@@ -4,6 +4,21 @@ import type { UploadRequest } from '../api/client';
 
 const MODES = ['IONIAN', 'DORIAN', 'PHRYGIAN', 'LYDIAN', 'MIXOLYDIAN', 'AEOLIAN', 'LOCRIAN'];
 
+const INPUT_KEYS = [
+  { value: 'C',       label: 'C'  },
+  { value: 'C_SHARP', label: 'C#' },
+  { value: 'D',       label: 'D'  },
+  { value: 'D_SHARP', label: 'D#' },
+  { value: 'E',       label: 'E'  },
+  { value: 'F',       label: 'F'  },
+  { value: 'F_SHARP', label: 'F#' },
+  { value: 'G',       label: 'G'  },
+  { value: 'G_SHARP', label: 'G#' },
+  { value: 'A',       label: 'A'  },
+  { value: 'A_SHARP', label: 'A#' },
+  { value: 'B',       label: 'B'  },
+];
+
 interface Props {
   onSuccess: () => void;
 }
@@ -11,6 +26,7 @@ interface Props {
 export default function UploadForm({ onSuccess }: Props) {
   const [rawTab, setRawTab] = useState('');
   const [mode, setMode] = useState('');
+  const [inputKey, setInputKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,9 +37,11 @@ export default function UploadForm({ onSuccess }: Props) {
     try {
       const req: UploadRequest = { rawTab };
       if (mode) req.mode = mode;
+      if (inputKey) req.inputKey = inputKey;
       await uploadLick(req);
       setRawTab('');
       setMode('');
+      setInputKey('');
       onSuccess();
     } catch {
       setError('Upload failed. Check your tab format and that the backend is running.');
@@ -42,6 +60,16 @@ export default function UploadForm({ onSuccess }: Props) {
         className="font-mono text-sm border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:border-indigo-400 bg-gray-50"
       />
       <div className="flex gap-2">
+        <select
+          value={inputKey}
+          onChange={e => setInputKey(e.target.value)}
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400 flex-1"
+        >
+          <option value="">Root: first note</option>
+          {INPUT_KEYS.map(k => (
+            <option key={k.value} value={k.value}>{k.label}</option>
+          ))}
+        </select>
         <select
           value={mode}
           onChange={e => setMode(e.target.value)}

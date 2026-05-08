@@ -1,4 +1,17 @@
-const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const NOTES = [
+  { value: 'C',       label: 'C'  },
+  { value: 'C_SHARP', label: 'C#' },
+  { value: 'D',       label: 'D'  },
+  { value: 'D_SHARP', label: 'D#' },
+  { value: 'E',       label: 'E'  },
+  { value: 'F',       label: 'F'  },
+  { value: 'F_SHARP', label: 'F#' },
+  { value: 'G',       label: 'G'  },
+  { value: 'G_SHARP', label: 'G#' },
+  { value: 'A',       label: 'A'  },
+  { value: 'A_SHARP', label: 'A#' },
+  { value: 'B',       label: 'B'  },
+];
 
 interface Props {
   value: string;
@@ -13,7 +26,7 @@ export default function KeySelector({ value, onChange }: Props) {
       className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400"
     >
       {NOTES.map(note => (
-        <option key={note} value={note}>{note}</option>
+        <option key={note.value} value={note.value}>{note.label}</option>
       ))}
     </select>
   );

@@ -23,6 +23,7 @@ export interface LickDetail {
 export interface UploadRequest {
   rawTab: string;
   mode?: string;
+  inputKey?: string;
 }
 
 export async function getAllLicks(): Promise<LickSummary[]> {
