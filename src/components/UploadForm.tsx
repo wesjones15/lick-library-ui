@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useLayoutEffect } from 'react';
 import { uploadLick } from '../api/client';
 import type { UploadRequest } from '../api/client';
 
@@ -19,16 +19,70 @@ const INPUT_KEYS = [
   { value: 'B',       label: 'B'  },
 ];
 
+const EMPTY_TAB =
+  'e|----------------|\n' +
+  'B|----------------|\n' +
+  'G|----------------|\n' +
+  'D|----------------|\n' +
+  'A|----------------|\n' +
+  'E|----------------|';
+
+const VALID_INPUT = /^[0-9hp/\\-]$/;
+
+function isProtected(str: string, pos: number): boolean {
+  if (pos < 0 || pos >= str.length) return true;
+  const ch = str[pos];
+  if (ch === '\n' || ch === '|') return true;
+  if (pos === 0 || str[pos - 1] === '\n') return true;
+  return false;
+}
+
 interface Props {
   onSuccess: () => void;
 }
 
 export default function UploadForm({ onSuccess }: Props) {
-  const [rawTab, setRawTab] = useState('');
+  const [rawTab, setRawTab] = useState(EMPTY_TAB);
   const [mode, setMode] = useState('');
   const [inputKey, setInputKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const nextCursorRef = useRef<number | null>(null);
+
+  useLayoutEffect(() => {
+    if (nextCursorRef.current !== null && textareaRef.current) {
+      textareaRef.current.setSelectionRange(nextCursorRef.current, nextCursorRef.current);
+      nextCursorRef.current = null;
+    }
+  });
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    const pos = ta.selectionStart;
+
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      const target = pos - 1;
+      if (!isProtected(rawTab, target)) {
+        nextCursorRef.current = target;
+        setRawTab(rawTab.slice(0, target) + '-' + rawTab.slice(target + 1));
+      } else {
+        ta.setSelectionRange(Math.max(0, pos - 1), Math.max(0, pos - 1));
+      }
+      return;
+    }
+
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      if (VALID_INPUT.test(e.key) && !isProtected(rawTab, pos)) {
+        nextCursorRef.current = pos + 1;
+        setRawTab(rawTab.slice(0, pos) + e.key + rawTab.slice(pos + 1));
+      }
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +93,7 @@ export default function UploadForm({ onSuccess }: Props) {
       if (mode) req.mode = mode;
       if (inputKey) req.inputKey = inputKey;
       await uploadLick(req);
-      setRawTab('');
+      setRawTab(EMPTY_TAB);
       setMode('');
       setInputKey('');
       onSuccess();
@@ -53,9 +107,10 @@ export default function UploadForm({ onSuccess }: Props) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <textarea
+        ref={textareaRef}
         value={rawTab}
         onChange={e => setRawTab(e.target.value)}
-        placeholder={"e|---------|\nB|---------|\nG|---------|\nD|---------|\nA|-0-2-4---|\nE|---------|"}
+        onKeyDown={handleKeyDown}
         rows={7}
         className="font-mono text-sm border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:border-indigo-400 bg-gray-50"
       />
@@ -84,7 +139,7 @@ export default function UploadForm({ onSuccess }: Props) {
         </select>
         <button
           type="submit"
-          disabled={loading || !rawTab.trim()}
+          disabled={loading || !/[0-9]/.test(rawTab)}
           className="px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? 'Uploading…' : 'Upload'}
