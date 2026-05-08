@@ -46,3 +46,8 @@ export async function getLick(id: string, key: string): Promise<LickDetail> {
   if (!res.ok) throw new Error('Failed to fetch lick');
   return res.json();
 }
+
+export async function deleteLick(id: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/lick/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete lick');
+}

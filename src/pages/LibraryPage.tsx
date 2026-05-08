@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAllLicks } from '../api/client';
+import { getAllLicks, deleteLick } from '../api/client';
 import type { LickSummary } from '../api/client';
 import LickList from '../components/LickList';
 import UploadForm from '../components/UploadForm';
@@ -18,6 +18,15 @@ export default function LibraryPage() {
       setError('Could not connect to backend. Is it running on port 8080?');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteLick(id);
+      fetchLicks();
+    } catch {
+      setError('Failed to delete lick.');
     }
   };
 
@@ -40,7 +49,7 @@ export default function LibraryPage() {
         </h2>
         {loading && <p className="text-gray-400 text-sm">Loading…</p>}
         {error && <p className="text-red-500 text-sm">{error}</p>}
-        {!loading && !error && <LickList licks={licks} />}
+        {!loading && !error && <LickList licks={licks} onDelete={handleDelete} />}
       </section>
     </div>
   );
