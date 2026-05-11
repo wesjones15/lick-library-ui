@@ -9,6 +9,16 @@ function modeLabel(mode: string) {
   return mode.charAt(0) + mode.slice(1).toLowerCase();
 }
 
+const MODE_INTERVALS: Record<string, string> = {
+  IONIAN:     '1  2  3  4  5  6  7',
+  DORIAN:     '1  2  b3  4  5  6  b7',
+  PHRYGIAN:   '1  b2  b3  4  5  b6  b7',
+  LYDIAN:     '1  2  3  #4  5  6  7',
+  MIXOLYDIAN: '1  2  3  4  5  6  b7',
+  AEOLIAN:    '1  2  b3  4  5  b6  b7',
+  LOCRIAN:    '1  b2  b3  4  b5  b6  b7',
+};
+
 export default function DetailPage() {
   const { id } = useParams<{ id: string }>();
   const [key, setKey] = useState('A');
@@ -39,8 +49,13 @@ export default function DetailPage() {
             <div className="flex flex-col gap-1">
               <span className="font-mono text-sm text-gray-500">{lick.intervalDisplayString}</span>
               {lick.mode && (
-                <span className="text-xs px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full font-medium w-fit">
-                  {modeLabel(lick.mode)}
+                <span className="relative group w-fit">
+                  <span className="text-xs px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full font-medium cursor-default">
+                    {modeLabel(lick.mode)}
+                  </span>
+                  <span className="absolute left-0 top-full mt-1 px-2 py-1 text-xs font-mono bg-gray-800 text-white rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    {MODE_INTERVALS[lick.mode]}
+                  </span>
                 </span>
               )}
             </div>
