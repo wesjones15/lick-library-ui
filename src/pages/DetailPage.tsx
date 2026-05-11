@@ -9,6 +9,12 @@ function modeLabel(mode: string) {
   return mode.charAt(0) + mode.slice(1).toLowerCase();
 }
 
+const KEY_LABELS: Record<string, string> = {
+  C: 'C', C_SHARP: 'C#', D: 'D', D_SHARP: 'D#', E: 'E',
+  F: 'F', F_SHARP: 'F#', G: 'G', G_SHARP: 'G#', A: 'A',
+  A_SHARP: 'Bb', B: 'B',
+};
+
 const MODE_INTERVALS: Record<string, string> = {
   IONIAN:     '1  2  3  4  5  6  7',
   DORIAN:     '1  2  b3  4  5  6  b7',
@@ -86,7 +92,7 @@ export default function DetailPage() {
 
       <div>
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
-          Positions in {key}
+          Positions in {KEY_LABELS[key] ?? key}
         </p>
         {loading && <p className="text-gray-400 text-sm">Loading…</p>}
         {error && <p className="text-red-500 text-sm">{error}</p>}
