@@ -3,7 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import { getLick } from '../api/client';
 import type { LickDetail } from '../api/client';
 import KeySelector from '../components/KeySelector';
+import InstrumentSelector from '../components/InstrumentSelector';
 import PositionTab from '../components/PositionTab';
+import { useInstrument } from '../hooks/useInstrument';
 
 function modeLabel(mode: string) {
   return mode.charAt(0) + mode.slice(1).toLowerCase();
@@ -32,16 +34,31 @@ export default function DetailPage() {
   const [lick, setLick] = useState<LickDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [instrumentError, setInstrumentError] = useState<string | null>(null);
+
+  const { instrument, customTuning, setInstrument, setCustomTuning } = useInstrument();
+
+  const [debouncedTuning, setDebouncedTuning] = useState(customTuning);
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedTuning(customTuning), 400);
+    return () => clearTimeout(t);
+  }, [customTuning]);
 
   useEffect(() => {
     if (!id) return;
+    if (instrument === 'CUSTOM' && !debouncedTuning.trim()) return;
     setLoading(true);
     setError(null);
-    getLick(id, key, algo)
+    setInstrumentError(null);
+    getLick(id, key, algo, instrument, instrument === 'CUSTOM' ? debouncedTuning : undefined)
       .then(setLick)
-      .catch(() => setError('Failed to load positions.'))
+      .catch(err => {
+        if (err.message === '400')
+          setInstrumentError('Invalid tuning — use space-separated note names, e.g. "E A D G B E".');
+        else setError('Failed to load positions.');
+      })
       .finally(() => setLoading(false));
-  }, [id, key, algo]);
+  }, [id, key, algo, instrument, debouncedTuning]);
 
   const tabLineLength = lick?.positions?.[0]?.tabString.split('\n')[0]?.length ?? 20;
   const minCellWidth = Math.round(tabLineLength * 8.4 + 32);
@@ -69,8 +86,15 @@ export default function DetailPage() {
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-3">
-                <div className="flex rounded-lg overflow-hidden border border-gray-300 text-sm">
+              <div className="flex flex-wrap items-start gap-3">
+                <InstrumentSelector
+                  instrument={instrument}
+                  customTuning={customTuning}
+                  onInstrumentChange={setInstrument}
+                  onCustomTuningChange={setCustomTuning}
+                  error={instrumentError}
+                />
+                <div className="flex rounded-lg overflow-hidden border border-gray-300 text-sm self-start">
                   {(['greedy', 'chord', 'dfs'] as const).map(a => (
                     <button key={a} onClick={() => setAlgo(a)}
                       className={`px-3 py-1.5 ${algo === a ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}>
@@ -78,8 +102,8 @@ export default function DetailPage() {
                     </button>
                   ))}
                 </div>
-                <span className="text-sm text-gray-500">Key:</span>
-                <KeySelector value={key} onChange={setKey} />
+                <span className="text-sm text-gray-500 self-start pt-2">Key:</span>
+                <div className="self-start"><KeySelector value={key} onChange={setKey} /></div>
               </div>
             </div>
 

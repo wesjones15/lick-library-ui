@@ -42,9 +42,21 @@ export async function uploadLick(request: UploadRequest): Promise<LickSummary> {
   return res.json();
 }
 
-export async function getLick(id: string, key: string, algo = 'greedy'): Promise<LickDetail> {
-  const res = await fetch(`${BASE_URL}/lick/${id}?key=${encodeURIComponent(key)}&algo=${algo}`);
-  if (!res.ok) throw new Error('Failed to fetch lick');
+export async function getLick(
+  id: string,
+  key: string,
+  algo = 'greedy',
+  instrument = 'GUITAR',
+  customTuning?: string
+): Promise<LickDetail> {
+  const params = new URLSearchParams({ key, algo });
+  if (instrument === 'CUSTOM' && customTuning?.trim()) {
+    params.set('tuning', customTuning.trim());
+  } else {
+    params.set('instrument', instrument);
+  }
+  const res = await fetch(`${BASE_URL}/lick/${id}?${params}`);
+  if (!res.ok) throw new Error(`${res.status}`);
   return res.json();
 }
 

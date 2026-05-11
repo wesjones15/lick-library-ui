@@ -3,11 +3,14 @@ import { getAllLicks, deleteLick } from '../api/client';
 import type { LickSummary } from '../api/client';
 import LickList from '../components/LickList';
 import UploadForm from '../components/UploadForm';
+import InstrumentSelector from '../components/InstrumentSelector';
+import { useInstrument } from '../hooks/useInstrument';
 
 export default function LibraryPage() {
   const [licks, setLicks] = useState<LickSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { instrument, customTuning, setInstrument, setCustomTuning } = useInstrument();
 
   const fetchLicks = async () => {
     try {
@@ -42,6 +45,16 @@ export default function LibraryPage() {
         </h2>
         <UploadForm onSuccess={fetchLicks} />
       </section>
+
+      <div className="mb-6 flex items-start gap-3">
+        <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest pt-2.5">Instrument</span>
+        <InstrumentSelector
+          instrument={instrument}
+          customTuning={customTuning}
+          onInstrumentChange={setInstrument}
+          onCustomTuningChange={setCustomTuning}
+        />
+      </div>
 
       <section>
         <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
