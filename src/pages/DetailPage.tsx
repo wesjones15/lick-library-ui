@@ -12,6 +12,7 @@ function modeLabel(mode: string) {
 export default function DetailPage() {
   const { id } = useParams<{ id: string }>();
   const [key, setKey] = useState('A');
+  const [algo, setAlgo] = useState<'greedy' | 'dfs'>('greedy');
   const [lick, setLick] = useState<LickDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,11 +21,11 @@ export default function DetailPage() {
     if (!id) return;
     setLoading(true);
     setError(null);
-    getLick(id, key)
+    getLick(id, key, algo)
       .then(setLick)
       .catch(() => setError('Failed to load positions.'))
       .finally(() => setLoading(false));
-  }, [id, key]);
+  }, [id, key, algo]);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
@@ -43,7 +44,15 @@ export default function DetailPage() {
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <div className="flex rounded-lg overflow-hidden border border-gray-300 text-sm">
+                {(['greedy', 'dfs'] as const).map(a => (
+                  <button key={a} onClick={() => setAlgo(a)}
+                    className={`px-3 py-1.5 ${algo === a ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}>
+                    {a === 'greedy' ? 'Greedy' : 'DFS'}
+                  </button>
+                ))}
+              </div>
               <span className="text-sm text-gray-500">Key:</span>
               <KeySelector value={key} onChange={setKey} />
             </div>

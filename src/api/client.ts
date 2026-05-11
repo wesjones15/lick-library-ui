@@ -42,8 +42,8 @@ export async function uploadLick(request: UploadRequest): Promise<LickSummary> {
   return res.json();
 }
 
-export async function getLick(id: string, key: string): Promise<LickDetail> {
-  const res = await fetch(`${BASE_URL}/lick/${id}?key=${encodeURIComponent(key)}`);
+export async function getLick(id: string, key: string, algo = 'greedy'): Promise<LickDetail> {
+  const res = await fetch(`${BASE_URL}/lick/${id}?key=${encodeURIComponent(key)}&algo=${algo}`);
   if (!res.ok) throw new Error('Failed to fetch lick');
   return res.json();
 }
