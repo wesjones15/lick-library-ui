@@ -15,7 +15,7 @@ const INPUT_KEYS = [
   { value: 'G',       label: 'G'  },
   { value: 'G_SHARP', label: 'G#' },
   { value: 'A',       label: 'A'  },
-  { value: 'A_SHARP', label: 'A#' },
+  { value: 'B_FLAT',  label: 'Bb' },
   { value: 'B',       label: 'B'  },
 ];
 
@@ -28,6 +28,13 @@ const EMPTY_TAB =
   'E|----------------|';
 
 const VALID_INPUT = /^[0-9hp/\\-]$/;
+
+function expandTab(tab: string): string {
+  return tab.split('\n').map(line => {
+    const lastPipe = line.lastIndexOf('|');
+    return lastPipe === -1 ? line : line.slice(0, lastPipe) + '-' + line.slice(lastPipe);
+  }).join('\n');
+}
 
 function isProtected(str: string, pos: number): boolean {
   if (pos < 0 || pos >= str.length) return true;
@@ -77,7 +84,18 @@ export default function UploadForm({ onSuccess }: Props) {
 
     if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
-      if (VALID_INPUT.test(e.key) && !isProtected(rawTab, pos)) {
+
+      const atClosingPipe =
+        rawTab[pos] === '|' &&
+        (pos === rawTab.length - 1 || rawTab[pos + 1] === '\n');
+
+      if (VALID_INPUT.test(e.key) && atClosingPipe) {
+        const expanded = expandTab(rawTab);
+        const linesBefore = rawTab.slice(0, pos).split('\n').length - 1;
+        const newPos = pos + linesBefore;
+        nextCursorRef.current = newPos + 1;
+        setRawTab(expanded.slice(0, newPos) + e.key + expanded.slice(newPos + 1));
+      } else if (VALID_INPUT.test(e.key) && !isProtected(rawTab, pos)) {
         nextCursorRef.current = pos + 1;
         setRawTab(rawTab.slice(0, pos) + e.key + rawTab.slice(pos + 1));
       }
