@@ -9,7 +9,7 @@ const NOTES = [
   { value: 'G',       label: 'G'  },
   { value: 'G_SHARP', label: 'G#' },
   { value: 'A',       label: 'A'  },
-  { value: 'A_SHARP', label: 'Bb' },
+  { value: 'B_FLAT',  label: 'Bb' },
   { value: 'B',       label: 'B'  },
 ];
 
