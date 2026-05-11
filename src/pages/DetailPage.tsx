@@ -28,7 +28,7 @@ const MODE_INTERVALS: Record<string, string> = {
 export default function DetailPage() {
   const { id } = useParams<{ id: string }>();
   const [key, setKey] = useState('A');
-  const [algo, setAlgo] = useState<'greedy' | 'dfs'>('greedy');
+  const [algo, setAlgo] = useState<'greedy' | 'chord' | 'dfs'>('greedy');
   const [lick, setLick] = useState<LickDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,10 +67,10 @@ export default function DetailPage() {
             </div>
             <div className="flex items-center gap-3">
               <div className="flex rounded-lg overflow-hidden border border-gray-300 text-sm">
-                {(['greedy', 'dfs'] as const).map(a => (
+                {(['greedy', 'chord', 'dfs'] as const).map(a => (
                   <button key={a} onClick={() => setAlgo(a)}
                     className={`px-3 py-1.5 ${algo === a ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}>
-                    {a === 'greedy' ? 'Greedy' : 'DFS'}
+                    {{ greedy: 'Greedy', chord: 'Chord', dfs: 'DFS' }[a]}
                   </button>
                 ))}
               </div>
