@@ -17,6 +17,19 @@ const KEY_LABELS: Record<string, string> = {
   B_FLAT: 'Bb', B: 'B',
 };
 
+const INSTRUMENT_LABELS: Record<string, string> = {
+  GUITAR:   'Standard Guitar',
+  DROP_D:   'Drop D',
+  OPEN_G:   'Open G',
+  OPEN_D:   'Open D',
+  DADGAD:   'DADGAD',
+  BASS:     'Bass',
+  UKULELE:  'Ukulele',
+  MANDOLIN: 'Mandolin',
+  BANJO:    'Banjo',
+  CUSTOM:   'Custom',
+};
+
 const MODE_INTERVALS: Record<string, string> = {
   IONIAN:     '1  2  3  4  5  6  7',
   DORIAN:     '1  2  b3  4  5  6  b7',
@@ -38,19 +51,16 @@ export default function DetailPage() {
 
   const { instrument, customTuning, setInstrument, setCustomTuning } = useInstrument();
 
-  const [debouncedTuning, setDebouncedTuning] = useState(customTuning);
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedTuning(customTuning), 400);
-    return () => clearTimeout(t);
-  }, [customTuning]);
+  const [appliedTuning, setAppliedTuning] = useState(customTuning);
+  const applyTuning = () => setAppliedTuning(customTuning);
 
   useEffect(() => {
     if (!id) return;
-    if (instrument === 'CUSTOM' && !debouncedTuning.trim()) return;
+    if (instrument === 'CUSTOM' && !appliedTuning.trim()) return;
     setLoading(true);
     setError(null);
     setInstrumentError(null);
-    getLick(id, key, algo, instrument, instrument === 'CUSTOM' ? debouncedTuning : undefined)
+    getLick(id, key, algo, instrument, instrument === 'CUSTOM' ? appliedTuning : undefined)
       .then(setLick)
       .catch(err => {
         if (err.message === '400')
@@ -58,7 +68,7 @@ export default function DetailPage() {
         else setError('Failed to load positions.');
       })
       .finally(() => setLoading(false));
-  }, [id, key, algo, instrument, debouncedTuning]);
+  }, [id, key, algo, instrument, appliedTuning]);
 
   const tabLineLength = lick?.positions?.[0]?.tabString.split('\n')[0]?.length ?? 20;
   const minCellWidth = Math.round(tabLineLength * 8.4 + 32);
@@ -92,6 +102,7 @@ export default function DetailPage() {
                   customTuning={customTuning}
                   onInstrumentChange={setInstrument}
                   onCustomTuningChange={setCustomTuning}
+                  onSubmit={applyTuning}
                   error={instrumentError}
                 />
                 <div className="flex rounded-lg overflow-hidden border border-gray-300 text-sm self-start">
@@ -121,7 +132,14 @@ export default function DetailPage() {
 
       <div>
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
-          Positions in <span className="normal-case">{KEY_LABELS[key] ?? key}</span>
+          Positions in{' '}
+          <span className="normal-case">{KEY_LABELS[key] ?? key}</span>
+          {' — '}
+          <span className="normal-case font-medium text-gray-500">
+            {instrument === 'CUSTOM'
+              ? (appliedTuning.trim() || 'Custom')
+              : (INSTRUMENT_LABELS[instrument] ?? instrument)}
+          </span>
         </p>
         {loading && <p className="text-gray-400 text-sm">Loading…</p>}
         {error && <p className="text-red-500 text-sm">{error}</p>}

@@ -5,6 +5,7 @@ interface Props {
   customTuning: string;
   onInstrumentChange: (name: InstrumentName) => void;
   onCustomTuningChange: (tuning: string) => void;
+  onSubmit?: () => void;
   error?: string | null;
 }
 
@@ -25,7 +26,7 @@ const SELECT_CLASS =
   'border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400';
 
 export default function InstrumentSelector({
-  instrument, customTuning, onInstrumentChange, onCustomTuningChange, error,
+  instrument, customTuning, onInstrumentChange, onCustomTuningChange, onSubmit, error,
 }: Props) {
   return (
     <div className="flex flex-col gap-1">
@@ -40,13 +41,22 @@ export default function InstrumentSelector({
       </select>
 
       {instrument === 'CUSTOM' && (
-        <input
-          type="text"
-          value={customTuning}
-          onChange={e => onCustomTuningChange(e.target.value)}
-          placeholder="e.g. E A D G B E"
-          className={SELECT_CLASS + ' w-44'}
-        />
+        <div className="flex gap-1">
+          <input
+            type="text"
+            value={customTuning}
+            onChange={e => onCustomTuningChange(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') onSubmit?.(); }}
+            placeholder="e.g. E A D G B E"
+            className={SELECT_CLASS + ' w-36'}
+          />
+          <button
+            onClick={onSubmit}
+            className="px-3 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            Apply
+          </button>
+        </div>
       )}
 
       {error && <p className="text-red-500 text-xs">{error}</p>}
