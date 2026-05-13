@@ -1,4 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import Metronome from './Metronome';
 
 const NAV_LINKS = [
   { label: 'Licks', to: '/' },
@@ -30,6 +31,9 @@ export default function Layout() {
               </Link>
             );
           })}
+        </div>
+        <div className="ml-auto">
+          <Metronome />
         </div>
       </nav>
       <main className="pt-14">
