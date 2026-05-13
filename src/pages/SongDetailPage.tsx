@@ -78,7 +78,7 @@ export default function SongDetailPage() {
               <div className="flex flex-col items-center gap-1">
                 <span className="text-xs text-gray-400">Transpose</span>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => setSemitones(s => s - 1)} className={btnClass}>−</button>
+                  <button onClick={() => setSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={btnClass}>−</button>
 
                   {/* Dual key display */}
                   <div className="flex gap-3 items-center">
@@ -99,7 +99,7 @@ export default function SongDetailPage() {
                     </div>
                   </div>
 
-                  <button onClick={() => setSemitones(s => s + 1)} className={btnClass}>+</button>
+                  <button onClick={() => setSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={btnClass}>+</button>
                 </div>
                 {/* Reset below transpose controls */}
                 <button
