@@ -38,15 +38,17 @@ export default function SongDetailPage() {
   }, [id, semitones]);
 
   return (
-    <div className="px-6 py-8">
+    <div className="px-6 pt-4 pb-0">
       {song && (
         <>
           {/* Header */}
-          <div className="flex items-start justify-between mb-6 max-w-5xl">
+          <div className="flex items-center justify-between mb-3">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{song.title}</h1>
-              {song.artist && <p className="text-gray-500 text-sm mt-0.5">{song.artist}</p>}
-              <div className="flex gap-4 mt-2 text-xs text-gray-400">
+              <div className="flex items-baseline gap-2">
+                <h1 className="text-xl font-bold text-gray-900">{song.title}</h1>
+                {song.artist && <span className="text-gray-400 text-sm">{song.artist}</span>}
+              </div>
+              <div className="flex gap-3 mt-0.5 text-xs text-gray-400">
                 {song.capo != null && song.capo > 0 && <span>Capo {song.capo}</span>}
                 {song.tempo != null && <span>{song.tempo} BPM</span>}
               </div>
