@@ -1,15 +1,18 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useMetronome } from '../hooks/useMetronome';
+import { useMetronomeContext } from '../contexts/MetronomeContext';
 
 const MIN_BPM = 40;
 const MAX_BPM = 240;
 
 export default function Metronome() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [bpm, setBpm] = useState(120);
-  const [bpmInput, setBpmInput] = useState('120');
+  const { bpm, setBpm, isPlaying, setIsPlaying } = useMetronomeContext();
+  const [bpmInput, setBpmInput] = useState(String(bpm));
   const [activeBeat, setActiveBeat] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
+
+  // Sync text input when BPM is changed from outside (e.g. song page click)
+  useEffect(() => { setBpmInput(String(bpm)); }, [bpm]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 

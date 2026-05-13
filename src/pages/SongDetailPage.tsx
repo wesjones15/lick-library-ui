@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { getSong } from '../api/client';
 import type { SongDetail } from '../api/client';
 import ChordSheet from '../components/ChordSheet';
+import { useMetronomeContext } from '../contexts/MetronomeContext';
 
 const KEY_LABELS: Record<string, string> = {
   C: 'C', C_SHARP: 'C#', D: 'D', D_SHARP: 'D#', E: 'E',
@@ -22,6 +23,7 @@ function keyLabel(originalKey: string | null, semitones: number): string {
 
 export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { setBpm, setIsPlaying } = useMetronomeContext();
   const [semitones, setSemitones] = useState(0);
   const [capo, setCapo] = useState(0);
   const [song, setSong] = useState<SongDetail | null>(null);
@@ -52,7 +54,14 @@ export default function SongDetailPage() {
                 {song.artist && <span className="text-gray-400 text-sm">{song.artist}</span>}
               </div>
               <div className="flex gap-3 mt-0.5 text-xs text-gray-400">
-                {song.tempo != null && <span>{song.tempo} BPM</span>}
+                {song.tempo != null && (
+                  <button
+                    onClick={() => { setBpm(song.tempo!); setIsPlaying(true); }}
+                    className="text-xs text-gray-400 hover:text-indigo-500 transition-colors"
+                  >
+                    {song.tempo} BPM
+                  </button>
+                )}
               </div>
             </div>
 
