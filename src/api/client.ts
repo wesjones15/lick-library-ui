@@ -64,3 +64,66 @@ export async function deleteLick(id: string): Promise<void> {
   const res = await fetch(`${BASE_URL}/lick/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete lick');
 }
+
+// --- Song / Chord Sheet ---
+
+export interface ChordLyric {
+  chords: string;
+  lyrics: string;
+  fontSize: number;
+}
+
+export interface SongSummary {
+  id: string;
+  title: string;
+  artist: string | null;
+  originalKey: string | null;
+}
+
+export interface SongDetail {
+  id: string;
+  title: string;
+  artist: string | null;
+  originalKey: string | null;
+  capo: number | null;
+  tempo: number | null;
+  chordLines: ChordLyric[];
+  numColumns: number;
+}
+
+export interface UploadSongRequest {
+  title: string;
+  artist?: string;
+  originalKey?: string;
+  capo?: number;
+  tempo?: number;
+  rawChordSheet: string;
+}
+
+export async function getAllSongs(): Promise<SongSummary[]> {
+  const res = await fetch(`${BASE_URL}/song`);
+  if (!res.ok) throw new Error('Failed to fetch songs');
+  return res.json();
+}
+
+export async function uploadSong(request: UploadSongRequest): Promise<SongSummary> {
+  const res = await fetch(`${BASE_URL}/song`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+  if (!res.ok) throw new Error('Failed to upload song');
+  return res.json();
+}
+
+export async function getSong(id: string, semitones = 0): Promise<SongDetail> {
+  const params = new URLSearchParams({ semitones: String(semitones) });
+  const res = await fetch(`${BASE_URL}/song/${id}?${params}`);
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+export async function deleteSong(id: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/song/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete song');
+}

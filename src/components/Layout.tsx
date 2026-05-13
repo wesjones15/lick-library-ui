@@ -3,6 +3,7 @@ import Metronome from './Metronome';
 
 const NAV_LINKS = [
   { label: 'Licks', to: '/' },
+  { label: 'Songs', to: '/songs' },
 ];
 
 export default function Layout() {
