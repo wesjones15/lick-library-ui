@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { getLick } from '../api/client';
 import type { LickDetail } from '../api/client';
 import KeySelector from '../components/KeySelector';
@@ -76,10 +76,6 @@ export default function DetailPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
       <div className="max-w-2xl">
-        <Link to="/" className="text-indigo-600 text-sm hover:underline mb-8 inline-block">
-          ← Back to library
-        </Link>
-
         {lick && (
           <>
             <div className="flex items-start justify-between mb-6">
