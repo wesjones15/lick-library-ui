@@ -4,7 +4,7 @@ import { getLick } from '../api/client';
 import type { LickDetail } from '../api/client';
 import KeySelector from '../components/KeySelector';
 import InstrumentSelector from '../components/InstrumentSelector';
-import PositionTab from '../components/PositionTab';
+import LickPositionTab from '../components/LickPositionTab';
 import { useInstrument } from '../hooks/useInstrument';
 
 function modeLabel(mode: string) {
@@ -40,7 +40,7 @@ const MODE_INTERVALS: Record<string, string> = {
   LOCRIAN:    '1  b2  b3  4  b5  b6  b7',
 };
 
-export default function DetailPage() {
+export default function LickDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [key, setKey] = useState('A');
   const [algo, setAlgo] = useState<'greedy' | 'chord' | 'dfs'>('greedy');
@@ -147,7 +147,7 @@ export default function DetailPage() {
           style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${minCellWidth}px, 1fr))` }}
         >
           {lick?.positions.map((pos, i) => (
-            <PositionTab key={i} tabString={pos.tabString} />
+            <LickPositionTab key={i} tabString={pos.tabString} />
           ))}
         </div>
       </div>

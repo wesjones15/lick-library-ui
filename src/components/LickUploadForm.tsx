@@ -48,7 +48,7 @@ interface Props {
   onSuccess: () => void;
 }
 
-export default function UploadForm({ onSuccess }: Props) {
+export default function LickUploadForm({ onSuccess }: Props) {
   const [rawTab, setRawTab] = useState(EMPTY_TAB);
   const [mode, setMode] = useState('');
   const [inputKey, setInputKey] = useState('');

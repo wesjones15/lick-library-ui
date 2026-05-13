@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { getAllLicks, deleteLick } from '../api/client';
 import type { LickSummary } from '../api/client';
 import LickList from '../components/LickList';
-import UploadForm from '../components/UploadForm';
+import LickUploadForm from '../components/LickUploadForm';
 import InstrumentSelector from '../components/InstrumentSelector';
 import { useInstrument } from '../hooks/useInstrument';
 
-export default function LibraryPage() {
+export default function LicksPage() {
   const [licks, setLicks] = useState<LickSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +43,7 @@ export default function LibraryPage() {
         <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
           Upload a Lick
         </h2>
-        <UploadForm onSuccess={fetchLicks} />
+        <LickUploadForm onSuccess={fetchLicks} />
       </section>
 
       <div className="mb-6 flex items-start gap-3">
