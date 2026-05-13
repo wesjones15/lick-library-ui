@@ -78,6 +78,7 @@ export interface SongSummary {
   title: string;
   artist: string | null;
   originalKey: string | null;
+  canReparse: boolean;
 }
 
 export interface SongDetail {
@@ -89,6 +90,7 @@ export interface SongDetail {
   tempo: number | null;
   chordLines: ChordLyric[];
   numColumns: number;
+  canReparse: boolean;
 }
 
 export interface UploadSongRequest {
@@ -126,4 +128,10 @@ export async function getSong(id: string, semitones = 0): Promise<SongDetail> {
 export async function deleteSong(id: string): Promise<void> {
   const res = await fetch(`${BASE_URL}/song/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete song');
+}
+
+export async function reparseSong(id: string): Promise<SongDetail> {
+  const res = await fetch(`${BASE_URL}/song/${id}/reparse`, { method: 'POST' });
+  if (!res.ok) throw new Error('Re-parse failed');
+  return res.json();
 }

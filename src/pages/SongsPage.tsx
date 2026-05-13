@@ -9,6 +9,7 @@ export default function SongsPage() {
   const [songs, setSongs] = useState<SongSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reparsing, setReparsing] = useState(false);
 
   const fetchSongs = async () => {
     try {
@@ -28,12 +29,20 @@ export default function SongsPage() {
     <div className="max-w-2xl mx-auto px-4 py-10">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Songs</h1>
-        <button
-          onClick={() => navigate('/songs/upload')}
-          className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          Upload
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setReparsing(r => !r)}
+            className={`px-3 py-2 text-sm rounded-lg border transition-colors ${reparsing ? 'border-indigo-300 text-indigo-600 bg-indigo-50' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+          >
+            Re-parse
+          </button>
+          <button
+            onClick={() => navigate('/songs/upload')}
+            className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Upload
+          </button>
+        </div>
       </div>
 
       <section>
@@ -43,7 +52,7 @@ export default function SongsPage() {
         {loading && <p className="text-gray-400 text-sm">Loading…</p>}
         {error && <p className="text-red-500 text-sm">{error}</p>}
         {!loading && !error && (
-          <SongList songs={songs} onDelete={id => setSongs(s => s.filter(x => x.id !== id))} />
+          <SongList songs={songs} onDelete={id => setSongs(s => s.filter(x => x.id !== id))} reparsing={reparsing} onReparse={fetchSongs} />
         )}
       </section>
     </div>
