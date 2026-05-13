@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8080/api';
+const BASE_URL = `http://${window.location.hostname}:8080/api`;
 
 export interface LickSummary {
   id: string;
