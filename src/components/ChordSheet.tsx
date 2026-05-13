@@ -3,9 +3,10 @@ import type { ChordLyric } from '../api/client';
 interface Props {
   chordLines: ChordLyric[];
   numColumns: number;
+  className?: string;
 }
 
-export default function ChordSheet({ chordLines, numColumns }: Props) {
+export default function ChordSheet({ chordLines, numColumns, className }: Props) {
   // Split lines into columns (top-to-bottom fill)
   const perColumn = Math.ceil(chordLines.length / numColumns);
   const columns: ChordLyric[][] = [];
@@ -14,7 +15,7 @@ export default function ChordSheet({ chordLines, numColumns }: Props) {
   }
 
   return (
-    <div className="flex gap-6 font-mono overflow-hidden">
+    <div className={`flex gap-6 font-mono overflow-hidden ${className ?? ''}`}>
       {columns.map((col, ci) => (
         <div key={ci} className="flex-1 flex flex-col">
           {col.map((pair, li) => (

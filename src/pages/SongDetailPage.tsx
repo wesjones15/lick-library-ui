@@ -113,10 +113,13 @@ export default function SongDetailPage() {
             </div>
           </div>
 
-          {loading && <p className="text-gray-400 text-sm mb-4">Transposing…</p>}
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-          <ChordSheet chordLines={song.chordLines} numColumns={song.numColumns} />
+          <ChordSheet
+            chordLines={song.chordLines}
+            numColumns={song.numColumns}
+            className={loading ? 'opacity-50 transition-opacity duration-150' : 'transition-opacity duration-150'}
+          />
         </>
       )}
 
