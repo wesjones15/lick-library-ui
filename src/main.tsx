@@ -7,6 +7,7 @@ import LicksPage from './pages/LicksPage'
 import LickDetailPage from './pages/LickDetailPage'
 import SongsPage from './pages/SongsPage'
 import SongDetailPage from './pages/SongDetailPage'
+import SongUploadPage from './pages/SongUploadPage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -16,6 +17,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/" element={<LicksPage />} />
           <Route path="/lick/:id" element={<LickDetailPage />} />
           <Route path="/songs" element={<SongsPage />} />
+          <Route path="/songs/upload" element={<SongUploadPage />} />
           <Route path="/song/:id" element={<SongDetailPage />} />
         </Route>
       </Routes>
