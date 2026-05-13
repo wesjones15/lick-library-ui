@@ -135,3 +135,10 @@ export async function reparseSong(id: string): Promise<SongDetail> {
   if (!res.ok) throw new Error('Re-parse failed');
   return res.json();
 }
+
+export async function getChordVoicings(root: string, quality: string): Promise<string[]> {
+  const params = new URLSearchParams({ root, quality });
+  const res = await fetch(`${BASE_URL}/chord?${params}`);
+  if (!res.ok) return [];
+  return res.json();
+}
