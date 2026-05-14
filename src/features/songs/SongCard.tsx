@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { deleteSong, reparseSong } from '../api/client';
-import type { SongSummary } from '../api/client';
+import { deleteSong, reparseSong } from '../../core/api/client';
+import type { SongSummary } from '../../core/api/client';
 
 interface Props {
   song: SongSummary;

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useMetronome } from '../hooks/useMetronome';
-import { useMetronomeContext } from '../contexts/MetronomeContext';
+import { useMetronome } from './useMetronome';
+import { useMetronomeContext } from './MetronomeContext';
 
 const MIN_BPM = 40;
 const MAX_BPM = 240;

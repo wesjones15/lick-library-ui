@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import SongUploadForm from '../components/SongUploadForm';
+import SongUploadForm from './SongUploadForm';
 
 export default function SongUploadPage() {
   const navigate = useNavigate();

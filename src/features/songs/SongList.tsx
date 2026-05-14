@@ -1,5 +1,5 @@
 import SongCard from './SongCard';
-import type { SongSummary } from '../api/client';
+import type { SongSummary } from '../../core/api/client';
 
 interface Props {
   songs: SongSummary[];

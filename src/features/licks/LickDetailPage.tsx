@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getLick } from '../api/client';
-import type { LickDetail } from '../api/client';
-import KeySelector from '../components/KeySelector';
-import InstrumentSelector from '../components/InstrumentSelector';
-import LickPositionTab from '../components/LickPositionTab';
-import { useInstrument } from '../hooks/useInstrument';
+import { getLick } from '../../core/api/client';
+import type { LickDetail } from '../../core/api/client';
+import KeySelector from '../../components/KeySelector';
+import InstrumentSelector from '../../components/InstrumentSelector';
+import LickPositionTab from './LickPositionTab';
+import { useInstrument } from '../../core/useInstrument';
 
 function modeLabel(mode: string) {
   return mode.charAt(0) + mode.slice(1).toLowerCase();

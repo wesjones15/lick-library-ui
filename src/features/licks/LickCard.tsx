@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import type { LickSummary } from '../api/client';
+import type { LickSummary } from '../../core/api/client';
 
 interface Props {
   lick: LickSummary;

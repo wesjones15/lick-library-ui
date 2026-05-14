@@ -1,4 +1,4 @@
-import type { InstrumentName } from '../hooks/useInstrument';
+import type { InstrumentName } from '../core/useInstrument';
 
 interface Props {
   instrument: InstrumentName;

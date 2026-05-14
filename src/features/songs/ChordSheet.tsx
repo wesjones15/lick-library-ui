@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import type { ChordLyric } from '../api/client';
-import { getChordVoicings } from '../api/client';
-import { parseChordName } from '../utils/parseChordName';
+import type { ChordLyric } from '../../core/api/client';
+import { getChordVoicings } from '../../core/api/client';
+import { parseChordName } from './parseChordName';
 
 // Cache fetched voicings so re-hovering the same chord doesn't re-fetch
 const voicingCache = new Map<string, string[]>();

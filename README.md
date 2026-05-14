@@ -222,7 +222,7 @@ Parses a chord symbol into backend-compatible components.
 
 ---
 
-## API client (`src/api/client.ts`)
+## API client (`src/core/api/client.ts`)
 
 Base URL: `http://{hostname}:8080/api`
 
@@ -276,34 +276,35 @@ getChordVoicings(root: string, quality: string): Promise<string[]>
 
 ```
 src/
-├── api/
-│   └── client.ts                  Typed fetch wrappers + response interfaces
-├── contexts/
-│   └── MetronomeContext.tsx        Global BPM + playback state
-├── hooks/
-│   ├── useInstrument.ts            localStorage-backed instrument/tuning state
-│   └── useMetronome.ts             Web Audio API metronome scheduler
-├── pages/
-│   ├── LicksPage.tsx              /              lick list + upload
-│   ├── LickDetailPage.tsx         /lick/:id      positions view
-│   ├── SongsPage.tsx              /songs         song list
-│   ├── SongDetailPage.tsx         /song/:id      chord sheet + transpose
-│   └── SongUploadPage.tsx         /songs/upload  upload form
-├── components/
+├── core/                          Domain-agnostic infrastructure
+│   ├── api/
+│   │   └── client.ts              Typed fetch wrappers + response interfaces
+│   ├── metronome/
+│   │   ├── MetronomeContext.tsx   Global BPM + playback state
+│   │   ├── MetronomeWidget.tsx    Popover metronome widget (navbar)
+│   │   └── useMetronome.ts       Web Audio API metronome scheduler
+│   └── useInstrument.ts          localStorage-backed instrument/tuning state
+├── components/                    Shared UI primitives (no business logic)
 │   ├── Layout.tsx                 Fixed navbar + Outlet
-│   ├── Metronome.tsx              Popover metronome widget
-│   ├── ChordSheet.tsx             Chord sheet renderer + voicing popovers
-│   ├── LickList.tsx               Renders array of LickCard
-│   ├── LickCard.tsx               Single lick library card
-│   ├── LickUploadForm.tsx         Tab editor + upload controls
-│   ├── LickPositionTab.tsx        Single position tab display
-│   ├── SongList.tsx               Renders array of SongCard
-│   ├── SongCard.tsx               Single song library card
-│   ├── SongUploadForm.tsx         Song upload form fields
 │   ├── InstrumentSelector.tsx     Preset + custom tuning selector
 │   └── KeySelector.tsx            12-note key dropdown
-└── utils/
-    └── parseChordName.ts          Chord symbol parser
+└── features/
+    ├── licks/                     Lick library vertical
+    │   ├── LicksPage.tsx          /              lick list + upload
+    │   ├── LickDetailPage.tsx     /lick/:id      positions view
+    │   ├── LickCard.tsx           Single lick library card
+    │   ├── LickList.tsx           Renders array of LickCard
+    │   ├── LickPositionTab.tsx    Single position tab display
+    │   └── LickUploadForm.tsx     Tab editor + upload controls
+    └── songs/                     Song library vertical
+        ├── SongsPage.tsx          /songs         song list
+        ├── SongDetailPage.tsx     /song/:id      chord sheet + transpose
+        ├── SongUploadPage.tsx     /songs/upload  upload form wrapper
+        ├── SongCard.tsx           Single song library card
+        ├── SongList.tsx           Renders array of SongCard
+        ├── SongUploadForm.tsx     Song upload form fields
+        ├── ChordSheet.tsx         Chord sheet renderer + voicing popovers
+        └── parseChordName.ts      Chord symbol parser
 ```
 
 ---

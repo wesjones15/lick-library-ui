@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { uploadSong } from '../api/client';
+import { uploadSong } from '../../core/api/client';
 
 const INPUT_KEYS = [
   { value: 'C',       label: 'C'  },

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getSong } from '../api/client';
-import type { SongDetail } from '../api/client';
-import ChordSheet from '../components/ChordSheet';
-import { useMetronomeContext } from '../contexts/MetronomeContext';
+import { getSong } from '../../core/api/client';
+import type { SongDetail } from '../../core/api/client';
+import ChordSheet from './ChordSheet';
+import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 
 const KEY_LABELS: Record<string, string> = {
   C: 'C', C_SHARP: 'C#', D: 'D', D_SHARP: 'D#', E: 'E',

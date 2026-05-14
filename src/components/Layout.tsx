@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import Metronome from './Metronome';
+import Metronome from '../core/metronome/MetronomeWidget';
 
 const NAV_LINKS = [
   { label: 'Licks', to: '/' },

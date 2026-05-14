@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllSongs } from '../api/client';
-import type { SongSummary } from '../api/client';
-import SongList from '../components/SongList';
+import { getAllSongs } from '../../core/api/client';
+import type { SongSummary } from '../../core/api/client';
+import SongList from './SongList';
 
 export default function SongsPage() {
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect } from 'react';
-import { uploadLick } from '../api/client';
-import type { UploadRequest } from '../api/client';
+import { uploadLick } from '../../core/api/client';
+import type { UploadRequest } from '../../core/api/client';
 
 const MODES = ['IONIAN', 'DORIAN', 'PHRYGIAN', 'LYDIAN', 'MIXOLYDIAN', 'AEOLIAN', 'LOCRIAN'];
 

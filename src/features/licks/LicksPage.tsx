@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { getAllLicks, deleteLick } from '../api/client';
-import type { LickSummary } from '../api/client';
-import LickList from '../components/LickList';
-import LickUploadForm from '../components/LickUploadForm';
-import InstrumentSelector from '../components/InstrumentSelector';
-import { useInstrument } from '../hooks/useInstrument';
+import { getAllLicks, deleteLick } from '../../core/api/client';
+import type { LickSummary } from '../../core/api/client';
+import LickList from './LickList';
+import LickUploadForm from './LickUploadForm';
+import InstrumentSelector from '../../components/InstrumentSelector';
+import { useInstrument } from '../../core/useInstrument';
 
 export default function LicksPage() {
   const [licks, setLicks] = useState<LickSummary[]>([]);

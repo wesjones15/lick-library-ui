@@ -1,4 +1,4 @@
-import type { LickSummary } from '../api/client';
+import type { LickSummary } from '../../core/api/client';
 import LickCard from './LickCard';
 
 interface Props {
