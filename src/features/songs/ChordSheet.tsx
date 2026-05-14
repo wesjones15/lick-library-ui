@@ -73,13 +73,13 @@ function ChordToken({ name }: ChordTokenProps) {
           {voicings.length > 1 && voicings.length > 0 && (
             <span style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8px', color: '#9ca3af', gap: '8px' }}>
               <button
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: voicingIdx > 0 ? '#6b7280' : '#d1d5db' }}
-                onClick={e => { e.stopPropagation(); setVoicingIdx(i => Math.max(0, i - 1)); }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6b7280' }}
+                onClick={e => { e.stopPropagation(); setVoicingIdx(i => (i - 1 + voicings.length) % voicings.length); }}
               >‹</button>
               <span>{voicingIdx + 1}/{voicings.length}</span>
               <button
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: voicingIdx < voicings.length - 1 ? '#6b7280' : '#d1d5db' }}
-                onClick={e => { e.stopPropagation(); setVoicingIdx(i => Math.min(voicings.length - 1, i + 1)); }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6b7280' }}
+                onClick={e => { e.stopPropagation(); setVoicingIdx(i => (i + 1) % voicings.length); }}
               >›</button>
             </span>
           )}
