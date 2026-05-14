@@ -89,13 +89,29 @@ function ChordToken({ name }: ChordTokenProps) {
   );
 }
 
+function renderChordToken(part: string, i: number): React.ReactNode {
+  const prefix = part.match(/^\(+/)?.[0] ?? '';
+  const suffix = part.match(/\)+$/)?.[0] ?? '';
+  const core = part.slice(prefix.length, part.length - suffix.length);
+
+  if (!/^[A-G]/.test(core)) {
+    return <span key={i}>{part}</span>;
+  }
+  return (
+    <span key={i} style={{ display: 'inline-block' }}>
+      {prefix && <span style={{ fontWeight: 'normal' }}>{prefix}</span>}
+      <ChordToken name={core} />
+      {suffix && <span style={{ fontWeight: 'normal' }}>{suffix}</span>}
+    </span>
+  );
+}
+
 function renderChords(chords: string): React.ReactNode[] {
-  // Split into whitespace runs and non-whitespace tokens
   const parts = chords.split(/(\s+)/);
   return parts.map((part, i) => {
     if (/^\s+$/.test(part) || part === '') return part;
     if (part === 'NC' || part === 'N.C.') return <span key={i}>{part}</span>;
-    return <ChordToken key={i} name={part} />;
+    return renderChordToken(part, i);
   });
 }
 
