@@ -1,6 +1,6 @@
 # Lick Library — Frontend
 
-React UI for the Lick Library backend. Upload guitar tabs, browse your library, and view playable positions in any key on any instrument.
+React UI for the Lick Library backend. Upload guitar tabs, browse your lick library, and view playable positions in any key on any instrument. Upload chord sheets, transpose them on the fly, and hover over chords to see fingering diagrams.
 
 ---
 
@@ -23,13 +23,13 @@ npm install
 npm run dev
 ```
 
-App available at `http://localhost:5173`. Expects the backend at `http://localhost:8080`.
+App available at `http://localhost:5173`. Expects the backend at `http://{hostname}:8080` — uses the page's own hostname so it works on the local network (e.g. from an iPad).
 
 ---
 
 ## Pages
 
-### Library (`/`)
+### Licks (`/`)
 
 Home page. Shows the full lick library and the upload form.
 
@@ -38,7 +38,7 @@ Home page. Shows the full lick library and the upload form.
 - **Lick list** — each card shows the interval display string, detected mode, and the original raw tab. Clicking a card navigates to the detail page.
 - **Delete** — the `×` on each card deletes the lick and refreshes the list.
 
-### Detail (`/lick/:id`)
+### Lick Detail (`/lick/:id`)
 
 Full view for a single lick.
 
@@ -49,11 +49,65 @@ Full view for a single lick.
 - **Instrument selector** — pick a preset or enter a custom tuning. Custom tuning only takes effect after clicking Apply (or pressing Enter).
 - **Positions grid** — rendered ASCII tabs, one card per playable position. Grid column width auto-sizes to the tab content. The header reads `Positions in A — Bass` (key + instrument) so it's always clear what you're looking at.
 
+### Songs (`/songs`)
+
+Lists all songs in the library.
+
+- **Song list** — each card shows title, artist, and original key. Clicking navigates to the song detail page.
+- **Delete** — inline delete button on each card.
+- **Re-parse** — toggle button enables a re-parse button on every card; clicking it calls `POST /api/song/:id/reparse` and shows a ✓ on success. Used to refresh songs after parser logic updates.
+- **Upload** — button navigates to `/songs/upload`.
+
+### Song Detail (`/song/:id`)
+
+Full chord sheet viewer with transposition and capo controls.
+
+- **Header** — song title, artist, original key. Tempo shown below the title; clicking it starts the metronome at that BPM.
+- **Capo display** — shown on the left when capo > 0; includes a "shape" key (the chord shapes you play) alongside the "sound" key (actual pitch heard).
+- **Transpose controls** — `−` / `+` buttons shift all chords by semitones (wraps at ±12). A Reset button appears when semitones ≠ 0. The chord sheet fades to 50% opacity during the fetch; no layout shift.
+- **Chord sheet** — rendered by `ChordSheet`; chords are bold and hoverable (see [ChordSheet](#chordsheet)).
+
+### Song Upload (`/songs/upload`)
+
+Form to add a new song.
+
+- Fields: Title (required), Artist, Original Key, Capo, Tempo/BPM, chord sheet textarea (required).
+- Submit disabled until title and chord sheet are both filled. Navigates to `/songs` on success.
+
 ---
 
 ## Components
 
-### `UploadForm`
+### `Layout`
+
+Fixed top navbar wrapping the whole app via `<Outlet />`.
+
+- Logo (`Lick Library`) links to `/`.
+- Nav links to **Licks** and **Songs**.
+- `Metronome` widget anchored to the right side of the navbar.
+
+### `Metronome`
+
+Collapsible popover in the navbar.
+
+- BPM input field + `−1`/`+1` buttons (range 40–240).
+- 4-beat visual pulse row — beat 1 accented.
+- Start/Stop button (green when stopped, red when playing).
+- BPM syncs automatically when the user clicks a song's tempo on `SongDetailPage`.
+
+### `ChordSheet`
+
+Renders a `ChordLyric[]` list as a formatted chord sheet.
+
+- Columns: 2 or 3, as computed by the backend parser.
+- Chord tokens are **bold**. Hovering opens a voicing popover:
+  - Fetches ASCII tab voicings from `GET /api/chord?root=...&quality=...`.
+  - `‹ N/M ›` arrows to page through multiple voicings.
+  - Unknown chords show `???`; `NC` / `N.C.` tokens are skipped entirely.
+  - Slash chords (e.g. `G/B`): bass note stripped, root quality looked up.
+  - Module-level cache — each `root+quality` pair is only fetched once.
+
+### `LickUploadForm`
 
 Tab editor with structured input handling.
 
@@ -99,15 +153,25 @@ Clickable library card. Shows:
 - Raw ASCII tab preview
 - Delete button (does not navigate)
 
-### `PositionTab`
+### `LickPositionTab`
 
 Dark terminal-style `<pre>` block (black background, green monospace text) rendering a single tab string from the backend. Scrolls horizontally for wide tabs.
+
+### `SongList` / `SongCard`
+
+`SongList` renders an array of `SongCard` components with an empty-state message.
+
+`SongCard` shows title, artist, original key, a delete button, and (when re-parse mode is active) a re-parse button that shows a ✓ after the call completes.
+
+### `SongUploadForm`
+
+Two-row form (Title + Artist on row 1; Original Key + Capo + Tempo on row 2) plus a chord sheet textarea. Submit disabled until title and chord sheet are filled.
 
 ---
 
 ## Tab editor
 
-The textarea in `UploadForm` implements overwrite-mode editing so the 6×N grid structure is always preserved.
+The textarea in `LickUploadForm` implements overwrite-mode editing so the 6×N grid structure is always preserved.
 
 **Cursor rules:**
 - Protected characters (`|`, string-label column, newlines) are skipped on advance.
@@ -122,22 +186,47 @@ A `nextCursorRef` + `useLayoutEffect` pattern restores `selectionStart`/`selecti
 
 ---
 
-## Instrument persistence
+## Hooks & context
 
-`useInstrument` stores the selected instrument and custom tuning in `localStorage`:
+### `useMetronome(bpm, isPlaying, onBeat?)`
+
+Web Audio API metronome scheduler. Plays oscillator clicks on a lookahead schedule (25 ms tick, 0.1 s lookahead) for drift-free timing. Beat 1 of each 4-beat cycle uses a 1000 Hz oscillator; beats 2–4 use 800 Hz. Cleans up the audio context on unmount.
+
+### `useInstrument()`
+
+Manages selected instrument and custom tuning string. Persists to `localStorage`:
 
 | Key | Value |
 |---|---|
-| `lick_instrument` | `InstrumentName` string (e.g. `BASS`) |
-| `lick_custom_tuning` | Tuning string (e.g. `E A D G B E`) |
+| `lick_instrument` | `InstrumentName` (e.g. `BASS`) |
+| `lick_custom_tuning` | tuning string (e.g. `E A D G B E`) |
 
-Both pages share the same hook and initialise from `localStorage` on mount. Changing the instrument on the Library page sets the default for all subsequent Detail page visits.
+Both `LicksPage` and `LickDetailPage` share the same hook and initialise from `localStorage` on mount.
+
+### `MetronomeContext`
+
+Global state provider: `{ bpm, setBpm, isPlaying, setIsPlaying }`. Default BPM 120, not playing. Wraps the app in `main.tsx`. Lets `SongDetailPage` set BPM by clicking the tempo without prop-drilling through `Layout` and `Metronome`.
+
+---
+
+## Utilities
+
+### `parseChordName(name: string): ParsedChord | null`
+
+Parses a chord symbol into backend-compatible components.
+
+- Maps display note names (`C`, `C#`, `Db`, `Bb`, …) to Java enum format (`C`, `C_SHARP`, `B_FLAT`, …).
+- Strips slash bass note (`G/B` → root `G`).
+- Returns `null` for `NC`, `N.C.`, and unrecognised tokens.
+- Returns `{ root: string, quality: string }` on success.
 
 ---
 
 ## API client (`src/api/client.ts`)
 
-All requests target `http://localhost:8080/api`.
+Base URL: `http://{hostname}:8080/api`
+
+### Lick endpoints
 
 ```typescript
 getAllLicks(): Promise<LickSummary[]>
@@ -157,7 +246,29 @@ getLick(
 deleteLick(id: string): Promise<void>
 ```
 
-`getLick` throws `Error(statusCode)` on non-2xx responses. The detail page catches `'400'` to show a specific "invalid tuning" message rather than a generic error.
+`getLick` throws `Error(statusCode)` on non-2xx. The detail page catches `'400'` to show a specific "invalid tuning" message.
+
+### Song endpoints
+
+```typescript
+getAllSongs(): Promise<SongSummary[]>
+
+uploadSong(request: UploadSongRequest): Promise<SongSummary>
+
+getSong(id: string, semitones?: number): Promise<SongDetail>
+// sends ?semitones=N; omitted when 0
+
+deleteSong(id: string): Promise<void>
+
+reparseSong(id: string): Promise<SongDetail>
+```
+
+### Chord endpoint
+
+```typescript
+getChordVoicings(root: string, quality: string): Promise<string[]>
+// Returns list of ASCII tab voicing strings
+```
 
 ---
 
@@ -166,20 +277,33 @@ deleteLick(id: string): Promise<void>
 ```
 src/
 ├── api/
-│   └── client.ts              Typed fetch wrappers + response interfaces
+│   └── client.ts                  Typed fetch wrappers + response interfaces
+├── contexts/
+│   └── MetronomeContext.tsx        Global BPM + playback state
 ├── hooks/
-│   └── useInstrument.ts       localStorage-backed instrument/tuning state
+│   ├── useInstrument.ts            localStorage-backed instrument/tuning state
+│   └── useMetronome.ts             Web Audio API metronome scheduler
 ├── pages/
-│   ├── LibraryPage.tsx        / — library list + upload
-│   └── DetailPage.tsx         /lick/:id — positions view
+│   ├── LicksPage.tsx              /              lick list + upload
+│   ├── LickDetailPage.tsx         /lick/:id      positions view
+│   ├── SongsPage.tsx              /songs         song list
+│   ├── SongDetailPage.tsx         /song/:id      chord sheet + transpose
+│   └── SongUploadPage.tsx         /songs/upload  upload form
 ├── components/
-│   ├── UploadForm.tsx         Tab editor + upload controls
-│   ├── LickList.tsx           Renders array of LickCard
-│   ├── LickCard.tsx           Single library card
-│   ├── KeySelector.tsx        12-note key dropdown
-│   ├── InstrumentSelector.tsx Preset + custom tuning selector
-│   └── PositionTab.tsx        Single position tab display
-└── main.tsx                   Router root
+│   ├── Layout.tsx                 Fixed navbar + Outlet
+│   ├── Metronome.tsx              Popover metronome widget
+│   ├── ChordSheet.tsx             Chord sheet renderer + voicing popovers
+│   ├── LickList.tsx               Renders array of LickCard
+│   ├── LickCard.tsx               Single lick library card
+│   ├── LickUploadForm.tsx         Tab editor + upload controls
+│   ├── LickPositionTab.tsx        Single position tab display
+│   ├── SongList.tsx               Renders array of SongCard
+│   ├── SongCard.tsx               Single song library card
+│   ├── SongUploadForm.tsx         Song upload form fields
+│   ├── InstrumentSelector.tsx     Preset + custom tuning selector
+│   └── KeySelector.tsx            12-note key dropdown
+└── utils/
+    └── parseChordName.ts          Chord symbol parser
 ```
 
 ---
@@ -211,6 +335,36 @@ interface UploadRequest {
   rawTab: string;
   mode?: string;
   inputKey?: string;
+}
+
+interface SongSummary {
+  id: string;
+  title: string;
+  artist: string;
+  originalKey: string;
+  canReparse: boolean;
+}
+
+interface SongDetail extends SongSummary {
+  capo: number;
+  tempo: number;
+  chordLines: ChordLyric[];
+  numColumns: number;
+}
+
+interface ChordLyric {
+  chords: string;
+  lyrics: string;
+  fontSize: number;
+}
+
+interface UploadSongRequest {
+  title: string;
+  artist?: string;
+  originalKey?: string;
+  capo?: number;
+  tempo?: number;
+  rawChordSheet: string;
 }
 
 type InstrumentName =
