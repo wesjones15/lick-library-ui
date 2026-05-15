@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getSong } from '../../core/api/client';
 import type { SongDetail } from '../../core/api/client';
@@ -30,13 +30,20 @@ export default function SongDetailPage() {
   const [song, setSong] = useState<SongDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const loadedSongIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
     setError(null);
     getSong(id, semitones)
-      .then(s => { setSong(s); setCapo(s.capo ?? 0); })
+      .then(s => {
+        setSong(s);
+        if (loadedSongIdRef.current !== id) {
+          setCapo(s.capo ?? 0);
+          loadedSongIdRef.current = id;
+        }
+      })
       .catch(() => setError('Failed to load song.'))
       .finally(() => setLoading(false));
   }, [id, semitones]);
@@ -106,7 +113,7 @@ export default function SongDetailPage() {
                   <div className="flex gap-3 items-center">
                     <div className="flex flex-col items-center w-10">
                       <span className="text-base font-semibold text-gray-900">
-                        {keyLabel(song.originalKey, semitones)}
+                        {keyLabel(song.originalKey, semitones - (song.capo ?? 0))}
                       </span>
                       <span className="text-xs text-gray-400">shape</span>
                     </div>
@@ -115,7 +122,7 @@ export default function SongDetailPage() {
                     </span>
                     <div className="flex flex-col items-center w-10">
                       <span className="text-base font-semibold text-gray-900">
-                        {keyLabel(song.originalKey, semitones + capo)}
+                        {keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0))}
                       </span>
                       <span className="text-xs text-gray-400">sound</span>
                     </div>
