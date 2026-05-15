@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import KeySelector from '../../components/KeySelector';
 import ChordCard from './ChordCard';
-import { getAllChordVoicings } from '../../core/api/client';
-import type { ChordFrets } from '../../core/api/client';
+import { getAllChordVoicings, reseedChordDefaults } from '../../core/api/client';
+import type { ChordVoicing } from '../../core/api/client';
 
 const NOTE_DISPLAY: Record<string, string> = {
   C: 'C', C_SHARP: 'C#', D: 'D', D_SHARP: 'D#', E: 'E', F: 'F',
@@ -27,16 +27,38 @@ const QUALITIES = [
   { quality: 'm7b5', label: 'Half Dim'},
 ];
 
+const KNOWN_QUALITIES = new Set(QUALITIES.map(q => q.quality));
+
 export default function ChordsGalleryPage() {
   const navigate = useNavigate();
   const [root, setRoot] = useState('C');
-  const [allVoicings, setAllVoicings] = useState<Record<string, ChordFrets[]>>({});
+  const [allVoicings, setAllVoicings] = useState<Record<string, ChordVoicing[]>>({});
+  const [manageMode, setManageMode] = useState(false);
+  const [reseedConfirm, setReseedConfirm] = useState(false);
+  const [reseeding, setReseeding] = useState(false);
 
-  useEffect(() => {
-    getAllChordVoicings(root).then(setAllVoicings);
-  }, [root]);
+  const fetchVoicings = () => getAllChordVoicings(root).then(setAllVoicings);
+
+  useEffect(() => { fetchVoicings(); }, [root]);
 
   const rootDisplay = NOTE_DISPLAY[root] ?? root;
+
+  const extraQualities = Object.keys(allVoicings)
+    .filter(q => !KNOWN_QUALITIES.has(q))
+    .map(q => ({ quality: q, label: q }));
+
+  const allQualities = [...QUALITIES, ...extraQualities];
+
+  async function handleReseed() {
+    setReseeding(true);
+    try {
+      await reseedChordDefaults();
+      await fetchVoicings();
+    } finally {
+      setReseeding(false);
+      setReseedConfirm(false);
+    }
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
@@ -44,22 +66,63 @@ export default function ChordsGalleryPage() {
         <h1 className="text-2xl font-bold text-gray-900">Chord Gallery</h1>
         <div className="flex items-center gap-3">
           <KeySelector value={root} onChange={setRoot} />
+          {!manageMode && (
+            <button
+              onClick={() => navigate('/chords/upload')}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+            >
+              Upload Voicing
+            </button>
+          )}
           <button
-            onClick={() => navigate('/chords/upload')}
-            className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+            onClick={() => { setManageMode(m => !m); setReseedConfirm(false); }}
+            className={`px-3 py-2 text-sm border rounded-lg transition-colors ${manageMode ? 'border-indigo-400 bg-indigo-50 text-indigo-700' : 'border-gray-300 text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
           >
-            Upload Voicing
+            {manageMode ? 'Done' : 'Manage'}
           </button>
         </div>
       </div>
+
+      {manageMode && (
+        <div className="mb-4 flex items-center gap-3">
+          {reseedConfirm ? (
+            <div className="flex items-center gap-3 px-4 py-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              <span>This will restore any deleted system voicings. Continue?</span>
+              <button
+                onClick={handleReseed}
+                disabled={reseeding}
+                className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+              >
+                {reseeding ? 'Restoring…' : 'Confirm'}
+              </button>
+              <button
+                onClick={() => setReseedConfirm(false)}
+                className="px-3 py-1 border border-red-300 rounded hover:bg-red-100"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setReseedConfirm(true)}
+              className="px-3 py-2 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50"
+            >
+              Reseed Defaults
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {QUALITIES.map(({ quality, label }) => (
+        {allQualities.map(({ quality, label }) => (
           <ChordCard
             key={`${root}-${quality}`}
             rootDisplay={rootDisplay}
             quality={quality}
             label={label}
             voicings={allVoicings[quality] ?? []}
+            manageMode={manageMode}
+            onChanged={fetchVoicings}
           />
         ))}
       </div>

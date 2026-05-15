@@ -1,19 +1,19 @@
 import { useState } from 'react';
-import type { ChordLyric, ChordFrets } from '../../core/api/client';
+import type { ChordLyric, ChordVoicing } from '../../core/api/client';
 import { getChordVoicings } from '../../core/api/client';
 import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
 import ChordDiagram from '../chords/ChordDiagram';
 
 // Cache fetched voicings so re-hovering the same chord doesn't re-fetch
-const voicingCache = new Map<string, ChordFrets[]>();
+const voicingCache = new Map<string, ChordVoicing[]>();
 
 interface ChordTokenProps {
   name: string;
 }
 
 function ChordToken({ name }: ChordTokenProps) {
-  const [voicings, setVoicings] = useState<ChordFrets[]>([]);
+  const [voicings, setVoicings] = useState<ChordVoicing[]>([]);
   const [voicingIdx, setVoicingIdx] = useState(0);
   const [open, setOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -72,7 +72,7 @@ function ChordToken({ name }: ChordTokenProps) {
             {name}
           </span>
           {voicings.length > 0
-            ? <ChordDiagram frets={voicings[voicingIdx]} width={100} />
+            ? <ChordDiagram frets={voicings[voicingIdx].frets} width={100} />
             : <button
                 onClick={e => { e.stopPropagation(); setOpen(false); setModalOpen(true); }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', color: '#6366f1', fontSize: '12px' }}
@@ -100,9 +100,9 @@ function ChordToken({ name }: ChordTokenProps) {
           onSuccess={() => {
             const key = `${parsed.root}:${parsed.quality}`;
             voicingCache.delete(key);
-            getChordVoicings(parsed.root, parsed.quality).then(v => {
-              voicingCache.set(key, v);
-              setVoicings(v);
+            getChordVoicings(parsed.root, parsed.quality).then(vs => {
+              voicingCache.set(key, vs);
+              setVoicings(vs);
             });
             setModalOpen(false);
           }}

@@ -159,18 +159,33 @@ export async function reparseSong(id: string): Promise<SongDetail> {
 // null = muted (x), 0 = open, positive = fret number; index 0 = low E, 5 = high e
 export type ChordFrets = (number | null)[];
 
-export async function getChordVoicings(root: string, quality: string): Promise<ChordFrets[]> {
+export interface ChordVoicing {
+  id: string;
+  frets: ChordFrets;
+}
+
+export async function getChordVoicings(root: string, quality: string): Promise<ChordVoicing[]> {
   const params = new URLSearchParams({ root, quality });
   const res = await fetch(`${BASE_URL}/chord?${params}`);
   if (!res.ok) return [];
   return res.json();
 }
 
-export async function getAllChordVoicings(root: string): Promise<Record<string, ChordFrets[]>> {
+export async function getAllChordVoicings(root: string): Promise<Record<string, ChordVoicing[]>> {
   const params = new URLSearchParams({ root });
   const res = await fetch(`${BASE_URL}/chord/all?${params}`);
   if (!res.ok) return {};
   return res.json();
+}
+
+export async function deleteChordVoicing(id: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/chord/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete voicing');
+}
+
+export async function reseedChordDefaults(): Promise<void> {
+  const res = await fetch(`${BASE_URL}/chord/reseed`, { method: 'POST' });
+  if (!res.ok) throw new Error('Reseed failed');
 }
 
 export interface UploadChordRequest {
