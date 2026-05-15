@@ -116,7 +116,7 @@ function ChordToken({ name }: ChordTokenProps) {
 
 function renderChordToken(part: string, i: number): React.ReactNode {
   const prefix = part.match(/^\(+/)?.[0] ?? '';
-  const suffix = part.match(/\)+$/)?.[0] ?? '';
+  const suffix = part.match(/[)*]+$/)?.[0] ?? '';
   const core = part.slice(prefix.length, part.length - suffix.length);
 
   if (!/^[A-G]/.test(core)) {
