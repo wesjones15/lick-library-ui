@@ -1,9 +1,19 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import type { ReactNode } from 'react';
 import Metronome from '../core/metronome/MetronomeWidget';
 
-const NAV_LINKS = [
+const NAV_LINKS: { label: ReactNode; to: string }[] = [
   { label: 'Licks', to: '/' },
   { label: 'Songs', to: '/songs' },
+  {
+    label: (
+      <span className="flex flex-col items-center leading-none">
+        <span>Chord</span>
+        <span>Gallery</span>
+      </span>
+    ),
+    to: '/chords',
+  },
 ];
 
 export default function Layout() {

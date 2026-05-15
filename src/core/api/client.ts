@@ -142,3 +142,10 @@ export async function getChordVoicings(root: string, quality: string): Promise<s
   if (!res.ok) return [];
   return res.json();
 }
+
+export async function getAllChordVoicings(root: string): Promise<Record<string, string[]>> {
+  const params = new URLSearchParams({ root });
+  const res = await fetch(`${BASE_URL}/chord/all?${params}`);
+  if (!res.ok) return {};
+  return res.json();
+}

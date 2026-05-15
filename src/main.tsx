@@ -9,6 +9,7 @@ import LickDetailPage from './features/licks/LickDetailPage'
 import SongsPage from './features/songs/SongsPage'
 import SongDetailPage from './features/songs/SongDetailPage'
 import SongUploadPage from './features/songs/SongUploadPage'
+import ChordsGalleryPage from './features/chords/ChordsGalleryPage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -21,6 +22,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/songs" element={<SongsPage />} />
             <Route path="/songs/upload" element={<SongUploadPage />} />
             <Route path="/song/:id" element={<SongDetailPage />} />
+            <Route path="/chords" element={<ChordsGalleryPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
