@@ -91,6 +91,16 @@ export interface SongDetail {
   chordLines: ChordLyric[];
   numColumns: number;
   canReparse: boolean;
+  rawChordSheet: string | null;
+}
+
+export interface UpdateSongRequest {
+  title?: string;
+  artist?: string;
+  originalKey?: string;
+  capo?: number;
+  tempo?: number;
+  rawChordSheet?: string;
 }
 
 export interface UploadSongRequest {
@@ -128,6 +138,16 @@ export async function getSong(id: string, semitones = 0): Promise<SongDetail> {
 export async function deleteSong(id: string): Promise<void> {
   const res = await fetch(`${BASE_URL}/song/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete song');
+}
+
+export async function updateSong(id: string, request: UpdateSongRequest): Promise<SongDetail> {
+  const res = await fetch(`${BASE_URL}/song/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+  if (!res.ok) throw new Error('Failed to update song');
+  return res.json();
 }
 
 export async function reparseSong(id: string): Promise<SongDetail> {

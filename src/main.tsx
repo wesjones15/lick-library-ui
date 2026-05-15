@@ -11,6 +11,7 @@ import SongDetailPage from './features/songs/SongDetailPage'
 import SongUploadPage from './features/songs/SongUploadPage'
 import ChordsGalleryPage from './features/chords/ChordsGalleryPage'
 import ChordUploadPage from './features/chords/ChordUploadPage'
+import SongManagePage from './features/songs/SongManagePage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -23,6 +24,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/songs" element={<SongsPage />} />
             <Route path="/songs/upload" element={<SongUploadPage />} />
             <Route path="/song/:id" element={<SongDetailPage />} />
+            <Route path="/song/:id/manage" element={<SongManagePage />} />
             <Route path="/chords" element={<ChordsGalleryPage />} />
             <Route path="/chords/upload" element={<ChordUploadPage />} />
           </Route>

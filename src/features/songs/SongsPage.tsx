@@ -52,7 +52,7 @@ export default function SongsPage() {
         {loading && <p className="text-gray-400 text-sm">Loading…</p>}
         {error && <p className="text-red-500 text-sm">{error}</p>}
         {!loading && !error && (
-          <SongList songs={songs} onDelete={id => setSongs(s => s.filter(x => x.id !== id))} reparsing={reparsing} onReparse={fetchSongs} />
+          <SongList songs={songs} reparsing={reparsing} onReparse={fetchSongs} />
         )}
       </section>
     </div>

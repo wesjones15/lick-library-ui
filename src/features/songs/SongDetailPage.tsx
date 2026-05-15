@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getSong } from '../../core/api/client';
 import type { SongDetail } from '../../core/api/client';
 import ChordSheet from './ChordSheet';
@@ -23,6 +23,7 @@ function keyLabel(originalKey: string | null, semitones: number): string {
 
 export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { setBpm, setIsPlaying } = useMetronomeContext();
   const [semitones, setSemitones] = useState(0);
   const [capo, setCapo] = useState(0);
@@ -52,6 +53,12 @@ export default function SongDetailPage() {
               <div className="flex items-baseline gap-2">
                 <h1 className="text-xl font-bold text-gray-900">{song.title}</h1>
                 {song.artist && <span className="text-gray-400 text-sm">{song.artist}</span>}
+                <button
+                  onClick={() => navigate(`/song/${id}/manage`)}
+                  className="text-xs text-gray-400 hover:text-indigo-500 transition-colors"
+                >
+                  Manage
+                </button>
               </div>
               <div className="flex gap-3 mt-0.5 text-xs text-gray-400">
                 {song.tempo != null && (

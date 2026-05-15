@@ -1,28 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { deleteSong, reparseSong } from '../../core/api/client';
+import { reparseSong } from '../../core/api/client';
 import type { SongSummary } from '../../core/api/client';
 
 interface Props {
   song: SongSummary;
-  onDelete: (id: string) => void;
   reparsing?: boolean;
   onReparse?: () => void;
 }
 
-export default function SongCard({ song, onDelete, reparsing = false, onReparse }: Props) {
+export default function SongCard({ song, reparsing = false, onReparse }: Props) {
   const navigate = useNavigate();
   const [reparsed, setReparsed] = useState(false);
-
-  async function handleDelete(e: React.MouseEvent) {
-    e.stopPropagation();
-    try {
-      await deleteSong(song.id);
-      onDelete(song.id);
-    } catch {
-      // swallow — parent can re-fetch
-    }
-  }
 
   async function handleReparse(e: React.MouseEvent) {
     e.stopPropagation();
@@ -58,11 +47,11 @@ export default function SongCard({ song, onDelete, reparsing = false, onReparse 
           </button>
         )}
         <button
-          onClick={handleDelete}
-          className="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none"
-          aria-label="Delete song"
+          onClick={e => { e.stopPropagation(); navigate(`/song/${song.id}/manage`); }}
+          className="text-gray-300 hover:text-indigo-500 transition-colors text-base leading-none"
+          aria-label="Manage song"
         >
-          ×
+          ✎
         </button>
       </div>
     </div>

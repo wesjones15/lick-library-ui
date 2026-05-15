@@ -3,19 +3,18 @@ import type { SongSummary } from '../../core/api/client';
 
 interface Props {
   songs: SongSummary[];
-  onDelete: (id: string) => void;
   reparsing?: boolean;
   onReparse?: () => void;
 }
 
-export default function SongList({ songs, onDelete, reparsing = false, onReparse }: Props) {
+export default function SongList({ songs, reparsing = false, onReparse }: Props) {
   if (songs.length === 0) {
     return <p className="text-gray-400 text-sm">No songs yet.</p>;
   }
   return (
     <div className="flex flex-col gap-2">
       {songs.map(song => (
-        <SongCard key={song.id} song={song} onDelete={onDelete} reparsing={reparsing} onReparse={onReparse} />
+        <SongCard key={song.id} song={song} reparsing={reparsing} onReparse={onReparse} />
       ))}
     </div>
   );
