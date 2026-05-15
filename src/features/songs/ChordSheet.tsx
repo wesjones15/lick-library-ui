@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { ChordLyric } from '../../core/api/client';
 import { getChordVoicings } from '../../core/api/client';
 import { parseChordName } from './parseChordName';
+import ChordUploadModal from '../chords/ChordUploadModal';
 
 // Cache fetched voicings so re-hovering the same chord doesn't re-fetch
 const voicingCache = new Map<string, string[]>();
@@ -14,6 +15,7 @@ function ChordToken({ name }: ChordTokenProps) {
   const [voicings, setVoicings] = useState<string[]>([]);
   const [voicingIdx, setVoicingIdx] = useState(0);
   const [open, setOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const parsed = parseChordName(name);
 
   async function handleMouseEnter() {
@@ -69,7 +71,15 @@ function ChordToken({ name }: ChordTokenProps) {
             minWidth: 'max-content',
           }}
         >
-          <span style={{ display: 'block' }}>{voicings.length > 0 ? voicings[voicingIdx] : '???'}</span>
+          <span style={{ display: 'block' }}>
+            {voicings.length > 0
+              ? voicings[voicingIdx]
+              : <button
+                  onClick={e => { e.stopPropagation(); setOpen(false); setModalOpen(true); }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6366f1', fontFamily: 'monospace', fontSize: 'inherit' }}
+                >???</button>
+            }
+          </span>
           {voicings.length > 1 && voicings.length > 0 && (
             <span style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8px', color: '#9ca3af', gap: '8px' }}>
               <button
@@ -84,6 +94,21 @@ function ChordToken({ name }: ChordTokenProps) {
             </span>
           )}
         </span>
+      )}
+      {modalOpen && parsed && (
+        <ChordUploadModal
+          chordName={name}
+          onClose={() => setModalOpen(false)}
+          onSuccess={() => {
+            const key = `${parsed.root}:${parsed.quality}`;
+            voicingCache.delete(key);
+            getChordVoicings(parsed.root, parsed.quality).then(v => {
+              voicingCache.set(key, v);
+              setVoicings(v);
+            });
+            setModalOpen(false);
+          }}
+        />
       )}
     </span>
   );
