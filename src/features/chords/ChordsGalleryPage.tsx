@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import KeySelector from '../../components/KeySelector';
 import ChordCard from './ChordCard';
 import { getAllChordVoicings } from '../../core/api/client';
+import type { ChordFrets } from '../../core/api/client';
 
 const NOTE_DISPLAY: Record<string, string> = {
   C: 'C', C_SHARP: 'C#', D: 'D', D_SHARP: 'D#', E: 'E', F: 'F',
@@ -29,7 +30,7 @@ const QUALITIES = [
 export default function ChordsGalleryPage() {
   const navigate = useNavigate();
   const [root, setRoot] = useState('C');
-  const [allVoicings, setAllVoicings] = useState<Record<string, string[]>>({});
+  const [allVoicings, setAllVoicings] = useState<Record<string, ChordFrets[]>>({});
 
   useEffect(() => {
     getAllChordVoicings(root).then(setAllVoicings);

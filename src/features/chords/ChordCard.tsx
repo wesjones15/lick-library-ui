@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import ChordDiagram from './ChordDiagram';
+import type { ChordFrets } from '../../core/api/client';
 
 interface ChordCardProps {
   rootDisplay: string;
   quality: string;
   label: string;
-  voicings: string[];
+  voicings: ChordFrets[];
 }
 
 export default function ChordCard({ rootDisplay, quality, label, voicings }: ChordCardProps) {
@@ -18,9 +20,12 @@ export default function ChordCard({ rootDisplay, quality, label, voicings }: Cho
         <div className="font-semibold text-gray-900 text-sm">{rootDisplay}{quality}</div>
         <div className="text-xs text-gray-400">{label}</div>
       </div>
-      <pre className="text-[9px] leading-[1.5] font-mono text-gray-800 whitespace-pre flex-1">
-        {voicings[idx] ?? '???'}
-      </pre>
+      <div className="flex-1 flex items-center justify-center">
+        {voicings.length > 0
+          ? <ChordDiagram frets={voicings[idx]} width={140} />
+          : <span className="text-gray-300 text-sm">???</span>
+        }
+      </div>
       {voicings.length > 1 && (
         <div className="flex items-center justify-between text-xs text-gray-400">
           <button

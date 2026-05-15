@@ -1,18 +1,19 @@
 import { useState } from 'react';
-import type { ChordLyric } from '../../core/api/client';
+import type { ChordLyric, ChordFrets } from '../../core/api/client';
 import { getChordVoicings } from '../../core/api/client';
 import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
+import ChordDiagram from '../chords/ChordDiagram';
 
 // Cache fetched voicings so re-hovering the same chord doesn't re-fetch
-const voicingCache = new Map<string, string[]>();
+const voicingCache = new Map<string, ChordFrets[]>();
 
 interface ChordTokenProps {
   name: string;
 }
 
 function ChordToken({ name }: ChordTokenProps) {
-  const [voicings, setVoicings] = useState<string[]>([]);
+  const [voicings, setVoicings] = useState<ChordFrets[]>([]);
   const [voicingIdx, setVoicingIdx] = useState(0);
   const [open, setOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -52,36 +53,30 @@ function ChordToken({ name }: ChordTokenProps) {
             position: 'absolute',
             top: '100%',
             marginTop: '2px',
-            left: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
             zIndex: 100,
             background: 'white',
             border: '1px solid #e5e7eb',
             borderRadius: '8px',
-            padding: '8px 10px',
-            fontSize: '9px',
-            lineHeight: 1.5,
-            fontFamily: 'monospace',
-            whiteSpace: 'pre',
-            color: '#111827',
+            padding: '6px 8px',
             boxShadow: '0 2px 10px rgba(0,0,0,0.12)',
             display: 'flex',
             flexDirection: 'column',
+            alignItems: 'center',
             gap: '4px',
             pointerEvents: 'auto',
-            minWidth: 'max-content',
           }}
         >
-          <span style={{ display: 'block' }}>
-            {voicings.length > 0
-              ? voicings[voicingIdx]
-              : <button
-                  onClick={e => { e.stopPropagation(); setOpen(false); setModalOpen(true); }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6366f1', fontFamily: 'monospace', fontSize: 'inherit' }}
-                >???</button>
-            }
-          </span>
-          {voicings.length > 1 && voicings.length > 0 && (
-            <span style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8px', color: '#9ca3af', gap: '8px' }}>
+          {voicings.length > 0
+            ? <ChordDiagram frets={voicings[voicingIdx]} width={100} />
+            : <button
+                onClick={e => { e.stopPropagation(); setOpen(false); setModalOpen(true); }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', color: '#6366f1', fontSize: '12px' }}
+              >???</button>
+          }
+          {voicings.length > 1 && (
+            <span style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: '8px', color: '#9ca3af' }}>
               <button
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6b7280' }}
                 onClick={e => { e.stopPropagation(); setVoicingIdx(i => (i - 1 + voicings.length) % voicings.length); }}

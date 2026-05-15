@@ -156,14 +156,17 @@ export async function reparseSong(id: string): Promise<SongDetail> {
   return res.json();
 }
 
-export async function getChordVoicings(root: string, quality: string): Promise<string[]> {
+// null = muted (x), 0 = open, positive = fret number; index 0 = low E, 5 = high e
+export type ChordFrets = (number | null)[];
+
+export async function getChordVoicings(root: string, quality: string): Promise<ChordFrets[]> {
   const params = new URLSearchParams({ root, quality });
   const res = await fetch(`${BASE_URL}/chord?${params}`);
   if (!res.ok) return [];
   return res.json();
 }
 
-export async function getAllChordVoicings(root: string): Promise<Record<string, string[]>> {
+export async function getAllChordVoicings(root: string): Promise<Record<string, ChordFrets[]>> {
   const params = new URLSearchParams({ root });
   const res = await fetch(`${BASE_URL}/chord/all?${params}`);
   if (!res.ok) return {};
