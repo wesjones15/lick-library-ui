@@ -68,6 +68,9 @@ function ChordToken({ name }: ChordTokenProps) {
             pointerEvents: 'auto',
           }}
         >
+          <span style={{ fontSize: '11px', fontWeight: 600, color: '#111827', textAlign: 'center', width: '100%' }}>
+            {name}
+          </span>
           {voicings.length > 0
             ? <ChordDiagram frets={voicings[voicingIdx]} width={100} />
             : <button
