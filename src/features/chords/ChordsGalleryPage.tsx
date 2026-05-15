@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import KeySelector from '../../components/KeySelector';
 import ChordCard from './ChordCard';
 import { getAllChordVoicings } from '../../core/api/client';
@@ -26,6 +27,7 @@ const QUALITIES = [
 ];
 
 export default function ChordsGalleryPage() {
+  const navigate = useNavigate();
   const [root, setRoot] = useState('C');
   const [allVoicings, setAllVoicings] = useState<Record<string, string[]>>({});
 
@@ -41,7 +43,10 @@ export default function ChordsGalleryPage() {
         <h1 className="text-2xl font-bold text-gray-900">Chord Gallery</h1>
         <div className="flex items-center gap-3">
           <KeySelector value={root} onChange={setRoot} />
-          <button className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50">
+          <button
+            onClick={() => navigate('/chords/upload')}
+            className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+          >
             Upload Voicing
           </button>
         </div>

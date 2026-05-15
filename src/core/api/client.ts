@@ -149,3 +149,23 @@ export async function getAllChordVoicings(root: string): Promise<Record<string, 
   if (!res.ok) return {};
   return res.json();
 }
+
+export interface UploadChordRequest {
+  root: string;
+  quality: string;
+  frets: string[];
+  shapeName?: string;
+  instrument?: string;
+}
+
+export async function uploadChordVoicing(request: UploadChordRequest): Promise<void> {
+  const res = await fetch(`${BASE_URL}/chord`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || 'Upload failed');
+  }
+}
