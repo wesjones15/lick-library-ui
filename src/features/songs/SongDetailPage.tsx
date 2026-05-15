@@ -78,6 +78,12 @@ export default function SongDetailPage() {
                   </div>
                   <button onClick={() => setCapo(c => Math.min(11, c + 1))} className={btnClass}>+</button>
                 </div>
+                <button
+                  onClick={() => setCapo(song.capo ?? 0)}
+                  className={`text-xs text-center transition-colors ${capo !== (song.capo ?? 0) ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+                >
+                  reset
+                </button>
               </div>
 
               {/* Divider */}
@@ -93,7 +99,7 @@ export default function SongDetailPage() {
                   <div className="flex gap-3 items-center">
                     <div className="flex flex-col items-center w-10">
                       <span className="text-base font-semibold text-gray-900">
-                        {keyLabel(song.originalKey, semitones - capo)}
+                        {keyLabel(song.originalKey, semitones)}
                       </span>
                       <span className="text-xs text-gray-400">shape</span>
                     </div>
@@ -102,7 +108,7 @@ export default function SongDetailPage() {
                     </span>
                     <div className="flex flex-col items-center w-10">
                       <span className="text-base font-semibold text-gray-900">
-                        {keyLabel(song.originalKey, semitones)}
+                        {keyLabel(song.originalKey, semitones + capo)}
                       </span>
                       <span className="text-xs text-gray-400">sound</span>
                     </div>
