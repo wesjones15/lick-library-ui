@@ -6,19 +6,21 @@ import type { ChordVoicing } from '../../core/api/client';
 interface ChordCardProps {
   rootDisplay: string;
   quality: string;
+  displayQuality?: string;
   label: string;
   voicings: ChordVoicing[];
   manageMode?: boolean;
   onChanged?: () => void;
 }
 
-export default function ChordCard({ rootDisplay, quality, label, voicings, manageMode, onChanged }: ChordCardProps) {
+export default function ChordCard({ rootDisplay, quality, displayQuality, label, voicings, manageMode, onChanged }: ChordCardProps) {
   const [idx, setIdx] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => { setIdx(0); }, [voicings]);
 
   const chordName = `${rootDisplay}${quality}`;
+  const displayName = `${rootDisplay}${displayQuality ?? quality}`;
 
   return (
     <>
@@ -27,7 +29,7 @@ export default function ChordCard({ rootDisplay, quality, label, voicings, manag
         onClick={manageMode ? () => setModalOpen(true) : undefined}
       >
         <div>
-          <div className="font-semibold text-gray-900 text-sm">{chordName}</div>
+          <div className="font-semibold text-gray-900 text-sm">{displayName}</div>
           <div className="text-xs text-gray-400">{label}</div>
         </div>
         <div className="flex-1 flex items-center justify-center">
@@ -56,7 +58,7 @@ export default function ChordCard({ rootDisplay, quality, label, voicings, manag
 
       {modalOpen && (
         <ChordManageModal
-          chordName={chordName}
+          chordName={displayName}
           voicings={voicings}
           onClose={() => setModalOpen(false)}
           onChanged={() => { onChanged?.(); }}

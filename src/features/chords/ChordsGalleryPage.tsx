@@ -29,6 +29,19 @@ const QUALITIES = [
 
 const KNOWN_QUALITIES = new Set(QUALITIES.map(q => q.quality));
 
+const NOTE_KEYS = ['C','C_SHARP','D','D_SHARP','E','F','F_SHARP','G','G_SHARP','A','B_FLAT','B'];
+
+function resolveSlashQuality(root: string, quality: string): string {
+  const m = quality.match(/^([^/]*)\/(\d+)$/);
+  if (!m) return quality;
+  const base = m[1];
+  const semitones = parseInt(m[2], 10);
+  const rootIdx = NOTE_KEYS.indexOf(root);
+  if (rootIdx === -1) return quality;
+  const bassKey = NOTE_KEYS[(rootIdx + semitones) % 12];
+  return `${base}/${NOTE_DISPLAY[bassKey]}`;
+}
+
 export default function ChordsGalleryPage() {
   const navigate = useNavigate();
   const [root, setRoot] = useState('C');
@@ -45,7 +58,7 @@ export default function ChordsGalleryPage() {
 
   const extraQualities = Object.keys(allVoicings)
     .filter(q => !KNOWN_QUALITIES.has(q))
-    .map(q => ({ quality: q, label: q }));
+    .map(q => ({ quality: q, label: resolveSlashQuality(root, q) }));
 
   const allQualities = [...QUALITIES, ...extraQualities];
 
@@ -114,17 +127,22 @@ export default function ChordsGalleryPage() {
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {allQualities.map(({ quality, label }) => (
-          <ChordCard
-            key={`${root}-${quality}`}
-            rootDisplay={rootDisplay}
-            quality={quality}
-            label={label}
-            voicings={allVoicings[quality] ?? []}
-            manageMode={manageMode}
-            onChanged={fetchVoicings}
-          />
-        ))}
+        {allQualities.map(({ quality, label }) => {
+          const resolved = resolveSlashQuality(root, quality);
+          const displayQuality = resolved !== quality ? resolved : undefined;
+          return (
+            <ChordCard
+              key={`${root}-${quality}`}
+              rootDisplay={rootDisplay}
+              quality={quality}
+              displayQuality={displayQuality}
+              label={label}
+              voicings={allVoicings[quality] ?? []}
+              manageMode={manageMode}
+              onChanged={fetchVoicings}
+            />
+          );
+        })}
       </div>
     </div>
   );

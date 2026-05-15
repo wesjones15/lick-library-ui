@@ -67,35 +67,37 @@ export default function ChordManageModal({ chordName, voicings: initialVoicings,
           {voicings.length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-8">No voicings for {chordName}</p>
           ) : (
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               {voicings.map(v => (
-                <div key={v.id} className="relative border border-gray-200 rounded-lg p-2 flex flex-col items-center gap-1">
+                <div key={v.id} className="border border-gray-200 rounded-lg p-2 flex flex-row items-start gap-2">
                   <ChordDiagram frets={v.frets} width={120} />
-                  {confirmId === v.id ? (
-                    <div className="flex items-center gap-1 mt-1">
-                      <span className="text-xs text-red-600">Delete?</span>
+                  <div className="flex flex-col items-center gap-1 pt-1">
+                    {confirmId === v.id ? (
+                      <>
+                        <span className="text-xs text-red-600 font-medium">Delete?</span>
+                        <button
+                          onClick={() => handleDelete(v.id)}
+                          disabled={deleting}
+                          className="px-2 py-0.5 text-xs bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                        >
+                          Yes
+                        </button>
+                        <button
+                          onClick={() => setConfirmId(null)}
+                          className="px-2 py-0.5 text-xs border border-gray-300 rounded hover:bg-gray-50"
+                        >
+                          No
+                        </button>
+                      </>
+                    ) : (
                       <button
-                        onClick={() => handleDelete(v.id)}
-                        disabled={deleting}
-                        className="px-2 py-0.5 text-xs bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                        onClick={() => setConfirmId(v.id)}
+                        className="w-5 h-5 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded text-xs leading-none"
                       >
-                        Yes
+                        ✕
                       </button>
-                      <button
-                        onClick={() => setConfirmId(null)}
-                        className="px-2 py-0.5 text-xs border border-gray-300 rounded hover:bg-gray-50"
-                      >
-                        No
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setConfirmId(v.id)}
-                      className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded text-xs leading-none"
-                    >
-                      ✕
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
