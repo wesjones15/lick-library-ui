@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { uploadChordVoicing } from '../../core/api/client';
 import { parseChordName } from '../songs/parseChordName';
+import ChordDiagram from './ChordDiagram';
 
 // Display order: high e (index 5) on top → low E (index 0) on bottom
 const STRING_DISPLAY = [
@@ -46,6 +47,13 @@ export default function ChordUploadForm({ initialChordName = '', lockChordName =
   const allFretsSet = frets.every(f => f.trim() !== '');
   const canSubmit = !loading && allFretsSet && !parseError && chordName.trim() !== '';
 
+  const previewFrets: (number | null)[] = frets.map(f => {
+    const t = f.trim().toLowerCase();
+    if (t === 'x') return null;
+    const n = parseInt(t, 10);
+    return !isNaN(n) && n >= 0 ? n : 0;
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = parseChordName(chordName.trim());
@@ -83,20 +91,23 @@ export default function ChordUploadForm({ initialChordName = '', lockChordName =
 
       <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
         <p className="text-xs text-gray-500 mb-3">Frets — enter a number (0–24) or <code>x</code> for muted</p>
-        <div className="flex flex-col gap-2">
-          {STRING_DISPLAY.map(({ label, fretsIdx }) => (
-            <div key={label} className="flex items-center gap-3">
-              <span className="w-4 text-right text-sm font-mono text-gray-600">{label}</span>
-              <input
-                type="text"
-                inputMode="text"
-                value={frets[fretsIdx]}
-                onChange={e => setFret(fretsIdx, e.target.value)}
-                placeholder="—"
-                className="w-16 border border-gray-300 rounded px-2 py-1 text-sm font-mono text-center focus:outline-none focus:border-indigo-400"
-              />
-            </div>
-          ))}
+        <div className="flex items-start gap-6">
+          <div className="flex flex-col gap-2">
+            {STRING_DISPLAY.map(({ label, fretsIdx }) => (
+              <div key={label} className="flex items-center gap-3">
+                <span className="w-4 text-right text-sm font-mono text-gray-600">{label}</span>
+                <input
+                  type="text"
+                  inputMode="text"
+                  value={frets[fretsIdx]}
+                  onChange={e => setFret(fretsIdx, e.target.value)}
+                  placeholder="—"
+                  className="w-16 border border-gray-300 rounded px-2 py-1 text-sm font-mono text-center focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+            ))}
+          </div>
+          <ChordDiagram frets={previewFrets} width={130} />
         </div>
       </div>
 
