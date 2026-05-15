@@ -41,7 +41,7 @@ function ChordToken({ name }: ChordTokenProps) {
 
   return (
     <span
-      style={{ display: 'inline-block', position: 'relative', fontWeight: 'bold' }}
+      style={{ display: 'inline-block', position: 'relative', fontWeight: 'bold', color: '#4f46e5' }}
       onMouseEnter={canShowPopover ? handleMouseEnter : undefined}
       onMouseLeave={canShowPopover ? handleMouseLeave : undefined}
     >
@@ -159,7 +159,7 @@ export default function ChordSheet({ chordLines, numColumns, className }: Props)
         <div key={ci} className="flex-1 flex flex-col">
           {col.map((pair, li) => (
             <div key={li} className="leading-tight">
-              <div style={{ fontSize: `${pair.fontSize}px`, whiteSpace: 'pre', color: '#4f46e5' }}>
+              <div style={{ fontSize: `${pair.fontSize}px`, whiteSpace: 'pre', color: '#111827' }}>
                 {renderChords(pair.chords)}
               </div>
               <div style={{ fontSize: `${pair.fontSize}px`, whiteSpace: 'pre', color: '#111827' }}>
