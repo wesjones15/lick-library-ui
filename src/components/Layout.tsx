@@ -52,30 +52,36 @@ export default function Layout() {
         {collapsed && info ? (
           /* Mini bar — shown when song view is collapsed */
           <div className="flex items-center gap-3 w-full min-w-0">
-            <span className="font-semibold text-sm text-gray-900 truncate max-w-[140px] sm:max-w-[200px]">
-              {info.title}
-            </span>
-            {info.artist && (
-              <span className="text-xs text-gray-400 truncate max-w-[100px] hidden sm:block">
-                {info.artist}
+            <div className="flex flex-col min-w-0">
+              {info.artist && (
+                <span className="text-xs text-gray-400 truncate">
+                  {info.artist}
+                </span>
+              )}
+              <span className="font-semibold text-sm text-gray-900 truncate">
+                {info.title}
               </span>
-            )}
-            {info.bpm != null && (
-              <button
-                onClick={() => { setBpm(info.bpm!); setIsPlaying(true); }}
-                className="text-xs text-gray-400 hover:text-indigo-500 transition-colors shrink-0"
-              >
-                {info.bpm} BPM
-              </button>
-            )}
-            {(info.shapeKey || info.soundKey) && (
-              <span className="text-xs text-gray-500 shrink-0">
-                {info.shapeKey}{info.soundKey && info.soundKey !== info.shapeKey ? `/${info.soundKey}` : ''}
-              </span>
-            )}
-            {info.capo > 0 && (
-              <span className="text-xs text-gray-400 shrink-0">Capo {info.capo}</span>
-            )}
+            </div>
+            <div className="flex items-start gap-1.5 shrink-0">
+              <div className="flex flex-col">
+                {info.soundKey && (
+                  <span className="text-xs text-gray-500">
+                    {info.soundKey}
+                  </span>
+                )}
+                {info.bpm != null && (
+                  <button
+                    onClick={() => { setBpm(info.bpm!); setIsPlaying(true); }}
+                    className="text-xs text-gray-400 hover:text-indigo-500 transition-colors"
+                  >
+                    {info.bpm} BPM
+                  </button>
+                )}
+              </div>
+              {info.capo > 0 && (
+                <span className="text-xs text-gray-400">Capo {info.capo}</span>
+              )}
+            </div>
             <div className="ml-auto flex items-center gap-2 shrink-0">
               <button
                 onClick={() => setCollapsed(false)}

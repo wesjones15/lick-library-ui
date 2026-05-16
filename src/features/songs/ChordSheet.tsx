@@ -187,7 +187,7 @@ export default function ChordSheet({ chordLines, numColumns, className, fontScal
   }
 
   return (
-    <div className={`flex gap-6 font-mono overflow-hidden ${className ?? ''}`}>
+    <div className={`flex gap-6 font-mono ${className ?? ''}`}>
       {columns.map((col, ci) => (
         <div key={ci} className="flex-1 flex flex-col">
           {col.map((line, li) => {
