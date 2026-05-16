@@ -72,6 +72,16 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
         }
         .candidate-dot { animation: candidate-stroke 0.8s ease-in-out infinite; }
       `}</style>
+      {/* Tan fretboard backdrop */}
+      <rect
+        x={fretLineStart}
+        y={strLineY0 - 6}
+        width={fretCount * FRET_W}
+        height={(STRING_COUNT - 1) * STR_H + 12}
+        fill="#e8d5b7"
+        rx={2}
+      />
+
       {/* Fret numbers */}
       {Array.from({ length: fretCount }, (_, i) => i + 1).map(f => (
         <text
@@ -95,7 +105,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           y1={yStr(di)}
           x2={fretLineEnd}
           y2={yStr(di)}
-          stroke="#6b7280"
+          stroke="#374151"
           strokeWidth={STRING_WEIGHTS[di]}
         />
       ))}
@@ -109,16 +119,17 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
         fill="#374151"
       />
 
-      {/* Fret lines */}
+      {/* Fret lines — silver bar with black outlines */}
       {Array.from({ length: fretCount }, (_, i) => i + 1).map(f => (
-        <line
+        <rect
           key={`fl${f}`}
-          x1={fretLineStart + f * FRET_W}
-          y1={strLineY0}
-          x2={fretLineStart + f * FRET_W}
-          y2={strLineYN}
-          stroke="#d1d5db"
-          strokeWidth={1}
+          x={fretLineStart + f * FRET_W - 1.5}
+          y={strLineY0}
+          width={3}
+          height={strLineYN - strLineY0}
+          fill="#c0c0c0"
+          stroke="#374151"
+          strokeWidth={0.5}
         />
       ))}
 
@@ -186,7 +197,9 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           const label = dot.note ?? '';
           const bright = dot.active || dot.candidate;
           const textFill = bright ? '#111827' : '#9ca3af';
-          const fontSize = label.length > 1 ? 5.5 : 7;
+          const fontSize = dot.active
+            ? (label.length > 1 ? 9 : 11)
+            : (label.length > 1 ? 7 : 9);
           const si = dataIdx(di);
           return (
             <g
@@ -194,7 +207,10 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
               onClick={onDotClick ? () => onDotClick(si, fret) : undefined}
               style={onDotClick ? { cursor: 'pointer' } : undefined}
             >
-              {/* active ring: filled pale yellow */}
+              {/* active ring: dark outer outline + filled pale yellow */}
+              {dot.active && (
+                <circle cx={cx} cy={cy} r={14.5} fill="none" stroke="#374151" strokeWidth={1} />
+              )}
               {dot.active && (
                 <circle cx={cx} cy={cy} r={R_RING} fill={ACTIVE_RING_COLOR} />
               )}

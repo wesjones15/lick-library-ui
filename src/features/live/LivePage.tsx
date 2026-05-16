@@ -121,7 +121,7 @@ export default function LivePage() {
         const isActive = currentNote?.string === s && currentNote?.fret === f;
         const isCandidate = !isActive
           && candidateDegrees.has(dot.degree)
-          && Math.hypot(f - currentNote!.fret, s - currentNote!.string) <= 4.0;
+          && Math.hypot(f - currentNote!.fret, s - currentNote!.string) <= 3.9;
         return { ...dot, active: isActive, candidate: isCandidate };
       })
     );
