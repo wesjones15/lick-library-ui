@@ -25,7 +25,7 @@ const NAV_LINKS: { label: ReactNode; to: string }[] = [
 export default function Layout() {
   const { pathname } = useLocation();
   const { info, collapsed, setCollapsed, showChords, setShowChords } = useSongNavContext();
-  const { setBpm, setIsPlaying } = useMetronomeContext();
+  const { setBpm, setIsPlaying, bpm, isPlaying } = useMetronomeContext();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -71,7 +71,7 @@ export default function Layout() {
                 )}
                 {info.bpm != null && (
                   <button
-                    onClick={() => { setBpm(info.bpm!); setIsPlaying(true); }}
+                    onClick={() => { if (isPlaying && bpm === info.bpm) { setIsPlaying(false); } else { setBpm(info.bpm!); setIsPlaying(true); } }}
                     className="text-xs text-gray-400 hover:text-indigo-500 transition-colors"
                   >
                     {info.bpm} BPM

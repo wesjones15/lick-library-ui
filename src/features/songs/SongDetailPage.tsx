@@ -68,7 +68,7 @@ function extractChordNames(song: SongDetail): string[] {
 export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { setBpm, setIsPlaying } = useMetronomeContext();
+  const { setBpm, setIsPlaying, bpm, isPlaying } = useMetronomeContext();
   const { setInfo, collapsed, showChords, setShowChords } = useSongNavContext();
   const isPortrait = usePortrait();
   const [semitones, setSemitones] = useState(0);
@@ -162,7 +162,7 @@ export default function SongDetailPage() {
                 </div>
                 {song.tempo != null && (
                   <button
-                    onClick={() => { setBpm(song.tempo!); setIsPlaying(true); }}
+                    onClick={() => { if (isPlaying && bpm === song.tempo) { setIsPlaying(false); } else { setBpm(song.tempo!); setIsPlaying(true); } }}
                     className="text-left text-xs text-gray-400 hover:text-indigo-500 transition-colors"
                   >
                     {song.tempo} BPM

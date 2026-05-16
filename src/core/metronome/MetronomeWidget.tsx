@@ -61,9 +61,9 @@ export default function Metronome() {
           open ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
         }`}
       >
-        {isPlaying && (
-          <span className={`inline-block w-2 h-2 rounded-full bg-indigo-500 ${activeBeat === 0 ? 'opacity-100' : 'opacity-40'} transition-opacity duration-75`} />
-        )}
+        <span className={`inline-block w-2 h-2 rounded-full bg-indigo-500 transition-opacity duration-75 ${
+          isPlaying ? (activeBeat === 0 ? 'opacity-100' : 'opacity-40') : 'opacity-0'
+        }`} />
         <span>♩ {bpm}</span>
       </button>
 
