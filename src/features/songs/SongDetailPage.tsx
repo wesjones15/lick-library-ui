@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getSong, getChordVoicings } from '../../core/api/client';
 import ChordUploadModal from '../chords/ChordUploadModal';
@@ -81,7 +81,12 @@ export default function SongDetailPage() {
   const [chordVoicingIdx, setChordVoicingIdx] = useState<Record<string, number>>({});
   const [uploadChord, setUploadChord] = useState<string | null>(null);
   const [autoScrolling, setAutoScrolling] = useState(false);
+  const [overflowOpen, setOverflowOpen] = useState(false);
+  const [capTranspOpen, setCapTranspOpen] = useState(false);
+  const [scrollFontScale, setScrollFontScale] = useState<number | null>(null);
   const loadedSongIdRef = useRef<string | null>(null);
+  const overflowRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -124,6 +129,17 @@ export default function SongDetailPage() {
   }, [song, semitones, capo]);
 
   useEffect(() => {
+    if (!overflowOpen) return;
+    function handle(e: MouseEvent) {
+      if (overflowRef.current && !overflowRef.current.contains(e.target as Node)) {
+        setOverflowOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, [overflowOpen]);
+
+  useEffect(() => {
     if (!showChords || !song) return;
     const names = extractChordNames(song);
     Promise.all(
@@ -138,6 +154,22 @@ export default function SongDetailPage() {
       setChordVoicingIdx({});
     });
   }, [showChords, song]);
+
+  const baseFontScale = isPortrait ? 1.5 : 2;
+  const effectiveFontScale = viewMode === 'scroll' ? (scrollFontScale ?? baseFontScale) : undefined;
+
+  useEffect(() => {
+    setScrollFontScale(null);
+  }, [song?.id, viewMode, isPortrait]);
+
+  useLayoutEffect(() => {
+    if (viewMode !== 'scroll' || !scrollContainerRef.current) return;
+    const el = scrollContainerRef.current;
+    if (el.scrollWidth > el.clientWidth + 1) {
+      const ratio = el.clientWidth / el.scrollWidth;
+      setScrollFontScale(prev => (prev ?? baseFontScale) * ratio);
+    }
+  }, [viewMode, song, semitones, capo, isPortrait, scrollFontScale]);
 
   const btnClass = "w-8 h-8 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-lg font-medium";
   const stubBtnClass = (active: boolean) =>
@@ -174,55 +206,102 @@ export default function SongDetailPage() {
             {/* Right: action buttons + capo/transpose */}
             <div className="flex items-center gap-2 md:gap-4">
 
-              {/* Desktop-only: View, Show Chords, Manage */}
+              {/* Desktop (md+): named text buttons */}
               <button
                 onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
-                className={`hidden sm:flex ${stubBtnClass(viewMode === 'scroll')} flex-col items-center w-14`}
+                className={`hidden md:flex ${stubBtnClass(viewMode === 'scroll')} flex-col items-center w-14`}
               >
                 <span style={{ fontSize: '9px' }}>view:</span>
                 <span style={{ fontSize: '9px' }}>{viewMode === 'scroll' ? 'scroll' : 'columns'}</span>
               </button>
               <button
                 onClick={() => setShowChords(v => !v)}
-                className={`hidden sm:block ${stubBtnClass(showChords)}`}
+                className={`hidden md:block ${stubBtnClass(showChords)}`}
               >
                 Show Chords
               </button>
               <button
                 onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-                className="hidden sm:block text-gray-300 hover:text-indigo-500 transition-colors text-4xl leading-none"
+                className="hidden md:block text-gray-300 hover:text-indigo-500 transition-colors text-4xl leading-none"
                 aria-label="Manage song"
               >
                 ✎
               </button>
 
-              {/* Mobile icon buttons */}
-              <button
-                onClick={() => setShowChords(v => !v)}
-                className={`sm:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-base transition-colors ${showChords ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
-                aria-label="Show chords"
-                title="Show chords"
-              >
-                ♬
-              </button>
+              {/* Landscape (sm–md): icon buttons */}
               <button
                 onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
-                className={`sm:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-xs transition-colors ${viewMode === 'scroll' ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs transition-colors ${viewMode === 'scroll' ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
                 aria-label="Toggle view"
                 title={viewMode === 'scroll' ? 'Switch to columns' : 'Switch to scroll'}
               >
                 {viewMode === 'scroll' ? '↕' : '⊞'}
               </button>
               <button
+                onClick={() => setShowChords(v => !v)}
+                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${showChords ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+                aria-label="Show chords"
+                title="Show chords"
+              >
+                ♬
+              </button>
+              <button
                 onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-                className="sm:hidden text-gray-300 hover:text-indigo-500 transition-colors text-3xl leading-none"
+                className="hidden sm:block md:hidden text-gray-300 hover:text-indigo-500 transition-colors text-3xl leading-none"
                 aria-label="Manage song"
               >
                 ✎
               </button>
 
-              {/* Capo group */}
-              <div className="flex flex-col items-center gap-1">
+              {/* Portrait (<sm): hamburger ⋮ */}
+              <div ref={overflowRef} className="relative sm:hidden">
+                <button
+                  onClick={() => setOverflowOpen(o => !o)}
+                  className="w-8 h-8 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 flex items-center justify-center text-xl leading-none"
+                  aria-label="More options"
+                >
+                  ⋮
+                </button>
+                {overflowOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-50 flex flex-col py-1">
+                    <button
+                      onClick={() => { setViewMode(m => m === 'columns' ? 'scroll' : 'columns'); setOverflowOpen(false); }}
+                      className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
+                    >
+                      View: {viewMode === 'scroll' ? 'columns' : 'scroll'}
+                    </button>
+                    <button
+                      onClick={() => { setShowChords(v => !v); setOverflowOpen(false); }}
+                      className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
+                    >
+                      {showChords ? 'Hide Chords' : 'Show Chords'}
+                    </button>
+                    <button
+                      onClick={() => { navigate(`/song/${id}/manage?semitones=${semitones}`); setOverflowOpen(false); }}
+                      className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
+                    >
+                      Manage
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Δ — mobile capo/transpose modal trigger (below md) */}
+              <button
+                onClick={() => setCapTranspOpen(true)}
+                className={`md:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-base transition-colors ${
+                  (capo !== (song?.capo ?? 0) || semitones !== 0)
+                    ? 'border-indigo-300 bg-indigo-50 text-indigo-600'
+                    : 'border-gray-200 text-gray-400 hover:text-gray-600'
+                }`}
+                aria-label="Capo & Transpose"
+                title="Capo & Transpose"
+              >
+                Δ
+              </button>
+
+              {/* Desktop inline capo (md+) */}
+              <div className="hidden md:flex flex-col items-center gap-1">
                 <span className="text-xs text-gray-400">Capo</span>
                 <div className="flex items-center gap-2">
                   <button onClick={() => setCapo(c => Math.max(0, c - 1))} className={btnClass}>−</button>
@@ -239,43 +318,40 @@ export default function SongDetailPage() {
                 </button>
               </div>
 
-              {/* Divider */}
-              <div className="self-stretch border-l border-gray-200" />
+              {/* Divider (md+) */}
+              <div className="hidden md:block self-stretch border-l border-gray-200" />
 
-                {/* Transpose group */}
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-xs text-gray-400">Transpose</span>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => setSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={btnClass}>−</button>
-
-                    {/* Dual key display */}
-                    <div className="flex gap-3 items-center">
-                      <div className="flex flex-col items-center w-10">
-                        <span className="text-base font-semibold text-gray-900">
-                          {keyLabel(song.originalKey, semitones - (song.capo ?? 0))}
-                        </span>
-                        <span className="text-xs text-gray-400">shape</span>
-                      </div>
-                      <span className="text-xs text-gray-300">
-                        {semitones > 0 ? `+${semitones}` : `${semitones}`}
+              {/* Desktop inline transpose (md+) */}
+              <div className="hidden md:flex flex-col items-center gap-1">
+                <span className="text-xs text-gray-400">Transpose</span>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={btnClass}>−</button>
+                  <div className="flex gap-3 items-center">
+                    <div className="flex flex-col items-center w-10">
+                      <span className="text-base font-semibold text-gray-900">
+                        {keyLabel(song.originalKey, semitones - (song.capo ?? 0))}
                       </span>
-                      <div className="flex flex-col items-center w-10">
-                        <span className="text-base font-semibold text-gray-900">
-                          {keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0))}
-                        </span>
-                        <span className="text-xs text-gray-400">sound</span>
-                      </div>
+                      <span className="text-xs text-gray-400">shape</span>
                     </div>
-
-                    <button onClick={() => setSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={btnClass}>+</button>
+                    <span className="text-xs text-gray-300">
+                      {semitones > 0 ? `+${semitones}` : `${semitones}`}
+                    </span>
+                    <div className="flex flex-col items-center w-10">
+                      <span className="text-base font-semibold text-gray-900">
+                        {keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0))}
+                      </span>
+                      <span className="text-xs text-gray-400">sound</span>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => setSemitones(0)}
-                    className={`text-xs text-center transition-colors ${semitones !== 0 ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
-                  >
-                    reset
-                  </button>
+                  <button onClick={() => setSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={btnClass}>+</button>
                 </div>
+                <button
+                  onClick={() => setSemitones(0)}
+                  className={`text-xs text-center transition-colors ${semitones !== 0 ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+                >
+                  reset
+                </button>
+              </div>
 
             </div>
           </div>
@@ -294,16 +370,76 @@ export default function SongDetailPage() {
 
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-          <div className={viewMode === 'scroll' ? 'max-w-2xl mx-auto mt-8 overflow-x-auto' : 'overflow-hidden'}>
-            <div className={viewMode === 'scroll' ? 'min-w-max' : ''}>
-              <ChordSheet
-                chordLines={song.chordLines}
-                numColumns={viewMode === 'scroll' ? 1 : song.numColumns}
-                fontScale={viewMode === 'scroll' ? (isPortrait ? 1.5 : 2) : undefined}
-                className={loading ? 'opacity-50 transition-opacity duration-150' : 'transition-opacity duration-150'}
-              />
-            </div>
+          <div ref={scrollContainerRef} className={viewMode === 'scroll' ? 'max-w-2xl mx-auto mt-8 overflow-x-hidden' : 'overflow-hidden'}>
+            <ChordSheet
+              chordLines={song.chordLines}
+              numColumns={viewMode === 'scroll' ? 1 : song.numColumns}
+              fontScale={effectiveFontScale}
+              className={loading ? 'opacity-50 transition-opacity duration-150' : 'transition-opacity duration-150'}
+            />
           </div>
+
+          {capTranspOpen && (
+            <div
+              className="fixed inset-0 z-50 flex items-end justify-center bg-black/30"
+              onClick={() => setCapTranspOpen(false)}
+            >
+              <div
+                className="bg-white rounded-t-xl shadow-xl p-6 w-full max-w-sm flex flex-col gap-6"
+                onClick={e => e.stopPropagation()}
+              >
+                {/* Capo */}
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-xs text-gray-400">Capo</span>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setCapo(c => Math.max(0, c - 1))} className={btnClass}>−</button>
+                    <div className="flex items-center justify-center w-8">
+                      <span className="text-base font-semibold text-gray-900">{capo}</span>
+                    </div>
+                    <button onClick={() => setCapo(c => Math.min(11, c + 1))} className={btnClass}>+</button>
+                  </div>
+                  <button
+                    onClick={() => setCapo(song?.capo ?? 0)}
+                    className={`text-xs text-center transition-colors ${capo !== (song?.capo ?? 0) ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+                  >
+                    reset
+                  </button>
+                </div>
+                <div className="border-t border-gray-100" />
+                {/* Transpose */}
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-xs text-gray-400">Transpose</span>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={btnClass}>−</button>
+                    <div className="flex gap-3 items-center">
+                      <div className="flex flex-col items-center w-10">
+                        <span className="text-base font-semibold text-gray-900">
+                          {keyLabel(song?.originalKey ?? null, semitones - (song?.capo ?? 0))}
+                        </span>
+                        <span className="text-xs text-gray-400">shape</span>
+                      </div>
+                      <span className="text-xs text-gray-300">
+                        {semitones > 0 ? `+${semitones}` : `${semitones}`}
+                      </span>
+                      <div className="flex flex-col items-center w-10">
+                        <span className="text-base font-semibold text-gray-900">
+                          {keyLabel(song?.originalKey ?? null, semitones + capo - (song?.capo ?? 0))}
+                        </span>
+                        <span className="text-xs text-gray-400">sound</span>
+                      </div>
+                    </div>
+                    <button onClick={() => setSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={btnClass}>+</button>
+                  </div>
+                  <button
+                    onClick={() => setSemitones(0)}
+                    className={`text-xs text-center transition-colors ${semitones !== 0 ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+                  >
+                    reset
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {showChords && (
             <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg">

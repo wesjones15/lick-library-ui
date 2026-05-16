@@ -189,7 +189,7 @@ export default function ChordSheet({ chordLines, numColumns, className, fontScal
   return (
     <div className={`flex gap-6 font-mono ${className ?? ''}`}>
       {columns.map((col, ci) => (
-        <div key={ci} className="flex-1 flex flex-col">
+        <div key={ci} className={`${numColumns === 1 ? 'w-max' : 'flex-1'} flex flex-col`}>
           {col.map((line, li) => {
             if (isTabBlock(line)) {
               return (
