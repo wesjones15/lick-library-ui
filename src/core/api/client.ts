@@ -142,8 +142,8 @@ export async function deleteSong(id: string): Promise<void> {
 }
 
 export async function updateSong(id: string, request: UpdateSongRequest): Promise<SongDetail> {
-  const res = await fetch(`${BASE_URL}/song/${id}`, {
-    method: 'PUT',
+  const res = await fetch(`${BASE_URL}/song/${id}/update`, {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
   });
