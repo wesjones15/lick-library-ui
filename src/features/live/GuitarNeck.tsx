@@ -1,6 +1,7 @@
 export interface NeckDot {
   degree: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null;
   active: boolean;
+  note?: string; // display label, e.g. "C#", "Bb"
 }
 
 interface GuitarNeckProps {
@@ -8,6 +9,7 @@ interface GuitarNeckProps {
   dots: NeckDot[][];
   fretCount?: number;
   width?: number | string;
+  onDotClick?: (stringIndex: number, fret: number) => void;
 }
 
 const DEGREE_COLORS: Record<number, string> = {
@@ -40,7 +42,7 @@ const R_RING = 13;
 
 const STRING_WEIGHTS = [0.5, 0.75, 1.0, 1.35, 1.75, 2.2]; // high e → low E
 
-export default function GuitarNeck({ dots, fretCount = 12, width = '100%' }: GuitarNeckProps) {
+export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDotClick }: GuitarNeckProps) {
   const vbW = LABEL_W + OPEN_W + NUT_W + fretCount * FRET_W;
   const vbH = TOP_PAD + (STRING_COUNT - 1) * STR_H + BOT_PAD;
 
@@ -173,12 +175,34 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%' }: Gui
           }
 
           const color = DEGREE_COLORS[dot.degree];
+          const label = dot.note ?? '';
+          const textFill = dot.active ? '#111827' : '#9ca3af';
+          const fontSize = label.length > 1 ? 5.5 : 7;
+          const si = dataIdx(di);
           return (
-            <g key={`d${di}-${fret}`}>
+            <g
+              key={`d${di}-${fret}`}
+              onClick={onDotClick ? () => onDotClick(si, fret) : undefined}
+              style={onDotClick ? { cursor: 'pointer' } : undefined}
+            >
               {dot.active && (
                 <circle cx={cx} cy={cy} r={R_RING} fill={ACTIVE_RING_COLOR} />
               )}
+              {/* white backing makes dot opaque over the string line */}
+              <circle cx={cx} cy={cy} r={R_NORMAL} fill="#ffffff" />
               <circle cx={cx} cy={cy} r={R_NORMAL} fill={color} opacity={dot.active ? 1 : 0.4} />
+              <text
+                x={cx}
+                y={cy + fontSize * 0.38}
+                textAnchor="middle"
+                fontSize={fontSize}
+                fill={textFill}
+                fontFamily="sans-serif"
+                fontWeight="600"
+                style={{ pointerEvents: 'none', userSelect: 'none' }}
+              >
+                {label}
+              </text>
             </g>
           );
         });

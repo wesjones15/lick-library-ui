@@ -218,3 +218,15 @@ export async function uploadChordVoicing(request: UploadChordRequest): Promise<v
     throw new Error(text || 'Upload failed');
   }
 }
+
+// --- Scale ---
+
+export interface ScalePosition { string: number; fret: number; degree: number; note: string; }
+export interface ScaleResponse { root: string; mode: string; positions: ScalePosition[]; }
+
+export async function getScalePositions(root: string, mode: string): Promise<ScaleResponse> {
+  const params = new URLSearchParams({ root, mode });
+  const res = await fetch(`${BASE_URL}/scale?${params}`);
+  if (!res.ok) throw new Error('Failed to fetch scale');
+  return res.json();
+}
