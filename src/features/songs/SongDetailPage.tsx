@@ -139,7 +139,7 @@ export default function SongDetailPage() {
 
               {/* ✎ manage */}
               <button
-                onClick={() => navigate(`/song/${id}/manage`)}
+                onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
                 className="text-gray-300 hover:text-indigo-500 transition-colors text-4xl leading-none"
                 aria-label="Manage song"
               >

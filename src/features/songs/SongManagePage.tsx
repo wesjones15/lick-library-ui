@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getSong, updateSong, deleteSong } from '../../core/api/client';
-import type { SongDetail } from '../../core/api/client';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { getSong, updateSong, deleteSong, getChordVoicings } from '../../core/api/client';
+import type { SongDetail, ChordVoicing } from '../../core/api/client';
+import ChordDiagram from '../chords/ChordDiagram';
+import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
 
 const INPUT_KEYS = [
@@ -23,9 +25,26 @@ const INPUT_KEYS = [
 const inputClass = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400';
 const btnSecondary = 'px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors';
 
+function extractChordNames(song: SongDetail): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  song.chordLines.forEach(line => {
+    line.chords.split(/\s+/).forEach(t => {
+      const core = t.replace(/^\(+/, '').replace(/[)*]+$/, '');
+      if (/^[A-G]/.test(core) && !seen.has(core)) {
+        seen.add(core);
+        result.push(core);
+      }
+    });
+  });
+  return result;
+}
+
 export default function SongManagePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const semitones = parseInt(searchParams.get('semitones') ?? '0', 10);
 
   const [song, setSong] = useState<SongDetail | null>(null);
   const [mode, setMode] = useState<'metadata' | 'chart' | 'chords'>('metadata');
@@ -39,6 +58,10 @@ export default function SongManagePage() {
   // Chart field
   const [rawChordSheet, setRawChordSheet] = useState('');
 
+  // Chord voicings
+  const [chordVoicings, setChordVoicings] = useState<Record<string, ChordVoicing[]>>({});
+  const [chordVoicingIdx, setChordVoicingIdx] = useState<Record<string, number>>({});
+
   // UI state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedChord, setSelectedChord] = useState<string | null>(null);
@@ -47,7 +70,7 @@ export default function SongManagePage() {
 
   useEffect(() => {
     if (!id) return;
-    getSong(id).then(s => {
+    getSong(id, semitones).then(s => {
       setSong(s);
       setTitle(s.title);
       setArtist(s.artist ?? '');
@@ -57,6 +80,22 @@ export default function SongManagePage() {
     });
   }, [id]);
 
+  useEffect(() => {
+    if (mode !== 'chords' || !song) return;
+    const names = extractChordNames(song);
+    Promise.all(
+      names.map(async name => {
+        const parsed = parseChordName(name);
+        if (!parsed) return [name, []] as [string, ChordVoicing[]];
+        const voicings = await getChordVoicings(parsed.root, parsed.quality);
+        return [name, voicings] as [string, ChordVoicing[]];
+      })
+    ).then(results => {
+      setChordVoicings(Object.fromEntries(results));
+      setChordVoicingIdx({});
+    });
+  }, [mode, song]);
+
   const metadataIsDirty = song && (
     title !== song.title ||
     artist !== (song.artist ?? '') ||
@@ -65,12 +104,6 @@ export default function SongManagePage() {
   );
 
   const chartIsDirty = song && rawChordSheet !== (song.rawChordSheet ?? '');
-
-  const uniqueChords = song ? [...new Set(
-    song.chordLines
-      .flatMap(l => l.chords.trim().split(/\s+/))
-      .filter(c => c && /^[A-G]/.test(c))
-  )].sort() : [];
 
   const handleMetadataSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,7 +153,7 @@ export default function SongManagePage() {
   if (!song) return <div className="px-6 pt-8 text-sm text-gray-400">Loading…</div>;
 
   return (
-    <div className="max-w-lg mx-auto px-6 py-8">
+    <div className={`mx-auto px-6 py-8 ${mode === 'chords' ? 'max-w-3xl' : 'max-w-lg'}`}>
       {/* Breadcrumb */}
       <Link to={`/song/${id}`} className="text-sm text-indigo-500 hover:text-indigo-700 mb-6 inline-block">
         ← {song.title}
@@ -240,22 +273,46 @@ export default function SongManagePage() {
           <button type="button" onClick={() => setMode('metadata')} className="text-sm text-indigo-500 hover:text-indigo-700 self-start">
             ← Back
           </button>
-          {uniqueChords.length === 0 ? (
+          {extractChordNames(song).length === 0 ? (
             <p className="text-sm text-gray-400">No chords detected in this song.</p>
           ) : (
-            <div className="flex flex-wrap gap-2">
-              {uniqueChords.map(chord => (
-                <button
-                  key={chord}
-                  onClick={() => setSelectedChord(chord)}
-                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-full text-gray-700 hover:border-indigo-400 hover:text-indigo-600 transition-colors font-mono"
-                >
-                  {chord}
-                </button>
-              ))}
+            <div className="grid grid-cols-6 gap-3">
+              {extractChordNames(song).map(name => {
+                const voicings = chordVoicings[name] ?? [];
+                const idx = chordVoicingIdx[name] ?? 0;
+                const frets = voicings.length > 0 ? voicings[idx].frets : [0, 0, 0, 0, 0, 0];
+                return (
+                  <div
+                    key={name}
+                    className="relative flex-shrink-0 flex flex-col items-center border border-gray-200 rounded-lg px-2 pt-2 pb-1 bg-white"
+                  >
+                    <span className="text-xs font-semibold text-gray-700 mb-1">{name}</span>
+                    <button
+                      title="Add voicing"
+                      onClick={() => setSelectedChord(name)}
+                      className="absolute top-1 right-2 text-gray-300 hover:text-indigo-500 text-xl leading-none"
+                    >
+                      +
+                    </button>
+                    <ChordDiagram frets={frets} width={90} />
+                    {voicings.length > 1 && (
+                      <div className="flex items-center justify-between w-full text-xs text-gray-400 mt-1">
+                        <button
+                          className="hover:text-gray-600 px-1 text-2xl leading-none"
+                          onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx - 1 + voicings.length) % voicings.length }))}
+                        >‹</button>
+                        <span>{idx + 1}/{voicings.length}</span>
+                        <button
+                          className="hover:text-gray-600 px-1 text-2xl leading-none"
+                          onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx + 1) % voicings.length }))}
+                        >›</button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
-          <p className="text-xs text-gray-400">Click a chord to add a voicing for it.</p>
         </div>
       )}
 
