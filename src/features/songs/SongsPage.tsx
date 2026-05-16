@@ -15,7 +15,7 @@ export default function SongsPage() {
   const [songs, setSongs] = useState<SongSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [reparsing, setReparsing] = useState(false);
+  const [managing, setManaging] = useState(false);
   const [sortBy, setSortBy] = useState<SortKey>('title');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [filterArtist, setFilterArtist] = useState('');
@@ -63,10 +63,10 @@ export default function SongsPage() {
         <h1 className="text-3xl font-bold text-gray-900">Songs</h1>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setReparsing(r => !r)}
-            className={`px-3 py-2 text-sm rounded-lg border transition-colors ${reparsing ? 'border-indigo-300 text-indigo-600 bg-indigo-50' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+            onClick={() => setManaging(m => !m)}
+            className={`px-3 py-2 text-sm rounded-lg border transition-colors ${managing ? 'border-indigo-300 text-indigo-600 bg-indigo-50' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
           >
-            Re-parse
+            Manage
           </button>
           <button
             onClick={() => navigate('/songs/upload')}
@@ -102,7 +102,7 @@ export default function SongsPage() {
       {error && <p className="text-red-500 text-sm">{error}</p>}
       {!loading && !error && (
         <>
-          <SongList songs={paginated} reparsing={reparsing} onReparse={fetchSongs} />
+          <SongList songs={paginated} managing={managing} onReparse={fetchSongs} />
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-4 mt-6 text-sm text-gray-500">
               <button
