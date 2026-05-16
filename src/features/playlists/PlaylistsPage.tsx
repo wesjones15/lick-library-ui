@@ -11,7 +11,8 @@ export default function PlaylistsPage() {
   const [newName, setNewName] = useState('');
   const [creating, setCreating] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [editNames, setEditNames] = useState<Record<string, string>>({});
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
+  const [nameInput, setNameInput] = useState('');
 
   useEffect(() => {
     getAllPlaylists().then(setPlaylists).catch(() => {});
@@ -38,21 +39,13 @@ export default function PlaylistsPage() {
     setConfirmDelete(null);
   }
 
-  async function handleExitManage() {
-    // Save any pending renames
-    const saves = Object.entries(editNames).map(async ([id, name]) => {
-      const trimmed = name.trim();
-      if (!trimmed) return;
-      const current = playlists.find(p => p.id === id);
-      if (current && trimmed !== current.name) {
-        const updated = await renamePlaylist(id, trimmed);
-        setPlaylists(prev => prev.map(p => p.id === id ? { ...p, name: updated.name } : p));
-      }
-    });
-    await Promise.all(saves);
-    setManaging(false);
-    setEditNames({});
-    setConfirmDelete(null);
+  async function handleSaveCardName(id: string) {
+    const trimmed = nameInput.trim();
+    if (trimmed && trimmed !== playlists.find(p => p.id === id)?.name) {
+      const updated = await renamePlaylist(id, trimmed);
+      setPlaylists(prev => prev.map(p => p.id === id ? { ...p, name: updated.name } : p));
+    }
+    setEditingCardId(null);
   }
 
   return (
@@ -62,7 +55,7 @@ export default function PlaylistsPage() {
         <div className="flex items-center gap-2">
           {managing ? (
             <button
-              onClick={handleExitManage}
+              onClick={() => { setManaging(false); setEditingCardId(null); setConfirmDelete(null); }}
               className="px-3 py-2 text-sm rounded-lg border border-indigo-300 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"
             >
               Done
@@ -90,45 +83,58 @@ export default function PlaylistsPage() {
         <p className="text-gray-400 text-sm">No playlists yet. Create one to get started.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {playlists.map(pl => {
-            const editName = editNames[pl.id] ?? pl.name;
-            return (
-              <div
-                key={pl.id}
-                className={`border border-gray-200 rounded-xl p-4 flex items-start justify-between transition-colors ${managing ? 'cursor-default' : 'hover:border-indigo-300 cursor-pointer group'}`}
-                onClick={managing ? undefined : () => navigate(`/playlist/${pl.id}`)}
-              >
-                <div className="flex-1 min-w-0 mr-3">
-                  {managing ? (
-                    <input
-                      type="text"
-                      value={editName}
-                      onChange={e => setEditNames(n => ({ ...n, [pl.id]: e.target.value }))}
-                      className="w-full text-sm font-semibold text-gray-900 border-b border-gray-300 focus:outline-none focus:border-indigo-400 bg-transparent pb-0.5"
-                      onClick={e => e.stopPropagation()}
-                    />
-                  ) : (
-                    <div className="font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors">{pl.name}</div>
-                  )}
-                  <div className="text-xs text-gray-400 mt-0.5">{pl.songCount} {pl.songCount === 1 ? 'song' : 'songs'}</div>
-                </div>
-
-                {managing && (
-                  confirmDelete === pl.id ? (
-                    <div className="flex gap-2 shrink-0" onClick={e => e.stopPropagation()}>
-                      <button onClick={() => handleDelete(pl.id)} className="text-xs px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600">Delete</button>
-                      <button onClick={() => setConfirmDelete(null)} className="text-xs px-2 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">Cancel</button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={e => { e.stopPropagation(); setConfirmDelete(pl.id); }}
-                      className="text-gray-300 hover:text-red-400 transition-colors text-xl ml-2 leading-none shrink-0"
-                    >×</button>
-                  )
+          {playlists.map(pl => (
+            <div
+              key={pl.id}
+              className={`border border-gray-200 rounded-xl p-4 flex items-start justify-between transition-colors ${managing ? 'cursor-default' : 'hover:border-indigo-300 cursor-pointer group'}`}
+              onClick={managing ? undefined : () => navigate(`/playlist/${pl.id}`)}
+            >
+              <div className="flex-1 min-w-0 mr-3">
+                {editingCardId === pl.id ? (
+                  <input
+                    autoFocus
+                    type="text"
+                    value={nameInput}
+                    onChange={e => setNameInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') handleSaveCardName(pl.id); if (e.key === 'Escape') setEditingCardId(null); }}
+                    onClick={e => e.stopPropagation()}
+                    className="w-full text-sm font-semibold text-gray-900 border-b border-indigo-400 focus:outline-none bg-transparent pb-0.5"
+                  />
+                ) : (
+                  <div className="font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors truncate">{pl.name}</div>
                 )}
+                <div className="text-xs text-gray-400 mt-0.5">{pl.songCount} {pl.songCount === 1 ? 'song' : 'songs'}</div>
               </div>
-            );
-          })}
+
+              {managing && (
+                editingCardId === pl.id ? (
+                  <button
+                    onClick={e => { e.stopPropagation(); handleSaveCardName(pl.id); }}
+                    className="text-indigo-500 hover:text-indigo-700 text-base leading-none shrink-0"
+                    title="Save"
+                  >💾</button>
+                ) : confirmDelete === pl.id ? (
+                  <div className="flex gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                    <button onClick={() => handleDelete(pl.id)} className="text-xs px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600">Delete</button>
+                    <button onClick={() => setConfirmDelete(null)} className="text-xs px-2 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">Cancel</button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-4 shrink-0" onClick={e => e.stopPropagation()}>
+                    <button
+                      onClick={() => { setEditingCardId(pl.id); setNameInput(pl.name); }}
+                      className="text-gray-400 hover:text-indigo-500 transition-colors leading-none"
+                      style={{ fontSize: '2.1875rem' }}
+                      title="Rename"
+                    >✎</button>
+                    <button
+                      onClick={() => setConfirmDelete(pl.id)}
+                      className="text-red-400 hover:text-red-600 transition-colors text-xl leading-none"
+                    >×</button>
+                  </div>
+                )
+              )}
+            </div>
+          ))}
         </div>
       )}
 

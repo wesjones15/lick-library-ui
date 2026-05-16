@@ -90,6 +90,7 @@ function AddSongsModal({
 }) {
   const [filter, setFilter] = useState('');
   const [pending, setPending] = useState<Record<string, 'adding' | 'removing'>>({});
+  const [recentlyAdded, setRecentlyAdded] = useState<Set<string>>(new Set());
 
   const inPlaylist = new Set(playlist.entries.map(e => e.songId));
 
@@ -111,6 +112,8 @@ function AddSongsModal({
       setPending(p => ({ ...p, [song.id]: 'adding' }));
       const updated = await addPlaylistEntry(playlist.id, song.id);
       onUpdate(updated);
+      setRecentlyAdded(s => new Set(s).add(song.id));
+      setTimeout(() => setRecentlyAdded(s => { const n = new Set(s); n.delete(song.id); return n; }), 2000);
     }
     setPending(p => { const n = { ...p }; delete n[song.id]; return n; });
   }
@@ -137,6 +140,7 @@ function AddSongsModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {visible.map(s => {
                 const isIn = inPlaylist.has(s.id);
+                const justAdded = recentlyAdded.has(s.id);
                 const busy = !!pending[s.id];
                 return (
                   <div
@@ -149,10 +153,10 @@ function AddSongsModal({
                     </div>
                     <button
                       onClick={() => handleToggle(s)}
-                      disabled={busy}
-                      className={`text-xl leading-none shrink-0 transition-colors ${busy ? 'opacity-40' : isIn ? 'text-red-400 hover:text-red-600' : 'text-gray-300 hover:text-green-500'}`}
+                      disabled={busy || justAdded}
+                      className={`text-xl leading-none shrink-0 transition-colors ${busy ? 'opacity-40' : justAdded ? 'text-green-500 cursor-default' : isIn ? 'text-red-400 hover:text-red-600' : 'text-gray-300 hover:text-green-500'}`}
                     >
-                      {isIn ? '×' : '+'}
+                      {justAdded ? '✓' : isIn ? '×' : '+'}
                     </button>
                   </div>
                 );
@@ -265,8 +269,7 @@ export default function PlaylistDetailPage() {
                 onKeyDown={e => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') setEditingName(false); }}
                 className="text-2xl font-bold text-gray-900 border-b-2 border-indigo-400 focus:outline-none bg-transparent"
               />
-              <button onClick={handleSaveName} className="text-indigo-500 hover:text-indigo-700 text-lg">✓</button>
-              <button onClick={() => setEditingName(false)} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
+              <button onClick={handleSaveName} className="text-indigo-500 hover:text-indigo-700 text-lg" title="Save name">💾</button>
             </div>
           ) : (
             <div className="flex items-center gap-2 mt-1">
