@@ -15,6 +15,8 @@ interface SongNavContextValue {
   setInfo: (info: SongNavInfo | null) => void;
   collapsed: boolean;
   setCollapsed: (v: boolean) => void;
+  showChords: boolean;
+  setShowChords: (v: boolean | ((prev: boolean) => boolean)) => void;
 }
 
 const SongNavContext = createContext<SongNavContextValue | null>(null);
@@ -22,8 +24,9 @@ const SongNavContext = createContext<SongNavContextValue | null>(null);
 export function SongNavProvider({ children }: { children: ReactNode }) {
   const [info, setInfo] = useState<SongNavInfo | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const [showChords, setShowChords] = useState(false);
   return (
-    <SongNavContext.Provider value={{ info, setInfo, collapsed, setCollapsed }}>
+    <SongNavContext.Provider value={{ info, setInfo, collapsed, setCollapsed, showChords, setShowChords }}>
       {children}
     </SongNavContext.Provider>
   );

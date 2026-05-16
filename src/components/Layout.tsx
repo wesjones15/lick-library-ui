@@ -24,7 +24,7 @@ const NAV_LINKS: { label: ReactNode; to: string }[] = [
 
 export default function Layout() {
   const { pathname } = useLocation();
-  const { info, collapsed, setCollapsed } = useSongNavContext();
+  const { info, collapsed, setCollapsed, showChords, setShowChords } = useSongNavContext();
   const { setBpm, setIsPlaying } = useMetronomeContext();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -51,7 +51,7 @@ export default function Layout() {
       <nav className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 z-50 flex items-center px-4 sm:px-6">
         {collapsed && info ? (
           /* Mini bar — shown when song view is collapsed */
-          <div className="flex items-center gap-3 w-full min-w-0">
+          <div className="flex-1 min-w-0 flex items-center gap-3">
             <div className="flex flex-col min-w-0">
               {info.artist && (
                 <span className="text-xs text-gray-400 truncate">
@@ -82,16 +82,23 @@ export default function Layout() {
                 <span className="text-xs text-gray-400">Capo {info.capo}</span>
               )}
             </div>
-            <div className="ml-auto flex items-center gap-2 shrink-0">
+            <div className="ml-auto flex items-center shrink-0">
+              <button
+                onClick={() => setShowChords(v => !v)}
+                className={`text-lg leading-none transition-colors ${showChords ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
+                aria-label="Show chords"
+                title="Show chords"
+              >
+                ♬
+              </button>
               <button
                 onClick={() => setCollapsed(false)}
-                className="text-gray-400 hover:text-indigo-500 transition-colors text-lg leading-none"
+                className="text-gray-400 hover:text-indigo-500 transition-colors text-xl leading-none ml-4"
                 aria-label="Restore full view"
                 title="Restore full view"
               >
-                ∨
+                ▼
               </button>
-              <Metronome />
             </div>
           </div>
         ) : (
@@ -153,22 +160,23 @@ export default function Layout() {
               })}
             </div>
 
-            <div className="ml-auto flex items-center gap-2">
-              {/* Collapse chevron — only on song detail pages */}
+            <div className="ml-auto flex items-center gap-3">
               {info && (
                 <button
                   onClick={() => setCollapsed(true)}
-                  className="text-gray-400 hover:text-indigo-500 transition-colors text-lg leading-none"
+                  className="text-gray-400 hover:text-indigo-500 transition-colors text-2xl leading-none"
                   aria-label="Collapse song view"
                   title="Collapse navbar"
                 >
-                  ^
+                  ▲
                 </button>
               )}
-              <Metronome />
             </div>
           </>
         )}
+        <div className="ml-6 shrink-0">
+          <Metronome />
+        </div>
       </nav>
       <main className="pt-14">
         <Outlet />

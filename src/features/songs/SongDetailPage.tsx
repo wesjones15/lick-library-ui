@@ -69,14 +69,13 @@ export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { setBpm, setIsPlaying } = useMetronomeContext();
-  const { setInfo, collapsed } = useSongNavContext();
+  const { setInfo, collapsed, showChords, setShowChords } = useSongNavContext();
   const isPortrait = usePortrait();
   const [semitones, setSemitones] = useState(0);
   const [capo, setCapo] = useState(0);
   const [song, setSong] = useState<SongDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showChords, setShowChords] = useState(false);
   const [viewMode, setViewMode] = useState<'columns' | 'scroll'>('columns');
   const [chordVoicings, setChordVoicings] = useState<Record<string, ChordVoicing[]>>({});
   const [chordVoicingIdx, setChordVoicingIdx] = useState<Record<string, number>>({});
@@ -178,20 +177,20 @@ export default function SongDetailPage() {
               {/* Desktop-only: View, Show Chords, Manage */}
               <button
                 onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
-                className={`hidden md:flex ${stubBtnClass(viewMode === 'scroll')} flex-col items-center w-14`}
+                className={`hidden sm:flex ${stubBtnClass(viewMode === 'scroll')} flex-col items-center w-14`}
               >
                 <span style={{ fontSize: '9px' }}>view:</span>
                 <span style={{ fontSize: '9px' }}>{viewMode === 'scroll' ? 'scroll' : 'columns'}</span>
               </button>
               <button
                 onClick={() => setShowChords(v => !v)}
-                className={`hidden md:block ${stubBtnClass(showChords)}`}
+                className={`hidden sm:block ${stubBtnClass(showChords)}`}
               >
                 Show Chords
               </button>
               <button
                 onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-                className="hidden md:block text-gray-300 hover:text-indigo-500 transition-colors text-4xl leading-none"
+                className="hidden sm:block text-gray-300 hover:text-indigo-500 transition-colors text-4xl leading-none"
                 aria-label="Manage song"
               >
                 ✎
@@ -200,7 +199,7 @@ export default function SongDetailPage() {
               {/* Mobile icon buttons */}
               <button
                 onClick={() => setShowChords(v => !v)}
-                className={`md:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-base transition-colors ${showChords ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+                className={`sm:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-base transition-colors ${showChords ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
                 aria-label="Show chords"
                 title="Show chords"
               >
@@ -208,7 +207,7 @@ export default function SongDetailPage() {
               </button>
               <button
                 onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
-                className={`md:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-xs transition-colors ${viewMode === 'scroll' ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+                className={`sm:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-xs transition-colors ${viewMode === 'scroll' ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
                 aria-label="Toggle view"
                 title={viewMode === 'scroll' ? 'Switch to columns' : 'Switch to scroll'}
               >
@@ -216,7 +215,7 @@ export default function SongDetailPage() {
               </button>
               <button
                 onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-                className="md:hidden text-gray-300 hover:text-indigo-500 transition-colors text-3xl leading-none"
+                className="sm:hidden text-gray-300 hover:text-indigo-500 transition-colors text-3xl leading-none"
                 aria-label="Manage song"
               >
                 ✎
@@ -296,12 +295,14 @@ export default function SongDetailPage() {
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
           <div className={viewMode === 'scroll' ? 'max-w-2xl mx-auto mt-8 overflow-x-auto' : 'overflow-hidden'}>
-            <ChordSheet
-              chordLines={song.chordLines}
-              numColumns={viewMode === 'scroll' ? 1 : song.numColumns}
-              fontScale={viewMode === 'scroll' ? (isPortrait ? 1.5 : 2) : undefined}
-              className={loading ? 'opacity-50 transition-opacity duration-150' : 'transition-opacity duration-150'}
-            />
+            <div className={viewMode === 'scroll' ? 'min-w-max' : ''}>
+              <ChordSheet
+                chordLines={song.chordLines}
+                numColumns={viewMode === 'scroll' ? 1 : song.numColumns}
+                fontScale={viewMode === 'scroll' ? (isPortrait ? 1.5 : 2) : undefined}
+                className={loading ? 'opacity-50 transition-opacity duration-150' : 'transition-opacity duration-150'}
+              />
+            </div>
           </div>
 
           {showChords && (
