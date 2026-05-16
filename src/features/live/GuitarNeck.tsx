@@ -13,7 +13,7 @@ interface GuitarNeckProps {
   onDotClick?: (stringIndex: number, fret: number) => void;
 }
 
-const DEGREE_COLORS: Record<number, string> = {
+export const DEGREE_COLORS: Record<number, string> = {
   1: '#ef4444',
   2: '#f97316',
   3: '#eab308',

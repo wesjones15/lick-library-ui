@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import GuitarNeck, { type NeckDot } from './GuitarNeck';
+import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
 import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
 
 const STRING_COUNT = 6;
 const FRET_COUNT = 12;
 const OPEN_MIDI = [40, 45, 50, 55, 59, 64]; // low E → high e
-const MAX_FRET_DISTANCE = 4;
 
 const NOTE_KEYS = [
   { value: 'C',       label: 'C'  },
@@ -32,6 +31,16 @@ const MODES = [
   { value: 'AEOLIAN',    label: 'Natural Minor (Aeolian)'  },
   { value: 'LOCRIAN',    label: 'Locrian'                 },
 ];
+
+const MODE_INTERVALS: Record<string, string[]> = {
+  IONIAN:     ['1', '2',  '3',  '4',  '5',  '6',  '7' ],
+  DORIAN:     ['1', '2',  'b3', '4',  '5',  '6',  'b7'],
+  PHRYGIAN:   ['1', 'b2', 'b3', '4',  '5',  'b6', 'b7'],
+  LYDIAN:     ['1', '2',  '3',  '#4', '5',  '6',  '7' ],
+  MIXOLYDIAN: ['1', '2',  '3',  '4',  '5',  '6',  'b7'],
+  AEOLIAN:    ['1', '2',  'b3', '4',  '5',  'b6', 'b7'],
+  LOCRIAN:    ['1', 'b2', 'b3', '4',  'b5', 'b6', 'b7'],
+};
 
 function formatNote(enumName: string): string {
   if (enumName === 'B_FLAT') return 'Bb';
@@ -65,7 +74,6 @@ interface CurrentNote { string: number; fret: number; degree: number; }
 export default function LivePage() {
   const [root, setRoot] = useState('C');
   const [mode, setMode] = useState('IONIAN');
-  // pure scale overlay — no active/candidate state
   const [scaleDots, setScaleDots] = useState<NeckDot[][]>(blankScaleDots);
   const [currentNote, setCurrentNote] = useState<CurrentNote | null>(null);
   const [listening, setListening] = useState(false);
@@ -92,28 +100,32 @@ export default function LivePage() {
     }).catch(() => {});
   }, [root, mode]);
 
-  // Derived dots: overlay active + candidate state onto the scale dots
-  const dots = useMemo<NeckDot[][]>(() => {
-    const candidateDegrees = currentNote
+  // Candidate degrees — lifted out so legend can use them too
+  const candidateDegrees = useMemo(() =>
+    currentNote
       ? new Set([
           wrapDegree(currentNote.degree - 2),
           wrapDegree(currentNote.degree - 1),
           wrapDegree(currentNote.degree + 1),
           wrapDegree(currentNote.degree + 2),
         ])
-      : new Set<number>();
+      : new Set<number>(),
+    [currentNote]
+  );
 
+  // Derived dots: overlay active + candidate state onto the scale dots
+  const dots = useMemo<NeckDot[][]>(() => {
     return scaleDots.map((row, s) =>
       row.map((dot, f) => {
         if (dot.degree === null) return dot;
         const isActive = currentNote?.string === s && currentNote?.fret === f;
         const isCandidate = !isActive
           && candidateDegrees.has(dot.degree)
-          && Math.abs(f - currentNote!.fret) <= MAX_FRET_DISTANCE;
+          && Math.hypot(f - currentNote!.fret, s - currentNote!.string) <= 4.0;
         return { ...dot, active: isActive, candidate: isCandidate };
       })
     );
-  }, [scaleDots, currentNote]);
+  }, [scaleDots, currentNote, candidateDegrees]);
 
   function selectNote(s: number, f: number, degree: number) {
     if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
@@ -144,9 +156,19 @@ export default function LivePage() {
     }
   }
 
+  const intervalLabels = MODE_INTERVALS[mode] ?? [];
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
-      <div className="flex items-center gap-4 mb-8 flex-wrap">
+      <style>{`
+        @keyframes legend-pulse {
+          0%, 100% { box-shadow: 0 0 0 1px #800020; }
+          50%       { box-shadow: 0 0 0 3px #800020; }
+        }
+        .legend-candidate { animation: legend-pulse 0.8s ease-in-out infinite; }
+      `}</style>
+
+      <div className="flex items-center gap-4 mb-4 flex-wrap">
         <h1 className="text-3xl font-bold text-gray-900">Live</h1>
         <select className={selectClass} value={root} onChange={e => { setRoot(e.target.value); }}>
           <option value="">— Key —</option>
@@ -170,6 +192,34 @@ export default function LivePage() {
         {listening && !micError && (
           <span className="text-sm text-green-600 animate-pulse">● Listening</span>
         )}
+      </div>
+
+      {/* Interval key legend */}
+      <div className="flex gap-2 items-center flex-wrap mb-6">
+        {intervalLabels.map((label, idx) => {
+          const degree = idx + 1;
+          const isActive   = currentNote?.degree === degree;
+          const isCandidate = candidateDegrees.has(degree);
+          return (
+            <div
+              key={degree}
+              className={isCandidate && !isActive ? 'legend-candidate' : undefined}
+              style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: DEGREE_COLORS[degree],
+                opacity: isActive || isCandidate ? 1 : 0.35,
+                border: isActive ? '2px solid #fef08a' : 'none',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: label.length > 1 ? 9 : 11,
+                fontWeight: 700,
+                color: isActive || isCandidate ? '#111827' : '#9ca3af',
+                flexShrink: 0,
+              }}
+            >
+              {label}
+            </div>
+          );
+        })}
       </div>
 
       {micError === 'NotAllowedError' && (
