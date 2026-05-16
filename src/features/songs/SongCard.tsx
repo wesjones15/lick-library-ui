@@ -7,6 +7,7 @@ interface Props {
   song: SongSummary;
   managing?: boolean;
   onReparse?: () => void;
+  onAddToPlaylist?: () => void;
 }
 
 function keyDisplay(key: string | null): string {
@@ -14,7 +15,7 @@ function keyDisplay(key: string | null): string {
   return key.replace('_SHARP', '#').replace('B_FLAT', 'Bb').replace('_FLAT', 'b').replace(/_/g, '');
 }
 
-export default function SongCard({ song, managing = false, onReparse }: Props) {
+export default function SongCard({ song, managing = false, onReparse, onAddToPlaylist }: Props) {
   const navigate = useNavigate();
   const [reparsed, setReparsed] = useState(false);
 
@@ -68,6 +69,16 @@ export default function SongCard({ song, managing = false, onReparse }: Props) {
           >
             ✎
           </button>
+          {onAddToPlaylist && (
+            <button
+              onClick={e => { e.stopPropagation(); onAddToPlaylist(); }}
+              title="add to playlist"
+              className="flex-1 flex items-center justify-center py-0.5 rounded-lg text-2xl leading-none text-gray-300 hover:text-indigo-500 hover:bg-indigo-50 transition-colors"
+              aria-label="Add to playlist"
+            >
+              ♪+
+            </button>
+          )}
         </div>
       ) : (
         <div className="flex items-center mt-auto pt-1 portrait:mt-0 portrait:pt-0 portrait:flex-col portrait:items-end portrait:gap-0.5">

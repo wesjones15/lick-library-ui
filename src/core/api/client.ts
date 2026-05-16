@@ -257,6 +257,16 @@ export async function getPlaylist(id: string): Promise<PlaylistDetail> {
   return res.json();
 }
 
+export async function renamePlaylist(id: string, name: string): Promise<PlaylistSummary> {
+  const res = await fetch(`${BASE_URL}/playlist/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+  if (!res.ok) throw new Error('Failed to rename playlist');
+  return res.json();
+}
+
 export async function deletePlaylist(id: string): Promise<void> {
   const res = await fetch(`${BASE_URL}/playlist/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete playlist');

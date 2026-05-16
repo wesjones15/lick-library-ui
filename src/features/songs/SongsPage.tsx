@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { getAllSongs } from '../../core/api/client';
 import type { SongSummary } from '../../core/api/client';
 import SongList from './SongList';
+import AddToPlaylistModal from '../playlists/AddToPlaylistModal';
 
 type SortKey = 'title' | 'artist' | 'key' | 'tempo';
-const PAGE_SIZE = 18;
+const PAGE_SIZE = 16;
 
 const sortBtnClass = (active: boolean) =>
   `px-2 py-1 text-xs rounded border transition-colors ${active ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
@@ -20,6 +21,8 @@ export default function SongsPage() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [filterArtist, setFilterArtist] = useState('');
   const [page, setPage] = useState(1);
+  const [showAll, setShowAll] = useState(false);
+  const [addToPlaylist, setAddToPlaylist] = useState<SongSummary | null>(null);
 
   const fetchSongs = async () => {
     try {
@@ -34,7 +37,7 @@ export default function SongsPage() {
   };
 
   useEffect(() => { fetchSongs(); }, []);
-  useEffect(() => { setPage(1); }, [sortBy, sortDir, filterArtist]);
+  useEffect(() => { setPage(1); setShowAll(false); }, [sortBy, sortDir, filterArtist]);
 
   function handleSort(key: SortKey) {
     if (key === sortBy) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -55,7 +58,7 @@ export default function SongsPage() {
     });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const paginated = showAll ? filtered : filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
@@ -102,27 +105,43 @@ export default function SongsPage() {
       {error && <p className="text-red-500 text-sm">{error}</p>}
       {!loading && !error && (
         <>
-          <SongList songs={paginated} managing={managing} onReparse={fetchSongs} />
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-4 mt-6 text-sm text-gray-500">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
+          {!showAll && totalPages > 1 && (
+            <div className="flex items-center justify-center gap-4 mb-4 text-sm text-gray-500">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                className="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 ← Prev
               </button>
               <span>{page} / {totalPages}</span>
-              <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                className="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 Next →
+              </button>
+              <button onClick={() => setShowAll(true)}
+                className="px-3 py-1 border border-gray-200 rounded-lg text-gray-400 hover:text-indigo-500 hover:border-indigo-300 transition-colors">
+                Show All
+              </button>
+            </div>
+          )}
+
+          <SongList songs={paginated} managing={managing} onReparse={fetchSongs} onAddToPlaylist={managing ? s => setAddToPlaylist(s) : undefined} />
+
+          {showAll && (
+            <div className="flex justify-center mt-6">
+              <button onClick={() => setShowAll(false)}
+                className="px-3 py-1 border border-gray-200 rounded-lg text-sm text-gray-400 hover:text-indigo-500 hover:border-indigo-300 transition-colors">
+                Show Less
               </button>
             </div>
           )}
         </>
+      )}
+
+      {addToPlaylist && (
+        <AddToPlaylistModal
+          songId={addToPlaylist.id}
+          songTitle={addToPlaylist.title}
+          onClose={() => setAddToPlaylist(null)}
+        />
       )}
     </div>
   );

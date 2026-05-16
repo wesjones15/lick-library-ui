@@ -1,6 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { getSong, getChordVoicings, updatePlaylistEntry } from '../../core/api/client';
+import AddToPlaylistModal from '../playlists/AddToPlaylistModal';
 import ChordUploadModal from '../chords/ChordUploadModal';
 import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/client';
 import ChordSheet from './ChordSheet';
@@ -100,6 +101,7 @@ export default function SongDetailPage() {
   const [autoScrolling, setAutoScrolling] = useState(false);
   const [overflowOpen, setOverflowOpen] = useState(false);
   const [capTranspOpen, setCapTranspOpen] = useState(false);
+  const [addToPlaylistOpen, setAddToPlaylistOpen] = useState(false);
   const [scrollFontScale, setScrollFontScale] = useState<number | null>(null);
   const loadedSongIdRef = useRef<string | null>(null);
   const overflowRef = useRef<HTMLDivElement>(null);
@@ -309,6 +311,14 @@ export default function SongDetailPage() {
                 Show Chords
               </button>
               <button
+                onClick={() => setAddToPlaylistOpen(true)}
+                className="hidden md:block text-gray-300 hover:text-indigo-500 transition-colors text-xl leading-none"
+                aria-label="Add to playlist"
+                title="Add to playlist"
+              >
+                ♪+
+              </button>
+              <button
                 onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
                 className="hidden md:block text-gray-300 hover:text-indigo-500 transition-colors text-4xl leading-none"
                 aria-label="Manage song"
@@ -332,6 +342,14 @@ export default function SongDetailPage() {
                 title="Show chords"
               >
                 ♬
+              </button>
+              <button
+                onClick={() => setAddToPlaylistOpen(true)}
+                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors border-gray-200 text-gray-400 hover:text-indigo-500 hover:border-indigo-300`}
+                aria-label="Add to playlist"
+                title="Add to playlist"
+              >
+                ♪+
               </button>
               <button
                 onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
@@ -363,6 +381,12 @@ export default function SongDetailPage() {
                       className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
                     >
                       {showChords ? 'Hide Chords' : 'Show Chords'}
+                    </button>
+                    <button
+                      onClick={() => { setAddToPlaylistOpen(true); setOverflowOpen(false); }}
+                      className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
+                    >
+                      Add to playlist
                     </button>
                     <button
                       onClick={() => { navigate(`/song/${id}/manage?semitones=${semitones}`); setOverflowOpen(false); }}
@@ -583,6 +607,14 @@ export default function SongDetailPage() {
             setUploadChord(null);
             setChordVoicings(s => { const n = { ...s }; delete n[name]; return n; });
           }}
+        />
+      )}
+
+      {addToPlaylistOpen && song && (
+        <AddToPlaylistModal
+          songId={id!}
+          songTitle={song.title}
+          onClose={() => setAddToPlaylistOpen(false)}
         />
       )}
     </div>

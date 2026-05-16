@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   getPlaylist, deletePlaylist, addPlaylistEntry,
-  removePlaylistEntry, updatePlaylistEntry, clearPlaylistEntryOverrides,
+  removePlaylistEntry, updatePlaylistEntry, renamePlaylist,
   getAllSongs,
 } from '../../core/api/client';
 import type { PlaylistDetail, PlaylistEntry, SongSummary } from '../../core/api/client';
@@ -41,12 +41,7 @@ function EntryOverrideEditor({ entry, songs, onSave, onClose }: EntryOverrideEdi
   return (
     <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm" onClick={e => e.stopPropagation()}>
       <label className="flex items-center gap-2 mb-3 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={hasOverride}
-          onChange={e => setHasOverride(e.target.checked)}
-          className="rounded"
-        />
+        <input type="checkbox" checked={hasOverride} onChange={e => setHasOverride(e.target.checked)} className="rounded" />
         <span className="text-gray-600">Custom key/capo for this playlist</span>
       </label>
       {hasOverride && (
@@ -74,11 +69,97 @@ function EntryOverrideEditor({ entry, songs, onSave, onClose }: EntryOverrideEdi
         </div>
       )}
       <div className="flex gap-2">
-        <button
-          onClick={() => onSave(hasOverride ? semitones : null, hasOverride ? capo : null)}
-          className="px-3 py-1 rounded bg-indigo-600 text-white text-xs hover:bg-indigo-700"
-        >Save</button>
+        <button onClick={() => onSave(hasOverride ? semitones : null, hasOverride ? capo : null)}
+          className="px-3 py-1 rounded bg-indigo-600 text-white text-xs hover:bg-indigo-700">Save</button>
         <button onClick={onClose} className="px-3 py-1 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50">Cancel</button>
+      </div>
+    </div>
+  );
+}
+
+function AddSongsModal({
+  playlist,
+  allSongs,
+  onClose,
+  onUpdate,
+}: {
+  playlist: PlaylistDetail;
+  allSongs: SongSummary[];
+  onClose: () => void;
+  onUpdate: (updated: PlaylistDetail) => void;
+}) {
+  const [filter, setFilter] = useState('');
+  const [pending, setPending] = useState<Record<string, 'adding' | 'removing'>>({});
+
+  const inPlaylist = new Set(playlist.entries.map(e => e.songId));
+
+  const visible = allSongs.filter(s =>
+    s.title.toLowerCase().includes(filter.toLowerCase()) ||
+    (s.artist ?? '').toLowerCase().includes(filter.toLowerCase())
+  );
+
+  async function handleToggle(song: SongSummary) {
+    if (pending[song.id]) return;
+    if (inPlaylist.has(song.id)) {
+      setPending(p => ({ ...p, [song.id]: 'removing' }));
+      const entry = playlist.entries.find(e => e.songId === song.id);
+      if (entry) {
+        const updated = await removePlaylistEntry(playlist.id, entry.entryId);
+        onUpdate(updated);
+      }
+    } else {
+      setPending(p => ({ ...p, [song.id]: 'adding' }));
+      const updated = await addPlaylistEntry(playlist.id, song.id);
+      onUpdate(updated);
+    }
+    setPending(p => { const n = { ...p }; delete n[song.id]; return n; });
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-xl p-5 w-full max-w-lg mx-4 flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-3">
+          <span className="font-semibold text-gray-900">Add Songs</span>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+        </div>
+        <input
+          autoFocus
+          type="text"
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+          placeholder="Search songs…"
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 mb-3"
+        />
+        <div className="overflow-y-auto flex-1">
+          {visible.length === 0 ? (
+            <p className="text-xs text-gray-400 text-center py-6">No songs found</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {visible.map(s => {
+                const isIn = inPlaylist.has(s.id);
+                const busy = !!pending[s.id];
+                return (
+                  <div
+                    key={s.id}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-colors ${isIn ? 'border-indigo-200 bg-indigo-50' : 'border-gray-100 hover:bg-gray-50'}`}
+                  >
+                    <div className="min-w-0 mr-2">
+                      <div className="text-sm font-medium text-gray-900 truncate">{s.title}</div>
+                      {s.artist && <div className="text-xs text-gray-400 truncate">{s.artist}</div>}
+                    </div>
+                    <button
+                      onClick={() => handleToggle(s)}
+                      disabled={busy}
+                      className={`text-xl leading-none shrink-0 transition-colors ${busy ? 'opacity-40' : isIn ? 'text-red-400 hover:text-red-600' : 'text-gray-300 hover:text-green-500'}`}
+                    >
+                      {isIn ? '×' : '+'}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -89,11 +170,13 @@ export default function PlaylistDetailPage() {
   const navigate = useNavigate();
   const [playlist, setPlaylist] = useState<PlaylistDetail | null>(null);
   const [allSongs, setAllSongs] = useState<SongSummary[]>([]);
+  const [managing, setManaging] = useState(false);
+  const [showAddSongs, setShowAddSongs] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   const [editingEntry, setEditingEntry] = useState<string | null>(null);
-  const [showAddSong, setShowAddSong] = useState(false);
-  const [songSearch, setSongSearch] = useState('');
 
   useEffect(() => {
     if (!id) return;
@@ -104,6 +187,26 @@ export default function PlaylistDetailPage() {
   if (!playlist) return <div className="max-w-3xl mx-auto px-6 py-10 text-gray-400 text-sm">Loading…</div>;
 
   const entries = playlist.entries;
+
+  function toggleManage() {
+    if (managing) {
+      setManaging(false);
+      setEditingName(false);
+      setConfirmDelete(false);
+      setConfirmRemove(null);
+      setEditingEntry(null);
+    } else {
+      setManaging(true);
+    }
+  }
+
+  async function handleSaveName() {
+    const trimmed = nameInput.trim();
+    if (!trimmed || trimmed === playlist!.name) { setEditingName(false); return; }
+    const updated = await renamePlaylist(playlist!.id, trimmed);
+    setPlaylist(p => p ? { ...p, name: updated.name } : p);
+    setEditingName(false);
+  }
 
   async function handleDeletePlaylist() {
     await deletePlaylist(playlist!.id);
@@ -128,13 +231,6 @@ export default function PlaylistDetailPage() {
     setEditingEntry(null);
   }
 
-  async function handleAddSong(songId: string) {
-    const updated = await addPlaylistEntry(playlist!.id, songId, null, null);
-    setPlaylist(updated);
-    setShowAddSong(false);
-    setSongSearch('');
-  }
-
   function handleOpenSong(index: number) {
     const entry = entries[index];
     navigate(`/song/${entry.songId}`, {
@@ -153,62 +249,93 @@ export default function PlaylistDetailPage() {
     });
   }
 
-  const alreadyInPlaylist = new Set(entries.map(e => e.songId));
-  const filteredSongs = allSongs.filter(s =>
-    !alreadyInPlaylist.has(s.id) &&
-    (s.title.toLowerCase().includes(songSearch.toLowerCase()) ||
-      (s.artist ?? '').toLowerCase().includes(songSearch.toLowerCase()))
-  );
-
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
+      <div className="flex items-start justify-between mb-6 gap-3">
+        <div className="min-w-0 flex-1">
           <Link to="/playlists" className="text-xs text-gray-400 hover:text-indigo-500 transition-colors">← Playlists</Link>
-          <h1 className="text-3xl font-bold text-gray-900 mt-1">{playlist.name}</h1>
+          {editingName ? (
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                autoFocus
+                type="text"
+                value={nameInput}
+                onChange={e => setNameInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') setEditingName(false); }}
+                className="text-2xl font-bold text-gray-900 border-b-2 border-indigo-400 focus:outline-none bg-transparent"
+              />
+              <button onClick={handleSaveName} className="text-indigo-500 hover:text-indigo-700 text-lg">✓</button>
+              <button onClick={() => setEditingName(false)} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 mt-1">
+              <h1 className="text-3xl font-bold text-gray-900">{playlist.name}</h1>
+              {managing && (
+                <button
+                  onClick={() => { setNameInput(playlist.name); setEditingName(true); }}
+                  className="text-gray-400 hover:text-indigo-500 transition-colors text-lg leading-none"
+                  title="Rename playlist"
+                >✎</button>
+              )}
+            </div>
+          )}
           <div className="text-xs text-gray-400 mt-0.5">{entries.length} {entries.length === 1 ? 'song' : 'songs'}</div>
         </div>
-        {confirmDelete ? (
-          <div className="flex gap-2 items-center">
-            <button onClick={handleDeletePlaylist} className="text-xs px-3 py-1.5 rounded bg-red-500 text-white hover:bg-red-600">Delete playlist</button>
-            <button onClick={() => setConfirmDelete(false)} className="text-xs px-3 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">Cancel</button>
-          </div>
-        ) : (
+
+        <div className="flex items-center gap-2 shrink-0">
+          {managing && confirmDelete && (
+            <div className="flex gap-2">
+              <button onClick={handleDeletePlaylist} className="text-xs px-3 py-1.5 rounded bg-red-500 text-white hover:bg-red-600">Delete playlist</button>
+              <button onClick={() => setConfirmDelete(false)} className="text-xs px-3 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">Cancel</button>
+            </div>
+          )}
+          {managing && !confirmDelete && (
+            <button onClick={() => setConfirmDelete(true)}
+              className="text-gray-300 hover:text-red-400 transition-colors text-2xl leading-none"
+              title="Delete playlist">×</button>
+          )}
           <button
-            onClick={() => setConfirmDelete(true)}
-            className="text-gray-300 hover:text-red-400 transition-colors text-2xl leading-none"
-            aria-label="Delete playlist"
-          >×</button>
-        )}
+            onClick={toggleManage}
+            className={`text-xl leading-none transition-colors ${managing ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
+            title={managing ? 'Done managing' : 'Manage playlist'}
+          >
+            {managing ? '✓' : '⚙'}
+          </button>
+        </div>
       </div>
+
+      {/* Add Songs button (manage mode only) */}
+      {managing && (
+        <button
+          onClick={() => setShowAddSongs(true)}
+          className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 border border-dashed border-indigo-300 rounded-xl px-4 py-3 w-full hover:bg-indigo-50 transition-colors mb-4"
+        >
+          <span className="text-lg leading-none">+</span> Add Songs
+        </button>
+      )}
 
       {/* Song list */}
       {entries.length === 0 ? (
-        <p className="text-gray-400 text-sm mb-6">No songs yet. Add one below.</p>
+        <p className="text-gray-400 text-sm">{managing ? 'Use Add Songs to add songs to this playlist.' : 'No songs yet.'}</p>
       ) : (
-        <div className="flex flex-col gap-2 mb-6">
+        <div className="flex flex-col gap-2">
           {entries.map((entry, idx) => (
             <div key={entry.entryId} className="border border-gray-200 rounded-xl p-3">
               <div className="flex items-center gap-3">
-                {/* Position */}
                 <span className="text-xs text-gray-300 w-5 text-right shrink-0">{idx + 1}</span>
 
-                {/* Reorder */}
-                <div className="flex flex-col gap-0.5 shrink-0">
-                  <button
-                    onClick={() => handleReorder(entry.entryId, -1)}
-                    disabled={idx === 0}
-                    className="text-gray-300 hover:text-gray-600 disabled:opacity-20 text-xs leading-none"
-                  >▲</button>
-                  <button
-                    onClick={() => handleReorder(entry.entryId, 1)}
-                    disabled={idx === entries.length - 1}
-                    className="text-gray-300 hover:text-gray-600 disabled:opacity-20 text-xs leading-none"
-                  >▼</button>
-                </div>
+                {/* Reorder (manage only) */}
+                {managing && (
+                  <div className="flex flex-col gap-0.5 shrink-0">
+                    <button onClick={() => handleReorder(entry.entryId, -1)} disabled={idx === 0}
+                      className="text-gray-300 hover:text-gray-600 disabled:opacity-20 text-xs leading-none">▲</button>
+                    <button onClick={() => handleReorder(entry.entryId, 1)} disabled={idx === entries.length - 1}
+                      className="text-gray-300 hover:text-gray-600 disabled:opacity-20 text-xs leading-none">▼</button>
+                  </div>
+                )}
 
-                {/* Song info — click to open */}
+                {/* Song info */}
                 <div
                   className="flex-1 cursor-pointer hover:text-indigo-700 transition-colors min-w-0"
                   onClick={() => handleOpenSong(idx)}
@@ -231,21 +358,20 @@ export default function PlaylistDetailPage() {
                     : 'Default'}
                 </button>
 
-                {/* Remove */}
-                {confirmRemove === entry.entryId ? (
-                  <div className="flex gap-1 shrink-0">
-                    <button onClick={() => handleRemoveEntry(entry.entryId)} className="text-xs px-2 py-0.5 rounded bg-red-500 text-white hover:bg-red-600">Remove</button>
-                    <button onClick={() => setConfirmRemove(null)} className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-600">Cancel</button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setConfirmRemove(entry.entryId)}
-                    className="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none shrink-0"
-                  >×</button>
+                {/* Remove (manage only) */}
+                {managing && (
+                  confirmRemove === entry.entryId ? (
+                    <div className="flex gap-1 shrink-0">
+                      <button onClick={() => handleRemoveEntry(entry.entryId)} className="text-xs px-2 py-0.5 rounded bg-red-500 text-white hover:bg-red-600">Remove</button>
+                      <button onClick={() => setConfirmRemove(null)} className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-600">Cancel</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => setConfirmRemove(entry.entryId)}
+                      className="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none shrink-0">×</button>
+                  )
                 )}
               </div>
 
-              {/* Inline override editor */}
               {editingEntry === entry.entryId && (
                 <EntryOverrideEditor
                   entry={entry}
@@ -259,43 +385,13 @@ export default function PlaylistDetailPage() {
         </div>
       )}
 
-      {/* Add song */}
-      {showAddSong ? (
-        <div className="border border-gray-200 rounded-xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-gray-700">Add a song</span>
-            <button onClick={() => { setShowAddSong(false); setSongSearch(''); }} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
-          </div>
-          <input
-            autoFocus
-            type="text"
-            value={songSearch}
-            onChange={e => setSongSearch(e.target.value)}
-            placeholder="Search by title or artist…"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 mb-3"
-          />
-          <div className="flex flex-col gap-1 max-h-60 overflow-y-auto">
-            {filteredSongs.length === 0 ? (
-              <div className="text-xs text-gray-400 text-center py-4">No songs found</div>
-            ) : filteredSongs.map(s => (
-              <button
-                key={s.id}
-                onClick={() => handleAddSong(s.id)}
-                className="text-left px-3 py-2 rounded-lg hover:bg-indigo-50 transition-colors"
-              >
-                <span className="text-sm text-gray-900">{s.title}</span>
-                {s.artist && <span className="text-xs text-gray-400 ml-2">{s.artist}</span>}
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <button
-          onClick={() => setShowAddSong(true)}
-          className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 border border-dashed border-indigo-300 rounded-xl px-4 py-3 w-full hover:bg-indigo-50 transition-colors"
-        >
-          <span className="text-lg leading-none">+</span> Add song
-        </button>
+      {showAddSongs && (
+        <AddSongsModal
+          playlist={playlist}
+          allSongs={allSongs}
+          onClose={() => setShowAddSongs(false)}
+          onUpdate={updated => setPlaylist(updated)}
+        />
       )}
     </div>
   );
