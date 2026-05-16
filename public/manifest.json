@@ -1,0 +1,8 @@
+{
+  "name": "Lick Library",
+  "short_name": "Lick Library",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
+}
