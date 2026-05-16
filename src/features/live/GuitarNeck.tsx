@@ -1,6 +1,7 @@
 export interface NeckDot {
   degree: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null;
   active: boolean;
+  candidate?: boolean;
   note?: string; // display label, e.g. "C#", "Bb"
 }
 
@@ -64,6 +65,13 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
       style={{ display: 'block' }}
       aria-label="Guitar neck diagram"
     >
+      <style>{`
+        @keyframes candidate-stroke {
+          0%, 100% { stroke-width: 1; }
+          50%       { stroke-width: 4; }
+        }
+        .candidate-dot { animation: candidate-stroke 0.8s ease-in-out infinite; }
+      `}</style>
       {/* Fret numbers */}
       {Array.from({ length: fretCount }, (_, i) => i + 1).map(f => (
         <text
@@ -176,7 +184,8 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
 
           const color = DEGREE_COLORS[dot.degree];
           const label = dot.note ?? '';
-          const textFill = dot.active ? '#111827' : '#9ca3af';
+          const bright = dot.active || dot.candidate;
+          const textFill = bright ? '#111827' : '#9ca3af';
           const fontSize = label.length > 1 ? 5.5 : 7;
           const si = dataIdx(di);
           return (
@@ -185,12 +194,20 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
               onClick={onDotClick ? () => onDotClick(si, fret) : undefined}
               style={onDotClick ? { cursor: 'pointer' } : undefined}
             >
+              {/* active ring: filled pale yellow */}
               {dot.active && (
                 <circle cx={cx} cy={cy} r={R_RING} fill={ACTIVE_RING_COLOR} />
               )}
-              {/* white backing makes dot opaque over the string line */}
-              <circle cx={cx} cy={cy} r={R_NORMAL} fill="#ffffff" />
-              <circle cx={cx} cy={cy} r={R_NORMAL} fill={color} opacity={dot.active ? 1 : 0.4} />
+              {/* white backing — larger for candidates to cover stroke bleed */}
+              <circle cx={cx} cy={cy} r={dot.candidate && !dot.active ? R_NORMAL + 3 : R_NORMAL} fill="#ffffff" />
+              {/* colored circle — stroke on candidate pulses via CSS */}
+              <circle
+                cx={cx} cy={cy} r={R_NORMAL}
+                fill={color} opacity={bright ? 1 : 0.4}
+                stroke={dot.candidate && !dot.active ? '#800020' : 'none'}
+                strokeWidth={dot.candidate && !dot.active ? 1 : 0}
+                className={dot.candidate && !dot.active ? 'candidate-dot' : undefined}
+              />
               <text
                 x={cx}
                 y={cy + fontSize * 0.38}
