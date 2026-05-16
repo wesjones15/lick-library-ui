@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { ChordLyric, ChordVoicing } from '../../core/api/client';
 import { getChordVoicings } from '../../core/api/client';
 import { parseChordName } from './parseChordName';
@@ -17,6 +17,8 @@ function ChordToken({ name }: ChordTokenProps) {
   const [voicingIdx, setVoicingIdx] = useState(0);
   const [open, setOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [showAbove, setShowAbove] = useState(false);
+  const spanRef = useRef<HTMLSpanElement>(null);
   const parsed = parseChordName(name);
 
   async function handleMouseEnter() {
@@ -31,6 +33,10 @@ function ChordToken({ name }: ChordTokenProps) {
     const cached = voicingCache.get(key)!;
     setVoicings(cached);
     setVoicingIdx(0);
+    if (spanRef.current) {
+      const rect = spanRef.current.getBoundingClientRect();
+      setShowAbove(rect.bottom > window.innerHeight * 0.6);
+    }
     setOpen(true);
   }
 
@@ -42,6 +48,7 @@ function ChordToken({ name }: ChordTokenProps) {
 
   return (
     <span
+      ref={spanRef}
       style={{ display: 'inline-block', position: 'relative', fontWeight: 'bold', color: '#4f46e5' }}
       onMouseEnter={canShowPopover ? handleMouseEnter : undefined}
       onMouseLeave={canShowPopover ? handleMouseLeave : undefined}
@@ -51,8 +58,9 @@ function ChordToken({ name }: ChordTokenProps) {
         <span
           style={{
             position: 'absolute',
-            top: '100%',
-            marginTop: '2px',
+            ...(showAbove
+              ? { bottom: '100%', marginBottom: '2px' }
+              : { top: '100%', marginTop: '2px' }),
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 100,
