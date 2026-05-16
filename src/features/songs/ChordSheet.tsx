@@ -73,20 +73,22 @@ function ChordToken({ name }: ChordTokenProps) {
           </span>
           {voicings.length > 0
             ? <ChordDiagram frets={voicings[voicingIdx].frets} width={100} />
-            : <button
+            : <div
+                style={{ cursor: 'pointer' }}
                 onClick={e => { e.stopPropagation(); setOpen(false); setModalOpen(true); }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', color: '#6366f1', fontSize: '12px' }}
-              >???</button>
+              >
+                <ChordDiagram frets={[0, 0, 0, 0, 0, 0]} width={100} />
+              </div>
           }
           {voicings.length > 1 && (
             <span style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: '8px', color: '#9ca3af' }}>
               <button
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6b7280' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6b7280', fontSize: '24px', lineHeight: 1 }}
                 onClick={e => { e.stopPropagation(); setVoicingIdx(i => (i - 1 + voicings.length) % voicings.length); }}
               >‹</button>
               <span>{voicingIdx + 1}/{voicings.length}</span>
               <button
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6b7280' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6b7280', fontSize: '24px', lineHeight: 1 }}
                 onClick={e => { e.stopPropagation(); setVoicingIdx(i => (i + 1) % voicings.length); }}
               >›</button>
             </span>

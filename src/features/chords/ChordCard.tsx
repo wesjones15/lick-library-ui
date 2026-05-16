@@ -41,12 +41,12 @@ export default function ChordCard({ rootDisplay, quality, displayQuality, label,
         {!manageMode && voicings.length > 1 && (
           <div className="flex items-center justify-between text-xs text-gray-400">
             <button
-              className="hover:text-gray-600 px-1"
+              className="hover:text-gray-600 px-1 text-2xl leading-none"
               onClick={e => { e.stopPropagation(); setIdx(i => (i - 1 + voicings.length) % voicings.length); }}
             >‹</button>
             <span>{idx + 1}/{voicings.length}</span>
             <button
-              className="hover:text-gray-600 px-1"
+              className="hover:text-gray-600 px-1 text-2xl leading-none"
               onClick={e => { e.stopPropagation(); setIdx(i => (i + 1) % voicings.length); }}
             >›</button>
           </div>
