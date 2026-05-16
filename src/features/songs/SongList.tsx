@@ -12,7 +12,7 @@ export default function SongList({ songs, managing = false, onReparse }: Props) 
     return <p className="text-gray-400 text-sm">No songs yet.</p>;
   }
   return (
-    <div className="grid grid-cols-4 gap-3">
+    <div className="grid grid-cols-1 portrait:grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
       {songs.map(song => (
         <SongCard key={song.id} song={song} managing={managing} onReparse={onReparse} />
       ))}

@@ -18,10 +18,32 @@ const CHROMATIC = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', '
 
 function keyLabel(originalKey: string | null, semitones: number): string {
   if (!originalKey) return '';
-  const base = KEY_LABELS[originalKey] ?? originalKey;
-  const baseIdx = CHROMATIC.indexOf(base);
-  if (baseIdx === -1) return base;
-  return CHROMATIC[((baseIdx + semitones) % 12 + 12) % 12];
+  const display = KEY_LABELS[originalKey] ?? originalKey;
+  const match = display.match(/^([A-G][#b]?)(m?)$/);
+  if (!match) return display;
+  const [, root, suffix] = match;
+  const idx = CHROMATIC.indexOf(root);
+  if (idx === -1) return display;
+  return CHROMATIC[((idx + semitones) % 12 + 12) % 12] + suffix;
+}
+
+function modeLabel(originalKey: string | null): string | null {
+  if (!originalKey) return null;
+  const display = KEY_LABELS[originalKey] ?? originalKey;
+  if (/m$/.test(display)) return 'Minor';
+  if (/^[A-G][#b]?$/.test(display)) return 'Major';
+  return null;
+}
+
+function usePortrait() {
+  const [p, setP] = useState(() => window.matchMedia('(orientation: portrait)').matches);
+  useEffect(() => {
+    const mq = window.matchMedia('(orientation: portrait)');
+    const h = (e: MediaQueryListEvent) => setP(e.matches);
+    mq.addEventListener('change', h);
+    return () => mq.removeEventListener('change', h);
+  }, []);
+  return p;
 }
 
 function extractChordNames(song: SongDetail): string[] {
@@ -46,6 +68,7 @@ export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { setBpm, setIsPlaying } = useMetronomeContext();
+  const isPortrait = usePortrait();
   const [semitones, setSemitones] = useState(0);
   const [capo, setCapo] = useState(0);
   const [song, setSong] = useState<SongDetail | null>(null);
@@ -114,10 +137,8 @@ export default function SongDetailPage() {
           <div className="flex items-start justify-between mb-1">
             {/* Left: title + meta */}
             <div>
-              <div className="flex items-baseline gap-2">
-                <h1 className="text-xl font-bold text-gray-900">{song.title}</h1>
-                {song.artist && <span className="text-gray-400 text-sm">{song.artist}</span>}
-              </div>
+              {song.artist && <div className="text-xs text-gray-400">{song.artist}</div>}
+              <h1 className="text-xl font-bold text-gray-900">{song.title}</h1>
               <div className="flex gap-3 mt-0.5 text-xs text-gray-400 items-center">
                 {song.tempo != null && (
                   <button
@@ -128,6 +149,7 @@ export default function SongDetailPage() {
                   </button>
                 )}
                 <span>Standard</span>
+                {modeLabel(song.originalKey) && <span>{modeLabel(song.originalKey)}</span>}
               </div>
             </div>
 
@@ -236,7 +258,7 @@ export default function SongDetailPage() {
             <ChordSheet
               chordLines={song.chordLines}
               numColumns={viewMode === 'scroll' ? 1 : song.numColumns}
-              fontScale={viewMode === 'scroll' ? 2 : undefined}
+              fontScale={viewMode === 'scroll' ? (isPortrait ? 1.5 : 2) : undefined}
               className={loading ? 'opacity-50 transition-opacity duration-150' : 'transition-opacity duration-150'}
             />
           </div>

@@ -6,21 +6,20 @@ import ChordDiagram from '../chords/ChordDiagram';
 import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
 
-const INPUT_KEYS = [
-  { value: '',        label: '—'  },
-  { value: 'C',       label: 'C'  },
-  { value: 'C_SHARP', label: 'C#' },
-  { value: 'D',       label: 'D'  },
-  { value: 'D_SHARP', label: 'D#' },
-  { value: 'E',       label: 'E'  },
-  { value: 'F',       label: 'F'  },
-  { value: 'F_SHARP', label: 'F#' },
-  { value: 'G',       label: 'G'  },
-  { value: 'G_SHARP', label: 'G#' },
-  { value: 'A',       label: 'A'  },
-  { value: 'B_FLAT',  label: 'Bb' },
-  { value: 'B',       label: 'B'  },
-];
+const ROOT_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
+const MODES = [{ value: '', label: 'Major' }, { value: 'm', label: 'Minor' }];
+
+const LEGACY_KEY_MAP: Record<string, string> = {
+  C_SHARP: 'C#', D_SHARP: 'D#', F_SHARP: 'F#', G_SHARP: 'G#', B_FLAT: 'Bb',
+};
+
+function parseStoredKey(stored: string): { root: string; mode: string } {
+  if (!stored) return { root: '', mode: '' };
+  const display = LEGACY_KEY_MAP[stored] ?? stored;
+  const match = display.match(/^([A-G][#b]?)(m?)$/);
+  if (!match) return { root: display, mode: '' };
+  return { root: match[1], mode: match[2] };
+}
 
 const inputClass = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400';
 const btnSecondary = 'px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors';
@@ -55,7 +54,8 @@ export default function SongManagePage() {
   // Metadata fields
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
-  const [originalKey, setOriginalKey] = useState('');
+  const [keyRoot, setKeyRoot] = useState('');
+  const [keyMode, setKeyMode] = useState('');
   const [tempo, setTempo] = useState('');
 
   // Chart field
@@ -77,7 +77,9 @@ export default function SongManagePage() {
       setSong(s);
       setTitle(s.title);
       setArtist(s.artist ?? '');
-      setOriginalKey(s.originalKey ?? '');
+      const { root, mode } = parseStoredKey(s.originalKey ?? '');
+      setKeyRoot(root);
+      setKeyMode(mode);
       setTempo(s.tempo != null ? String(s.tempo) : '');
       setRawChordSheet(s.rawChordSheet ?? '');
     });
@@ -99,10 +101,14 @@ export default function SongManagePage() {
     });
   }, [mode, song]);
 
+  const currentKey = keyRoot ? keyRoot + keyMode : '';
+  const savedKey = song
+    ? (() => { const { root, mode } = parseStoredKey(song.originalKey ?? ''); return root ? root + mode : ''; })()
+    : '';
   const metadataIsDirty = song && (
     title !== song.title ||
     artist !== (song.artist ?? '') ||
-    originalKey !== (song.originalKey ?? '') ||
+    currentKey !== savedKey ||
     tempo !== (song.tempo != null ? String(song.tempo) : '')
   );
 
@@ -117,7 +123,7 @@ export default function SongManagePage() {
       await updateSong(id, {
         title: title.trim(),
         artist: artist.trim() || undefined,
-        originalKey: originalKey || undefined,
+        originalKey: currentKey || undefined,
         tempo: tempo ? parseInt(tempo, 10) : undefined,
       });
       navigate(`/song/${id}`);
@@ -181,12 +187,23 @@ export default function SongManagePage() {
           />
           <div className="flex gap-2">
             <select
-              value={originalKey}
-              onChange={e => setOriginalKey(e.target.value)}
+              value={keyRoot}
+              onChange={e => setKeyRoot(e.target.value)}
               className={`${inputClass} flex-1 bg-white`}
             >
-              {INPUT_KEYS.map(k => (
-                <option key={k.value} value={k.value}>{k.label}</option>
+              <option value="">— Key —</option>
+              {ROOT_NOTES.map(r => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+            <select
+              value={keyMode}
+              onChange={e => setKeyMode(e.target.value)}
+              disabled={!keyRoot}
+              className={`${inputClass} w-24 bg-white disabled:opacity-40`}
+            >
+              {MODES.map(m => (
+                <option key={m.value} value={m.value}>{m.label}</option>
               ))}
             </select>
             <input

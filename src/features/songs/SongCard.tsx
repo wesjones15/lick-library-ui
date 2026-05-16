@@ -39,7 +39,7 @@ export default function SongCard({ song, managing = false, onReparse }: Props) {
   return (
     <div
       onClick={managing ? undefined : () => navigate(`/song/${song.id}`)}
-      className={`border border-gray-200 rounded-xl p-2 bg-white flex flex-col gap-0.5 min-h-[110px] transition-shadow ${managing ? 'cursor-default' : 'cursor-pointer hover:shadow-sm'}`}
+      className={`border border-gray-200 rounded-xl p-2 bg-white flex flex-col gap-0.5 min-h-[110px] portrait:flex-row portrait:min-h-0 portrait:items-center portrait:gap-3 transition-shadow ${managing ? 'cursor-default' : 'cursor-pointer hover:shadow-sm'}`}
     >
       <div className="flex-1">
         <div className={titleClass}>{song.title}</div>
@@ -70,8 +70,8 @@ export default function SongCard({ song, managing = false, onReparse }: Props) {
           </button>
         </div>
       ) : (
-        <div className="flex items-center mt-auto pt-1">
-          <div className="flex items-center gap-2 text-xs text-gray-400 font-mono">
+        <div className="flex items-center mt-auto pt-1 portrait:mt-0 portrait:pt-0 portrait:flex-col portrait:items-end portrait:gap-0.5">
+          <div className="flex items-center gap-2 text-xs text-gray-400 font-mono portrait:flex-col portrait:items-end portrait:gap-0">
             {song.originalKey && <span>{keyDisplay(song.originalKey)}</span>}
             {song.tempo != null && <span>{song.tempo} BPM</span>}
           </div>

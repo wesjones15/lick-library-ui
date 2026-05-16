@@ -1,20 +1,8 @@
 import { useState } from 'react';
 import { uploadSong } from '../../core/api/client';
 
-const INPUT_KEYS = [
-  { value: 'C',       label: 'C'  },
-  { value: 'C_SHARP', label: 'C#' },
-  { value: 'D',       label: 'D'  },
-  { value: 'D_SHARP', label: 'D#' },
-  { value: 'E',       label: 'E'  },
-  { value: 'F',       label: 'F'  },
-  { value: 'F_SHARP', label: 'F#' },
-  { value: 'G',       label: 'G'  },
-  { value: 'G_SHARP', label: 'G#' },
-  { value: 'A',       label: 'A'  },
-  { value: 'B_FLAT',  label: 'Bb' },
-  { value: 'B',       label: 'B'  },
-];
+const ROOT_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
+const MODES = [{ value: '', label: 'Major' }, { value: 'm', label: 'Minor' }];
 
 interface Props {
   onSuccess: () => void;
@@ -23,7 +11,8 @@ interface Props {
 export default function SongUploadForm({ onSuccess }: Props) {
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
-  const [originalKey, setOriginalKey] = useState('');
+  const [keyRoot, setKeyRoot] = useState('');
+  const [keyMode, setKeyMode] = useState('');
   const [capo, setCapo] = useState('');
   const [tempo, setTempo] = useState('');
   const [rawChordSheet, setRawChordSheet] = useState('');
@@ -39,14 +28,15 @@ export default function SongUploadForm({ onSuccess }: Props) {
       await uploadSong({
         title: title.trim(),
         artist: artist.trim() || undefined,
-        originalKey: originalKey || undefined,
+        originalKey: keyRoot ? keyRoot + keyMode : undefined,
         capo: capo ? parseInt(capo, 10) : undefined,
         tempo: tempo ? parseInt(tempo, 10) : undefined,
         rawChordSheet,
       });
       setTitle('');
       setArtist('');
-      setOriginalKey('');
+      setKeyRoot('');
+      setKeyMode('');
       setCapo('');
       setTempo('');
       setRawChordSheet('');
@@ -79,13 +69,23 @@ export default function SongUploadForm({ onSuccess }: Props) {
       </div>
       <div className="flex gap-2">
         <select
-          value={originalKey}
-          onChange={e => setOriginalKey(e.target.value)}
+          value={keyRoot}
+          onChange={e => setKeyRoot(e.target.value)}
           className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400"
         >
           <option value="">Key (optional)</option>
-          {INPUT_KEYS.map(k => (
-            <option key={k.value} value={k.value}>{k.label}</option>
+          {ROOT_NOTES.map(r => (
+            <option key={r} value={r}>{r}</option>
+          ))}
+        </select>
+        <select
+          value={keyMode}
+          onChange={e => setKeyMode(e.target.value)}
+          disabled={!keyRoot}
+          className="w-24 border border-gray-300 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400 disabled:opacity-40"
+        >
+          {MODES.map(m => (
+            <option key={m.value} value={m.value}>{m.label}</option>
           ))}
         </select>
         <input
