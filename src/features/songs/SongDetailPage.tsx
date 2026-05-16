@@ -7,6 +7,7 @@ import ChordSheet from './ChordSheet';
 import ChordDiagram from '../chords/ChordDiagram';
 import { parseChordName } from './parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
+import { useSongNavContext } from '../../core/context/SongNavContext';
 
 const KEY_LABELS: Record<string, string> = {
   C: 'C', C_SHARP: 'C#', D: 'D', D_SHARP: 'D#', E: 'E',
@@ -68,6 +69,7 @@ export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { setBpm, setIsPlaying } = useMetronomeContext();
+  const { setInfo, collapsed } = useSongNavContext();
   const isPortrait = usePortrait();
   const [semitones, setSemitones] = useState(0);
   const [capo, setCapo] = useState(0);
@@ -80,7 +82,9 @@ export default function SongDetailPage() {
   const [chordVoicingIdx, setChordVoicingIdx] = useState<Record<string, number>>({});
   const [uploadChord, setUploadChord] = useState<string | null>(null);
   const [autoScrolling, setAutoScrolling] = useState(false);
+  const [overflowOpen, setOverflowOpen] = useState(false);
   const loadedSongIdRef = useRef<string | null>(null);
+  const overflowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -108,6 +112,32 @@ export default function SongDetailPage() {
     if (viewMode !== 'scroll') setAutoScrolling(false);
   }, [viewMode]);
 
+  // Populate mini-navbar context
+  useEffect(() => {
+    if (!song) return;
+    setInfo({
+      title: song.title,
+      artist: song.artist ?? undefined,
+      bpm: song.tempo ?? undefined,
+      shapeKey: keyLabel(song.originalKey, semitones - (song.capo ?? 0)),
+      soundKey: keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0)),
+      capo,
+    });
+    return () => setInfo(null);
+  }, [song, semitones, capo]);
+
+  // Close overflow menu on outside click
+  useEffect(() => {
+    if (!overflowOpen) return;
+    function handle(e: MouseEvent) {
+      if (overflowRef.current && !overflowRef.current.contains(e.target as Node)) {
+        setOverflowOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, [overflowOpen]);
+
   useEffect(() => {
     if (!showChords || !song) return;
     const names = extractChordNames(song);
@@ -129,10 +159,11 @@ export default function SongDetailPage() {
     `px-2 py-1 text-xs rounded border transition-colors ${active ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
 
   return (
-    <div className={`px-6 pb-4 ${viewMode === 'scroll' ? 'pt-0' : 'pt-4'}`}>
+    <div className={`px-3 sm:px-6 pb-4 ${viewMode === 'scroll' ? 'pt-0' : 'pt-4'}`}>
       {song && (
         <>
-          {/* Header */}
+          {/* Header — hidden when collapsed */}
+          {!collapsed && (
           <div className={viewMode === 'scroll' ? 'sticky top-14 z-40 bg-white border-b border-gray-100 relative' : ''}>
           <div className="flex items-start justify-between mb-1">
             {/* Left: title + meta */}
@@ -153,34 +184,63 @@ export default function SongDetailPage() {
               </div>
             </div>
 
-            {/* Right: single row — action buttons + capo/transpose */}
-            <div className="flex items-center gap-4">
+            {/* Right: action buttons + capo/transpose */}
+            <div className="flex items-center gap-2 md:gap-4">
 
-              {/* View button */}
+              {/* Desktop-only: View, Show Chords, Manage */}
               <button
                 onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
-                className={`${stubBtnClass(viewMode === 'scroll')} flex flex-col items-center w-14`}
+                className={`hidden md:flex ${stubBtnClass(viewMode === 'scroll')} flex-col items-center w-14`}
               >
                 <span style={{ fontSize: '9px' }}>view:</span>
                 <span style={{ fontSize: '9px' }}>{viewMode === 'scroll' ? 'scroll' : 'columns'}</span>
               </button>
-
-              {/* Show Chords */}
               <button
                 onClick={() => setShowChords(v => !v)}
-                className={stubBtnClass(showChords)}
+                className={`hidden md:block ${stubBtnClass(showChords)}`}
               >
                 Show Chords
               </button>
-
-              {/* ✎ manage */}
               <button
                 onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-                className="text-gray-300 hover:text-indigo-500 transition-colors text-4xl leading-none"
+                className="hidden md:block text-gray-300 hover:text-indigo-500 transition-colors text-4xl leading-none"
                 aria-label="Manage song"
               >
                 ✎
               </button>
+
+              {/* Mobile ⋮ overflow menu */}
+              <div ref={overflowRef} className="relative md:hidden">
+                <button
+                  onClick={() => setOverflowOpen(o => !o)}
+                  className="w-8 h-8 rounded-lg border border-gray-300 text-gray-500 hover:bg-gray-50 flex items-center justify-center text-base font-bold"
+                  aria-label="More options"
+                >
+                  ⋮
+                </button>
+                {overflowOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50 flex flex-col py-1">
+                    <button
+                      onClick={() => { setViewMode(m => m === 'columns' ? 'scroll' : 'columns'); setOverflowOpen(false); }}
+                      className={`px-4 py-2 text-sm text-left transition-colors ${viewMode === 'scroll' ? 'text-indigo-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                      View: {viewMode === 'scroll' ? 'scroll' : 'columns'}
+                    </button>
+                    <button
+                      onClick={() => { setShowChords(v => !v); setOverflowOpen(false); }}
+                      className={`px-4 py-2 text-sm text-left transition-colors ${showChords ? 'text-indigo-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                      {showChords ? 'Hide Chords' : 'Show Chords'}
+                    </button>
+                    <button
+                      onClick={() => { navigate(`/song/${id}/manage?semitones=${semitones}`); setOverflowOpen(false); }}
+                      className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50 transition-colors"
+                    >
+                      Manage
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {/* Capo group */}
               <div className="flex flex-col items-center gap-1">
@@ -251,6 +311,7 @@ export default function SongDetailPage() {
             </button>
           )}
           </div>
+          )} {/* end !collapsed */}
 
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 

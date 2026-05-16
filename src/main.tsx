@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import Layout from './components/Layout'
 import { MetronomeProvider } from './core/metronome/MetronomeContext'
+import { SongNavProvider } from './core/context/SongNavContext'
 import HomePage from './features/home/HomePage'
 import LicksPage from './features/licks/LicksPage'
 import LickDetailPage from './features/licks/LickDetailPage'
@@ -20,6 +21,7 @@ import LivePage from './features/live/LivePage'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <MetronomeProvider>
+      <SongNavProvider>
       <BrowserRouter>
         <Routes>
           <Route element={<Layout />}>
@@ -38,6 +40,7 @@ createRoot(document.getElementById('root')!).render(
           </Route>
         </Routes>
       </BrowserRouter>
+      </SongNavProvider>
     </MetronomeProvider>
   </StrictMode>,
 )
