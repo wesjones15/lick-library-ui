@@ -113,19 +113,41 @@ export default function LivePage() {
     [currentNote]
   );
 
+  // For each candidate degree, find the 2 closest notes on the neck
+  const bestCandidates = useMemo<Set<string>>(() => {
+    if (!currentNote) return new Set();
+    const bestByDegree = new Map<number, Array<{ string: number; fret: number; distance: number }>>();
+    scaleDots.forEach((row, s) => {
+      row.forEach((dot, f) => {
+        if (dot.degree === null) return;
+        if (currentNote.string === s && currentNote.fret === f) return;
+        if (!candidateDegrees.has(dot.degree)) return;
+        const dist = Math.hypot(f - currentNote.fret, s - currentNote.string);
+        if (dist > 3.9) return;
+        const list = bestByDegree.get(dot.degree) ?? [];
+        list.push({ string: s, fret: f, distance: dist });
+        list.sort((a, b) => a.distance - b.distance);
+        // Keep 2 only if tied for closest; otherwise keep 1
+        const top = list[0];
+        bestByDegree.set(dot.degree, list.filter(x => x.distance === top.distance));
+      });
+    });
+    return new Set(
+      Array.from(bestByDegree.values()).flatMap(list => list.map(({ string, fret }) => `${string},${fret}`))
+    );
+  }, [scaleDots, currentNote, candidateDegrees]);
+
   // Derived dots: overlay active + candidate state onto the scale dots
   const dots = useMemo<NeckDot[][]>(() => {
     return scaleDots.map((row, s) =>
       row.map((dot, f) => {
         if (dot.degree === null) return dot;
         const isActive = currentNote?.string === s && currentNote?.fret === f;
-        const isCandidate = !isActive
-          && candidateDegrees.has(dot.degree)
-          && Math.hypot(f - currentNote!.fret, s - currentNote!.string) <= 3.9;
+        const isCandidate = !isActive && bestCandidates.has(`${s},${f}`);
         return { ...dot, active: isActive, candidate: isCandidate };
       })
     );
-  }, [scaleDots, currentNote, candidateDegrees]);
+  }, [scaleDots, currentNote, bestCandidates]);
 
   function selectNote(s: number, f: number, degree: number) {
     if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
