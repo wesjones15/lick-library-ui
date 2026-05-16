@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useLayoutEffect } from 'react';
 import type { ChordLyric, ChordSheetLine, GuitarTabLine, ChordVoicing } from '../../core/api/client';
 import { getChordVoicings } from '../../core/api/client';
 import { parseChordName } from './parseChordName';
@@ -18,8 +18,24 @@ function ChordToken({ name }: ChordTokenProps) {
   const [open, setOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [showAbove, setShowAbove] = useState(false);
+  const [popoverOffset, setPopoverOffset] = useState(0);
+  const [anchorRect, setAnchorRect] = useState<{ top: number; bottom: number; left: number; width: number } | null>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
+  const popoverRef = useRef<HTMLSpanElement>(null);
   const parsed = parseChordName(name);
+
+  useLayoutEffect(() => {
+    if (!open || !popoverRef.current) {
+      setPopoverOffset(0);
+      return;
+    }
+    const r = popoverRef.current.getBoundingClientRect();
+    const margin = 8;
+    let offset = 0;
+    if (r.left < margin) offset = margin - r.left;
+    else if (r.right > window.innerWidth - margin) offset = window.innerWidth - margin - r.right;
+    setPopoverOffset(offset);
+  }, [open]);
 
   async function handleMouseEnter() {
     if (!parsed) return;
@@ -35,7 +51,10 @@ function ChordToken({ name }: ChordTokenProps) {
     setVoicingIdx(0);
     if (spanRef.current) {
       const rect = spanRef.current.getBoundingClientRect();
-      setShowAbove(rect.bottom > window.innerHeight * 0.6);
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top - 56;
+      setShowAbove(spaceAbove > spaceBelow);
+      setAnchorRect({ top: rect.top, bottom: rect.bottom, left: rect.left, width: rect.width });
     }
     setOpen(true);
   }
@@ -54,16 +73,17 @@ function ChordToken({ name }: ChordTokenProps) {
       onMouseLeave={canShowPopover ? handleMouseLeave : undefined}
     >
       {name}
-      {open && (
+      {open && anchorRect && (
         <span
+          ref={popoverRef}
           style={{
-            position: 'absolute',
-            ...(showAbove
-              ? { bottom: '100%', marginBottom: '2px' }
-              : { top: '100%', marginTop: '2px' }),
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 100,
+            position: 'fixed',
+            top: showAbove ? anchorRect.top : anchorRect.bottom,
+            left: anchorRect.left + anchorRect.width / 2,
+            transform: showAbove
+              ? `translateX(calc(-50% + ${popoverOffset}px)) translateY(-100%)`
+              : `translateX(calc(-50% + ${popoverOffset}px))`,
+            zIndex: 1000,
             background: 'white',
             border: '1px solid #e5e7eb',
             borderRadius: '8px',

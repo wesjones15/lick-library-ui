@@ -106,7 +106,7 @@ export default function SongDetailPage() {
     `px-2 py-1 text-xs rounded border transition-colors ${active ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
 
   return (
-    <div className="px-6 pt-4 pb-4">
+    <div className={`px-6 pb-4 ${viewMode === 'scroll' ? 'pt-0' : 'pt-4'}`}>
       {song && (
         <>
           {/* Header */}
