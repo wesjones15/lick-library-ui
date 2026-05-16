@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import Metronome from '../core/metronome/MetronomeWidget';
 
 const NAV_LINKS: { label: ReactNode; to: string }[] = [
-  { label: 'Licks', to: '/' },
+  { label: 'Licks', to: '/licks' },
   { label: 'Songs', to: '/songs' },
   {
     label: (

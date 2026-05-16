@@ -1,0 +1,41 @@
+import { useNavigate } from 'react-router-dom';
+
+const FEATURES = [
+  {
+    to: '/licks',
+    title: 'Licks',
+    description: 'Upload a guitar tab and explore positions across the neck in any key, tuning, or algorithm.',
+  },
+  {
+    to: '/songs',
+    title: 'Songs',
+    description: 'Chord sheets with live transposition, capo support, scroll view, and chord diagrams on hover.',
+  },
+  {
+    to: '/chords',
+    title: 'Chord Gallery',
+    description: 'Browse and manage CAGED voicings for every chord quality. Upload custom fingerings.',
+  },
+];
+
+export default function HomePage() {
+  const navigate = useNavigate();
+  return (
+    <div className="max-w-3xl mx-auto px-6 py-16">
+      <h1 className="text-3xl font-bold text-gray-900 mb-2">Lick Library</h1>
+      <p className="text-gray-400 text-sm mb-10">A guitar practice tool.</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {FEATURES.map(f => (
+          <button
+            key={f.to}
+            onClick={() => navigate(f.to)}
+            className="text-left border border-gray-200 rounded-xl p-5 bg-white hover:shadow-sm hover:border-indigo-200 transition-all"
+          >
+            <div className="text-base font-semibold text-gray-900 mb-1">{f.title}</div>
+            <div className="text-xs text-gray-400 leading-snug">{f.description}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import Layout from './components/Layout'
 import { MetronomeProvider } from './core/metronome/MetronomeContext'
+import HomePage from './features/home/HomePage'
 import LicksPage from './features/licks/LicksPage'
 import LickDetailPage from './features/licks/LickDetailPage'
 import SongsPage from './features/songs/SongsPage'
@@ -19,7 +20,8 @@ createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <Routes>
           <Route element={<Layout />}>
-            <Route path="/" element={<LicksPage />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/licks" element={<LicksPage />} />
             <Route path="/lick/:id" element={<LickDetailPage />} />
             <Route path="/songs" element={<SongsPage />} />
             <Route path="/songs/upload" element={<SongUploadPage />} />
