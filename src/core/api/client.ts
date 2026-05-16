@@ -68,10 +68,20 @@ export async function deleteLick(id: string): Promise<void> {
 // --- Song / Chord Sheet ---
 
 export interface ChordLyric {
+  type?: 'chord';
   chords: string;
   lyrics: string;
   fontSize: number;
 }
+
+export interface GuitarTabLine {
+  type: 'tab';
+  header: string;
+  tabLines: string[];
+  fontSize: number;
+}
+
+export type ChordSheetLine = ChordLyric | GuitarTabLine;
 
 export interface SongSummary {
   id: string;
@@ -89,7 +99,7 @@ export interface SongDetail {
   originalKey: string | null;
   capo: number | null;
   tempo: number | null;
-  chordLines: ChordLyric[];
+  chordLines: ChordSheetLine[];
   numColumns: number;
   canReparse: boolean;
   rawChordSheet: string | null;

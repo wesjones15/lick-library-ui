@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { getSong, updateSong, deleteSong, getChordVoicings } from '../../core/api/client';
-import type { SongDetail, ChordVoicing } from '../../core/api/client';
+import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/client';
 import ChordDiagram from '../chords/ChordDiagram';
 import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
@@ -29,7 +29,10 @@ function extractChordNames(song: SongDetail): string[] {
   const seen = new Set<string>();
   const result: string[] = [];
   song.chordLines.forEach(line => {
-    line.chords.split(/\s+/).forEach(t => {
+    const text = (line as GuitarTabLine).type === 'tab'
+      ? (line as GuitarTabLine).header
+      : (line as { chords: string }).chords;
+    text.split(/\s+/).forEach(t => {
       const core = t.replace(/^\(+/, '').replace(/[)*]+$/, '');
       if (/^[A-G]/.test(core) && !seen.has(core)) {
         seen.add(core);

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import type { ChordLyric, ChordVoicing } from '../../core/api/client';
+import type { ChordLyric, ChordSheetLine, GuitarTabLine, ChordVoicing } from '../../core/api/client';
 import { getChordVoicings } from '../../core/api/client';
 import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
@@ -148,8 +148,12 @@ function renderChords(chords: string): React.ReactNode[] {
   });
 }
 
+function isTabBlock(line: ChordSheetLine): line is GuitarTabLine {
+  return (line as GuitarTabLine).type === 'tab';
+}
+
 interface Props {
-  chordLines: ChordLyric[];
+  chordLines: ChordSheetLine[];
   numColumns: number;
   className?: string;
   fontScale?: number;
@@ -157,7 +161,7 @@ interface Props {
 
 export default function ChordSheet({ chordLines, numColumns, className, fontScale = 1 }: Props) {
   const perColumn = Math.ceil(chordLines.length / numColumns);
-  const columns: ChordLyric[][] = [];
+  const columns: ChordSheetLine[][] = [];
   for (let c = 0; c < numColumns; c++) {
     columns.push(chordLines.slice(c * perColumn, (c + 1) * perColumn));
   }
@@ -166,16 +170,33 @@ export default function ChordSheet({ chordLines, numColumns, className, fontScal
     <div className={`flex gap-6 font-mono overflow-hidden ${className ?? ''}`}>
       {columns.map((col, ci) => (
         <div key={ci} className="flex-1 flex flex-col">
-          {col.map((pair, li) => (
-            <div key={li} className="leading-tight">
-              <div style={{ fontSize: `${pair.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#111827' }}>
-                {renderChords(pair.chords)}
+          {col.map((line, li) => {
+            if (isTabBlock(line)) {
+              return (
+                <div key={li} className="leading-tight my-1">
+                  {line.header && (
+                    <div style={{ fontSize: `${line.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#111827' }}>
+                      {renderChords(line.header)}
+                    </div>
+                  )}
+                  <div style={{ fontSize: `${line.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#4b5563', fontFamily: 'monospace' }}>
+                    {line.tabLines.join('\n')}
+                  </div>
+                </div>
+              );
+            }
+            const pair = line as ChordLyric;
+            return (
+              <div key={li} className="leading-tight">
+                <div style={{ fontSize: `${pair.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#111827' }}>
+                  {renderChords(pair.chords)}
+                </div>
+                <div style={{ fontSize: `${pair.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#111827' }}>
+                  {pair.lyrics || ' '}
+                </div>
               </div>
-              <div style={{ fontSize: `${pair.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#111827' }}>
-                {pair.lyrics || ' '}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ))}
     </div>
