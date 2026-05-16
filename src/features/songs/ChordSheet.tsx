@@ -152,9 +152,10 @@ interface Props {
   chordLines: ChordLyric[];
   numColumns: number;
   className?: string;
+  fontScale?: number;
 }
 
-export default function ChordSheet({ chordLines, numColumns, className }: Props) {
+export default function ChordSheet({ chordLines, numColumns, className, fontScale = 1 }: Props) {
   const perColumn = Math.ceil(chordLines.length / numColumns);
   const columns: ChordLyric[][] = [];
   for (let c = 0; c < numColumns; c++) {
@@ -167,10 +168,10 @@ export default function ChordSheet({ chordLines, numColumns, className }: Props)
         <div key={ci} className="flex-1 flex flex-col">
           {col.map((pair, li) => (
             <div key={li} className="leading-tight">
-              <div style={{ fontSize: `${pair.fontSize}px`, whiteSpace: 'pre', color: '#111827' }}>
+              <div style={{ fontSize: `${pair.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#111827' }}>
                 {renderChords(pair.chords)}
               </div>
-              <div style={{ fontSize: `${pair.fontSize}px`, whiteSpace: 'pre', color: '#111827' }}>
+              <div style={{ fontSize: `${pair.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#111827' }}>
                 {pair.lyrics || ' '}
               </div>
             </div>

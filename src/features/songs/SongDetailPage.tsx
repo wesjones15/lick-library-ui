@@ -121,12 +121,10 @@ export default function SongDetailPage() {
 
               {/* View button */}
               <button
-                title="Toggle scrolling view (coming soon)"
                 onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
-                className={`${stubBtnClass(viewMode === 'scroll')} flex flex-col items-center`}
+                className={stubBtnClass(viewMode === 'scroll')}
               >
-                <span style={{ fontSize: '9px' }}>view:</span>
-                <span style={{ fontSize: '9px' }}>{viewMode}</span>
+                {viewMode === 'scroll' ? 'Scroll' : 'Columns'}
               </button>
 
               {/* Show Chords */}
@@ -209,7 +207,8 @@ export default function SongDetailPage() {
 
           <ChordSheet
             chordLines={song.chordLines}
-            numColumns={song.numColumns}
+            numColumns={viewMode === 'scroll' ? 1 : song.numColumns}
+            fontScale={viewMode === 'scroll' ? 2 : undefined}
             className={loading ? 'opacity-50 transition-opacity duration-150' : 'transition-opacity duration-150'}
           />
 
