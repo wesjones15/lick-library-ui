@@ -53,6 +53,7 @@ export default function SongDetailPage() {
   const [chordVoicings, setChordVoicings] = useState<Record<string, ChordVoicing[]>>({});
   const [chordVoicingIdx, setChordVoicingIdx] = useState<Record<string, number>>({});
   const [uploadChord, setUploadChord] = useState<string | null>(null);
+  const [autoScrolling, setAutoScrolling] = useState(false);
   const loadedSongIdRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -70,6 +71,16 @@ export default function SongDetailPage() {
       .catch(() => setError('Failed to load song.'))
       .finally(() => setLoading(false));
   }, [id, semitones]);
+
+  useEffect(() => {
+    if (!autoScrolling) return;
+    const id = setInterval(() => window.scrollBy({ top: 2 }), 50);
+    return () => clearInterval(id);
+  }, [autoScrolling]);
+
+  useEffect(() => {
+    if (viewMode !== 'scroll') setAutoScrolling(false);
+  }, [viewMode]);
 
   useEffect(() => {
     if (!showChords || !song) return;
@@ -92,11 +103,12 @@ export default function SongDetailPage() {
     `px-2 py-1 text-xs rounded border transition-colors ${active ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
 
   return (
-    <div className="px-6 pt-4 pb-0">
+    <div className="px-6 pt-4 pb-4">
       {song && (
         <>
           {/* Header */}
-          <div className="flex items-start justify-between mb-3">
+          <div className={viewMode === 'scroll' ? 'sticky top-14 z-40 bg-white border-b border-gray-100 relative' : ''}>
+          <div className="flex items-start justify-between mb-1">
             {/* Left: title + meta */}
             <div>
               <div className="flex items-baseline gap-2">
@@ -122,9 +134,10 @@ export default function SongDetailPage() {
               {/* View button */}
               <button
                 onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
-                className={stubBtnClass(viewMode === 'scroll')}
+                className={`${stubBtnClass(viewMode === 'scroll')} flex flex-col items-center w-14`}
               >
-                {viewMode === 'scroll' ? 'Scroll' : 'Columns'}
+                <span style={{ fontSize: '9px' }}>view:</span>
+                <span style={{ fontSize: '9px' }}>{viewMode === 'scroll' ? 'scroll' : 'columns'}</span>
               </button>
 
               {/* Show Chords */}
@@ -202,15 +215,28 @@ export default function SongDetailPage() {
 
             </div>
           </div>
+          {viewMode === 'scroll' && (
+            <button
+              onClick={() => setAutoScrolling(a => !a)}
+              style={{ position: 'absolute', top: '100%', marginTop: '4px', left: 0 }}
+              className={`text-xl leading-none transition-colors ${autoScrolling ? 'text-indigo-500' : 'text-gray-300 hover:text-gray-500'}`}
+              aria-label={autoScrolling ? 'Pause autoscroll' : 'Start autoscroll'}
+            >
+              {autoScrolling ? '⏸' : '▶'}
+            </button>
+          )}
+          </div>
 
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-          <ChordSheet
-            chordLines={song.chordLines}
-            numColumns={viewMode === 'scroll' ? 1 : song.numColumns}
-            fontScale={viewMode === 'scroll' ? 2 : undefined}
-            className={loading ? 'opacity-50 transition-opacity duration-150' : 'transition-opacity duration-150'}
-          />
+          <div className={viewMode === 'scroll' ? 'max-w-2xl mx-auto mt-8' : ''}>
+            <ChordSheet
+              chordLines={song.chordLines}
+              numColumns={viewMode === 'scroll' ? 1 : song.numColumns}
+              fontScale={viewMode === 'scroll' ? 2 : undefined}
+              className={loading ? 'opacity-50 transition-opacity duration-150' : 'transition-opacity duration-150'}
+            />
+          </div>
 
           {showChords && (
             <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg">
