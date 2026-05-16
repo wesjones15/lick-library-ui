@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getSong, getChordVoicings } from '../../core/api/client';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { getSong, getChordVoicings, updatePlaylistEntry } from '../../core/api/client';
 import ChordUploadModal from '../chords/ChordUploadModal';
 import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/client';
 import ChordSheet from './ChordSheet';
@@ -65,13 +65,30 @@ function extractChordNames(song: SongDetail): string[] {
   return result;
 }
 
+interface PlaylistNavEntry {
+  entryId: string;
+  songId: string;
+  title: string;
+  overrideSemitones: number | null;
+  overrideCapo: number | null;
+}
+
+interface PlaylistNavState {
+  playlistId: string;
+  playlistName: string;
+  entries: PlaylistNavEntry[];
+  currentIndex: number;
+}
+
 export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const playlistState = (location.state as PlaylistNavState | null) ?? null;
   const { setBpm, setIsPlaying, bpm, isPlaying } = useMetronomeContext();
   const { setInfo, collapsed, showChords, setShowChords } = useSongNavContext();
   const isPortrait = usePortrait();
-  const [semitones, setSemitones] = useState(0);
+  const [semitones, setSemitones] = useState(() => playlistState?.entries[playlistState.currentIndex]?.overrideSemitones ?? 0);
   const [capo, setCapo] = useState(0);
   const [song, setSong] = useState<SongDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -88,6 +105,17 @@ export default function SongDetailPage() {
   const overflowRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Reset semitones/capo when navigating to a different song (including within playlist)
+  const prevIdRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (id && id !== prevIdRef.current) {
+      prevIdRef.current = id;
+      const ps = (location.state as PlaylistNavState | null);
+      const entry = ps?.entries[ps.currentIndex];
+      setSemitones(entry?.overrideSemitones ?? 0);
+    }
+  }, [id]);
+
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -96,7 +124,8 @@ export default function SongDetailPage() {
       .then(s => {
         setSong(s);
         if (loadedSongIdRef.current !== id) {
-          setCapo(s.capo ?? 0);
+          const playlistCapo = playlistState?.entries[playlistState.currentIndex]?.overrideCapo;
+          setCapo(playlistCapo ?? s.capo ?? 0);
           loadedSongIdRef.current = id;
         }
       })
@@ -182,6 +211,65 @@ export default function SongDetailPage() {
           {/* Header — hidden when collapsed */}
           {!collapsed && (
           <div className={viewMode === 'scroll' ? 'sticky top-14 z-40 bg-white border-b border-gray-100 relative' : ''}>
+
+          {/* Playlist breadcrumb + navigation */}
+          {playlistState && (() => {
+            const { playlistId, playlistName, entries: plEntries, currentIndex } = playlistState;
+            const currentEntry = plEntries[currentIndex];
+            const prevEntry = currentIndex > 0 ? plEntries[currentIndex - 1] : null;
+            const nextEntry = currentIndex < plEntries.length - 1 ? plEntries[currentIndex + 1] : null;
+            const savedSemitones = currentEntry?.overrideSemitones ?? 0;
+            const savedCapo = currentEntry?.overrideCapo ?? 0;
+            const overrideChanged = semitones !== savedSemitones || capo !== savedCapo;
+
+            function navigateTo(idx: number) {
+              const entry = plEntries[idx];
+              navigate(`/song/${entry.songId}`, {
+                state: { playlistId, playlistName, entries: plEntries, currentIndex: idx },
+              });
+            }
+
+            async function saveOverride() {
+              if (!currentEntry) return;
+              await updatePlaylistEntry(playlistId, currentEntry.entryId, {
+                overrideSemitones: semitones,
+                overrideCapo: capo,
+              });
+            }
+
+            return (
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
+                <Link
+                  to={`/playlist/${playlistId}`}
+                  className="text-xs text-gray-400 hover:text-indigo-500 transition-colors"
+                >
+                  ← {playlistName}
+                </Link>
+                <div className="flex items-center gap-1 ml-auto">
+                  {overrideChanged && (
+                    <button
+                      onClick={saveOverride}
+                      className="text-xs px-2 py-0.5 rounded border border-indigo-300 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+                    >
+                      Save key/capo
+                    </button>
+                  )}
+                  <button
+                    onClick={() => prevEntry && navigateTo(currentIndex - 1)}
+                    disabled={!prevEntry}
+                    className="text-xs px-2 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors"
+                  >← Prev</button>
+                  <span className="text-xs text-gray-300">{currentIndex + 1}/{plEntries.length}</span>
+                  <button
+                    onClick={() => nextEntry && navigateTo(currentIndex + 1)}
+                    disabled={!nextEntry}
+                    className="text-xs px-2 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors"
+                  >Next →</button>
+                </div>
+              </div>
+            );
+          })()}
+
           <div className="flex items-start justify-between mb-1">
             {/* Left: title + meta */}
             <div>

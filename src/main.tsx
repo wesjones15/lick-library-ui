@@ -15,6 +15,7 @@ import ChordsGalleryPage from './features/chords/ChordsGalleryPage'
 import ChordUploadPage from './features/chords/ChordUploadPage'
 import SongManagePage from './features/songs/SongManagePage'
 import PlaylistsPage from './features/playlists/PlaylistsPage'
+import PlaylistDetailPage from './features/playlists/PlaylistDetailPage'
 import TheoryPage from './features/theory/TheoryPage'
 import LivePage from './features/live/LivePage'
 
@@ -35,6 +36,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/chords" element={<ChordsGalleryPage />} />
             <Route path="/chords/upload" element={<ChordUploadPage />} />
             <Route path="/playlists" element={<PlaylistsPage />} />
+            <Route path="/playlist/:id" element={<PlaylistDetailPage />} />
             <Route path="/theory" element={<TheoryPage />} />
             <Route path="/live" element={<LivePage />} />
           </Route>

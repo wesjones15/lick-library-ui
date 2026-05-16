@@ -219,6 +219,90 @@ export async function uploadChordVoicing(request: UploadChordRequest): Promise<v
   }
 }
 
+// --- Playlists ---
+
+export interface PlaylistSummary { id: string; name: string; songCount: number; }
+
+export interface PlaylistEntry {
+  entryId: string;
+  songId: string;
+  title: string;
+  artist: string | null;
+  position: number;
+  overrideSemitones: number | null;
+  overrideCapo: number | null;
+}
+
+export interface PlaylistDetail { id: string; name: string; entries: PlaylistEntry[]; }
+
+export async function getAllPlaylists(): Promise<PlaylistSummary[]> {
+  const res = await fetch(`${BASE_URL}/playlist`);
+  if (!res.ok) throw new Error('Failed to fetch playlists');
+  return res.json();
+}
+
+export async function createPlaylist(name: string): Promise<PlaylistSummary> {
+  const res = await fetch(`${BASE_URL}/playlist`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+  if (!res.ok) throw new Error('Failed to create playlist');
+  return res.json();
+}
+
+export async function getPlaylist(id: string): Promise<PlaylistDetail> {
+  const res = await fetch(`${BASE_URL}/playlist/${id}`);
+  if (!res.ok) throw new Error('Failed to fetch playlist');
+  return res.json();
+}
+
+export async function deletePlaylist(id: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/playlist/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete playlist');
+}
+
+export async function addPlaylistEntry(
+  playlistId: string,
+  songId: string,
+  overrideSemitones?: number | null,
+  overrideCapo?: number | null,
+): Promise<PlaylistDetail> {
+  const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ songId, overrideSemitones: overrideSemitones ?? null, overrideCapo: overrideCapo ?? null }),
+  });
+  if (!res.ok) throw new Error('Failed to add entry');
+  return res.json();
+}
+
+export async function updatePlaylistEntry(
+  playlistId: string,
+  entryId: string,
+  req: { overrideSemitones?: number | null; overrideCapo?: number | null; position?: number },
+): Promise<PlaylistDetail> {
+  const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  if (!res.ok) throw new Error('Failed to update entry');
+  return res.json();
+}
+
+export async function removePlaylistEntry(playlistId: string, entryId: string): Promise<PlaylistDetail> {
+  const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to remove entry');
+  return res.json();
+}
+
+export async function clearPlaylistEntryOverrides(playlistId: string, entryId: string): Promise<PlaylistDetail> {
+  const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}/overrides`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to clear overrides');
+  return res.json();
+}
+
 // --- Scale ---
 
 export interface ScalePosition { string: number; fret: number; degree: number; note: string; }
