@@ -16,6 +16,21 @@ const FEATURES = [
     title: 'Chord Gallery',
     description: 'Browse and manage CAGED voicings for every chord quality. Upload custom fingerings.',
   },
+  {
+    to: '/playlists',
+    title: 'Playlists',
+    description: 'Organize songs into playlists with per-song key and capo overrides.',
+  },
+  {
+    to: '/theory',
+    title: 'Theory',
+    description: 'Circle of fifths, CAGED shapes, mode reference, and chord progressions.',
+  },
+  {
+    to: '/live',
+    title: 'Live',
+    description: 'Real-time pitch detection with an animated neck and scale overlays.',
+  },
 ];
 
 export default function HomePage() {
