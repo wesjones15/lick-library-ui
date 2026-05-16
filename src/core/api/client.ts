@@ -79,6 +79,7 @@ export interface SongSummary {
   artist: string | null;
   originalKey: string | null;
   canReparse: boolean;
+  tempo: number | null;
 }
 
 export interface SongDetail {

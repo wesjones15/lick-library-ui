@@ -9,6 +9,11 @@ interface Props {
   onReparse?: () => void;
 }
 
+function keyDisplay(key: string | null): string {
+  if (!key) return '';
+  return key.replace('_SHARP', '#').replace('B_FLAT', 'Bb').replace('_FLAT', 'b').replace(/_/g, '');
+}
+
 export default function SongCard({ song, reparsing = false, onReparse }: Props) {
   const navigate = useNavigate();
   const [reparsed, setReparsed] = useState(false);
@@ -24,35 +29,43 @@ export default function SongCard({ song, reparsing = false, onReparse }: Props) 
     }
   }
 
+  const titleClass = song.title.length > 30
+    ? 'text-xs font-semibold text-gray-900 break-words leading-snug'
+    : 'text-sm font-semibold text-gray-900 break-words leading-snug';
+
   return (
     <div
       onClick={() => navigate(`/song/${song.id}`)}
-      className="flex items-center justify-between px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+      className="border border-gray-200 rounded-xl p-3 bg-white cursor-pointer hover:shadow-sm flex flex-col gap-1 min-h-[130px] transition-shadow"
     >
-      <div className="flex flex-col gap-0.5">
-        <span className="text-sm font-medium text-gray-900">{song.title}</span>
-        {song.artist && <span className="text-xs text-gray-500">{song.artist}</span>}
+      <div className="flex-1">
+        <div className={titleClass}>{song.title}</div>
+        {song.artist && <div className="text-xs text-gray-400 mt-0.5">{song.artist}</div>}
       </div>
-      <div className="flex items-center gap-3">
-        {song.originalKey && (
-          <span className="text-xs text-gray-400 font-mono">{song.originalKey.replace('_SHARP', '#').replace('_FLAT', 'b').replace('_', '')}</span>
-        )}
-        {reparsing && song.canReparse && (
+
+      <div className="flex items-center justify-between mt-auto pt-1">
+        <div className="flex items-center gap-2 text-xs text-gray-400 font-mono">
+          {song.originalKey && <span>{keyDisplay(song.originalKey)}</span>}
+          {song.tempo != null && <span>{song.tempo} BPM</span>}
+        </div>
+        <div className="flex items-center gap-2">
+          {reparsing && song.canReparse && (
+            <button
+              onClick={reparsed ? undefined : handleReparse}
+              className={`transition-colors text-base leading-none ${reparsed ? 'text-green-400 cursor-default' : 'text-gray-300 hover:text-indigo-500'}`}
+              aria-label="Re-parse song"
+            >
+              {reparsed ? '✓' : '↺'}
+            </button>
+          )}
           <button
-            onClick={reparsed ? undefined : handleReparse}
-            className={`transition-colors text-base leading-none ${reparsed ? 'text-green-400 cursor-default' : 'text-gray-300 hover:text-indigo-500'}`}
-            aria-label="Re-parse song"
+            onClick={e => { e.stopPropagation(); navigate(`/song/${song.id}/manage`); }}
+            className="text-gray-300 hover:text-indigo-500 transition-colors text-base leading-none"
+            aria-label="Manage song"
           >
-            {reparsed ? '✓' : '↺'}
+            ✎
           </button>
-        )}
-        <button
-          onClick={e => { e.stopPropagation(); navigate(`/song/${song.id}/manage`); }}
-          className="text-gray-300 hover:text-indigo-500 transition-colors text-base leading-none"
-          aria-label="Manage song"
-        >
-          ✎
-        </button>
+        </div>
       </div>
     </div>
   );
