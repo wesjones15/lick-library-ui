@@ -85,7 +85,7 @@ export default function LivePage() {
   const [mode, setMode] = useState('IONIAN');
   const [scaleDots, setScaleDots] = useState<NeckDot[][]>(blankScaleDots);
   const [currentNote, setCurrentNote] = useState<CurrentNote | null>(null);
-  const [highlightedDegree, setHighlightedDegree] = useState<number | null>(null);
+  const [highlightedDegrees, setHighlightedDegrees] = useState<Set<number>>(new Set());
   const [showCaged, setShowCaged] = useState(false);
   const [showPentatonic, setShowPentatonic] = useState(false);
   const [listening, setListening] = useState(false);
@@ -114,7 +114,7 @@ export default function LivePage() {
 
   // For each degree (including same-degree), find exactly 1 closest note within 3.9
   const bestCandidates = useMemo<Map<string, { candidateColor: string; ownNote: boolean }>>(() => {
-    if (!currentNote) return new Map();
+    if (!currentNote || highlightedDegrees.size > 0) return new Map();
     const closestByDegree = new Map<number, { string: number; fret: number; dist: number }>();
     scaleDots.forEach((row, s) => {
       row.forEach((dot, f) => {
@@ -136,9 +136,41 @@ export default function LivePage() {
     return result;
   }, [scaleDots, currentNote]);
 
+  // Neighbors of the own-note (same-degree) candidate — rendered at half brightness
+  const secondCandidates = useMemo<Map<string, { candidateColor: string }>>(() => {
+    if (!currentNote || highlightedDegrees.size > 0) return new Map();
+    let ownPos: { string: number; fret: number } | null = null;
+    bestCandidates.forEach(({ ownNote }, key) => {
+      if (ownNote) {
+        const [s, f] = key.split(',').map(Number);
+        ownPos = { string: s, fret: f };
+      }
+    });
+    if (!ownPos) return new Map();
+    const op = ownPos as { string: number; fret: number };
+    const closestByDegree = new Map<number, { string: number; fret: number; dist: number }>();
+    scaleDots.forEach((row, s) => {
+      row.forEach((dot, f) => {
+        if (!dot.degree) return;
+        if (s === op.string && f === op.fret) return;
+        if (s === currentNote.string && f === currentNote.fret) return;
+        const dist = Math.hypot(f - op.fret, s - op.string);
+        if (dist > 3.9) return;
+        const prev = closestByDegree.get(dot.degree);
+        if (!prev || dist < prev.dist) closestByDegree.set(dot.degree, { string: s, fret: f, dist });
+      });
+    });
+    const result = new Map<string, { candidateColor: string }>();
+    closestByDegree.forEach((pos, degree) => {
+      const key = `${pos.string},${pos.fret}`;
+      if (!bestCandidates.has(key)) result.set(key, { candidateColor: DEGREE_COLORS[degree] });
+    });
+    return result;
+  }, [scaleDots, currentNote, bestCandidates, highlightedDegrees]);
+
   // candidateDegrees: derived from bestCandidates, used for legend highlighting
   const candidateDegrees = useMemo(() => {
-    if (highlightedDegree !== null) return new Set<number>();
+    if (highlightedDegrees.size > 0) return new Set<number>();
     const s = new Set<number>();
     bestCandidates.forEach(({ ownNote }, key) => {
       const [str, fret] = key.split(',').map(Number);
@@ -146,7 +178,7 @@ export default function LivePage() {
       if (deg && !ownNote) s.add(deg);
     });
     return s;
-  }, [bestCandidates, highlightedDegree, scaleDots]);
+  }, [bestCandidates, highlightedDegrees, scaleDots]);
 
   const pentGroupMap = useMemo(
     () => showPentatonic ? getPentatonicGroupMap(mode) : null,
@@ -159,22 +191,24 @@ export default function LivePage() {
       row.map((dot, f) => {
         if (dot.degree === null) return dot;
         const pentatonicGroup = pentGroupMap ? (pentGroupMap[dot.degree] ?? null) : undefined;
-        if (highlightedDegree !== null) {
-          return { ...dot, active: dot.degree === highlightedDegree, candidate: false, pentatonicGroup };
+        if (highlightedDegrees.size > 0) {
+          return { ...dot, active: highlightedDegrees.has(dot.degree!), candidate: false, pentatonicGroup };
         }
         const isActive = currentNote?.string === s && currentNote?.fret === f;
         const candidateInfo = !isActive ? bestCandidates.get(`${s},${f}`) : undefined;
+        const secondInfo = !isActive && !candidateInfo ? secondCandidates.get(`${s},${f}`) : undefined;
         return {
           ...dot,
           active: isActive,
           candidate: !!candidateInfo,
-          candidateColor: candidateInfo?.candidateColor,
+          candidateColor: candidateInfo?.candidateColor ?? secondInfo?.candidateColor,
           ownNote: candidateInfo?.ownNote,
+          secondCandidate: !!secondInfo,
           pentatonicGroup,
         };
       })
     );
-  }, [scaleDots, currentNote, bestCandidates, highlightedDegree, pentGroupMap]);
+  }, [scaleDots, currentNote, bestCandidates, secondCandidates, highlightedDegrees, pentGroupMap]);
 
   function selectNote(s: number, f: number, degree: number) {
     if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
@@ -195,7 +229,7 @@ export default function LivePage() {
   }, [midiNote]);
 
   function handleDotClick(stringIndex: number, fret: number) {
-    setHighlightedDegree(null);
+    if (highlightedDegrees.size > 0) return;
     const dot = scaleDots[stringIndex]?.[fret];
     if (!dot || dot.degree === null) return;
     if (currentNote?.string === stringIndex && currentNote?.fret === fret) {
@@ -283,7 +317,7 @@ export default function LivePage() {
           {intervalLabels.map((label, idx) => {
             const degree = idx + 1;
             const isNoteActive = currentNote?.degree === degree;
-            const isDegreeHighlighted = highlightedDegree === degree;
+            const isDegreeHighlighted = highlightedDegrees.has(degree);
             const isCandidate = candidateDegrees.has(degree);
             const lit = isNoteActive || isDegreeHighlighted || isCandidate;
             return (
@@ -293,7 +327,12 @@ export default function LivePage() {
                 onClick={() => {
                   setCurrentNote(null);
                   if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
-                  setHighlightedDegree(prev => prev === degree ? null : degree);
+                  setHighlightedDegrees(prev => {
+                    const next = new Set(prev);
+                    if (next.has(degree)) next.delete(degree);
+                    else next.add(degree);
+                    return next;
+                  });
                 }}
                 style={{
                   width: 32, height: 32, borderRadius: '50%',
@@ -312,6 +351,14 @@ export default function LivePage() {
               </div>
             );
           })}
+          {highlightedDegrees.size > 0 && (
+            <button
+              onClick={() => setHighlightedDegrees(new Set())}
+              className="px-2 py-1 text-xs rounded border border-gray-300 text-gray-500 hover:bg-gray-50"
+            >
+              Clear
+            </button>
+          )}
         </div>
 
         {micError === 'NotAllowedError' && (

@@ -5,7 +5,8 @@ export interface NeckDot {
   active: boolean;
   candidate?: boolean;
   candidateColor?: string;       // degree color for pulse stroke; replaces hardcoded dark-red
-  ownNote?: boolean;             // same-degree candidate — dimmed relative to other candidates
+  ownNote?: boolean;             // same-degree candidate
+  secondCandidate?: boolean;     // neighbor of the own-note candidate; renders at half brightness
   note?: string;                 // display label, e.g. "C#", "Bb"
   pentatonicGroup?: PentatonicGroup | null; // which of the 3 pentatonic subsets this note belongs to
 }
@@ -78,6 +79,11 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           50%       { stroke-width: 4; }
         }
         .candidate-dot { animation: candidate-stroke 0.8s ease-in-out infinite; }
+        @keyframes active-stroke {
+          0%, 100% { stroke-width: 1; }
+          50%       { stroke-width: 4; }
+        }
+        .active-dot { animation: active-stroke 0.8s ease-in-out infinite; }
       `}</style>
       {/* Tan fretboard backdrop */}
       <rect
@@ -228,37 +234,37 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           const color = DEGREE_COLORS[dot.degree];
           const label = dot.note ?? '';
           const isCandidate = dot.candidate && !dot.active;
+          const isSecondCandidate = !!dot.secondCandidate && !dot.active && !isCandidate;
           const bright = dot.active || isCandidate;
           const textFill = bright ? '#111827' : '#9ca3af';
           const fontSize = dot.active
             ? (label.length > 1 ? 9 : 11)
             : (label.length > 1 ? 7 : 9);
           const si = dataIdx(di);
-          const candidateStroke = isCandidate ? (dot.candidateColor ?? '#800020') : 'none';
+          const candidateStroke = (isCandidate || isSecondCandidate)
+            ? (dot.candidateColor ?? DEGREE_COLORS[dot.degree] ?? '#800020')
+            : 'none';
           return (
             <g
               key={`d${di}-${fret}`}
               onClick={onDotClick ? () => onDotClick(si, fret) : undefined}
               style={onDotClick ? { cursor: 'pointer' } : undefined}
-              opacity={dot.ownNote ? 0.5 : 1}
+              opacity={isSecondCandidate ? 0.5 : 1}
             >
-              {/* active ring: dark outer outline + filled pale yellow (larger than before) */}
-              {dot.active && (
-                <circle cx={cx} cy={cy} r={16} fill="none" stroke="#374151" strokeWidth={1} />
-              )}
+              {/* pale yellow ring — outer border of active pulse */}
               {dot.active && (
                 <circle cx={cx} cy={cy} r={R_RING} fill={ACTIVE_RING_COLOR} />
               )}
-              {/* white backing — larger for candidates to cover stroke bleed */}
-              <circle cx={cx} cy={cy} r={isCandidate ? R_NORMAL + 3 : R_NORMAL} fill="#ffffff" />
-              {/* colored circle — stroke on candidate pulses via CSS */}
+              {/* white backing for inactive dots — dim color stays opaque, not translucent */}
+              {!bright && !isSecondCandidate && <circle cx={cx} cy={cy} r={R_NORMAL} fill="#ffffff" />}
+              {/* colored circle — stroke pulses via CSS for active, candidate, and second candidate */}
               <circle
                 cx={cx} cy={cy} r={R_NORMAL}
-                fill={color} opacity={bright ? 1 : 0.4}
-                stroke={candidateStroke}
-                strokeWidth={isCandidate ? 1 : 0}
-                style={isCandidate ? { stroke: candidateStroke } : undefined}
-                className={isCandidate ? 'candidate-dot' : undefined}
+                fill={color} opacity={bright || isSecondCandidate ? 1 : 0.4}
+                stroke={dot.active ? color : candidateStroke}
+                strokeWidth={dot.active || isCandidate || isSecondCandidate ? 1 : 0}
+                style={dot.active ? { stroke: color } : ((isCandidate || isSecondCandidate) ? { stroke: candidateStroke } : undefined)}
+                className={dot.active ? 'active-dot' : ((isCandidate || isSecondCandidate) ? 'candidate-dot' : undefined)}
               />
               {/* Pentatonic group ring — thin colored ring just outside the dot */}
               {dot.pentatonicGroup && PENT_COLORS[dot.pentatonicGroup] && (
