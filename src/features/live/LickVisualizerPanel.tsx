@@ -178,6 +178,8 @@ export default function LickVisualizerPanel() {
   const [speedMode, setSpeedMode] = useState<'fixed' | 'metronome'>('fixed');
   const [isRunning, setIsRunning] = useState(false);
   const [lickSource, setLickSource] = useState<LickSource>('none');
+  const [savedInputKey, setSavedInputKey] = useState<string | undefined>(undefined);
+  const [savedMode, setSavedMode] = useState<string | undefined>(undefined);
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -236,14 +238,14 @@ export default function LickVisualizerPanel() {
     setSaveLoading(true);
     setSaveError(null);
     try {
-      await uploadLick({ rawTab });
+      await uploadLick({ rawTab, inputKey: savedInputKey, mode: savedMode });
       setLickSource('library');
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Save failed');
     } finally {
       setSaveLoading(false);
     }
-  }, [rawTab]);
+  }, [rawTab, savedInputKey, savedMode]);
 
   const handleSaveBuiltLick = useCallback(async () => {
     if (!builtTabText.trim()) return;
@@ -251,7 +253,7 @@ export default function LickVisualizerPanel() {
     setBuildSaveError(null);
     try {
       const normalized = normalizeTab(builtTabText);
-      await uploadLick({ rawTab: normalized });
+      await uploadLick({ rawTab: normalized, inputKey: savedInputKey, mode: savedMode });
       setRawTab(normalized);
       analyzeTab(normalized);
       setLickSource('library');
@@ -263,7 +265,7 @@ export default function LickVisualizerPanel() {
     } finally {
       setBuildSaveLoading(false);
     }
-  }, [builtTabText, analyzeTab]);
+  }, [builtTabText, analyzeTab, savedInputKey, savedMode]);
 
   const dots = useMemo(() => {
     if (columns.length === 0) return blankDots();
@@ -484,9 +486,11 @@ export default function LickVisualizerPanel() {
       {showNewLick && (
         <LickInputModal
           title="New Lick"
-          onVisualize={tab => {
+          onVisualize={(tab, inputKey, mode) => {
             const normalized = normalizeTab(tab);
             setRawTab(normalized);
+            setSavedInputKey(inputKey);
+            setSavedMode(mode);
             setShowNewLick(false);
             analyzeTab(normalized);
             setLickSource('new');
@@ -499,9 +503,11 @@ export default function LickVisualizerPanel() {
         <LickInputModal
           title="Edit Lick"
           initialTab={rawTab}
-          onVisualize={tab => {
+          onVisualize={(tab, inputKey, mode) => {
             const normalized = normalizeTab(tab);
             setRawTab(normalized);
+            setSavedInputKey(inputKey);
+            setSavedMode(mode);
             setShowEditLick(false);
             analyzeTab(normalized);
             setLickSource('modified');

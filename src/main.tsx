@@ -18,6 +18,9 @@ import PlaylistsPage from './features/playlists/PlaylistsPage'
 import PlaylistDetailPage from './features/playlists/PlaylistDetailPage'
 import TheoryPage from './features/theory/TheoryPage'
 import LivePage from './features/live/LivePage'
+import LickVisualizerPage from './features/licks/LickVisualizerPage'
+import LickLibraryPage from './features/licks/LickLibraryPage'
+import ChordsTheoryPage from './features/chords/ChordsTheoryPage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -39,6 +42,9 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/playlist/:id" element={<PlaylistDetailPage />} />
             <Route path="/theory" element={<TheoryPage />} />
             <Route path="/live" element={<LivePage />} />
+            <Route path="/lick/visualizer" element={<LickVisualizerPage />} />
+            <Route path="/licks/library" element={<LickLibraryPage />} />
+            <Route path="/chords/theory" element={<ChordsTheoryPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

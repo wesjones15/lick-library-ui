@@ -1,69 +1,28 @@
-import { useState, useEffect } from 'react';
-import { getAllLicks, deleteLick } from '../../core/api/client';
-import type { LickSummary } from '../../core/api/client';
-import LickList from './LickList';
+import { Link } from 'react-router-dom';
 import LickUploadForm from './LickUploadForm';
-import InstrumentSelector from '../../components/InstrumentSelector';
-import { useInstrument } from '../../core/useInstrument';
+
+const navBtnClass = 'px-5 py-2.5 text-sm font-medium rounded-lg border transition-colors border-gray-300 text-gray-700 hover:bg-gray-50';
 
 export default function LicksPage() {
-  const [licks, setLicks] = useState<LickSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { instrument, customTuning, setInstrument, setCustomTuning } = useInstrument();
-
-  const fetchLicks = async () => {
-    try {
-      setError(null);
-      const data = await getAllLicks();
-      setLicks(data);
-    } catch {
-      setError('Could not connect to backend. Is it running on port 8080?');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteLick(id);
-      fetchLicks();
-    } catch {
-      setError('Failed to delete lick.');
-    }
-  };
-
-  useEffect(() => { fetchLicks(); }, []);
-
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Lick Library</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Licks</h1>
 
       <section className="mb-10">
         <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
           Upload a Lick
         </h2>
-        <LickUploadForm onSuccess={fetchLicks} />
+        <LickUploadForm onSuccess={() => {}} />
       </section>
 
-      <div className="mb-6 flex items-start gap-3">
-        <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest pt-2.5">Instrument</span>
-        <InstrumentSelector
-          instrument={instrument}
-          customTuning={customTuning}
-          onInstrumentChange={setInstrument}
-          onCustomTuningChange={setCustomTuning}
-        />
+      <div className="flex gap-3">
+        <Link to="/licks/library" className={navBtnClass}>
+          Lick Library
+        </Link>
+        <Link to="/lick/visualizer" className={navBtnClass}>
+          Lick Visualizer
+        </Link>
       </div>
-
-      <section>
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
-          Library
-        </h2>
-        {loading && <p className="text-gray-400 text-sm">Loading…</p>}
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        {!loading && !error && <LickList licks={licks} onDelete={handleDelete} />}
-      </section>
     </div>
   );
 }

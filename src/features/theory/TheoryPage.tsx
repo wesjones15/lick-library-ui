@@ -1,5 +1,5 @@
-import { Navigate } from 'react-router-dom';
+import LivePage from '../live/LivePage';
 
 export default function TheoryPage() {
-  return <Navigate to="/live?mode=chords" replace />;
+  return <LivePage pageMode="theory" />;
 }

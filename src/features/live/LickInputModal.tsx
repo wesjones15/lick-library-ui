@@ -1,5 +1,22 @@
 import { useState, useRef, useLayoutEffect } from 'react';
 
+const MODES = ['IONIAN', 'DORIAN', 'PHRYGIAN', 'LYDIAN', 'MIXOLYDIAN', 'AEOLIAN', 'LOCRIAN'];
+
+const INPUT_KEYS = [
+  { value: 'C',       label: 'C'  },
+  { value: 'C_SHARP', label: 'C#' },
+  { value: 'D',       label: 'D'  },
+  { value: 'D_SHARP', label: 'D#' },
+  { value: 'E',       label: 'E'  },
+  { value: 'F',       label: 'F'  },
+  { value: 'F_SHARP', label: 'F#' },
+  { value: 'G',       label: 'G'  },
+  { value: 'G_SHARP', label: 'G#' },
+  { value: 'A',       label: 'A'  },
+  { value: 'B_FLAT',  label: 'Bb' },
+  { value: 'B',       label: 'B'  },
+];
+
 const EMPTY_TAB =
   'e|----------------|\n' +
   'B|----------------|\n' +
@@ -28,12 +45,14 @@ function isProtected(str: string, pos: number): boolean {
 interface Props {
   title: string;
   initialTab?: string;
-  onVisualize: (rawTab: string) => void;
+  onVisualize: (rawTab: string, inputKey?: string, mode?: string) => void;
   onClose: () => void;
 }
 
 export default function LickInputModal({ title, initialTab, onVisualize, onClose }: Props) {
   const [rawTab, setRawTab] = useState(initialTab ?? EMPTY_TAB);
+  const [inputKey, setInputKey] = useState('');
+  const [mode, setMode] = useState('');
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const nextCursorRef = useRef<number | null>(null);
@@ -107,6 +126,30 @@ export default function LickInputModal({ title, initialTab, onVisualize, onClose
             rows={7}
             className="w-full font-mono text-sm border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:border-indigo-400 bg-gray-50"
           />
+          <div className="flex gap-2 mt-3">
+            <select
+              value={inputKey}
+              onChange={e => setInputKey(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400 flex-1"
+            >
+              <option value="">Root: first note</option>
+              {INPUT_KEYS.map(k => (
+                <option key={k.value} value={k.value}>{k.label}</option>
+              ))}
+            </select>
+            <select
+              value={mode}
+              onChange={e => setMode(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400 flex-1"
+            >
+              <option value="">Auto-detect mode</option>
+              {MODES.map(m => (
+                <option key={m} value={m}>
+                  {m.charAt(0) + m.slice(1).toLowerCase()}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="flex justify-end gap-2 mt-3">
             <button
               onClick={onClose}
@@ -115,7 +158,7 @@ export default function LickInputModal({ title, initialTab, onVisualize, onClose
               Cancel
             </button>
             <button
-              onClick={() => onVisualize(rawTab)}
+              onClick={() => onVisualize(rawTab, inputKey || undefined, mode || undefined)}
               disabled={!hasNotes}
               className="px-5 py-2 text-sm rounded-lg bg-indigo-600 text-white border border-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >

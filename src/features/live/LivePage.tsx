@@ -1,14 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
 import { getPentatonicDegree, getPentatonicNoteSet, ROOT_CHROMATIC } from './cagedUtils';
 import PentatonicWidget from './PentatonicWidget';
-import LickVisualizerPanel from './LickVisualizerPanel';
-import ChordsProgressionPanel from './ChordsProgressionPanel';
 import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
-
-type ViewMode = 'live' | 'lick' | 'chords';
 
 const STRING_COUNT = 6;
 const FRET_COUNT = 12;
@@ -61,7 +56,6 @@ function blankScaleDots(): NeckDot[][] {
   );
 }
 
-
 function midiToPositions(midi: number): Array<{ string: number; fret: number }> {
   const result: Array<{ string: number; fret: number }> = [];
   for (let s = 0; s < STRING_COUNT; s++) {
@@ -76,13 +70,11 @@ const btnClass = 'px-4 py-2 text-sm rounded-lg border transition-colors';
 
 interface CurrentNote { string: number; fret: number; degree: number; }
 
-export default function LivePage() {
-  const [searchParams] = useSearchParams();
-  const [viewMode, setViewMode] = useState<ViewMode>(() => {
-    const param = searchParams.get('mode');
-    return (param === 'lick' || param === 'chords') ? param : 'live';
-  });
+interface LivePageProps {
+  pageMode?: 'live' | 'theory';
+}
 
+export default function LivePage({ pageMode = 'live' }: LivePageProps) {
   const [root, setRoot] = useState('C');
   const [mode, setMode] = useState('IONIAN');
   const [scaleDots, setScaleDots] = useState<NeckDot[][]>(blankScaleDots);
@@ -95,9 +87,8 @@ export default function LivePage() {
   const [listening, setListening] = useState(false);
   const noteHoldTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { midiNote, error: micError } = usePitchDetection(listening);
+  const { midiNote, error: micError } = usePitchDetection(pageMode === 'live' && listening);
 
-  // Fetch scale overlay when key/mode changes
   useEffect(() => {
     if (!root) { setScaleDots(blankScaleDots()); return; }
     getScalePositions(root, mode).then(res => {
@@ -116,12 +107,10 @@ export default function LivePage() {
     }).catch(() => {});
   }, [root, mode]);
 
-  // Keep pentWidgetMode in sync with Live toolbar mode unless user has detached it
   useEffect(() => {
     if (pentModeSynced) setPentWidgetMode(mode);
   }, [mode, pentModeSynced]);
 
-  // Top-3 candidates per degree, sorted by distance from currentNote within 3.9 units
   const allCandidates = useMemo<{
     best: Map<string, { candidateColor: string; ownNote: boolean }>;
     second: Map<string, { candidateColor: string }>;
@@ -163,7 +152,6 @@ export default function LivePage() {
   const secondCandidates = allCandidates.second;
   const thirdCandidates = allCandidates.third;
 
-  // candidateDegrees: derived from bestCandidates, used for legend highlighting
   const candidateDegrees = useMemo(() => {
     if (highlightedDegrees.size > 0) return new Set<number>();
     const s = new Set<number>();
@@ -175,9 +163,6 @@ export default function LivePage() {
     return s;
   }, [allCandidates, highlightedDegrees, scaleDots]);
 
-  // Pentatonic keys recognized from the current toolbar interval selection.
-  // 'partial' = all selected notes fit within this pent (not ruled out yet).
-  // 'full'    = all 5 pent notes are covered by the selection.
   const recognizedPentKeys = useMemo<Map<string, 'partial' | 'full'>>(() => {
     if (highlightedDegrees.size < 2 || !root) return new Map();
     const rootIdx = ROOT_CHROMATIC[root] ?? 0;
@@ -207,11 +192,9 @@ export default function LivePage() {
     return result;
   }, [highlightedDegrees, root, mode, pentWidgetMode]);
 
-  // Derived dots: overlay active + candidate state onto scale dots
   const dots = useMemo<NeckDot[][]>(() => {
     return scaleDots.map((row, s) =>
       row.map((dot, f) => {
-        // Pentatonic ring overlay
         let pentatonicRings: string[] | undefined;
         let pentatonicOutOfScale: boolean | undefined;
 
@@ -260,7 +243,6 @@ export default function LivePage() {
     noteHoldTimer.current = setTimeout(() => setCurrentNote(null), 3000);
   }
 
-  // Mic pitch → select matching in-scale note
   useEffect(() => {
     if (midiNote === null) return;
     const positions = midiToPositions(midiNote);
@@ -286,12 +268,6 @@ export default function LivePage() {
 
   const intervalLabels = MODE_INTERVALS[mode] ?? [];
 
-  const VIEW_MODES: { id: ViewMode; label: string }[] = [
-    { id: 'live',   label: 'Live'   },
-    { id: 'lick',   label: 'Lick'   },
-    { id: 'chords', label: 'Chords' },
-  ];
-
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       <style>{`
@@ -304,59 +280,41 @@ export default function LivePage() {
 
       {/* Top toolbar */}
       <div className="flex items-center gap-4 mb-4 flex-wrap">
-        <h1 className="text-3xl font-bold text-gray-900">Live</h1>
+        <h1 className="text-3xl font-bold text-gray-900">
+          {pageMode === 'theory' ? 'Theory' : 'Live'}
+        </h1>
 
-        {/* Key + Mode selectors: visible in live and chords modes */}
-        {(viewMode === 'live' || viewMode === 'chords') && (<>
-          <select className={selectClass} value={root} onChange={e => { setRoot(e.target.value); }}>
-            <option value="">— Key —</option>
-            {NOTE_KEYS.map(k => (
-              <option key={k.value} value={k.value}>{k.label}</option>
-            ))}
-          </select>
-          <select className={selectClass} value={mode} onChange={e => setMode(e.target.value)}>
-            {MODES.map(m => (
-              <option key={m.value} value={m.value}>{m.label}</option>
-            ))}
-          </select>
-        </>)}
-
-        {/* Mic button: live mode only */}
-        {viewMode === 'live' && (<>
-          <button
-            className={`${btnClass} ${listening
-              ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
-              : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-            onClick={() => setListening(l => !l)}
-          >
-            {listening ? '⏹ Stop' : '🎙 Listen'}
-          </button>
-          {listening && !micError && (
-            <span className="text-sm text-green-600 animate-pulse">● Listening</span>
-          )}
-        </>)}
-
-        {/* View mode pill buttons — right-aligned */}
-        <div className="ml-auto flex rounded-lg overflow-hidden border border-gray-300">
-          {VIEW_MODES.map(vm => (
-            <button
-              key={vm.id}
-              onClick={() => setViewMode(vm.id)}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
-                viewMode === vm.id
-                  ? 'bg-gray-800 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              } ${vm.id !== 'live' ? 'border-l border-gray-300' : ''}`}
-            >
-              {vm.label}
-            </button>
+        <select className={selectClass} value={root} onChange={e => setRoot(e.target.value)}>
+          <option value="">— Key —</option>
+          {NOTE_KEYS.map(k => (
+            <option key={k.value} value={k.value}>{k.label}</option>
           ))}
-        </div>
+        </select>
+        <select className={selectClass} value={mode} onChange={e => setMode(e.target.value)}>
+          {MODES.map(m => (
+            <option key={m.value} value={m.value}>{m.label}</option>
+          ))}
+        </select>
+
+        {pageMode === 'live' && (
+          <>
+            <button
+              className={`${btnClass} ${listening
+                ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
+                : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+              onClick={() => setListening(l => !l)}
+            >
+              {listening ? '⏹ Stop' : '🎙 Listen'}
+            </button>
+            {listening && !micError && (
+              <span className="text-sm text-green-600 animate-pulse">● Listening</span>
+            )}
+          </>
+        )}
       </div>
 
-      {/* Live mode content */}
-      {viewMode === 'live' && (<>
-        {/* Interval key legend — clickable bubbles highlight all notes of that degree */}
+      {/* Interval legend: theory mode only */}
+      {pageMode === 'theory' && (
         <div className="flex gap-2 items-center flex-wrap mb-6">
           {intervalLabels.map((label, idx) => {
             const degree = idx + 1;
@@ -404,23 +362,27 @@ export default function LivePage() {
             </button>
           )}
         </div>
+      )}
 
-        {micError === 'NotAllowedError' && (
-          <p className="text-sm text-red-500 mb-4">Mic access denied. Allow microphone permission and try again.</p>
-        )}
-        {micError === 'NotFoundError' && (
-          <p className="text-sm text-red-500 mb-4">No microphone found.</p>
-        )}
-        {micError === 'NotSecureContext' && (
-          <p className="text-sm text-red-500 mb-4">Mic requires a secure connection (HTTPS). Try accessing the app via HTTPS, or on the same device as the server.</p>
-        )}
+      {/* Mic errors: live mode only */}
+      {pageMode === 'live' && micError === 'NotAllowedError' && (
+        <p className="text-sm text-red-500 mb-4">Mic access denied. Allow microphone permission and try again.</p>
+      )}
+      {pageMode === 'live' && micError === 'NotFoundError' && (
+        <p className="text-sm text-red-500 mb-4">No microphone found.</p>
+      )}
+      {pageMode === 'live' && micError === 'NotSecureContext' && (
+        <p className="text-sm text-red-500 mb-4">Mic requires a secure connection (HTTPS). Try accessing the app via HTTPS, or on the same device as the server.</p>
+      )}
 
-        <GuitarNeck
-          dots={dots}
-          fretCount={FRET_COUNT}
-          onDotClick={handleDotClick}
-        />
+      <GuitarNeck
+        dots={dots}
+        fretCount={FRET_COUNT}
+        onDotClick={pageMode === 'theory' ? handleDotClick : undefined}
+      />
 
+      {/* Pentatonic widget: theory mode only */}
+      {pageMode === 'theory' && (
         <PentatonicWidget
           activePentKeys={activePentKeys}
           pentWidgetMode={pentWidgetMode}
@@ -433,14 +395,6 @@ export default function LivePage() {
           show={showPentatonicWidget}
           onToggle={() => setShowPentatonicWidget(v => !v)}
         />
-      </>)}
-
-      {/* Lick Visualizer mode */}
-      {viewMode === 'lick' && <LickVisualizerPanel />}
-
-      {/* Chords/Progressions mode */}
-      {viewMode === 'chords' && (
-        <ChordsProgressionPanel initialRoot={root} initialMode={mode} />
       )}
     </div>
   );

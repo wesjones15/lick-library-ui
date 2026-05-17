@@ -81,6 +81,14 @@ export default function ChordsGalleryPage() {
           <KeySelector value={root} onChange={setRoot} />
           {!manageMode && (
             <button
+              onClick={() => navigate('/chords/theory')}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+            >
+              Chord Theory
+            </button>
+          )}
+          {!manageMode && (
+            <button
               onClick={() => navigate('/chords/upload')}
               className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50"
             >
