@@ -40,6 +40,62 @@ const SHAPE_ORDER: Array<{ shape: CagedZone['shape']; offset: number }> = [
   { shape: 'G', offset:  5 },
 ];
 
+// Pentatonic group membership by scale degree for each mode.
+// The 3 pentatonic subsets within a diatonic key are built on scale degrees I, IV, V.
+// Group 1 = I pentatonic (degrees 1,2,3,5,6)
+// Group 2 = IV pentatonic (degrees 4,5,6,1,2 relative to IV — mapped back to scale: 4,5,6,1,2)
+// Group 3 = V pentatonic  (degrees 5,6,7,2,3 relative to V — mapped back to scale: 5,6,7,2,3)
+// When a degree belongs to multiple groups, the first (lowest-numbered) group is assigned.
+//
+// Ionian  (1 2 3 4 5 6 7):
+//   1: G1,G2  2: G1,G3  3: G1,G3  4: G2  5: G1,G2,G3  6: G1,G2  7: G3
+// Primary assignment: 1→1, 2→1, 3→1, 4→2, 5→1, 6→1, 7→3
+//
+// For other modes, the interval layout shifts the I/IV/V positions.
+// We compute at runtime: find which scale degrees land on steps 1,4,5 of the mode.
+//
+// Mode interval sequences (semitones from root, 7 values):
+const MODE_SEMITONES: Record<string, number[]> = {
+  IONIAN:     [0, 2, 4, 5, 7, 9, 11],
+  DORIAN:     [0, 2, 3, 5, 7, 9, 10],
+  PHRYGIAN:   [0, 1, 3, 5, 7, 8, 10],
+  LYDIAN:     [0, 2, 4, 6, 7, 9, 11],
+  MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10],
+  AEOLIAN:    [0, 2, 3, 5, 7, 8, 10],
+  LOCRIAN:    [0, 1, 3, 5, 6, 8, 10],
+};
+
+// Major pentatonic intervals from a root (semitones): 0,2,4,7,9
+const PENT_INTERVALS = new Set([0, 2, 4, 7, 9]);
+
+export type PentatonicGroup = 1 | 2 | 3;
+
+// Returns for each scale degree (1-7) which pentatonic group it primarily belongs to, or null.
+// Group 1 = pentatonic built on degree 1 of the mode
+// Group 2 = pentatonic built on degree 4 (IV)
+// Group 3 = pentatonic built on degree 5 (V)
+export function getPentatonicGroupMap(mode: string): Record<number, PentatonicGroup | null> {
+  const semitones = MODE_SEMITONES[mode] ?? MODE_SEMITONES.IONIAN;
+  // Roots of the 3 pentatonics (in semitones from key root):
+  const pentRoots = [semitones[0], semitones[3], semitones[4]]; // I, IV, V
+
+  const result: Record<number, PentatonicGroup | null> = {};
+  for (let di = 0; di < 7; di++) {
+    const degree = di + 1;
+    const noteSemitone = semitones[di];
+    let assigned: PentatonicGroup | null = null;
+    for (let g = 0; g < 3; g++) {
+      const interval = (noteSemitone - pentRoots[g] + 12) % 12;
+      if (PENT_INTERVALS.has(interval)) {
+        assigned = (g + 1) as PentatonicGroup;
+        break;
+      }
+    }
+    result[degree] = assigned;
+  }
+  return result;
+}
+
 export function getCagedZones(root: string): CagedZone[] {
   const R = ROOT_INDEX[root] ?? 0;
   const zones: CagedZone[] = [];

@@ -1,12 +1,13 @@
-import type { CagedZone } from './cagedUtils';
+import type { CagedZone, PentatonicGroup } from './cagedUtils';
 
 export interface NeckDot {
   degree: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null;
   active: boolean;
   candidate?: boolean;
-  candidateColor?: string; // degree color for pulse stroke; replaces hardcoded dark-red
-  ownNote?: boolean;       // same-degree candidate — dimmed relative to other candidates
-  note?: string;           // display label, e.g. "C#", "Bb"
+  candidateColor?: string;       // degree color for pulse stroke; replaces hardcoded dark-red
+  ownNote?: boolean;             // same-degree candidate — dimmed relative to other candidates
+  note?: string;                 // display label, e.g. "C#", "Bb"
+  pentatonicGroup?: PentatonicGroup | null; // which of the 3 pentatonic subsets this note belongs to
 }
 
 interface GuitarNeckProps {
@@ -29,6 +30,7 @@ export const DEGREE_COLORS: Record<number, string> = {
 };
 const OFF_SCALE_COLOR = '#d1d5db';
 const ACTIVE_RING_COLOR = '#fef08a';
+const PENT_COLORS: Record<number, string> = { 1: '#f59e0b', 2: '#14b8a6', 3: '#a855f7' };
 
 const STRING_LABELS = ['e', 'B', 'G', 'D', 'A', 'E']; // display top → bottom
 const STRING_COUNT = 6;
@@ -258,6 +260,17 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
                 style={isCandidate ? { stroke: candidateStroke } : undefined}
                 className={isCandidate ? 'candidate-dot' : undefined}
               />
+              {/* Pentatonic group ring — thin colored ring just outside the dot */}
+              {dot.pentatonicGroup && PENT_COLORS[dot.pentatonicGroup] && (
+                <circle
+                  cx={cx} cy={cy} r={11.5}
+                  fill="none"
+                  stroke={PENT_COLORS[dot.pentatonicGroup]}
+                  strokeWidth={2}
+                  opacity={bright ? 0.9 : 0.6}
+                  style={{ pointerEvents: 'none' }}
+                />
+              )}
               <text
                 x={cx}
                 y={cy + fontSize * 0.38}

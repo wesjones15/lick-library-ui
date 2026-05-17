@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
-import { getCagedZones } from './cagedUtils';
+import { getCagedZones, getPentatonicGroupMap } from './cagedUtils';
 import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
 
@@ -85,6 +85,7 @@ export default function LivePage() {
   const [currentNote, setCurrentNote] = useState<CurrentNote | null>(null);
   const [highlightedDegree, setHighlightedDegree] = useState<number | null>(null);
   const [showCaged, setShowCaged] = useState(false);
+  const [showPentatonic, setShowPentatonic] = useState(false);
   const [listening, setListening] = useState(false);
   const noteHoldTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -145,13 +146,19 @@ export default function LivePage() {
     return s;
   }, [bestCandidates, highlightedDegree, scaleDots]);
 
-  // Derived dots: overlay active + candidate state; highlightedDegree overrides all
+  const pentGroupMap = useMemo(
+    () => showPentatonic ? getPentatonicGroupMap(mode) : null,
+    [showPentatonic, mode]
+  );
+
+  // Derived dots: overlay active + candidate + pentatonic group onto scale dots
   const dots = useMemo<NeckDot[][]>(() => {
     return scaleDots.map((row, s) =>
       row.map((dot, f) => {
         if (dot.degree === null) return dot;
+        const pentatonicGroup = pentGroupMap ? (pentGroupMap[dot.degree] ?? null) : undefined;
         if (highlightedDegree !== null) {
-          return { ...dot, active: dot.degree === highlightedDegree, candidate: false };
+          return { ...dot, active: dot.degree === highlightedDegree, candidate: false, pentatonicGroup };
         }
         const isActive = currentNote?.string === s && currentNote?.fret === f;
         const candidateInfo = !isActive ? bestCandidates.get(`${s},${f}`) : undefined;
@@ -161,10 +168,11 @@ export default function LivePage() {
           candidate: !!candidateInfo,
           candidateColor: candidateInfo?.candidateColor,
           ownNote: candidateInfo?.ownNote,
+          pentatonicGroup,
         };
       })
     );
-  }, [scaleDots, currentNote, bestCandidates, highlightedDegree]);
+  }, [scaleDots, currentNote, bestCandidates, highlightedDegree, pentGroupMap]);
 
   function selectNote(s: number, f: number, degree: number) {
     if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
@@ -323,6 +331,14 @@ export default function LivePage() {
               : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
           >
             CAGED Zones
+          </button>
+          <button
+            onClick={() => setShowPentatonic(v => !v)}
+            className={`${btnClass} text-xs ${showPentatonic
+              ? 'bg-gray-800 text-white border-gray-800'
+              : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+          >
+            Pent. Sets
           </button>
         </div>
 
