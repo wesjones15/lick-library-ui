@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
-import { getCagedZones, getPentatonicDegree } from './cagedUtils';
+import { getCagedZones, getPentatonicDegree, getPentatonicNoteSet, ROOT_CHROMATIC } from './cagedUtils';
 import PentatonicWidget from './PentatonicWidget';
 import LickVisualizerPanel from './LickVisualizerPanel';
 import ChordsProgressionPanel from './ChordsProgressionPanel';
@@ -188,6 +188,33 @@ export default function LivePage() {
     });
     return s;
   }, [bestCandidates, highlightedDegrees, scaleDots]);
+
+  // Pentatonic keys that are fully covered by the current toolbar interval selection
+  const recognizedPentKeys = useMemo<Set<string>>(() => {
+    if (highlightedDegrees.size < 5 || !root) return new Set();
+    const rootIdx = ROOT_CHROMATIC[root] ?? 0;
+    const liveSemis = ((): number[] => {
+      const semMap: Record<string, number[]> = {
+        IONIAN:     [0,2,4,5,7,9,11],
+        DORIAN:     [0,2,3,5,7,9,10],
+        PHRYGIAN:   [0,1,3,5,7,8,10],
+        LYDIAN:     [0,2,4,6,7,9,11],
+        MIXOLYDIAN: [0,2,4,5,7,9,10],
+        AEOLIAN:    [0,2,3,5,7,8,10],
+        LOCRIAN:    [0,1,3,5,6,8,10],
+      };
+      return semMap[mode] ?? semMap.IONIAN;
+    })();
+    const selectedChromatic = new Set(
+      Array.from(highlightedDegrees).map(d => (rootIdx + liveSemis[d - 1]) % 12)
+    );
+    const result = new Set<string>();
+    for (const key of Object.keys(ROOT_CHROMATIC)) {
+      const pentNotes = getPentatonicNoteSet(key, pentWidgetMode);
+      if ([...pentNotes].every(n => selectedChromatic.has(n))) result.add(key);
+    }
+    return result;
+  }, [highlightedDegrees, root, mode, pentWidgetMode]);
 
   // Derived dots: overlay active + candidate state onto scale dots
   const dots = useMemo<NeckDot[][]>(() => {
@@ -417,7 +444,7 @@ export default function LivePage() {
           activePentKeys={activePentKeys}
           pentWidgetMode={pentWidgetMode}
           pentModeSynced={pentModeSynced}
-          recognizedPentKeys={new Set()}
+          recognizedPentKeys={recognizedPentKeys}
           onKeyToggle={key => setActivePentKeys(prev =>
             prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
           )}
