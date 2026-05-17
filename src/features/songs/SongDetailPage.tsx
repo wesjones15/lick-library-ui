@@ -351,6 +351,17 @@ export default function SongDetailPage() {
             <div className="flex items-center gap-2 md:gap-4">
 
               {/* Desktop (md+): named text buttons */}
+              {hasTabLines && (
+                <button
+                  onClick={handleTabLicksToggle}
+                  disabled={reparsing}
+                  className={`hidden md:flex w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? 'border-red-300 bg-red-50 text-red-500' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+                  aria-label="Tab positions (experimental)"
+                  title="Tab positions (experimental)"
+                >
+                  {reparsing ? '…' : '≡'}
+                </button>
+              )}
               <button
                 onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
                 className={`hidden md:flex ${stubBtnClass(viewMode === 'scroll')} flex-col items-center w-14`}
@@ -379,19 +390,19 @@ export default function SongDetailPage() {
               >
                 ✎
               </button>
+
+              {/* Landscape (sm–md): icon buttons */}
               {hasTabLines && (
                 <button
                   onClick={handleTabLicksToggle}
                   disabled={reparsing}
-                  className={`hidden md:flex w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+                  className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? 'border-red-300 bg-red-50 text-red-500' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
                   aria-label="Tab positions (experimental)"
                   title="Tab positions (experimental)"
                 >
                   {reparsing ? '…' : '≡'}
                 </button>
               )}
-
-              {/* Landscape (sm–md): icon buttons */}
               <button
                 onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
                 className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs transition-colors ${viewMode === 'scroll' ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
@@ -423,17 +434,6 @@ export default function SongDetailPage() {
               >
                 ✎
               </button>
-              {hasTabLines && (
-                <button
-                  onClick={handleTabLicksToggle}
-                  disabled={reparsing}
-                  className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
-                  aria-label="Tab positions (experimental)"
-                  title="Tab positions (experimental)"
-                >
-                  {reparsing ? '…' : '≡'}
-                </button>
-              )}
 
               {/* Portrait (<sm): hamburger ⋮ */}
               <div ref={overflowRef} className="relative sm:hidden">
@@ -474,7 +474,7 @@ export default function SongDetailPage() {
                       <button
                         onClick={() => { handleTabLicksToggle(); setOverflowOpen(false); }}
                         disabled={reparsing}
-                        className={`px-4 py-2 text-sm text-left transition-colors disabled:opacity-40 ${showTabLicks ? 'text-indigo-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                        className={`px-4 py-2 text-sm text-left transition-colors disabled:opacity-40 ${showTabLicks ? 'text-red-500' : 'text-gray-600 hover:bg-gray-50'}`}
                       >
                         {reparsing ? 'Detecting tabs…' : showTabLicks ? 'Tab positions: on' : 'Tab positions'}
                       </button>
