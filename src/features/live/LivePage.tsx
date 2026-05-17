@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
-import { getCagedZones, getPentatonicGroupMap } from './cagedUtils';
+import { getCagedZones } from './cagedUtils';
+import PentatonicWidget from './PentatonicWidget';
 import LickVisualizerPanel from './LickVisualizerPanel';
 import ChordsProgressionPanel from './ChordsProgressionPanel';
 import { getScalePositions } from '../../core/api/client';
@@ -87,7 +88,10 @@ export default function LivePage() {
   const [currentNote, setCurrentNote] = useState<CurrentNote | null>(null);
   const [highlightedDegrees, setHighlightedDegrees] = useState<Set<number>>(new Set());
   const [showCaged, setShowCaged] = useState(false);
-  const [showPentatonic, setShowPentatonic] = useState(false);
+  const [showPentatonicWidget, setShowPentatonicWidget] = useState(false);
+  const [activePentKeys, setActivePentKeys] = useState<string[]>([]);
+  const [pentWidgetMode, setPentWidgetMode] = useState(mode);
+  const [pentModeSynced, setPentModeSynced] = useState(true);
   const [listening, setListening] = useState(false);
   const noteHoldTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -111,6 +115,11 @@ export default function LivePage() {
       setCurrentNote(null);
     }).catch(() => {});
   }, [root, mode]);
+
+  // Keep pentWidgetMode in sync with Live toolbar mode unless user has detached it
+  useEffect(() => {
+    if (pentModeSynced) setPentWidgetMode(mode);
+  }, [mode, pentModeSynced]);
 
   // For each degree (including same-degree), find exactly 1 closest note within 3.9
   const bestCandidates = useMemo<Map<string, { candidateColor: string; ownNote: boolean }>>(() => {
@@ -180,19 +189,13 @@ export default function LivePage() {
     return s;
   }, [bestCandidates, highlightedDegrees, scaleDots]);
 
-  const pentGroupMap = useMemo(
-    () => showPentatonic ? getPentatonicGroupMap(mode) : null,
-    [showPentatonic, mode]
-  );
-
-  // Derived dots: overlay active + candidate + pentatonic group onto scale dots
+  // Derived dots: overlay active + candidate state onto scale dots
   const dots = useMemo<NeckDot[][]>(() => {
     return scaleDots.map((row, s) =>
       row.map((dot, f) => {
         if (dot.degree === null) return dot;
-        const pentatonicGroup = pentGroupMap ? (pentGroupMap[dot.degree] ?? null) : undefined;
         if (highlightedDegrees.size > 0) {
-          return { ...dot, active: false, highlighted: highlightedDegrees.has(dot.degree!), candidate: false, pentatonicGroup };
+          return { ...dot, active: false, highlighted: highlightedDegrees.has(dot.degree!), candidate: false };
         }
         const isActive = currentNote?.string === s && currentNote?.fret === f;
         const candidateInfo = !isActive ? bestCandidates.get(`${s},${f}`) : undefined;
@@ -204,11 +207,10 @@ export default function LivePage() {
           candidateColor: candidateInfo?.candidateColor ?? secondInfo?.candidateColor,
           ownNote: candidateInfo?.ownNote,
           secondCandidate: !!secondInfo,
-          pentatonicGroup,
         };
       })
     );
-  }, [scaleDots, currentNote, bestCandidates, secondCandidates, highlightedDegrees, pentGroupMap]);
+  }, [scaleDots, currentNote, bestCandidates, secondCandidates, highlightedDegrees]);
 
   function selectNote(s: number, f: number, degree: number) {
     if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
@@ -381,14 +383,6 @@ export default function LivePage() {
           >
             CAGED Zones
           </button>
-          <button
-            onClick={() => setShowPentatonic(v => !v)}
-            className={`${btnClass} text-xs ${showPentatonic
-              ? 'bg-gray-800 text-white border-gray-800'
-              : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-          >
-            Pent. Sets
-          </button>
         </div>
 
         <GuitarNeck
@@ -396,6 +390,19 @@ export default function LivePage() {
           fretCount={FRET_COUNT}
           onDotClick={handleDotClick}
           cagedZones={showCaged && root ? getCagedZones(root) : undefined}
+        />
+
+        <PentatonicWidget
+          activePentKeys={activePentKeys}
+          pentWidgetMode={pentWidgetMode}
+          pentModeSynced={pentModeSynced}
+          recognizedPentKeys={new Set()}
+          onKeyToggle={key => setActivePentKeys(prev =>
+            prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+          )}
+          onModeChange={m => { setPentWidgetMode(m); setPentModeSynced(false); }}
+          show={showPentatonicWidget}
+          onToggle={() => setShowPentatonicWidget(v => !v)}
         />
       </>)}
 

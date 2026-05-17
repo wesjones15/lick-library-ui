@@ -13,11 +13,14 @@ const CAGED_COLORS: Record<string, string> = {
   G: 'rgba(234,179,8,0.18)',
 };
 
-// Chromatic index for each NOTE_KEYS value
+// Chromatic index for each NOTE_KEYS value (internal; matches NOTE_KEYS enum values)
 const ROOT_INDEX: Record<string, number> = {
   C: 0, C_SHARP: 1, D: 2, D_SHARP: 3, E: 4, F: 5,
   F_SHARP: 6, G: 7, G_SHARP: 8, A: 9, B_FLAT: 10, B: 11,
 };
+
+// Exported version of ROOT_INDEX for consumers that need chromatic → note mapping
+export const ROOT_CHROMATIC = ROOT_INDEX;
 
 // CAGED shape positions defined by the fret where the root note falls on its
 // primary string, relative to the root's chromatic index R.
@@ -94,6 +97,14 @@ export function getPentatonicGroupMap(mode: string): Record<number, PentatonicGr
     result[degree] = assigned;
   }
   return result;
+}
+
+// Returns the 5 chromatic indices (0–11) for the pentatonic scale of rootKey + mode.
+// Uses scale degrees 1,2,3,5,6 (MODE_SEMITONES indices [0,1,2,4,5]).
+export function getPentatonicNoteSet(rootKey: string, mode: string): Set<number> {
+  const semitones = MODE_SEMITONES[mode] ?? MODE_SEMITONES.IONIAN;
+  const root = ROOT_INDEX[rootKey] ?? 0;
+  return new Set([0, 1, 2, 4, 5].map(i => (root + semitones[i]) % 12));
 }
 
 export function getCagedZones(root: string): CagedZone[] {
