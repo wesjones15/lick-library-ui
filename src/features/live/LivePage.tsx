@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
 import { getCagedZones, getPentatonicGroupMap } from './cagedUtils';
+import LickVisualizerPanel from './LickVisualizerPanel';
 import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
 
@@ -350,12 +351,8 @@ export default function LivePage() {
         />
       </>)}
 
-      {/* Lick Visualizer mode — stub */}
-      {viewMode === 'lick' && (
-        <div className="py-16 text-center text-gray-400 text-sm">
-          Lick Visualizer coming soon.
-        </div>
-      )}
+      {/* Lick Visualizer mode */}
+      {viewMode === 'lick' && <LickVisualizerPanel />}
 
       {/* Chords/Progressions mode — stub */}
       {viewMode === 'chords' && (
