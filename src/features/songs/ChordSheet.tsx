@@ -1,9 +1,10 @@
-import { useState, useRef, useLayoutEffect } from 'react';
-import type { ChordLyric, ChordSheetLine, GuitarTabLine, ChordVoicing } from '../../core/api/client';
+import { useState, useRef, useLayoutEffect, useMemo } from 'react';
+import type { ChordLyric, ChordSheetLine, GuitarTabLine, ChordVoicing, SongLickInfo } from '../../core/api/client';
 import { getChordVoicings } from '../../core/api/client';
 import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
 import ChordDiagram from '../chords/ChordDiagram';
+import SongLickCard from './SongLickCard';
 
 // Cache fetched voicings so re-hovering the same chord doesn't re-fetch
 const voicingCache = new Map<string, ChordVoicing[]>();
@@ -177,21 +178,38 @@ interface Props {
   numColumns: number;
   className?: string;
   fontScale?: number;
+  showTabLicks?: boolean;
+  songLicks?: Record<number, SongLickInfo>;
+  currentKey?: string | null;
+  isTransposed?: boolean;
 }
 
-export default function ChordSheet({ chordLines, numColumns, className, fontScale = 1 }: Props) {
+export default function ChordSheet({ chordLines, numColumns, className, fontScale = 1, showTabLicks = false, songLicks = {}, currentKey, isTransposed = false }: Props) {
   const perColumn = Math.ceil(chordLines.length / numColumns);
   const columns: ChordSheetLine[][] = [];
   for (let c = 0; c < numColumns; c++) {
     columns.push(chordLines.slice(c * perColumn, (c + 1) * perColumn));
   }
 
+  // Precompute global index → tabOrder mapping
+  const tabOrderMap = useMemo(() => {
+    const m = new Map<number, number>();
+    let order = 0;
+    chordLines.forEach((line, idx) => {
+      if (isTabBlock(line)) m.set(idx, order++);
+    });
+    return m;
+  }, [chordLines]);
+
   return (
     <div className={`flex gap-6 font-mono ${className ?? ''}`}>
       {columns.map((col, ci) => (
         <div key={ci} className={`${numColumns === 1 ? 'w-max' : 'flex-1'} flex flex-col`}>
           {col.map((line, li) => {
+            const globalIdx = ci * perColumn + li;
             if (isTabBlock(line)) {
+              const tabOrder = tabOrderMap.get(globalIdx);
+              const lickInfo = tabOrder !== undefined ? songLicks[tabOrder] : undefined;
               return (
                 <div key={li} className="leading-tight my-1">
                   {line.header && (
@@ -199,9 +217,19 @@ export default function ChordSheet({ chordLines, numColumns, className, fontScal
                       {renderChords(line.header)}
                     </div>
                   )}
-                  <div style={{ fontSize: `${line.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#4b5563', fontFamily: 'monospace' }}>
-                    {line.tabLines.join('\n')}
-                  </div>
+                  {showTabLicks && lickInfo ? (
+                    <SongLickCard
+                      lickId={lickInfo.lickId}
+                      rawTab={lickInfo.rawTab}
+                      currentKey={currentKey ?? null}
+                      isTransposed={isTransposed}
+                      fontSize={line.fontSize * fontScale}
+                    />
+                  ) : (
+                    <div style={{ fontSize: `${line.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#4b5563', fontFamily: 'monospace' }}>
+                      {line.tabLines.join('\n')}
+                    </div>
+                  )}
                 </div>
               );
             }

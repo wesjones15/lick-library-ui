@@ -26,13 +26,15 @@ export default function LickCard({ lick, onDelete }: Props) {
               {modeLabel(lick.mode)}
             </span>
           )}
-          <button
-            onClick={e => { e.stopPropagation(); onDelete(); }}
-            className="text-red-400 hover:text-red-600 text-base leading-none transition-colors"
-            aria-label="Delete lick"
-          >
-            ×
-          </button>
+          {!lick.autoImported && (
+            <button
+              onClick={e => { e.stopPropagation(); onDelete(); }}
+              className="text-red-400 hover:text-red-600 text-base leading-none transition-colors"
+              aria-label="Delete lick"
+            >
+              ×
+            </button>
+          )}
         </div>
       </div>
       <pre className="text-xs font-mono text-gray-700 whitespace-pre overflow-x-auto leading-tight">

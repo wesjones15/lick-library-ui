@@ -6,6 +6,7 @@ export interface LickSummary {
   intervalDisplayString: string;
   mode: string | null;
   positions: null;
+  autoImported: boolean;
 }
 
 export interface PositionResponse {
@@ -26,8 +27,9 @@ export interface UploadRequest {
   inputKey?: string;
 }
 
-export async function getAllLicks(): Promise<LickSummary[]> {
-  const res = await fetch(`${BASE_URL}/lick`);
+export async function getAllLicks(includeSongLicks = false): Promise<LickSummary[]> {
+  const params = includeSongLicks ? '?includeSongLicks=true' : '';
+  const res = await fetch(`${BASE_URL}/lick${params}`);
   if (!res.ok) throw new Error('Failed to fetch licks');
   return res.json();
 }
@@ -92,6 +94,11 @@ export interface SongSummary {
   tempo: number | null;
 }
 
+export interface SongLickInfo {
+  lickId: string | null;
+  rawTab: string;
+}
+
 export interface SongDetail {
   id: string;
   title: string;
@@ -103,6 +110,7 @@ export interface SongDetail {
   numColumns: number;
   canReparse: boolean;
   rawChordSheet: string | null;
+  songLicks: Record<number, SongLickInfo>;
 }
 
 export interface UpdateSongRequest {
