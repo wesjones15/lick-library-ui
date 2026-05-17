@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { getSong, getChordVoicings, updatePlaylistEntry } from '../../core/api/client';
+import { getSong, getChordVoicings, updatePlaylistEntry, clearPlaylistEntryOverrides } from '../../core/api/client';
 import AddToPlaylistModal from '../playlists/AddToPlaylistModal';
 import ChordUploadModal from '../chords/ChordUploadModal';
 import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/client';
@@ -70,8 +70,8 @@ interface PlaylistNavEntry {
   entryId: string;
   songId: string;
   title: string;
-  overrideSemitones: number | null;
-  overrideCapo: number | null;
+  keyOffset: number;
+  capoOffset: number;
 }
 
 interface PlaylistNavState {
@@ -89,8 +89,11 @@ export default function SongDetailPage() {
   const { setBpm, setIsPlaying, bpm, isPlaying } = useMetronomeContext();
   const { setInfo, collapsed, showChords, setShowChords } = useSongNavContext();
   const isPortrait = usePortrait();
-  const [semitones, setSemitones] = useState(() => playlistState?.entries[playlistState.currentIndex]?.overrideSemitones ?? 0);
+  const [semitones, setSemitones] = useState(() => playlistState?.entries[playlistState.currentIndex]?.keyOffset ?? 0);
   const [capo, setCapo] = useState(0);
+  const [saveState, setSaveState] = useState<'idle' | 'saved' | 'can-reset'>('idle');
+  const [lastSavedKeyOffset, setLastSavedKeyOffset] = useState<number | null>(null);
+  const [lastSavedCapoOffset, setLastSavedCapoOffset] = useState<number | null>(null);
   const [song, setSong] = useState<SongDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -107,6 +110,9 @@ export default function SongDetailPage() {
   const overflowRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Reset save state whenever the user changes key or capo
+  useEffect(() => { setSaveState('idle'); }, [semitones, capo]);
+
   // Reset semitones/capo when navigating to a different song (including within playlist)
   const prevIdRef = useRef<string | undefined>(undefined);
   useEffect(() => {
@@ -114,7 +120,9 @@ export default function SongDetailPage() {
       prevIdRef.current = id;
       const ps = (location.state as PlaylistNavState | null);
       const entry = ps?.entries[ps.currentIndex];
-      setSemitones(entry?.overrideSemitones ?? 0);
+      setSemitones(entry?.keyOffset ?? 0);
+      setLastSavedKeyOffset(null);
+      setLastSavedCapoOffset(null);
     }
   }, [id]);
 
@@ -126,8 +134,8 @@ export default function SongDetailPage() {
       .then(s => {
         setSong(s);
         if (loadedSongIdRef.current !== id) {
-          const playlistCapo = playlistState?.entries[playlistState.currentIndex]?.overrideCapo;
-          setCapo(playlistCapo ?? s.capo ?? 0);
+          const navEntry = playlistState?.entries[playlistState.currentIndex];
+          setCapo((s.capo ?? 0) + (navEntry?.capoOffset ?? 0));
           loadedSongIdRef.current = id;
         }
       })
@@ -152,8 +160,8 @@ export default function SongDetailPage() {
       title: song.title,
       artist: song.artist ?? undefined,
       bpm: song.tempo ?? undefined,
-      shapeKey: keyLabel(song.originalKey, semitones - (song.capo ?? 0)),
-      soundKey: keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0)),
+      shapeKey: keyLabel(song.originalKey, semitones),
+      soundKey: keyLabel(song.originalKey, semitones + capo),
       capo,
     });
     return () => setInfo(null);
@@ -218,11 +226,11 @@ export default function SongDetailPage() {
           {playlistState && (() => {
             const { playlistId, playlistName, entries: plEntries, currentIndex } = playlistState;
             const currentEntry = plEntries[currentIndex];
-            const prevEntry = currentIndex > 0 ? plEntries[currentIndex - 1] : null;
+            const prevEntry = plEntries[(currentIndex - 1 + plEntries.length) % plEntries.length];
             const nextEntry = plEntries[(currentIndex + 1) % plEntries.length];
-            const savedSemitones = currentEntry?.overrideSemitones ?? 0;
-            const savedCapo = currentEntry?.overrideCapo ?? 0;
-            const overrideChanged = semitones !== savedSemitones || capo !== savedCapo;
+            const savedKeyOffset = lastSavedKeyOffset ?? (currentEntry?.keyOffset ?? 0);
+            const savedCapoOffset = lastSavedCapoOffset ?? (currentEntry?.capoOffset ?? 0);
+            const overrideChanged = semitones !== savedKeyOffset || (capo - (song?.capo ?? 0)) !== savedCapoOffset;
 
             function navigateTo(idx: number) {
               const entry = plEntries[idx];
@@ -234,9 +242,23 @@ export default function SongDetailPage() {
             async function saveOverride() {
               if (!currentEntry) return;
               await updatePlaylistEntry(playlistId, currentEntry.entryId, {
-                overrideSemitones: semitones,
-                overrideCapo: capo,
+                keyOffset: semitones,
+                capoOffset: capo - (song?.capo ?? 0),
               });
+              setLastSavedKeyOffset(semitones);
+              setLastSavedCapoOffset(capo - (song?.capo ?? 0));
+              setSaveState('saved');
+              setTimeout(() => setSaveState('can-reset'), 2000);
+            }
+
+            async function resetOverride() {
+              if (!currentEntry) return;
+              await clearPlaylistEntryOverrides(playlistId, currentEntry.entryId);
+              setSemitones(0);
+              setCapo(song?.capo ?? 0);
+              setLastSavedKeyOffset(0);
+              setLastSavedCapoOffset(0);
+              setSaveState('idle');
             }
 
             return (
@@ -248,18 +270,18 @@ export default function SongDetailPage() {
                   ← {playlistName}
                 </Link>
                 <div className="flex items-center gap-1 ml-auto">
-                  {overrideChanged && (
-                    <button
-                      onClick={saveOverride}
-                      className="text-xs px-2 py-0.5 rounded border border-indigo-300 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
-                    >
-                      Save key/capo
-                    </button>
+                  {saveState === 'saved' && (
+                    <span className="text-green-500 text-sm leading-none">✓</span>
+                  )}
+                  {saveState === 'can-reset' && (
+                    <button onClick={resetOverride} className="text-blue-400 hover:text-blue-600 text-sm transition-colors leading-none" title="Restore defaults">↺</button>
+                  )}
+                  {saveState === 'idle' && overrideChanged && (
+                    <button onClick={saveOverride} className="text-indigo-500 hover:text-indigo-700 text-sm transition-colors leading-none" title="Save voicing">💾</button>
                   )}
                   <button
-                    onClick={() => prevEntry && navigateTo(currentIndex - 1)}
-                    disabled={!prevEntry}
-                    className="text-xs px-2 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors"
+                    onClick={() => navigateTo((currentIndex - 1 + plEntries.length) % plEntries.length)}
+                    className="text-xs px-2 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
                   >← Prev</button>
                   <span className="text-xs text-gray-300">{currentIndex + 1}/{plEntries.length}</span>
                   <button
@@ -440,7 +462,7 @@ export default function SongDetailPage() {
                   <div className="flex gap-3 items-center">
                     <div className="flex flex-col items-center w-10">
                       <span className="text-base font-semibold text-gray-900">
-                        {keyLabel(song.originalKey, semitones - (song.capo ?? 0))}
+                        {keyLabel(song.originalKey, semitones)}
                       </span>
                       <span className="text-xs text-gray-400">shape</span>
                     </div>
@@ -449,7 +471,7 @@ export default function SongDetailPage() {
                     </span>
                     <div className="flex flex-col items-center w-10">
                       <span className="text-base font-semibold text-gray-900">
-                        {keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0))}
+                        {keyLabel(song.originalKey, semitones + capo)}
                       </span>
                       <span className="text-xs text-gray-400">sound</span>
                     </div>
@@ -525,7 +547,7 @@ export default function SongDetailPage() {
                     <div className="flex gap-3 items-center">
                       <div className="flex flex-col items-center w-10">
                         <span className="text-base font-semibold text-gray-900">
-                          {keyLabel(song?.originalKey ?? null, semitones - (song?.capo ?? 0))}
+                          {keyLabel(song?.originalKey ?? null, semitones)}
                         </span>
                         <span className="text-xs text-gray-400">shape</span>
                       </div>
@@ -534,7 +556,7 @@ export default function SongDetailPage() {
                       </span>
                       <div className="flex flex-col items-center w-10">
                         <span className="text-base font-semibold text-gray-900">
-                          {keyLabel(song?.originalKey ?? null, semitones + capo - (song?.capo ?? 0))}
+                          {keyLabel(song?.originalKey ?? null, semitones + capo)}
                         </span>
                         <span className="text-xs text-gray-400">sound</span>
                       </div>
@@ -614,8 +636,8 @@ export default function SongDetailPage() {
           songId={id!}
           songTitle={song.title}
           onClose={() => setAddToPlaylistOpen(false)}
-          semitones={semitones}
-          capo={capo}
+          keyOffset={semitones}
+          capoOffset={capo - (song?.capo ?? 0)}
         />
       )}
     </div>

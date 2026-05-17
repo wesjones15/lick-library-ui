@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   getPlaylist, deletePlaylist, addPlaylistEntry,
   removePlaylistEntry, updatePlaylistEntry, renamePlaylist,
-  getAllSongs,
+  clearPlaylistEntryOverrides, getAllSongs,
 } from '../../core/api/client';
 import type { PlaylistDetail, PlaylistEntry, SongSummary } from '../../core/api/client';
 
@@ -14,64 +14,79 @@ const KEY_LABELS: Record<string, string> = {
 };
 const CHROMATIC = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 
-function semitoneLabel(originalKey: string | null, semitones: number | null): string {
-  if (semitones === null || !originalKey) return 'Default';
-  const base = KEY_LABELS[originalKey] ?? originalKey;
-  const match = base.match(/^([A-G][#b]?)(m?)$/);
-  if (!match) return 'Default';
+function keyLabel(originalKey: string | null, semitones: number): string {
+  if (!originalKey) return '?';
+  const display = KEY_LABELS[originalKey] ?? originalKey;
+  const match = display.match(/^([A-G][#b]?)(m?)$/);
+  if (!match) return display;
   const [, root, suffix] = match;
   const idx = CHROMATIC.indexOf(root);
-  if (idx === -1) return 'Default';
+  if (idx === -1) return display;
   return CHROMATIC[((idx + semitones) % 12 + 12) % 12] + suffix;
 }
 
-interface EntryOverrideEditorProps {
+function VoicingModal({ entry, onSave, onClose }: {
   entry: PlaylistEntry;
-  songs: SongSummary[];
-  onSave: (overrideSemitones: number | null, overrideCapo: number | null) => void;
+  onSave: (keyOffset: number, capoOffset: number) => void;
   onClose: () => void;
-}
-
-function EntryOverrideEditor({ entry, songs, onSave, onClose }: EntryOverrideEditorProps) {
-  const song = songs.find(s => s.id === entry.songId);
-  const [semitones, setSemitones] = useState(entry.overrideSemitones ?? 0);
-  const [capo, setCapo] = useState(entry.overrideCapo ?? 0);
-  const [hasOverride, setHasOverride] = useState(entry.overrideSemitones !== null || entry.overrideCapo !== null);
+}) {
+  const [localSemitones, setLocalSemitones] = useState(entry.keyOffset);
+  const [localCapo, setLocalCapo] = useState(entry.defaultCapo + entry.capoOffset);
+  const btnClass = "w-8 h-8 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-lg font-medium";
 
   return (
-    <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm" onClick={e => e.stopPropagation()}>
-      <label className="flex items-center gap-2 mb-3 cursor-pointer">
-        <input type="checkbox" checked={hasOverride} onChange={e => setHasOverride(e.target.checked)} className="rounded" />
-        <span className="text-gray-600">Custom key/capo for this playlist</span>
-      </label>
-      {hasOverride && (
-        <div className="flex gap-6 flex-wrap mb-3">
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-xs text-gray-400">Key ({semitoneLabel(song?.originalKey ?? null, semitones)})</span>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setSemitones(s => s - 1 <= -12 ? 0 : s - 1)}
-                className="w-7 h-7 rounded border border-gray-300 text-gray-600 hover:bg-gray-100 flex items-center justify-center">−</button>
-              <span className="w-6 text-center font-semibold text-gray-900">{semitones > 0 ? `+${semitones}` : semitones}</span>
-              <button onClick={() => setSemitones(s => s + 1 >= 12 ? 0 : s + 1)}
-                className="w-7 h-7 rounded border border-gray-300 text-gray-600 hover:bg-gray-100 flex items-center justify-center">+</button>
-            </div>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-xs mx-4" onClick={e => e.stopPropagation()}>
+        <div className="font-semibold text-gray-900 text-sm mb-5 text-center">{entry.title}</div>
+        <div className="flex gap-8 justify-center mb-6">
+
+          {/* Capo widget */}
           <div className="flex flex-col items-center gap-1">
             <span className="text-xs text-gray-400">Capo</span>
             <div className="flex items-center gap-2">
-              <button onClick={() => setCapo(c => Math.max(0, c - 1))}
-                className="w-7 h-7 rounded border border-gray-300 text-gray-600 hover:bg-gray-100 flex items-center justify-center">−</button>
-              <span className="w-6 text-center font-semibold text-gray-900">{capo}</span>
-              <button onClick={() => setCapo(c => Math.min(11, c + 1))}
-                className="w-7 h-7 rounded border border-gray-300 text-gray-600 hover:bg-gray-100 flex items-center justify-center">+</button>
+              <button onClick={() => setLocalCapo(c => Math.max(0, c - 1))} className={btnClass}>−</button>
+              <div className="flex items-center justify-center w-8">
+                <span className="text-base font-semibold text-gray-900">{localCapo}</span>
+              </div>
+              <button onClick={() => setLocalCapo(c => Math.min(12, c + 1))} className={btnClass}>+</button>
             </div>
+            <button
+              onClick={() => setLocalCapo(entry.defaultCapo)}
+              className={`text-xs transition-colors ${localCapo !== entry.defaultCapo ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+            >reset</button>
+          </div>
+
+          {/* Transpose widget */}
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-xs text-gray-400">Transpose</span>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setLocalSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={btnClass}>−</button>
+              <div className="flex gap-2 items-center">
+                <div className="flex flex-col items-center w-8">
+                  <span className="text-base font-semibold text-gray-900">
+                    {keyLabel(entry.originalKey, localSemitones)}
+                  </span>
+                  <span className="text-xs text-gray-400">shape</span>
+                </div>
+                <div className="flex flex-col items-center w-8">
+                  <span className="text-base font-semibold text-gray-900">
+                    {keyLabel(entry.originalKey, localSemitones + localCapo)}
+                  </span>
+                  <span className="text-xs text-gray-400">sound</span>
+                </div>
+              </div>
+              <button onClick={() => setLocalSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={btnClass}>+</button>
+            </div>
+            <button
+              onClick={() => setLocalSemitones(0)}
+              className={`text-xs transition-colors ${localSemitones !== 0 ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+            >reset</button>
           </div>
         </div>
-      )}
-      <div className="flex gap-2">
-        <button onClick={() => onSave(hasOverride ? semitones : null, hasOverride ? capo : null)}
-          className="px-3 py-1 rounded bg-indigo-600 text-white text-xs hover:bg-indigo-700">Save</button>
-        <button onClick={onClose} className="px-3 py-1 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50">Cancel</button>
+        <button
+          onClick={() => { onSave(localSemitones, localCapo - entry.defaultCapo); onClose(); }}
+          className="w-full px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+        >Save</button>
       </div>
     </div>
   );
@@ -229,10 +244,18 @@ export default function PlaylistDetailPage() {
     setPlaylist(updated);
   }
 
-  async function handleSaveOverride(entryId: string, overrideSemitones: number | null, overrideCapo: number | null) {
-    const updated = await updatePlaylistEntry(playlist!.id, entryId, { overrideSemitones, overrideCapo });
+  async function handleSaveOverride(entryId: string, keyOffset: number, capoOffset: number) {
+    const clearing = keyOffset === 0 && capoOffset === 0;
+    setPlaylist(p => p ? {
+      ...p,
+      entries: p.entries.map(e => e.entryId === entryId
+        ? { ...e, keyOffset: clearing ? 0 : keyOffset, capoOffset: clearing ? 0 : capoOffset }
+        : e),
+    } : p);
+    const updated = clearing
+      ? await clearPlaylistEntryOverrides(playlist!.id, entryId)
+      : await updatePlaylistEntry(playlist!.id, entryId, { keyOffset, capoOffset });
     setPlaylist(updated);
-    setEditingEntry(null);
   }
 
   function handleOpenSong(index: number) {
@@ -245,8 +268,8 @@ export default function PlaylistDetailPage() {
           entryId: e.entryId,
           songId: e.songId,
           title: e.title,
-          overrideSemitones: e.overrideSemitones,
-          overrideCapo: e.overrideCapo,
+          keyOffset: e.keyOffset,
+          capoOffset: e.capoOffset,
         })),
         currentIndex: index,
       },
@@ -342,25 +365,37 @@ export default function PlaylistDetailPage() {
                 {/* Song info */}
                 <div
                   className="flex-1 cursor-pointer hover:text-indigo-700 transition-colors min-w-0"
-                  onClick={() => handleOpenSong(idx)}
+                  onClick={() => !managing && handleOpenSong(idx)}
                 >
                   <div className="font-medium text-gray-900 truncate">{entry.title}</div>
                   {entry.artist && <div className="text-xs text-gray-400 truncate">{entry.artist}</div>}
+                  <div className="flex items-center gap-2 text-xs font-mono mt-0.5">
+                    {entry.originalKey && (
+                      <span className={entry.keyOffset !== 0 || entry.capoOffset !== 0 ? 'text-indigo-500' : 'text-gray-400'}>
+                        {keyLabel(entry.originalKey, entry.keyOffset)}
+                      </span>
+                    )}
+                    {entry.tempo != null && <span className="text-gray-400">{entry.tempo} BPM</span>}
+                  </div>
                 </div>
 
-                {/* Override badge */}
-                <button
-                  onClick={() => setEditingEntry(editingEntry === entry.entryId ? null : entry.entryId)}
-                  className={`text-xs px-2 py-0.5 rounded-full border transition-colors shrink-0 ${
-                    entry.overrideSemitones !== null || entry.overrideCapo !== null
-                      ? 'border-indigo-300 bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
-                      : 'border-gray-200 text-gray-400 hover:border-gray-300'
-                  }`}
-                >
-                  {entry.overrideSemitones !== null || entry.overrideCapo !== null
-                    ? `Key${entry.overrideSemitones !== null ? ` +${entry.overrideSemitones}` : ''} Capo${entry.overrideCapo !== null ? ` ${entry.overrideCapo}` : ''}`
-                    : 'Default'}
-                </button>
+                {/* Voicing edit button (manage only) */}
+                {managing && (
+                  <button
+                    onClick={() => setEditingEntry(entry.entryId)}
+                    className="text-xs px-2 py-1 rounded border border-gray-200 text-gray-400 hover:border-indigo-300 hover:text-indigo-600 shrink-0"
+                    title="Edit voicing offset"
+                  >✎</button>
+                )}
+
+                {/* Open song (non-manage) */}
+                {!managing && (
+                  <button
+                    onClick={() => handleOpenSong(idx)}
+                    className="text-gray-300 hover:text-indigo-400 transition-colors text-lg leading-none shrink-0"
+                    title="Open song"
+                  >›</button>
+                )}
 
                 {/* Remove (manage only) */}
                 {managing && (
@@ -375,19 +410,21 @@ export default function PlaylistDetailPage() {
                   )
                 )}
               </div>
-
-              {editingEntry === entry.entryId && (
-                <EntryOverrideEditor
-                  entry={entry}
-                  songs={allSongs}
-                  onSave={(s, c) => handleSaveOverride(entry.entryId, s, c)}
-                  onClose={() => setEditingEntry(null)}
-                />
-              )}
             </div>
           ))}
         </div>
       )}
+
+      {editingEntry && (() => {
+        const entry = entries.find(e => e.entryId === editingEntry);
+        return entry ? (
+          <VoicingModal
+            entry={entry}
+            onSave={(k, c) => handleSaveOverride(entry.entryId, k, c)}
+            onClose={() => setEditingEntry(null)}
+          />
+        ) : null;
+      })()}
 
       {showAddSongs && (
         <AddSongsModal

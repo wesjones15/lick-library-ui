@@ -229,8 +229,11 @@ export interface PlaylistEntry {
   title: string;
   artist: string | null;
   position: number;
-  overrideSemitones: number | null;
-  overrideCapo: number | null;
+  keyOffset: number;
+  capoOffset: number;
+  originalKey: string | null;
+  defaultCapo: number;
+  tempo: number | null;
 }
 
 export interface PlaylistDetail { id: string; name: string; entries: PlaylistEntry[]; }
@@ -275,14 +278,15 @@ export async function deletePlaylist(id: string): Promise<void> {
 export async function addPlaylistEntry(
   playlistId: string,
   songId: string,
-  overrideSemitones?: number | null,
-  overrideCapo?: number | null,
+  keyOffset = 0,
+  capoOffset = 0,
 ): Promise<PlaylistDetail> {
   const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ songId, overrideSemitones: overrideSemitones ?? null, overrideCapo: overrideCapo ?? null }),
+    body: JSON.stringify({ songId, keyOffset, capoOffset }),
   });
+  if (res.status === 409) throw new Error('DUPLICATE');
   if (!res.ok) throw new Error('Failed to add entry');
   return res.json();
 }
@@ -290,7 +294,7 @@ export async function addPlaylistEntry(
 export async function updatePlaylistEntry(
   playlistId: string,
   entryId: string,
-  req: { overrideSemitones?: number | null; overrideCapo?: number | null; position?: number },
+  req: { keyOffset?: number | null; capoOffset?: number | null; position?: number },
 ): Promise<PlaylistDetail> {
   const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}`, {
     method: 'PUT',
@@ -304,6 +308,14 @@ export async function updatePlaylistEntry(
 export async function removePlaylistEntry(playlistId: string, entryId: string): Promise<PlaylistDetail> {
   const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to remove entry');
+  return res.json();
+}
+
+export async function getPlaylistsContainingSong(
+  songId: string
+): Promise<{ playlistId: string; entryId: string }[]> {
+  const res = await fetch(`${BASE_URL}/playlist/containing?songId=${songId}`);
+  if (!res.ok) return [];
   return res.json();
 }
 

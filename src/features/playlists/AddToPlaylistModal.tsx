@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
-import { getAllPlaylists, addPlaylistEntry, removePlaylistEntry } from '../../core/api/client';
+import { useNavigate } from 'react-router-dom';
+import { getAllPlaylists, addPlaylistEntry, removePlaylistEntry, getPlaylistsContainingSong } from '../../core/api/client';
 import type { PlaylistSummary } from '../../core/api/client';
 
 interface Props {
   songId: string;
   songTitle: string;
   onClose: () => void;
-  semitones?: number;
-  capo?: number;
+  keyOffset?: number;
+  capoOffset?: number;
 }
 
-export default function AddToPlaylistModal({ songId, songTitle, onClose, semitones, capo }: Props) {
+export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffset, capoOffset }: Props) {
+  const navigate = useNavigate();
   const [playlists, setPlaylists] = useState<PlaylistSummary[]>([]);
   const [filter, setFilter] = useState('');
   const [added, setAdded] = useState<Set<string>>(new Set());
@@ -21,9 +23,16 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, semiton
     getAllPlaylists().then(setPlaylists).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    getPlaylistsContainingSong(songId).then(entries => {
+      setAdded(new Set(entries.map(e => e.playlistId)));
+      setAddedEntryIds(new Map(entries.map(e => [e.playlistId, e.entryId])));
+    }).catch(() => {});
+  }, [songId]);
+
   async function handleAdd(playlistId: string) {
     try {
-      const updated = await addPlaylistEntry(playlistId, songId, semitones ?? null, capo ?? null);
+      const updated = await addPlaylistEntry(playlistId, songId, keyOffset ?? 0, capoOffset ?? 0);
       const entry = [...updated.entries].reverse().find(e => e.songId === songId);
       if (entry) setAddedEntryIds(m => new Map(m).set(playlistId, entry.entryId));
       setRecentlyAdded(s => new Set(s).add(playlistId));
@@ -80,10 +89,13 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, semiton
               const isAdded = added.has(pl.id);
               return (
                 <div key={pl.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
-                  <div>
-                    <span className="text-sm text-gray-900">{pl.name}</span>
+                  <button
+                    className="text-sm text-gray-900 hover:text-indigo-600 flex-1 text-left"
+                    onClick={() => { navigate(`/playlist/${pl.id}`); onClose(); }}
+                  >
+                    {pl.name}
                     <span className="text-xs text-gray-400 ml-2">{pl.songCount} songs</span>
-                  </div>
+                  </button>
                   <button
                     onClick={() => { if (!isRecent) isAdded ? handleRemove(pl.id) : handleAdd(pl.id); }}
                     className={`text-lg leading-none transition-colors ${
