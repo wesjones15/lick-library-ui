@@ -219,7 +219,7 @@ export default function SongDetailPage() {
             const { playlistId, playlistName, entries: plEntries, currentIndex } = playlistState;
             const currentEntry = plEntries[currentIndex];
             const prevEntry = currentIndex > 0 ? plEntries[currentIndex - 1] : null;
-            const nextEntry = currentIndex < plEntries.length - 1 ? plEntries[currentIndex + 1] : null;
+            const nextEntry = plEntries[(currentIndex + 1) % plEntries.length];
             const savedSemitones = currentEntry?.overrideSemitones ?? 0;
             const savedCapo = currentEntry?.overrideCapo ?? 0;
             const overrideChanged = semitones !== savedSemitones || capo !== savedCapo;
@@ -263,9 +263,8 @@ export default function SongDetailPage() {
                   >← Prev</button>
                   <span className="text-xs text-gray-300">{currentIndex + 1}/{plEntries.length}</span>
                   <button
-                    onClick={() => nextEntry && navigateTo(currentIndex + 1)}
-                    disabled={!nextEntry}
-                    className="text-xs px-2 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors"
+                    onClick={() => navigateTo((currentIndex + 1) % plEntries.length)}
+                    className="text-xs px-2 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
                   >Next →</button>
                 </div>
               </div>
@@ -615,6 +614,8 @@ export default function SongDetailPage() {
           songId={id!}
           songTitle={song.title}
           onClose={() => setAddToPlaylistOpen(false)}
+          semitones={semitones}
+          capo={capo}
         />
       )}
     </div>

@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
-import { getAllPlaylists, addPlaylistEntry } from '../../core/api/client';
+import { getAllPlaylists, addPlaylistEntry, removePlaylistEntry } from '../../core/api/client';
 import type { PlaylistSummary } from '../../core/api/client';
 
 interface Props {
   songId: string;
   songTitle: string;
   onClose: () => void;
+  semitones?: number;
+  capo?: number;
 }
 
-export default function AddToPlaylistModal({ songId, songTitle, onClose }: Props) {
+export default function AddToPlaylistModal({ songId, songTitle, onClose, semitones, capo }: Props) {
   const [playlists, setPlaylists] = useState<PlaylistSummary[]>([]);
   const [filter, setFilter] = useState('');
   const [added, setAdded] = useState<Set<string>>(new Set());
+  const [recentlyAdded, setRecentlyAdded] = useState<Set<string>>(new Set());
+  const [addedEntryIds, setAddedEntryIds] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     getAllPlaylists().then(setPlaylists).catch(() => {});
@@ -19,8 +23,24 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose }: Props
 
   async function handleAdd(playlistId: string) {
     try {
-      await addPlaylistEntry(playlistId, songId);
+      const updated = await addPlaylistEntry(playlistId, songId, semitones ?? null, capo ?? null);
+      const entry = [...updated.entries].reverse().find(e => e.songId === songId);
+      if (entry) setAddedEntryIds(m => new Map(m).set(playlistId, entry.entryId));
+      setRecentlyAdded(s => new Set(s).add(playlistId));
+      setTimeout(() => setRecentlyAdded(s => { const n = new Set(s); n.delete(playlistId); return n; }), 2000);
       setAdded(s => new Set(s).add(playlistId));
+    } catch {
+      // swallow
+    }
+  }
+
+  async function handleRemove(playlistId: string) {
+    const entryId = addedEntryIds.get(playlistId);
+    if (!entryId) return;
+    try {
+      await removePlaylistEntry(playlistId, entryId);
+      setAdded(s => { const n = new Set(s); n.delete(playlistId); return n; });
+      setAddedEntryIds(m => { const n = new Map(m); n.delete(playlistId); return n; });
     } catch {
       // swallow
     }
@@ -56,6 +76,7 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose }: Props
         ) : (
           <div className="flex flex-col gap-1 max-h-56 overflow-y-auto">
             {visible.map(pl => {
+              const isRecent = recentlyAdded.has(pl.id);
               const isAdded = added.has(pl.id);
               return (
                 <div key={pl.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
@@ -64,11 +85,15 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose }: Props
                     <span className="text-xs text-gray-400 ml-2">{pl.songCount} songs</span>
                   </div>
                   <button
-                    onClick={() => !isAdded && handleAdd(pl.id)}
-                    className={`text-lg leading-none transition-colors ${isAdded ? 'text-green-500 cursor-default' : 'text-gray-300 hover:text-indigo-500'}`}
-                    disabled={isAdded}
+                    onClick={() => { if (!isRecent) isAdded ? handleRemove(pl.id) : handleAdd(pl.id); }}
+                    className={`text-lg leading-none transition-colors ${
+                      isRecent ? 'text-green-500 cursor-default'
+                      : isAdded ? 'text-red-400 hover:text-red-600'
+                      : 'text-gray-300 hover:text-indigo-500'
+                    }`}
+                    disabled={isRecent}
                   >
-                    {isAdded ? '✓' : '+'}
+                    {isRecent ? '✓' : isAdded ? '×' : '+'}
                   </button>
                 </div>
               );

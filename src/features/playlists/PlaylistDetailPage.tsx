@@ -295,15 +295,16 @@ export default function PlaylistDetailPage() {
           )}
           {managing && !confirmDelete && (
             <button onClick={() => setConfirmDelete(true)}
-              className="text-gray-300 hover:text-red-400 transition-colors text-2xl leading-none"
-              title="Delete playlist">×</button>
+              className="px-3 py-2 text-sm rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors"
+              title="Delete playlist">Delete</button>
           )}
           <button
             onClick={toggleManage}
-            className={`text-xl leading-none transition-colors ${managing ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
-            title={managing ? 'Done managing' : 'Manage playlist'}
+            className={managing
+              ? 'px-3 py-2 text-sm rounded-lg border border-indigo-300 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors'
+              : 'px-3 py-2 text-sm rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors'}
           >
-            {managing ? '✓' : '⚙'}
+            {managing ? 'Done' : 'Manage'}
           </button>
         </div>
       </div>
