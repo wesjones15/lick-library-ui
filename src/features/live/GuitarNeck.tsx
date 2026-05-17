@@ -1,3 +1,5 @@
+import type { CagedZone } from './cagedUtils';
+
 export interface NeckDot {
   degree: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null;
   active: boolean;
@@ -13,6 +15,7 @@ interface GuitarNeckProps {
   fretCount?: number;
   width?: number | string;
   onDotClick?: (stringIndex: number, fret: number) => void;
+  cagedZones?: CagedZone[];
 }
 
 export const DEGREE_COLORS: Record<number, string> = {
@@ -45,7 +48,7 @@ const R_RING = 13;
 
 const STRING_WEIGHTS = [0.5, 0.75, 1.0, 1.35, 1.75, 2.2]; // high e → low E
 
-export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDotClick }: GuitarNeckProps) {
+export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDotClick, cagedZones }: GuitarNeckProps) {
   const vbW = LABEL_W + OPEN_W + NUT_W + fretCount * FRET_W;
   const vbH = TOP_PAD + (STRING_COUNT - 1) * STR_H + BOT_PAD;
 
@@ -83,6 +86,31 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
         fill="#e8d5b7"
         rx={2}
       />
+
+      {/* CAGED zone overlays — semi-transparent rects layered above fretboard */}
+      {cagedZones?.map(zone => {
+        const x = fretLineStart + (zone.fretStart - 1) * FRET_W;
+        const w = (zone.fretEnd - zone.fretStart + 1) * FRET_W;
+        const y = strLineY0 - 6;
+        const h = (STRING_COUNT - 1) * STR_H + 12;
+        return (
+          <g key={`caged-${zone.shape}`}>
+            <rect x={x} y={y} width={w} height={h} fill={zone.color} rx={2} />
+            <text
+              x={x + w / 2}
+              y={y + h - 4}
+              textAnchor="middle"
+              fontSize={11}
+              fontWeight="700"
+              fill="rgba(0,0,0,0.35)"
+              fontFamily="sans-serif"
+              style={{ pointerEvents: 'none', userSelect: 'none' }}
+            >
+              {zone.shape}
+            </text>
+          </g>
+        );
+      })}
 
       {/* Fret numbers */}
       {Array.from({ length: fretCount }, (_, i) => i + 1).map(f => (

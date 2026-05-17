@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
+import { getCagedZones } from './cagedUtils';
 import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
 
@@ -83,6 +84,7 @@ export default function LivePage() {
   const [scaleDots, setScaleDots] = useState<NeckDot[][]>(blankScaleDots);
   const [currentNote, setCurrentNote] = useState<CurrentNote | null>(null);
   const [highlightedDegree, setHighlightedDegree] = useState<number | null>(null);
+  const [showCaged, setShowCaged] = useState(false);
   const [listening, setListening] = useState(false);
   const noteHoldTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -312,7 +314,24 @@ export default function LivePage() {
           <p className="text-sm text-red-500 mb-4">Mic requires a secure connection (HTTPS). Try accessing the app via HTTPS, or on the same device as the server.</p>
         )}
 
-        <GuitarNeck dots={dots} fretCount={FRET_COUNT} onDotClick={handleDotClick} />
+        {/* Overlay toggle buttons */}
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setShowCaged(v => !v)}
+            className={`${btnClass} text-xs ${showCaged
+              ? 'bg-gray-800 text-white border-gray-800'
+              : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+          >
+            CAGED Zones
+          </button>
+        </div>
+
+        <GuitarNeck
+          dots={dots}
+          fretCount={FRET_COUNT}
+          onDotClick={handleDotClick}
+          cagedZones={showCaged && root ? getCagedZones(root) : undefined}
+        />
       </>)}
 
       {/* Lick Visualizer mode — stub */}
