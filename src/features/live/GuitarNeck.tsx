@@ -1,4 +1,4 @@
-import type { CagedZone, PentatonicGroup } from './cagedUtils';
+import type { CagedZone } from './cagedUtils';
 
 export interface NeckDot {
   degree: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null;
@@ -9,7 +9,8 @@ export interface NeckDot {
   secondCandidate?: boolean;     // neighbor of the own-note candidate; renders at half brightness
   highlighted?: boolean;         // toolbar-selected or pentatonic-active; degree pulse, no pale yellow ring
   note?: string;                 // display label, e.g. "C#", "Bb"
-  pentatonicGroup?: PentatonicGroup | null; // which of the 3 pentatonic subsets this note belongs to
+  pentatonicRings?: string[];    // ordered ring colors; index 0 = r=11.5, 1 = r=14.5, 2 = r=17.5
+  pentatonicOutOfScale?: boolean; // in active pentatonic but not in diatonic scale → grey pulsing circle
 }
 
 interface GuitarNeckProps {
@@ -32,7 +33,6 @@ export const DEGREE_COLORS: Record<number, string> = {
 };
 const OFF_SCALE_COLOR = '#d1d5db';
 const ACTIVE_RING_COLOR = '#fef08a';
-const PENT_COLORS: Record<number, string> = { 1: '#f59e0b', 2: '#14b8a6', 3: '#a855f7' };
 
 const STRING_LABELS = ['e', 'B', 'G', 'D', 'A', 'E']; // display top → bottom
 const STRING_COUNT = 6;
@@ -227,6 +227,22 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           const cy = yStr(di);
 
           if (dot.degree === null) {
+            if (dot.pentatonicOutOfScale && dot.pentatonicRings?.length) {
+              return (
+                <g
+                  key={`d${di}-${fret}`}
+                  onClick={onDotClick ? () => onDotClick(si, fret) : undefined}
+                  style={onDotClick ? { cursor: 'pointer' } : undefined}
+                >
+                  <circle cx={cx} cy={cy} r={R_NORMAL} fill="#9ca3af" className="active-dot"
+                    stroke="#9ca3af" strokeWidth={1} />
+                  {dot.pentatonicRings.map((color, i) => (
+                    <circle key={i} cx={cx} cy={cy} r={11.5 + i * 3} fill="none"
+                      stroke={color} strokeWidth={2} style={{ pointerEvents: 'none' }} />
+                  ))}
+                </g>
+              );
+            }
             return (
               <circle key={`d${di}-${fret}`} cx={cx} cy={cy} r={R_SMALL} fill={OFF_SCALE_COLOR} />
             );
@@ -268,17 +284,12 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
                 style={dot.active ? { stroke: color } : ((isCandidate || isSecondCandidate) ? { stroke: candidateStroke } : (isHighlighted ? { stroke: color } : undefined))}
                 className={dot.active || isHighlighted ? 'active-dot' : ((isCandidate || isSecondCandidate) ? 'candidate-dot' : undefined)}
               />
-              {/* Pentatonic group ring — thin colored ring just outside the dot */}
-              {dot.pentatonicGroup && PENT_COLORS[dot.pentatonicGroup] && (
-                <circle
-                  cx={cx} cy={cy} r={11.5}
-                  fill="none"
-                  stroke={PENT_COLORS[dot.pentatonicGroup]}
-                  strokeWidth={2}
-                  opacity={bright ? 0.9 : 0.6}
-                  style={{ pointerEvents: 'none' }}
-                />
-              )}
+              {/* Pentatonic rings — one per selected pentatonic key, outward from r=11.5 */}
+              {dot.pentatonicRings?.map((color, i) => (
+                <circle key={i} cx={cx} cy={cy} r={11.5 + i * 3} fill="none"
+                  stroke={color} strokeWidth={2} opacity={bright ? 0.9 : 0.6}
+                  style={{ pointerEvents: 'none' }} />
+              ))}
               <text
                 x={cx}
                 y={cy + fontSize * 0.38}

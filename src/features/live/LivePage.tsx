@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
-import { getCagedZones } from './cagedUtils';
+import { getCagedZones, getPentatonicDegree } from './cagedUtils';
 import PentatonicWidget from './PentatonicWidget';
 import LickVisualizerPanel from './LickVisualizerPanel';
 import ChordsProgressionPanel from './ChordsProgressionPanel';
@@ -193,9 +193,28 @@ export default function LivePage() {
   const dots = useMemo<NeckDot[][]>(() => {
     return scaleDots.map((row, s) =>
       row.map((dot, f) => {
-        if (dot.degree === null) return dot;
+        // Pentatonic ring overlay
+        let pentatonicRings: string[] | undefined;
+        let pentatonicOutOfScale: boolean | undefined;
+
+        if (activePentKeys.length > 0) {
+          const chromatic = (OPEN_MIDI[s] + f) % 12;
+          const rings: string[] = [];
+          for (const key of activePentKeys) {
+            const deg = getPentatonicDegree(chromatic, key, pentWidgetMode);
+            if (deg !== null) rings.push(DEGREE_COLORS[deg]);
+          }
+          if (rings.length > 0) {
+            pentatonicRings = rings;
+            if (dot.degree === null) pentatonicOutOfScale = true;
+          }
+        }
+
+        if (dot.degree === null) {
+          return { ...dot, pentatonicRings, pentatonicOutOfScale };
+        }
         if (highlightedDegrees.size > 0) {
-          return { ...dot, active: false, highlighted: highlightedDegrees.has(dot.degree!), candidate: false };
+          return { ...dot, active: false, highlighted: highlightedDegrees.has(dot.degree!), candidate: false, pentatonicRings };
         }
         const isActive = currentNote?.string === s && currentNote?.fret === f;
         const candidateInfo = !isActive ? bestCandidates.get(`${s},${f}`) : undefined;
@@ -207,10 +226,12 @@ export default function LivePage() {
           candidateColor: candidateInfo?.candidateColor ?? secondInfo?.candidateColor,
           ownNote: candidateInfo?.ownNote,
           secondCandidate: !!secondInfo,
+          highlighted: pentatonicRings && !isActive ? true : undefined,
+          pentatonicRings,
         };
       })
     );
-  }, [scaleDots, currentNote, bestCandidates, secondCandidates, highlightedDegrees]);
+  }, [scaleDots, currentNote, bestCandidates, secondCandidates, highlightedDegrees, activePentKeys, pentWidgetMode]);
 
   function selectNote(s: number, f: number, degree: number) {
     if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);

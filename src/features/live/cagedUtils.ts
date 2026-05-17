@@ -107,6 +107,21 @@ export function getPentatonicNoteSet(rootKey: string, mode: string): Set<number>
   return new Set([0, 1, 2, 4, 5].map(i => (root + semitones[i]) % 12));
 }
 
+// Returns the scale degree (1,2,3,5,6) of chromaticNote within the pentatonic of rootKey+mode.
+// Returns null if the note is not in that pentatonic.
+export function getPentatonicDegree(chromaticNote: number, rootKey: string, mode: string): number | null {
+  const semitones = MODE_SEMITONES[mode] ?? MODE_SEMITONES.IONIAN;
+  const root = ROOT_INDEX[rootKey] ?? 0;
+  const map: Array<[number, number]> = [
+    [(root + semitones[0]) % 12, 1],
+    [(root + semitones[1]) % 12, 2],
+    [(root + semitones[2]) % 12, 3],
+    [(root + semitones[4]) % 12, 5],
+    [(root + semitones[5]) % 12, 6],
+  ];
+  return map.find(([n]) => n === chromaticNote)?.[1] ?? null;
+}
+
 export function getCagedZones(root: string): CagedZone[] {
   const R = ROOT_INDEX[root] ?? 0;
   const zones: CagedZone[] = [];
