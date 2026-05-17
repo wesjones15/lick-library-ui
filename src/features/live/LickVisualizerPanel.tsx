@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import GuitarNeck, { type NeckDot } from './GuitarNeck';
-import { uploadLick, getLick } from '../../core/api/client';
+import LickLibraryModal from './LickLibraryModal';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 
 const STRING_COUNT = 6;
@@ -30,33 +30,32 @@ E|---------|`;
 
 const selectClass = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 bg-white';
 const btnClass = 'px-4 py-2 text-sm rounded-lg border transition-colors';
-const navBtnClass = 'px-3 py-1.5 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed';
 
-// Parse an ASCII tab string (6 lines with | | delimiters) into columns of {string, fret} pairs.
-// Returns an array of columns; each column is an array of notes played simultaneously.
-function parseTabString(tabString: string): Array<Array<{ string: number; fret: number }>> {
+type NoteCol = { isRest: false; notes: { string: number; fret: number }[] };
+type RestCol = { isRest: true };
+type TabColumn = NoteCol | RestCol;
+
+function parseTabString(tabString: string): TabColumn[] {
   const lines = tabString.split('\n').filter(l => l.includes('|'));
   if (lines.length < 2) return [];
 
-  // Extract content between the first and last | on each line
   const contents = lines.map(line => {
     const first = line.indexOf('|');
     const last = line.lastIndexOf('|');
     return first >= 0 && last > first ? line.slice(first + 1, last) : '';
   });
 
-  // Scan each string line for digit positions, group by horizontal character position
-  const colMap = new Map<number, Array<{ string: number; fret: number }>>();
+  // colKey → notes or rest marker
+  const noteMap = new Map<number, { string: number; fret: number }[]>();
+  const restSet = new Set<number>();
 
   contents.forEach((content, displayRow) => {
-    // GuitarNeck display order: row 0 = high e (string 5), row N-1 = low E (string 0)
     const stringIndex = (lines.length - 1) - displayRow;
     let i = 0;
     while (i < content.length) {
       if (/\d/.test(content[i])) {
         const colKey = i;
         let fretStr = content[i];
-        // Two-digit fret lookahead
         if (i + 1 < content.length && /\d/.test(content[i + 1])) {
           fretStr += content[i + 1];
           i += 2;
@@ -64,17 +63,25 @@ function parseTabString(tabString: string): Array<Array<{ string: number; fret: 
           i++;
         }
         const fret = parseInt(fretStr, 10);
-        if (!colMap.has(colKey)) colMap.set(colKey, []);
-        colMap.get(colKey)!.push({ string: stringIndex, fret });
+        if (!noteMap.has(colKey)) noteMap.set(colKey, []);
+        noteMap.get(colKey)!.push({ string: stringIndex, fret });
+      } else if (content[i] === '~') {
+        // Only register as rest if no note column exists at this position
+        if (!noteMap.has(i)) restSet.add(i);
+        i++;
       } else {
         i++;
       }
     }
   });
 
-  return Array.from(colMap.entries())
-    .sort(([a], [b]) => a - b)
-    .map(([, notes]) => notes);
+  const allKeys = new Set([...noteMap.keys(), ...restSet]);
+  return Array.from(allKeys)
+    .sort((a, b) => a - b)
+    .map(key => {
+      if (noteMap.has(key)) return { isRest: false, notes: noteMap.get(key)! } as NoteCol;
+      return { isRest: true } as RestCol;
+    });
 }
 
 function blankDots(): NeckDot[][] {
@@ -83,9 +90,10 @@ function blankDots(): NeckDot[][] {
   );
 }
 
-function buildDotsForColumn(column: Array<{ string: number; fret: number }>): NeckDot[][] {
+function buildDotsForColumn(col: TabColumn): NeckDot[][] {
+  if (col.isRest) return blankDots();
   const dots = blankDots();
-  for (const { string: s, fret: f } of column) {
+  for (const { string: s, fret: f } of col.notes) {
     if (s >= 0 && s < STRING_COUNT && f >= 0 && f <= FRET_COUNT) {
       dots[s][f] = { degree: 1, active: true };
     }
@@ -93,63 +101,86 @@ function buildDotsForColumn(column: Array<{ string: number; fret: number }>): Ne
   return dots;
 }
 
+function buildDotsForAllColumns(cols: TabColumn[]): NeckDot[][] {
+  const dots = blankDots();
+  for (const col of cols) {
+    if (col.isRest) continue;
+    for (const { string: s, fret: f } of col.notes) {
+      if (s >= 0 && s < STRING_COUNT && f >= 0 && f <= FRET_COUNT) {
+        dots[s][f] = { degree: 1, active: true };
+      }
+    }
+  }
+  return dots;
+}
+
 export default function LickVisualizerPanel() {
-  const { bpm, isPlaying } = useMetronomeContext();
+  const { bpm } = useMetronomeContext();
 
   const [rawTab, setRawTab] = useState(PLACEHOLDER_TAB);
   const [renderKey, setRenderKey] = useState('C');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const [positions, setPositions] = useState<string[]>([]);
-  const [currentPos, setCurrentPos] = useState(0);
-  const [columns, setColumns] = useState<Array<Array<{ string: number; fret: number }>>>([]);
+  const [columns, setColumns] = useState<TabColumn[]>([]);
   const [currentCol, setCurrentCol] = useState(0);
+  const [displayMode, setDisplayMode] = useState<'column' | 'all'>('column');
+  const [speedMode, setSpeedMode] = useState<'fixed' | 'metronome'>('fixed');
+  const [isRunning, setIsRunning] = useState(false);
+  const [showLibrary, setShowLibrary] = useState(false);
 
-  const playTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Parse columns whenever position changes
+  // Column cycling — independent of metronome play state; only speed is borrowed
   useEffect(() => {
-    if (!positions[currentPos]) { setColumns([]); setCurrentCol(0); return; }
-    const parsed = parseTabString(positions[currentPos]);
-    setColumns(parsed);
-    setCurrentCol(0);
-  }, [positions, currentPos]);
-
-  // Metronome-driven column advance
-  useEffect(() => {
-    if (playTimerRef.current) clearInterval(playTimerRef.current);
-    if (!isPlaying || columns.length === 0) return;
-    const ms = Math.round(60000 / bpm);
-    playTimerRef.current = setInterval(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (!isRunning || columns.length === 0 || displayMode === 'all') return;
+    const ms = speedMode === 'metronome' ? Math.round(60000 / bpm) : 1000;
+    timerRef.current = setInterval(() => {
       setCurrentCol(c => (c + 1) % columns.length);
     }, ms);
-    return () => { if (playTimerRef.current) clearInterval(playTimerRef.current); };
-  }, [isPlaying, bpm, columns.length]);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [isRunning, speedMode, bpm, columns.length, displayMode]);
 
-  const handleVisualize = useCallback(async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      const summary = await uploadLick({ rawTab, inputKey: renderKey });
-      const detail = await getLick(summary.id, renderKey, 'dfs');
-      setPositions(detail.positions.map(p => p.tabString));
-      setCurrentPos(0);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to visualize');
-    } finally {
-      setLoading(false);
-    }
-  }, [rawTab, renderKey]);
+  const analyzeTab = useCallback((tab: string) => {
+    const parsed = parseTabString(tab);
+    setColumns(parsed);
+    setCurrentCol(0);
+    setIsRunning(true);
+  }, []);
 
-  const dots = columns.length > 0 && currentCol < columns.length
-    ? buildDotsForColumn(columns[currentCol])
-    : blankDots();
+  const handleVisualize = useCallback(() => {
+    analyzeTab(rawTab);
+  }, [rawTab, analyzeTab]);
+
+  const handleLibrarySelect = useCallback((selectedRawTab: string) => {
+    setRawTab(selectedRawTab);
+    setShowLibrary(false);
+    analyzeTab(selectedRawTab);
+  }, [analyzeTab]);
+
+  const dots = useMemo(() => {
+    if (columns.length === 0) return blankDots();
+    if (displayMode === 'all') return buildDotsForAllColumns(columns);
+    if (currentCol >= columns.length) return blankDots();
+    return buildDotsForColumn(columns[currentCol]);
+  }, [columns, currentCol, displayMode]);
+
+  const toggleBtnBase = 'px-3 py-1.5 text-xs rounded-md border transition-colors';
+  const toggleActive = 'bg-indigo-600 text-white border-indigo-600';
+  const toggleInactive = 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50';
 
   return (
     <div className="py-6">
-      {/* Input row */}
-      <div className="flex gap-3 items-start flex-wrap mb-4">
+      {/* Library button */}
+      <div className="mb-3">
+        <button
+          onClick={() => setShowLibrary(true)}
+          className={`${btnClass} bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
+        >
+          Load from Library
+        </button>
+      </div>
+
+      {/* Tab input row */}
+      <div className="flex gap-3 items-start flex-wrap mb-3">
         <textarea
           value={rawTab}
           onChange={e => setRawTab(e.target.value)}
@@ -170,47 +201,94 @@ export default function LickVisualizerPanel() {
           </select>
           <button
             onClick={handleVisualize}
-            disabled={loading}
-            className={`${btnClass} bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700 disabled:opacity-50`}
+            className={`${btnClass} bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700`}
           >
-            {loading ? 'Loading…' : 'Visualize'}
+            Visualize
           </button>
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-500 mb-4">{error}</p>}
-
-      {positions.length > 0 && (
-        <>
-          <GuitarNeck dots={dots} fretCount={FRET_COUNT} />
-
-          {/* Navigation row */}
-          <div className="flex gap-6 items-center mt-3 flex-wrap">
-            {/* Column navigation */}
-            {columns.length > 1 && (
-              <div className="flex items-center gap-2">
-                <button className={navBtnClass} disabled={currentCol === 0} onClick={() => setCurrentCol(c => c - 1)}>‹</button>
-                <span className="text-sm text-gray-500 w-20 text-center">Col {currentCol + 1} / {columns.length}</span>
-                <button className={navBtnClass} disabled={currentCol === columns.length - 1} onClick={() => setCurrentCol(c => c + 1)}>›</button>
-              </div>
-            )}
-
-            {/* Position navigation */}
-            {positions.length > 1 && (
-              <div className="flex items-center gap-2">
-                <button className={navBtnClass} disabled={currentPos === 0} onClick={() => setCurrentPos(p => p - 1)}>‹</button>
-                <span className="text-sm text-gray-500 w-24 text-center">Pos {currentPos + 1} / {positions.length}</span>
-                <button className={navBtnClass} disabled={currentPos === positions.length - 1} onClick={() => setCurrentPos(p => p + 1)}>›</button>
-              </div>
-            )}
-
-            <span className="text-xs text-gray-400">Use metronome to auto-advance columns</span>
-          </div>
-        </>
+      {/* Progress bar */}
+      {columns.length > 0 && (
+        <div className="mb-4 flex flex-wrap gap-1 max-w-lg">
+          {columns.map((col, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentCol(i)}
+              className={`min-w-[24px] h-6 px-1 text-xs rounded border transition-colors font-mono
+                ${i === currentCol && displayMode === 'column'
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-50'}`}
+            >
+              {col.isRest ? '~' : i + 1}
+            </button>
+          ))}
+        </div>
       )}
 
-      {positions.length === 0 && !loading && (
+      {/* Controls row */}
+      {columns.length > 0 && (
+        <div className="flex gap-4 items-center flex-wrap mb-4">
+          {/* Display mode toggle */}
+          <div className="flex rounded-md overflow-hidden border border-gray-300">
+            <button
+              className={`${toggleBtnBase} rounded-none border-0 border-r border-gray-300 ${displayMode === 'column' ? toggleActive : toggleInactive}`}
+              onClick={() => setDisplayMode('column')}
+            >
+              Column
+            </button>
+            <button
+              className={`${toggleBtnBase} rounded-none border-0 ${displayMode === 'all' ? toggleActive : toggleInactive}`}
+              onClick={() => setDisplayMode('all')}
+            >
+              All
+            </button>
+          </div>
+
+          {/* Speed toggle — only when in column mode */}
+          {displayMode === 'column' && (
+            <div className="flex rounded-md overflow-hidden border border-gray-300">
+              <button
+                className={`${toggleBtnBase} rounded-none border-0 border-r border-gray-300 ${speedMode === 'fixed' ? toggleActive : toggleInactive}`}
+                onClick={() => setSpeedMode('fixed')}
+              >
+                1/sec
+              </button>
+              <button
+                className={`${toggleBtnBase} rounded-none border-0 ${speedMode === 'metronome' ? toggleActive : toggleInactive}`}
+                onClick={() => setSpeedMode('metronome')}
+              >
+                Metronome
+              </button>
+            </div>
+          )}
+
+          {/* Pause / Resume — only when in column mode */}
+          {displayMode === 'column' && (
+            <button
+              onClick={() => setIsRunning(r => !r)}
+              className={`${btnClass} ${isRunning
+                ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                : 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'}`}
+            >
+              {isRunning ? 'Pause' : 'Resume'}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Guitar neck */}
+      {columns.length > 0 && <GuitarNeck dots={dots} fretCount={FRET_COUNT} />}
+
+      {columns.length === 0 && (
         <p className="text-sm text-gray-400 mt-4">Paste a guitar tab above and click Visualize to see it on the neck.</p>
+      )}
+
+      {showLibrary && (
+        <LickLibraryModal
+          onSelect={handleLibrarySelect}
+          onClose={() => setShowLibrary(false)}
+        />
       )}
     </div>
   );
