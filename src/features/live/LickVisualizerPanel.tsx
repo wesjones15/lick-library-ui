@@ -209,20 +209,35 @@ export default function LickVisualizerPanel() {
       </div>
 
       {/* Progress bar */}
-      {columns.length > 0 && (
-        <div className="mb-4 flex flex-wrap gap-1 max-w-lg">
-          {columns.map((col, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentCol(i)}
-              className={`min-w-[24px] h-6 px-1 text-xs rounded border transition-colors font-mono
-                ${i === currentCol && displayMode === 'column'
-                  ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-50'}`}
-            >
-              {col.isRest ? '~' : i + 1}
-            </button>
-          ))}
+      {columns.length > 0 && displayMode === 'column' && (
+        <div className="mb-4 max-w-lg">
+          <div className="relative">
+            <input
+              type="range"
+              min={0}
+              max={columns.length - 1}
+              step={1}
+              value={currentCol}
+              onChange={e => setCurrentCol(+e.target.value)}
+              className="w-full accent-indigo-600"
+            />
+            {columns.length > 1 && columns.map((col, i) =>
+              col.isRest ? (
+                <span
+                  key={i}
+                  className="absolute top-5 text-[10px] text-gray-400 font-mono -translate-x-1/2 pointer-events-none"
+                  style={{ left: `${(i / (columns.length - 1)) * 100}%` }}
+                >
+                  ~
+                </span>
+              ) : null
+            )}
+          </div>
+          <div className="flex justify-between text-xs text-gray-400 mt-3 select-none">
+            <span>1</span>
+            <span className="font-mono">{columns[currentCol]?.isRest ? '~' : `col ${currentCol + 1}`}</span>
+            <span>{columns.length}</span>
+          </div>
         </div>
       )}
 
