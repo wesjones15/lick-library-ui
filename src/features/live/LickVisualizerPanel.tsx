@@ -12,7 +12,7 @@ const BUILD_LABELS = ['e|', 'B|', 'G|', 'D|', 'A|', 'E|'];
 
 const btnClass = 'px-4 py-2 text-sm rounded-lg border transition-colors';
 
-type NoteCol = { isRest: false; notes: { string: number; fret: number }[] };
+type NoteCol = { isRest: false; notes: { string: number; fret: number; technique?: string }[] };
 type RestCol = { isRest: true };
 type TabColumn = NoteCol | RestCol;
 type LickSource = 'none' | 'new' | 'library' | 'modified';
@@ -27,7 +27,7 @@ function parseTabString(tabString: string): TabColumn[] {
     return first >= 0 && last > first ? line.slice(first + 1, last) : '';
   });
 
-  const noteMap = new Map<number, { string: number; fret: number }[]>();
+  const noteMap = new Map<number, { string: number; fret: number; technique?: string }[]>();
   const restSet = new Set<number>();
 
   contents.forEach((content, displayRow) => {
@@ -44,8 +44,13 @@ function parseTabString(tabString: string): TabColumn[] {
           i++;
         }
         const fret = parseInt(fretStr, 10);
+        let technique: string | undefined;
+        if (i < content.length && /[hp/\\]/.test(content[i])) {
+          technique = content[i];
+          // don't advance i; the else branch skips it next iteration
+        }
         if (!noteMap.has(colKey)) noteMap.set(colKey, []);
-        noteMap.get(colKey)!.push({ string: stringIndex, fret });
+        noteMap.get(colKey)!.push({ string: stringIndex, fret, ...(technique && { technique }) });
       } else if (content[i] === '~') {
         if (!noteMap.has(i)) restSet.add(i);
         i++;
@@ -110,14 +115,14 @@ function buildNormalizedTab(labels: string[], columns: TabColumn[]): string {
     let line = labels[displayRow] + '-';
     columns.forEach((col, _i) => {
       if (col.isRest) {
-        line += '~';
+        line += '~-';
       } else {
         const colWidth = colWidths[_i];
         const note = col.notes.find(n => n.string === stringIndex);
         const fretStr = note ? String(note.fret) : '';
         line += fretStr + '-'.repeat(colWidth - fretStr.length);
+        line += note?.technique ?? '-';
       }
-      line += '-';
     });
     line += '|';
     return line;
@@ -148,7 +153,13 @@ function buildSpreadTab(rawTab: string, columns: TabColumn[]): string {
       } else {
         const note = col.notes.find(n => n.string === stringIndex);
         const fretStr = note ? String(note.fret) : '';
-        line += fretStr + '-'.repeat(SPREAD_SLOT - fretStr.length);
+        const technique = note?.technique;
+        const padLen = SPREAD_SLOT - fretStr.length;
+        if (technique && padLen >= 2) {
+          line += fretStr + '-' + technique + '-'.repeat(padLen - 2);
+        } else {
+          line += fretStr + '-'.repeat(padLen);
+        }
       }
     }
     line += '|';
