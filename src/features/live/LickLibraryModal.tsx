@@ -57,9 +57,11 @@ export default function LickLibraryModal({ onSelect, onClose }: Props) {
                 )}
                 <span className="text-xs text-gray-400 font-mono">{lick.intervalDisplayString}</span>
               </div>
-              <pre className="font-mono text-xs text-gray-600 whitespace-pre overflow-hidden line-clamp-3 leading-tight">
-                {lick.rawTab}
-              </pre>
+              <div className="font-mono text-xs text-gray-600 leading-tight">
+                {lick.rawTab.split('\n').map((line, i) => (
+                  <div key={i} className="truncate">{line}</div>
+                ))}
+              </div>
             </button>
           ))}
         </div>
