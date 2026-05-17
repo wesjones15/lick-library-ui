@@ -44,15 +44,26 @@ export default function PentatonicWidget({
   show,
   onToggle,
 }: PentatonicWidgetProps) {
+  if (!show) {
+    return (
+      <div className="mt-4 p-3 inline-block">
+        <button
+          onClick={onToggle}
+          className={`${btnClass} border-gray-300 text-gray-600 hover:bg-gray-50`}
+        >
+          Pentatonic
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-4 p-3 border border-gray-200 rounded-lg bg-gray-50 inline-block">
       {/* Row 1: toggle button + mode dropdown */}
       <div className="flex items-center gap-2">
         <button
           onClick={onToggle}
-          className={`${btnClass} ${show
-            ? 'bg-gray-800 text-white border-gray-800'
-            : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+          className={`${btnClass} bg-gray-800 text-white border-gray-800`}
         >
           Pentatonic
         </button>
@@ -70,7 +81,7 @@ export default function PentatonicWidget({
       {/* Row 2: Clear (left, space-preserved) + synced (right, space-preserved) */}
       <div className="flex justify-between mt-1 h-4">
         <button
-          style={{ visibility: activePentKeys.length > 0 && show ? 'visible' : 'hidden' }}
+          style={{ visibility: activePentKeys.length > 0 ? 'visible' : 'hidden' }}
           onClick={() => activePentKeys.forEach(k => onKeyToggle(k))}
           className="text-xs text-gray-400 hover:text-gray-600 underline"
         >
@@ -81,38 +92,36 @@ export default function PentatonicWidget({
         </span>
       </div>
 
-      {/* 4×3 note grid — shown when active */}
-      {show && (
-        <div className="flex flex-col gap-1.5 mt-1">
-          {GRID_NOTES.map((row, ri) => (
-            <div key={ri} className="flex gap-1.5">
-              {row.map(key => {
-                const isActive = activePentKeys.includes(key);
-                const matchLevel = recognizedPentKeys.get(key);
-                const isFull = matchLevel === 'full' && !isActive;
-                const isPartial = matchLevel === 'partial' && !isActive;
-                return (
-                  <button
-                    key={key}
-                    onClick={() => onKeyToggle(key)}
-                    className={`w-12 py-1.5 text-xs font-medium rounded border transition-colors ${
-                      isActive
-                        ? 'bg-gray-800 text-white border-gray-800'
-                        : isFull
-                          ? 'bg-orange-50 border-orange-400 text-orange-700'
-                          : isPartial
-                            ? 'bg-yellow-50 border-yellow-300 text-yellow-600'
-                            : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    {NOTE_DISPLAY[key]}
-                  </button>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-      )}
+      {/* 4×3 note grid */}
+      <div className="flex flex-col gap-1.5 mt-1">
+        {GRID_NOTES.map((row, ri) => (
+          <div key={ri} className="flex gap-1.5">
+            {row.map(key => {
+              const isActive = activePentKeys.includes(key);
+              const matchLevel = recognizedPentKeys.get(key);
+              const isFull = matchLevel === 'full' && !isActive;
+              const isPartial = matchLevel === 'partial' && !isActive;
+              return (
+                <button
+                  key={key}
+                  onClick={() => onKeyToggle(key)}
+                  className={`w-12 py-1.5 text-xs font-medium rounded border transition-colors ${
+                    isActive
+                      ? 'bg-gray-800 text-white border-gray-800'
+                      : isFull
+                        ? 'bg-orange-50 border-orange-400 text-orange-700'
+                        : isPartial
+                          ? 'bg-yellow-50 border-yellow-300 text-yellow-600'
+                          : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  {NOTE_DISPLAY[key]}
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
