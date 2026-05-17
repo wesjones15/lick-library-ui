@@ -121,61 +121,47 @@ export default function LivePage() {
     if (pentModeSynced) setPentWidgetMode(mode);
   }, [mode, pentModeSynced]);
 
-  // For each degree (including same-degree), find exactly 1 closest note within 3.9
-  const bestCandidates = useMemo<Map<string, { candidateColor: string; ownNote: boolean }>>(() => {
-    if (!currentNote || highlightedDegrees.size > 0) return new Map();
-    const closestByDegree = new Map<number, { string: number; fret: number; dist: number }>();
+  // Top-3 candidates per degree, sorted by distance from currentNote within 3.9 units
+  const allCandidates = useMemo<{
+    best: Map<string, { candidateColor: string; ownNote: boolean }>;
+    second: Map<string, { candidateColor: string }>;
+    third: Map<string, { candidateColor: string }>;
+  }>(() => {
+    const empty = { best: new Map(), second: new Map(), third: new Map() };
+    if (!currentNote || highlightedDegrees.size > 0) return empty;
+
+    const byDegree = new Map<number, Array<{ string: number; fret: number; dist: number }>>();
     scaleDots.forEach((row, s) => {
       row.forEach((dot, f) => {
         if (!dot.degree) return;
         if (s === currentNote.string && f === currentNote.fret) return;
         const dist = Math.hypot(f - currentNote.fret, s - currentNote.string);
         if (dist > 3.9) return;
-        const prev = closestByDegree.get(dot.degree);
-        if (!prev || dist < prev.dist) closestByDegree.set(dot.degree, { string: s, fret: f, dist });
+        const arr = byDegree.get(dot.degree) ?? [];
+        arr.push({ string: s, fret: f, dist });
+        byDegree.set(dot.degree, arr);
       });
     });
-    const result = new Map<string, { candidateColor: string; ownNote: boolean }>();
-    closestByDegree.forEach((pos, degree) => {
-      result.set(`${pos.string},${pos.fret}`, {
-        candidateColor: DEGREE_COLORS[degree],
-        ownNote: degree === currentNote.degree,
-      });
-    });
-    return result;
-  }, [scaleDots, currentNote]);
+    byDegree.forEach(arr => arr.sort((a, b) => a.dist - b.dist));
 
-  // Neighbors of the own-note (same-degree) candidate — rendered at half brightness
-  const secondCandidates = useMemo<Map<string, { candidateColor: string }>>(() => {
-    if (!currentNote || highlightedDegrees.size > 0) return new Map();
-    let ownPos: { string: number; fret: number } | null = null;
-    bestCandidates.forEach(({ ownNote }, key) => {
-      if (ownNote) {
-        const [s, f] = key.split(',').map(Number);
-        ownPos = { string: s, fret: f };
-      }
+    const best = new Map<string, { candidateColor: string; ownNote: boolean }>();
+    const second = new Map<string, { candidateColor: string }>();
+    const third = new Map<string, { candidateColor: string }>();
+
+    byDegree.forEach((arr, degree) => {
+      const color = DEGREE_COLORS[degree];
+      const isOwn = degree === currentNote.degree;
+      if (arr[0]) best.set(`${arr[0].string},${arr[0].fret}`, { candidateColor: color, ownNote: isOwn });
+      if (arr[1]) second.set(`${arr[1].string},${arr[1].fret}`, { candidateColor: color });
+      if (arr[2]) third.set(`${arr[2].string},${arr[2].fret}`, { candidateColor: color });
     });
-    if (!ownPos) return new Map();
-    const op = ownPos as { string: number; fret: number };
-    const closestByDegree = new Map<number, { string: number; fret: number; dist: number }>();
-    scaleDots.forEach((row, s) => {
-      row.forEach((dot, f) => {
-        if (!dot.degree) return;
-        if (s === op.string && f === op.fret) return;
-        if (s === currentNote.string && f === currentNote.fret) return;
-        const dist = Math.hypot(f - op.fret, s - op.string);
-        if (dist > 3.9) return;
-        const prev = closestByDegree.get(dot.degree);
-        if (!prev || dist < prev.dist) closestByDegree.set(dot.degree, { string: s, fret: f, dist });
-      });
-    });
-    const result = new Map<string, { candidateColor: string }>();
-    closestByDegree.forEach((pos, degree) => {
-      const key = `${pos.string},${pos.fret}`;
-      if (!bestCandidates.has(key)) result.set(key, { candidateColor: DEGREE_COLORS[degree] });
-    });
-    return result;
-  }, [scaleDots, currentNote, bestCandidates, highlightedDegrees]);
+
+    return { best, second, third };
+  }, [scaleDots, currentNote, highlightedDegrees]);
+
+  const bestCandidates = allCandidates.best;
+  const secondCandidates = allCandidates.second;
+  const thirdCandidates = allCandidates.third;
 
   // candidateDegrees: derived from bestCandidates, used for legend highlighting
   const candidateDegrees = useMemo(() => {
@@ -187,7 +173,7 @@ export default function LivePage() {
       if (deg && !ownNote) s.add(deg);
     });
     return s;
-  }, [bestCandidates, highlightedDegrees, scaleDots]);
+  }, [allCandidates, highlightedDegrees, scaleDots]);
 
   // Pentatonic keys recognized from the current toolbar interval selection.
   // 'partial' = all selected notes fit within this pent (not ruled out yet).
@@ -252,19 +238,21 @@ export default function LivePage() {
         const isActive = currentNote?.string === s && currentNote?.fret === f;
         const candidateInfo = !isActive ? bestCandidates.get(`${s},${f}`) : undefined;
         const secondInfo = !isActive && !candidateInfo ? secondCandidates.get(`${s},${f}`) : undefined;
+        const thirdInfo = !isActive && !candidateInfo && !secondInfo ? thirdCandidates.get(`${s},${f}`) : undefined;
         return {
           ...dot,
           active: isActive,
           candidate: !!candidateInfo,
-          candidateColor: candidateInfo?.candidateColor ?? secondInfo?.candidateColor,
+          candidateColor: candidateInfo?.candidateColor ?? secondInfo?.candidateColor ?? thirdInfo?.candidateColor,
           ownNote: candidateInfo?.ownNote,
           secondCandidate: !!secondInfo,
+          thirdCandidate: !!thirdInfo,
           highlighted: pentatonicRings && !isActive ? true : undefined,
           pentatonicRings,
         };
       })
     );
-  }, [scaleDots, currentNote, bestCandidates, secondCandidates, highlightedDegrees, activePentKeys, pentWidgetMode]);
+  }, [scaleDots, currentNote, allCandidates, highlightedDegrees, activePentKeys, pentWidgetMode]);
 
   function selectNote(s: number, f: number, degree: number) {
     if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);

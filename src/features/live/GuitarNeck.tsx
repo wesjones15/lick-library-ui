@@ -6,7 +6,8 @@ export interface NeckDot {
   candidate?: boolean;
   candidateColor?: string;       // degree color for pulse stroke; replaces hardcoded dark-red
   ownNote?: boolean;             // same-degree candidate
-  secondCandidate?: boolean;     // neighbor of the own-note candidate; renders at half brightness
+  secondCandidate?: boolean;     // 2nd closest candidate from currentNote; renders at 2/3 brightness
+  thirdCandidate?: boolean;      // 3rd closest candidate from currentNote; renders at 1/3 brightness
   highlighted?: boolean;         // toolbar-selected or pentatonic-active; degree pulse, no pale yellow ring
   note?: string;                 // display label, e.g. "C#", "Bb"
   pentatonicRings?: string[];    // ordered ring colors; index 0 = r=11.5, 1 = r=14.5, 2 = r=17.5
@@ -264,6 +265,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           const label = dot.note ?? '';
           const isCandidate = dot.candidate && !dot.active;
           const isSecondCandidate = !!dot.secondCandidate && !dot.active && !isCandidate;
+          const isThirdCandidate = !!dot.thirdCandidate && !dot.active && !isCandidate && !isSecondCandidate;
           const isHighlighted = !!dot.highlighted && !dot.active;
           const bright = dot.active || isCandidate || isHighlighted;
           const textFill = bright ? '#111827' : '#9ca3af';
@@ -271,7 +273,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
             ? (label.length > 1 ? 9 : 11)
             : (label.length > 1 ? 7 : 9);
           const si = dataIdx(di);
-          const candidateStroke = (isCandidate || isSecondCandidate)
+          const candidateStroke = (isCandidate || isSecondCandidate || isThirdCandidate)
             ? (dot.candidateColor ?? DEGREE_COLORS[dot.degree] ?? '#800020')
             : 'none';
           return (
@@ -279,22 +281,22 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
               key={`d${di}-${fret}`}
               onClick={onDotClick ? () => onDotClick(si, fret) : undefined}
               style={onDotClick ? { cursor: 'pointer' } : undefined}
-              opacity={isSecondCandidate ? 0.5 : 1}
+              opacity={isThirdCandidate ? 0.33 : isSecondCandidate ? 0.67 : 1}
             >
               {/* pale yellow ring — outer border of active pulse */}
               {dot.active && (
                 <circle cx={cx} cy={cy} r={R_RING} fill={ACTIVE_RING_COLOR} />
               )}
               {/* white backing for inactive dots — dim color stays opaque, not translucent */}
-              {!bright && !isSecondCandidate && <circle cx={cx} cy={cy} r={R_NORMAL} fill="#ffffff" />}
+              {!bright && !isSecondCandidate && !isThirdCandidate && <circle cx={cx} cy={cy} r={R_NORMAL} fill="#ffffff" />}
               {/* colored circle — stroke pulses via CSS for active, candidate, and second candidate */}
               <circle
                 cx={cx} cy={cy} r={R_NORMAL}
-                fill={color} opacity={bright || isSecondCandidate ? 1 : 0.4}
+                fill={color} opacity={bright || isSecondCandidate || isThirdCandidate ? 1 : 0.4}
                 stroke={dot.active ? color : candidateStroke}
-                strokeWidth={dot.active || isCandidate || isSecondCandidate || isHighlighted ? 1 : 0}
-                style={dot.active ? { stroke: color } : ((isCandidate || isSecondCandidate) ? { stroke: candidateStroke } : (isHighlighted ? { stroke: color } : undefined))}
-                className={dot.active || isHighlighted ? 'active-dot' : ((isCandidate || isSecondCandidate) ? 'candidate-dot' : undefined)}
+                strokeWidth={dot.active || isCandidate || isSecondCandidate || isThirdCandidate || isHighlighted ? 1 : 0}
+                style={dot.active ? { stroke: color } : ((isCandidate || isSecondCandidate || isThirdCandidate) ? { stroke: candidateStroke } : (isHighlighted ? { stroke: color } : undefined))}
+                className={dot.active || isHighlighted ? 'active-dot' : (isCandidate || isSecondCandidate || isThirdCandidate) ? 'candidate-dot' : undefined}
               />
               {/* Pentatonic rings — one per selected pentatonic key, outward from r=11.5 */}
               {dot.pentatonicRings?.map((color, i) => (
