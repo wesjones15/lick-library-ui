@@ -280,9 +280,9 @@ export default function LickVisualizerPanel() {
   const toggleInactive = 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50';
 
   return (
-    <div className="py-6">
+    <div className="py-3">
       {/* Panel mode toggle + action buttons */}
-      <div className="flex gap-3 items-center mb-4 flex-wrap">
+      <div className="flex gap-3 items-center mb-2 flex-wrap">
         <div className="flex rounded-md overflow-hidden border border-gray-300">
           <button
             className={`${toggleBtnBase} rounded-none border-0 border-r border-gray-300 ${panelMode === 'visualize' ? toggleActive : toggleInactive}`}
@@ -312,14 +312,6 @@ export default function LickVisualizerPanel() {
             >
               New Lick
             </button>
-            {lickSource === 'library' && (
-              <button
-                onClick={() => setShowEditLick(true)}
-                className={`${btnClass} bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
-              >
-                Edit Lick
-              </button>
-            )}
           </>
         )}
       </div>
@@ -369,7 +361,7 @@ export default function LickVisualizerPanel() {
             </div>
           )}
 
-          {/* Playback controls */}
+          {/* Playback controls + Edit/Save */}
           <div className="flex gap-4 items-center flex-wrap mb-3 mt-4">
             <div className="flex rounded-md overflow-hidden border border-gray-300">
               <button
@@ -412,19 +404,26 @@ export default function LickVisualizerPanel() {
                 </button>
               </>
             )}
-          </div>
 
-          {/* Save Lick */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleSaveLick}
-              disabled={!canSave || saveLoading}
-              className={`${btnClass} ${canSave
-                ? 'bg-green-600 text-white border-green-600 hover:bg-green-700'
-                : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'} disabled:opacity-60`}
-            >
-              {saveLoading ? 'Saving…' : 'Save Lick'}
-            </button>
+            <div className="ml-auto flex items-center gap-2">
+              {lickSource === 'library' && (
+                <button
+                  onClick={() => setShowEditLick(true)}
+                  className={`${btnClass} bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
+                >
+                  Edit Lick
+                </button>
+              )}
+              <button
+                onClick={handleSaveLick}
+                disabled={!canSave || saveLoading}
+                className={`${btnClass} ${canSave
+                  ? 'bg-green-600 text-white border-green-600 hover:bg-green-700'
+                  : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'} disabled:opacity-60`}
+              >
+                {saveLoading ? 'Saving…' : 'Save Lick'}
+              </button>
+            </div>
           </div>
           {saveError && <p className="text-sm text-red-500 mt-1">{saveError}</p>}
         </div>
