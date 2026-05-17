@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
 import { getCagedZones, getPentatonicGroupMap } from './cagedUtils';
 import LickVisualizerPanel from './LickVisualizerPanel';
+import ChordsProgressionPanel from './ChordsProgressionPanel';
 import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
 
@@ -354,11 +355,9 @@ export default function LivePage() {
       {/* Lick Visualizer mode */}
       {viewMode === 'lick' && <LickVisualizerPanel />}
 
-      {/* Chords/Progressions mode — stub */}
+      {/* Chords/Progressions mode */}
       {viewMode === 'chords' && (
-        <div className="py-16 text-center text-gray-400 text-sm">
-          Chords &amp; Progressions coming soon.
-        </div>
+        <ChordsProgressionPanel initialRoot={root} initialMode={mode} />
       )}
     </div>
   );
