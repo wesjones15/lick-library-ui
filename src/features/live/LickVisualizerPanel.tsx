@@ -8,6 +8,7 @@ import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 const STRING_COUNT = 6;
 const FRET_COUNT = 12;
 const SPREAD_SLOT = 4;
+const BUILD_LABELS = ['e|', 'B|', 'G|', 'D|', 'A|', 'E|'];
 
 const btnClass = 'px-4 py-2 text-sm rounded-lg border transition-colors';
 
@@ -94,6 +95,44 @@ function buildDotsForAllColumns(cols: TabColumn[]): NeckDot[][] {
   return dots;
 }
 
+// Compact format: |-col0-col1-...-colN-|
+// Column width = max fret digit count across all notes in that column.
+// Non-note strings get dashes to fill the column width.
+function buildNormalizedTab(labels: string[], columns: TabColumn[]): string {
+  const numStrings = labels.length;
+  const colWidths = columns.map(col => {
+    if (col.isRest) return 1;
+    return col.notes.reduce((m, n) => Math.max(m, String(n.fret).length), 1);
+  });
+
+  return Array.from({ length: numStrings }, (_, displayRow) => {
+    const stringIndex = (numStrings - 1) - displayRow;
+    let line = labels[displayRow] + '-';
+    columns.forEach((col, _i) => {
+      if (col.isRest) {
+        line += '~';
+      } else {
+        const colWidth = colWidths[_i];
+        const note = col.notes.find(n => n.string === stringIndex);
+        const fretStr = note ? String(note.fret) : '';
+        line += fretStr + '-'.repeat(colWidth - fretStr.length);
+      }
+      line += '-';
+    });
+    line += '|';
+    return line;
+  }).join('\n');
+}
+
+function normalizeTab(rawTab: string): string {
+  const columns = parseTabString(rawTab);
+  if (columns.length === 0) return rawTab;
+  const lines = rawTab.split('\n').filter(l => l.includes('|'));
+  const labels = lines.map(l => l.slice(0, l.indexOf('|') + 1));
+  return buildNormalizedTab(labels, columns);
+}
+
+// Spread tab: each column gets SPREAD_SLOT chars, for visual alignment with the range slider.
 function buildSpreadTab(rawTab: string, columns: TabColumn[]): string {
   const lines = rawTab.split('\n').filter(l => l.includes('|'));
   if (lines.length === 0) return '';
@@ -111,20 +150,6 @@ function buildSpreadTab(rawTab: string, columns: TabColumn[]): string {
         const fretStr = note ? String(note.fret) : '';
         line += fretStr + '-'.repeat(SPREAD_SLOT - fretStr.length);
       }
-    }
-    line += '|';
-    return line;
-  }).join('\n');
-}
-
-function buildTabFromColumns(cols: { string: number; fret: number }[][]): string {
-  const labels = ['e', 'B', 'G', 'D', 'A', 'E'];
-  return Array.from({ length: 6 }, (_, displayRow) => {
-    const si = 5 - displayRow;
-    let line = labels[displayRow] + '|';
-    for (const col of cols) {
-      const note = col.find(n => n.string === si);
-      line += note ? String(note.fret) : '-';
     }
     line += '|';
     return line;
@@ -178,9 +203,10 @@ export default function LickVisualizerPanel() {
   }, []);
 
   const handleLibrarySelect = useCallback((selectedRawTab: string) => {
-    setRawTab(selectedRawTab);
+    const normalized = normalizeTab(selectedRawTab);
+    setRawTab(normalized);
     setShowLibrary(false);
-    analyzeTab(selectedRawTab);
+    analyzeTab(normalized);
     setLickSource('library');
     setSaveError(null);
   }, [analyzeTab]);
@@ -189,7 +215,8 @@ export default function LickVisualizerPanel() {
     if (panelMode !== 'build') return;
     setBuiltCols(prev => {
       const newCols = [...prev, [{ string: stringIndex, fret }]];
-      setBuiltTabText(buildTabFromColumns(newCols));
+      const tabCols: TabColumn[] = newCols.map(col => ({ isRest: false, notes: col }));
+      setBuiltTabText(buildNormalizedTab(BUILD_LABELS, tabCols));
       return newCols;
     });
   }, [panelMode]);
@@ -212,9 +239,10 @@ export default function LickVisualizerPanel() {
     setBuildSaveLoading(true);
     setBuildSaveError(null);
     try {
-      await uploadLick({ rawTab: builtTabText });
-      setRawTab(builtTabText);
-      analyzeTab(builtTabText);
+      const normalized = normalizeTab(builtTabText);
+      await uploadLick({ rawTab: normalized });
+      setRawTab(normalized);
+      analyzeTab(normalized);
       setLickSource('library');
       setPanelMode('visualize');
       setBuiltCols([]);
@@ -245,7 +273,6 @@ export default function LickVisualizerPanel() {
     return d;
   }, [builtCols]);
 
-  const spreadTab = columns.length > 0 ? buildSpreadTab(rawTab, columns) : '';
   const canSave = lickSource === 'new' || lickSource === 'modified';
 
   const toggleBtnBase = 'px-3 py-1.5 text-xs rounded-md border transition-colors';
@@ -254,7 +281,7 @@ export default function LickVisualizerPanel() {
 
   return (
     <div className="py-6">
-      {/* Panel mode toggle */}
+      {/* Panel mode toggle + action buttons */}
       <div className="flex gap-3 items-center mb-4 flex-wrap">
         <div className="flex rounded-md overflow-hidden border border-gray-300">
           <button
@@ -307,12 +334,16 @@ export default function LickVisualizerPanel() {
       {/* Visualize mode content */}
       {panelMode === 'visualize' && columns.length > 0 && (
         <div className="mt-4">
-          {/* Spread tab + aligned slider */}
-          <div style={{ display: 'inline-block', maxWidth: '100%', overflowX: 'auto' }} className="mb-1">
-            <pre className="font-mono text-xs text-gray-600 leading-tight m-0 p-0 whitespace-pre">
-              {spreadTab}
+          {/* Tab display: compact rawTab in all mode, spread tab aligned to slider in column mode */}
+          {displayMode === 'all' ? (
+            <pre className="font-mono text-xs text-gray-600 leading-tight mb-3 whitespace-pre overflow-x-auto">
+              {rawTab}
             </pre>
-            {displayMode === 'column' && (
+          ) : (
+            <div style={{ display: 'inline-block', maxWidth: '100%', overflowX: 'auto' }} className="mb-1">
+              <pre className="font-mono text-xs text-gray-600 leading-tight m-0 p-0 whitespace-pre">
+                {buildSpreadTab(rawTab, columns)}
+              </pre>
               <div className="relative" style={{ paddingLeft: '2ch', paddingRight: '1ch' }}>
                 <input
                   type="range"
@@ -335,8 +366,8 @@ export default function LickVisualizerPanel() {
                   ) : null
                 )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Playback controls */}
           <div className="flex gap-4 items-center flex-wrap mb-3 mt-4">
@@ -444,9 +475,10 @@ export default function LickVisualizerPanel() {
         <LickInputModal
           title="New Lick"
           onVisualize={tab => {
-            setRawTab(tab);
+            const normalized = normalizeTab(tab);
+            setRawTab(normalized);
             setShowNewLick(false);
-            analyzeTab(tab);
+            analyzeTab(normalized);
             setLickSource('new');
             setSaveError(null);
           }}
@@ -458,9 +490,10 @@ export default function LickVisualizerPanel() {
           title="Edit Lick"
           initialTab={rawTab}
           onVisualize={tab => {
-            setRawTab(tab);
+            const normalized = normalizeTab(tab);
+            setRawTab(normalized);
             setShowEditLick(false);
-            analyzeTab(tab);
+            analyzeTab(normalized);
             setLickSource('modified');
             setSaveError(null);
           }}
