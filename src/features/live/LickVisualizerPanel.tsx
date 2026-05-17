@@ -141,7 +141,7 @@ function buildSpreadTab(rawTab: string, columns: TabColumn[]): string {
 
   return Array.from({ length: numStrings }, (_, displayRow) => {
     const stringIndex = (numStrings - 1) - displayRow;
-    let line = labels[displayRow];
+    let line = labels[displayRow] + '-';
     for (const col of columns) {
       if (col.isRest) {
         line += '~' + '-'.repeat(SPREAD_SLOT - 1);
@@ -340,11 +340,11 @@ export default function LickVisualizerPanel() {
               {rawTab}
             </pre>
           ) : (
-            <div style={{ display: 'inline-block', maxWidth: '100%', overflowX: 'auto' }} className="mb-1">
-              <pre className="font-mono text-xs text-gray-600 leading-tight m-0 p-0 whitespace-pre">
+            <div className="font-mono text-xs mb-1" style={{ display: 'inline-block', maxWidth: '100%', overflowX: 'auto' }}>
+              <pre className="text-gray-600 leading-tight m-0 p-0 whitespace-pre">
                 {buildSpreadTab(rawTab, columns)}
               </pre>
-              <div className="relative" style={{ paddingLeft: '2ch', paddingRight: '1ch' }}>
+              <div className="relative" style={{ paddingLeft: '3ch', paddingRight: '5ch' }}>
                 <input
                   type="range"
                   min={0}
