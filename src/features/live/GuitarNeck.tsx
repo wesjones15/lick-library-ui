@@ -268,7 +268,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           const isThirdCandidate = !!dot.thirdCandidate && !dot.active && !isCandidate && !isSecondCandidate;
           const isHighlighted = !!dot.highlighted && !dot.active;
           const bright = dot.active || isCandidate || isHighlighted;
-          const textFill = bright ? '#111827' : '#9ca3af';
+          const textFill = (bright || isSecondCandidate || isThirdCandidate) ? '#111827' : '#9ca3af';
           const fontSize = dot.active
             ? (label.length > 1 ? 9 : 11)
             : (label.length > 1 ? 7 : 9);
@@ -281,7 +281,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
               key={`d${di}-${fret}`}
               onClick={onDotClick ? () => onDotClick(si, fret) : undefined}
               style={onDotClick ? { cursor: 'pointer' } : undefined}
-              opacity={isThirdCandidate ? 0.33 : isSecondCandidate ? 0.67 : 1}
+              opacity={isThirdCandidate ? 0.33 : isSecondCandidate ? 0.67 : isCandidate ? 0.8 : 1}
             >
               {/* pale yellow ring — outer border of active pulse */}
               {dot.active && (
