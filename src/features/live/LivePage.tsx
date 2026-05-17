@@ -192,7 +192,7 @@ export default function LivePage() {
         if (dot.degree === null) return dot;
         const pentatonicGroup = pentGroupMap ? (pentGroupMap[dot.degree] ?? null) : undefined;
         if (highlightedDegrees.size > 0) {
-          return { ...dot, active: highlightedDegrees.has(dot.degree!), candidate: false, pentatonicGroup };
+          return { ...dot, active: false, highlighted: highlightedDegrees.has(dot.degree!), candidate: false, pentatonicGroup };
         }
         const isActive = currentNote?.string === s && currentNote?.fret === f;
         const candidateInfo = !isActive ? bestCandidates.get(`${s},${f}`) : undefined;

@@ -7,6 +7,7 @@ export interface NeckDot {
   candidateColor?: string;       // degree color for pulse stroke; replaces hardcoded dark-red
   ownNote?: boolean;             // same-degree candidate
   secondCandidate?: boolean;     // neighbor of the own-note candidate; renders at half brightness
+  highlighted?: boolean;         // toolbar-selected or pentatonic-active; degree pulse, no pale yellow ring
   note?: string;                 // display label, e.g. "C#", "Bb"
   pentatonicGroup?: PentatonicGroup | null; // which of the 3 pentatonic subsets this note belongs to
 }
@@ -235,7 +236,8 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           const label = dot.note ?? '';
           const isCandidate = dot.candidate && !dot.active;
           const isSecondCandidate = !!dot.secondCandidate && !dot.active && !isCandidate;
-          const bright = dot.active || isCandidate;
+          const isHighlighted = !!dot.highlighted && !dot.active;
+          const bright = dot.active || isCandidate || isHighlighted;
           const textFill = bright ? '#111827' : '#9ca3af';
           const fontSize = dot.active
             ? (label.length > 1 ? 9 : 11)
@@ -262,9 +264,9 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
                 cx={cx} cy={cy} r={R_NORMAL}
                 fill={color} opacity={bright || isSecondCandidate ? 1 : 0.4}
                 stroke={dot.active ? color : candidateStroke}
-                strokeWidth={dot.active || isCandidate || isSecondCandidate ? 1 : 0}
-                style={dot.active ? { stroke: color } : ((isCandidate || isSecondCandidate) ? { stroke: candidateStroke } : undefined)}
-                className={dot.active ? 'active-dot' : ((isCandidate || isSecondCandidate) ? 'candidate-dot' : undefined)}
+                strokeWidth={dot.active || isCandidate || isSecondCandidate || isHighlighted ? 1 : 0}
+                style={dot.active ? { stroke: color } : ((isCandidate || isSecondCandidate) ? { stroke: candidateStroke } : (isHighlighted ? { stroke: color } : undefined))}
+                className={dot.active || isHighlighted ? 'active-dot' : ((isCandidate || isSecondCandidate) ? 'candidate-dot' : undefined)}
               />
               {/* Pentatonic group ring — thin colored ring just outside the dot */}
               {dot.pentatonicGroup && PENT_COLORS[dot.pentatonicGroup] && (
