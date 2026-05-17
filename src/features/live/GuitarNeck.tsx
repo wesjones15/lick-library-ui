@@ -2,7 +2,9 @@ export interface NeckDot {
   degree: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null;
   active: boolean;
   candidate?: boolean;
-  note?: string; // display label, e.g. "C#", "Bb"
+  candidateColor?: string; // degree color for pulse stroke; replaces hardcoded dark-red
+  ownNote?: boolean;       // same-degree candidate — dimmed relative to other candidates
+  note?: string;           // display label, e.g. "C#", "Bb"
 }
 
 interface GuitarNeckProps {
@@ -195,34 +197,38 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
 
           const color = DEGREE_COLORS[dot.degree];
           const label = dot.note ?? '';
-          const bright = dot.active || dot.candidate;
+          const isCandidate = dot.candidate && !dot.active;
+          const bright = dot.active || isCandidate;
           const textFill = bright ? '#111827' : '#9ca3af';
           const fontSize = dot.active
             ? (label.length > 1 ? 9 : 11)
             : (label.length > 1 ? 7 : 9);
           const si = dataIdx(di);
+          const candidateStroke = isCandidate ? (dot.candidateColor ?? '#800020') : 'none';
           return (
             <g
               key={`d${di}-${fret}`}
               onClick={onDotClick ? () => onDotClick(si, fret) : undefined}
               style={onDotClick ? { cursor: 'pointer' } : undefined}
+              opacity={dot.ownNote ? 0.5 : 1}
             >
-              {/* active ring: dark outer outline + filled pale yellow */}
+              {/* active ring: dark outer outline + filled pale yellow (larger than before) */}
               {dot.active && (
-                <circle cx={cx} cy={cy} r={14.5} fill="none" stroke="#374151" strokeWidth={1} />
+                <circle cx={cx} cy={cy} r={16} fill="none" stroke="#374151" strokeWidth={1} />
               )}
               {dot.active && (
                 <circle cx={cx} cy={cy} r={R_RING} fill={ACTIVE_RING_COLOR} />
               )}
               {/* white backing — larger for candidates to cover stroke bleed */}
-              <circle cx={cx} cy={cy} r={dot.candidate && !dot.active ? R_NORMAL + 3 : R_NORMAL} fill="#ffffff" />
+              <circle cx={cx} cy={cy} r={isCandidate ? R_NORMAL + 3 : R_NORMAL} fill="#ffffff" />
               {/* colored circle — stroke on candidate pulses via CSS */}
               <circle
                 cx={cx} cy={cy} r={R_NORMAL}
                 fill={color} opacity={bright ? 1 : 0.4}
-                stroke={dot.candidate && !dot.active ? '#800020' : 'none'}
-                strokeWidth={dot.candidate && !dot.active ? 1 : 0}
-                className={dot.candidate && !dot.active ? 'candidate-dot' : undefined}
+                stroke={candidateStroke}
+                strokeWidth={isCandidate ? 1 : 0}
+                style={isCandidate ? { stroke: candidateStroke } : undefined}
+                className={isCandidate ? 'candidate-dot' : undefined}
               />
               <text
                 x={cx}

@@ -56,9 +56,6 @@ function blankScaleDots(): NeckDot[][] {
   );
 }
 
-function wrapDegree(d: number): number {
-  return ((d - 1 + 7) % 7) + 1;
-}
 
 function midiToPositions(midi: number): Array<{ string: number; fret: number }> {
   const result: Array<{ string: number; fret: number }> = [];
@@ -85,6 +82,7 @@ export default function LivePage() {
   const [mode, setMode] = useState('IONIAN');
   const [scaleDots, setScaleDots] = useState<NeckDot[][]>(blankScaleDots);
   const [currentNote, setCurrentNote] = useState<CurrentNote | null>(null);
+  const [highlightedDegree, setHighlightedDegree] = useState<number | null>(null);
   const [listening, setListening] = useState(false);
   const noteHoldTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -109,54 +107,62 @@ export default function LivePage() {
     }).catch(() => {});
   }, [root, mode]);
 
-  // Candidate degrees — lifted out so legend can use them too
-  const candidateDegrees = useMemo(() =>
-    currentNote
-      ? new Set([
-          wrapDegree(currentNote.degree - 2),
-          wrapDegree(currentNote.degree - 1),
-          wrapDegree(currentNote.degree + 1),
-          wrapDegree(currentNote.degree + 2),
-        ])
-      : new Set<number>(),
-    [currentNote]
-  );
-
-  // For each candidate degree, find the 2 closest notes on the neck
-  const bestCandidates = useMemo<Set<string>>(() => {
-    if (!currentNote) return new Set();
-    const bestByDegree = new Map<number, Array<{ string: number; fret: number; distance: number }>>();
+  // For each degree (including same-degree), find exactly 1 closest note within 3.9
+  const bestCandidates = useMemo<Map<string, { candidateColor: string; ownNote: boolean }>>(() => {
+    if (!currentNote) return new Map();
+    const closestByDegree = new Map<number, { string: number; fret: number; dist: number }>();
     scaleDots.forEach((row, s) => {
       row.forEach((dot, f) => {
-        if (dot.degree === null) return;
-        if (currentNote.string === s && currentNote.fret === f) return;
-        if (!candidateDegrees.has(dot.degree)) return;
+        if (!dot.degree) return;
+        if (s === currentNote.string && f === currentNote.fret) return;
         const dist = Math.hypot(f - currentNote.fret, s - currentNote.string);
         if (dist > 3.9) return;
-        const list = bestByDegree.get(dot.degree) ?? [];
-        list.push({ string: s, fret: f, distance: dist });
-        list.sort((a, b) => a.distance - b.distance);
-        // Keep 2 only if tied for closest; otherwise keep 1
-        const top = list[0];
-        bestByDegree.set(dot.degree, list.filter(x => x.distance === top.distance));
+        const prev = closestByDegree.get(dot.degree);
+        if (!prev || dist < prev.dist) closestByDegree.set(dot.degree, { string: s, fret: f, dist });
       });
     });
-    return new Set(
-      Array.from(bestByDegree.values()).flatMap(list => list.map(({ string, fret }) => `${string},${fret}`))
-    );
-  }, [scaleDots, currentNote, candidateDegrees]);
+    const result = new Map<string, { candidateColor: string; ownNote: boolean }>();
+    closestByDegree.forEach((pos, degree) => {
+      result.set(`${pos.string},${pos.fret}`, {
+        candidateColor: DEGREE_COLORS[degree],
+        ownNote: degree === currentNote.degree,
+      });
+    });
+    return result;
+  }, [scaleDots, currentNote]);
 
-  // Derived dots: overlay active + candidate state onto the scale dots
+  // candidateDegrees: derived from bestCandidates, used for legend highlighting
+  const candidateDegrees = useMemo(() => {
+    if (highlightedDegree !== null) return new Set<number>();
+    const s = new Set<number>();
+    bestCandidates.forEach(({ ownNote }, key) => {
+      const [str, fret] = key.split(',').map(Number);
+      const deg = scaleDots[str]?.[fret]?.degree;
+      if (deg && !ownNote) s.add(deg);
+    });
+    return s;
+  }, [bestCandidates, highlightedDegree, scaleDots]);
+
+  // Derived dots: overlay active + candidate state; highlightedDegree overrides all
   const dots = useMemo<NeckDot[][]>(() => {
     return scaleDots.map((row, s) =>
       row.map((dot, f) => {
         if (dot.degree === null) return dot;
+        if (highlightedDegree !== null) {
+          return { ...dot, active: dot.degree === highlightedDegree, candidate: false };
+        }
         const isActive = currentNote?.string === s && currentNote?.fret === f;
-        const isCandidate = !isActive && bestCandidates.has(`${s},${f}`);
-        return { ...dot, active: isActive, candidate: isCandidate };
+        const candidateInfo = !isActive ? bestCandidates.get(`${s},${f}`) : undefined;
+        return {
+          ...dot,
+          active: isActive,
+          candidate: !!candidateInfo,
+          candidateColor: candidateInfo?.candidateColor,
+          ownNote: candidateInfo?.ownNote,
+        };
       })
     );
-  }, [scaleDots, currentNote, bestCandidates]);
+  }, [scaleDots, currentNote, bestCandidates, highlightedDegree]);
 
   function selectNote(s: number, f: number, degree: number) {
     if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
@@ -177,6 +183,7 @@ export default function LivePage() {
   }, [midiNote]);
 
   function handleDotClick(stringIndex: number, fret: number) {
+    setHighlightedDegree(null);
     const dot = scaleDots[stringIndex]?.[fret];
     if (!dot || dot.degree === null) return;
     if (currentNote?.string === stringIndex && currentNote?.fret === fret) {
@@ -259,26 +266,34 @@ export default function LivePage() {
 
       {/* Live mode content */}
       {viewMode === 'live' && (<>
-        {/* Interval key legend */}
+        {/* Interval key legend — clickable bubbles highlight all notes of that degree */}
         <div className="flex gap-2 items-center flex-wrap mb-6">
           {intervalLabels.map((label, idx) => {
             const degree = idx + 1;
-            const isActive   = currentNote?.degree === degree;
+            const isNoteActive = currentNote?.degree === degree;
+            const isDegreeHighlighted = highlightedDegree === degree;
             const isCandidate = candidateDegrees.has(degree);
+            const lit = isNoteActive || isDegreeHighlighted || isCandidate;
             return (
               <div
                 key={degree}
-                className={isCandidate && !isActive ? 'legend-candidate' : undefined}
+                className={isCandidate && !isNoteActive && !isDegreeHighlighted ? 'legend-candidate' : undefined}
+                onClick={() => {
+                  setCurrentNote(null);
+                  if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
+                  setHighlightedDegree(prev => prev === degree ? null : degree);
+                }}
                 style={{
                   width: 32, height: 32, borderRadius: '50%',
                   background: DEGREE_COLORS[degree],
-                  opacity: isActive || isCandidate ? 1 : 0.35,
-                  border: isActive ? '2px solid #fef08a' : 'none',
+                  opacity: lit ? 1 : 0.35,
+                  border: isDegreeHighlighted ? '2px solid #ffffff' : isNoteActive ? '2px solid #fef08a' : 'none',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: label.length > 1 ? 9 : 11,
                   fontWeight: 700,
-                  color: isActive || isCandidate ? '#111827' : '#9ca3af',
+                  color: lit ? '#111827' : '#9ca3af',
                   flexShrink: 0,
+                  cursor: 'pointer',
                 }}
               >
                 {label}
