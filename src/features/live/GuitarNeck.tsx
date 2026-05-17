@@ -237,9 +237,21 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
                   <circle cx={cx} cy={cy} r={R_NORMAL} fill="#9ca3af" className="active-dot"
                     stroke="#9ca3af" strokeWidth={1} />
                   {dot.pentatonicRings.map((color, i) => (
-                    <circle key={i} cx={cx} cy={cy} r={11.5 + i * 3} fill="none"
-                      stroke={color} strokeWidth={2} style={{ pointerEvents: 'none' }} />
+                    <g key={i} style={{ pointerEvents: 'none' }}>
+                      <circle cx={cx} cy={cy} r={11.5 + i * 3} fill="none"
+                        stroke="rgba(0,0,0,0.55)" strokeWidth={3.5} />
+                      <circle cx={cx} cy={cy} r={11.5 + i * 3} fill="none"
+                        stroke={color} strokeWidth={2} />
+                    </g>
                   ))}
+                  {dot.note && (
+                    <text x={cx} y={cy + (dot.note.length > 1 ? 7 : 9) * 0.38}
+                      textAnchor="middle" fontSize={dot.note.length > 1 ? 7 : 9}
+                      fill="#374151" fontFamily="sans-serif" fontWeight="600"
+                      style={{ pointerEvents: 'none', userSelect: 'none' }}>
+                      {dot.note}
+                    </text>
+                  )}
                 </g>
               );
             }
@@ -286,9 +298,12 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
               />
               {/* Pentatonic rings — one per selected pentatonic key, outward from r=11.5 */}
               {dot.pentatonicRings?.map((color, i) => (
-                <circle key={i} cx={cx} cy={cy} r={11.5 + i * 3} fill="none"
-                  stroke={color} strokeWidth={2} opacity={bright ? 0.9 : 0.6}
-                  style={{ pointerEvents: 'none' }} />
+                <g key={i} style={{ pointerEvents: 'none' }} opacity={bright ? 0.9 : 0.6}>
+                  <circle cx={cx} cy={cy} r={11.5 + i * 3} fill="none"
+                    stroke="rgba(0,0,0,0.55)" strokeWidth={3.5} />
+                  <circle cx={cx} cy={cy} r={11.5 + i * 3} fill="none"
+                    stroke={color} strokeWidth={2} />
+                </g>
               ))}
               <text
                 x={cx}

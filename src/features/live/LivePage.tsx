@@ -13,6 +13,7 @@ type ViewMode = 'live' | 'lick' | 'chords';
 const STRING_COUNT = 6;
 const FRET_COUNT = 12;
 const OPEN_MIDI = [40, 45, 50, 55, 59, 64]; // low E → high e
+const CHROMATIC_LABELS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 
 const NOTE_KEYS = [
   { value: 'C',       label: 'C'  },
@@ -189,9 +190,11 @@ export default function LivePage() {
     return s;
   }, [bestCandidates, highlightedDegrees, scaleDots]);
 
-  // Pentatonic keys that are fully covered by the current toolbar interval selection
-  const recognizedPentKeys = useMemo<Set<string>>(() => {
-    if (highlightedDegrees.size < 5 || !root) return new Set();
+  // Pentatonic keys recognized from the current toolbar interval selection.
+  // 'partial' = all selected notes fit within this pent (not ruled out yet).
+  // 'full'    = all 5 pent notes are covered by the selection.
+  const recognizedPentKeys = useMemo<Map<string, 'partial' | 'full'>>(() => {
+    if (highlightedDegrees.size < 2 || !root) return new Map();
     const rootIdx = ROOT_CHROMATIC[root] ?? 0;
     const liveSemis = ((): number[] => {
       const semMap: Record<string, number[]> = {
@@ -208,10 +211,13 @@ export default function LivePage() {
     const selectedChromatic = new Set(
       Array.from(highlightedDegrees).map(d => (rootIdx + liveSemis[d - 1]) % 12)
     );
-    const result = new Set<string>();
+    const result = new Map<string, 'partial' | 'full'>();
     for (const key of Object.keys(ROOT_CHROMATIC)) {
       const pentNotes = getPentatonicNoteSet(key, pentWidgetMode);
-      if ([...pentNotes].every(n => selectedChromatic.has(n))) result.add(key);
+      const notRuledOut = [...selectedChromatic].every(n => pentNotes.has(n));
+      if (!notRuledOut) continue;
+      const isFull = [...pentNotes].every(n => selectedChromatic.has(n));
+      result.set(key, isFull ? 'full' : 'partial');
     }
     return result;
   }, [highlightedDegrees, root, mode, pentWidgetMode]);
@@ -238,7 +244,8 @@ export default function LivePage() {
         }
 
         if (dot.degree === null) {
-          return { ...dot, pentatonicRings, pentatonicOutOfScale };
+          const note = pentatonicOutOfScale ? CHROMATIC_LABELS[(OPEN_MIDI[s] + f) % 12] : undefined;
+          return { ...dot, pentatonicRings, pentatonicOutOfScale, note };
         }
         if (highlightedDegrees.size > 0) {
           return { ...dot, active: false, highlighted: highlightedDegrees.has(dot.degree!), candidate: false, pentatonicRings };
