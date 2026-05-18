@@ -162,8 +162,8 @@ export default function SongDetailPage() {
       title: song.title,
       artist: song.artist ?? undefined,
       bpm: song.tempo ?? undefined,
-      shapeKey: keyLabel(song.originalKey, semitones),
-      soundKey: keyLabel(song.originalKey, semitones + capo),
+      shapeKey: keyLabel(song.originalKey, semitones - capo),
+      soundKey: keyLabel(song.originalKey, semitones),
       capo,
     });
     return () => setInfo(null);
@@ -225,7 +225,7 @@ export default function SongDetailPage() {
   };
   const currentNoteKey = (() => {
     if (!song?.originalKey) return null;
-    const label = keyLabel(song.originalKey, semitones);
+    const label = keyLabel(song.originalKey, semitones - capo);
     const rootMatch = label.match(/^([A-G][#b]?)/);
     if (!rootMatch) return null;
     return DISPLAY_TO_NOTE[rootMatch[1]] ?? null;
@@ -526,7 +526,7 @@ export default function SongDetailPage() {
                   <div className="flex gap-3 items-center">
                     <div className="flex flex-col items-center w-10">
                       <span className="text-base font-semibold text-gray-900">
-                        {keyLabel(song.originalKey, semitones)}
+                        {keyLabel(song.originalKey, semitones - capo)}
                       </span>
                       <span className="text-xs text-gray-400">shape</span>
                     </div>
@@ -535,7 +535,7 @@ export default function SongDetailPage() {
                     </span>
                     <div className="flex flex-col items-center w-10">
                       <span className="text-base font-semibold text-gray-900">
-                        {keyLabel(song.originalKey, semitones + capo)}
+                        {keyLabel(song.originalKey, semitones)}
                       </span>
                       <span className="text-xs text-gray-400">sound</span>
                     </div>
@@ -615,7 +615,7 @@ export default function SongDetailPage() {
                     <div className="flex gap-3 items-center">
                       <div className="flex flex-col items-center w-10">
                         <span className="text-base font-semibold text-gray-900">
-                          {keyLabel(song?.originalKey ?? null, semitones)}
+                          {keyLabel(song?.originalKey ?? null, semitones - capo)}
                         </span>
                         <span className="text-xs text-gray-400">shape</span>
                       </div>
@@ -624,7 +624,7 @@ export default function SongDetailPage() {
                       </span>
                       <div className="flex flex-col items-center w-10">
                         <span className="text-base font-semibold text-gray-900">
-                          {keyLabel(song?.originalKey ?? null, semitones + capo)}
+                          {keyLabel(song?.originalKey ?? null, semitones)}
                         </span>
                         <span className="text-xs text-gray-400">sound</span>
                       </div>

@@ -56,6 +56,7 @@ export default function SongManagePage() {
   const [artist, setArtist] = useState('');
   const [keyRoot, setKeyRoot] = useState('');
   const [keyMode, setKeyMode] = useState('');
+  const [capo, setCapo] = useState('');
   const [tempo, setTempo] = useState('');
 
   // Chart field
@@ -80,6 +81,7 @@ export default function SongManagePage() {
       const { root, mode } = parseStoredKey(s.originalKey ?? '');
       setKeyRoot(root);
       setKeyMode(mode);
+      setCapo(s.capo != null ? String(s.capo) : '');
       setTempo(s.tempo != null ? String(s.tempo) : '');
       setRawChordSheet(s.rawChordSheet ?? '');
     });
@@ -109,6 +111,7 @@ export default function SongManagePage() {
     title !== song.title ||
     artist !== (song.artist ?? '') ||
     currentKey !== savedKey ||
+    capo !== (song.capo != null ? String(song.capo) : '') ||
     tempo !== (song.tempo != null ? String(song.tempo) : '')
   );
 
@@ -124,6 +127,7 @@ export default function SongManagePage() {
         title: title.trim(),
         artist: artist.trim() || undefined,
         originalKey: currentKey || undefined,
+        capo: capo ? parseInt(capo, 10) : undefined,
         tempo: tempo ? parseInt(tempo, 10) : undefined,
       });
       navigate(`/song/${id}`);
@@ -206,6 +210,15 @@ export default function SongManagePage() {
                 <option key={m.value} value={m.value}>{m.label}</option>
               ))}
             </select>
+            <input
+              type="number"
+              value={capo}
+              onChange={e => setCapo(e.target.value)}
+              placeholder="Capo"
+              min={0}
+              max={11}
+              className={`${inputClass} w-20`}
+            />
             <input
               type="number"
               value={tempo}
