@@ -257,7 +257,13 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
               );
             }
             return (
-              <circle key={`d${di}-${fret}`} cx={cx} cy={cy} r={R_SMALL} fill={OFF_SCALE_COLOR} />
+              <g
+                key={`d${di}-${fret}`}
+                onClick={onDotClick ? () => onDotClick(si, fret) : undefined}
+                style={onDotClick ? { cursor: 'pointer' } : undefined}
+              >
+                <circle cx={cx} cy={cy} r={R_SMALL} fill={OFF_SCALE_COLOR} />
+              </g>
             );
           }
 

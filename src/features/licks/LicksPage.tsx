@@ -22,6 +22,9 @@ export default function LicksPage() {
         <Link to="/lick/visualizer" className={navBtnClass}>
           Lick Visualizer
         </Link>
+        <Link to="/lick/visualizer?mode=build" className={navBtnClass}>
+          Lick Builder
+        </Link>
       </div>
     </div>
   );
