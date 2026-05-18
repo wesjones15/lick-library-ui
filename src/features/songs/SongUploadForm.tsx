@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { uploadSong } from '../../core/api/client';
-
-const ROOT_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
+import { CHROMATIC_NOTES } from '../../core/music';
 const MODES = [{ value: '', label: 'Major' }, { value: 'm', label: 'Minor' }];
 
 interface Props {
@@ -74,7 +73,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
           className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400"
         >
           <option value="">Key (optional)</option>
-          {ROOT_NOTES.map(r => (
+          {CHROMATIC_NOTES.map(r => (
             <option key={r} value={r}>{r}</option>
           ))}
         </select>

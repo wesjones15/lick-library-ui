@@ -1,31 +1,5 @@
 import { useState, useRef, useLayoutEffect } from 'react';
-
-const MODES = ['IONIAN', 'DORIAN', 'PHRYGIAN', 'LYDIAN', 'MIXOLYDIAN', 'AEOLIAN', 'LOCRIAN'];
-
-const INPUT_KEYS = [
-  { value: 'C',       label: 'C'  },
-  { value: 'C_SHARP', label: 'C#' },
-  { value: 'D',       label: 'D'  },
-  { value: 'D_SHARP', label: 'D#' },
-  { value: 'E',       label: 'E'  },
-  { value: 'F',       label: 'F'  },
-  { value: 'F_SHARP', label: 'F#' },
-  { value: 'G',       label: 'G'  },
-  { value: 'G_SHARP', label: 'G#' },
-  { value: 'A',       label: 'A'  },
-  { value: 'B_FLAT',  label: 'Bb' },
-  { value: 'B',       label: 'B'  },
-];
-
-const EMPTY_TAB =
-  'e|----------------|\n' +
-  'B|----------------|\n' +
-  'G|----------------|\n' +
-  'D|----------------|\n' +
-  'A|----------------|\n' +
-  'E|----------------|';
-
-const VALID_INPUT = /^[0-9hp/\\-]$/;
+import { NOTE_KEYS, MODES, EMPTY_TAB, VALID_INPUT } from '../../core/music';
 
 function expandTab(tab: string): string {
   return tab.split('\n').map(line => {
@@ -133,7 +107,7 @@ export default function LickInputModal({ title, initialTab, onVisualize, onClose
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400 flex-1"
             >
               <option value="">Root: first note</option>
-              {INPUT_KEYS.map(k => (
+              {NOTE_KEYS.map(k => (
                 <option key={k.value} value={k.value}>{k.label}</option>
               ))}
             </select>

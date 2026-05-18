@@ -11,11 +11,7 @@ function modeLabel(mode: string) {
   return mode.charAt(0) + mode.slice(1).toLowerCase();
 }
 
-const KEY_LABELS: Record<string, string> = {
-  C: 'C', C_SHARP: 'C#', D: 'D', D_SHARP: 'D#', E: 'E',
-  F: 'F', F_SHARP: 'F#', G: 'G', G_SHARP: 'G#', A: 'A',
-  B_FLAT: 'Bb', B: 'B',
-};
+import { KEY_LABEL } from '../../core/music';
 
 const INSTRUMENT_LABELS: Record<string, string> = {
   GUITAR:   'Standard Guitar',
@@ -129,7 +125,7 @@ export default function LickDetailPage() {
       <div>
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
           Positions in{' '}
-          <span className="normal-case">{KEY_LABELS[key] ?? key}</span>
+          <span className="normal-case">{KEY_LABEL[key] ?? key}</span>
           {' — '}
           <span className="normal-case font-medium text-gray-500">
             {instrument === 'CUSTOM'

@@ -5,8 +5,7 @@ import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/cli
 import ChordDiagram from '../chords/ChordDiagram';
 import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
-
-const ROOT_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
+import { CHROMATIC_NOTES } from '../../core/music';
 const MODES = [{ value: '', label: 'Major' }, { value: 'm', label: 'Minor' }];
 
 const LEGACY_KEY_MAP: Record<string, string> = {
@@ -196,7 +195,7 @@ export default function SongManagePage() {
               className={`${inputClass} flex-1 bg-white`}
             >
               <option value="">— Key —</option>
-              {ROOT_NOTES.map(r => (
+              {CHROMATIC_NOTES.map(r => (
                 <option key={r} value={r}>{r}</option>
               ))}
             </select>

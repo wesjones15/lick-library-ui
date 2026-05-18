@@ -1,3 +1,5 @@
+import { KEY_LABEL } from '../../core/music';
+
 const MODES = [
   { value: 'IONIAN',     label: 'Ionian (Major)'     },
   { value: 'DORIAN',     label: 'Dorian'              },
@@ -14,11 +16,6 @@ const GRID_NOTES = [
   ['G_SHARP', 'A', 'B_FLAT', 'B'],
 ];
 
-const NOTE_DISPLAY: Record<string, string> = {
-  C: 'C', C_SHARP: 'C#', D: 'D', D_SHARP: 'D#',
-  E: 'E', F: 'F', F_SHARP: 'F#', G: 'G',
-  G_SHARP: 'G#', A: 'A', B_FLAT: 'Bb', B: 'B',
-};
 
 const selectClass = 'border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-indigo-400 bg-white';
 const btnClass = 'px-3 py-1.5 text-xs rounded-lg border transition-colors';
@@ -115,7 +112,7 @@ export default function PentatonicWidget({
                           : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
                   }`}
                 >
-                  {NOTE_DISPLAY[key]}
+                  {KEY_LABEL[key]}
                 </button>
               );
             })}

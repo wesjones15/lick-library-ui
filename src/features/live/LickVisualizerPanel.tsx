@@ -5,42 +5,17 @@ import LickLibraryModal from './LickLibraryModal';
 import LickInputModal from './LickInputModal';
 import { uploadLick, getScalePositions } from '../../core/api/client';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
+import { NOTE_KEYS, CHROMATIC_NOTES, MODES, MODE_LABELS, formatNoteEnum } from '../../core/music';
 
 const STRING_COUNT = 6;
 const FRET_COUNT = 12;
 const SPREAD_SLOT = 4;
 const BUILD_LABELS = ['e|', 'B|', 'G|', 'D|', 'A|', 'E|'];
 
-function formatNote(enumName: string): string {
-  if (enumName === 'B_FLAT') return 'Bb';
-  return enumName.replace('_SHARP', '#');
-}
-
 const STANDARD_OPEN_NOTES = [4, 9, 2, 7, 11, 4]; // E A D G B e in semitones from C
-const NOTE_NAMES_BUILD = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 function computeNoteName(si: number, fret: number): string {
-  return NOTE_NAMES_BUILD[((STANDARD_OPEN_NOTES[si] ?? 0) + fret) % 12];
+  return CHROMATIC_NOTES[((STANDARD_OPEN_NOTES[si] ?? 0) + fret) % 12];
 }
-
-const ROOT_NOTES = [
-  { value: 'C',       label: 'C'  },
-  { value: 'C_SHARP', label: 'C#' },
-  { value: 'D',       label: 'D'  },
-  { value: 'D_SHARP', label: 'D#' },
-  { value: 'E',       label: 'E'  },
-  { value: 'F',       label: 'F'  },
-  { value: 'F_SHARP', label: 'F#' },
-  { value: 'G',       label: 'G'  },
-  { value: 'G_SHARP', label: 'G#' },
-  { value: 'A',       label: 'A'  },
-  { value: 'B_FLAT',  label: 'Bb' },
-  { value: 'B',       label: 'B'  },
-];
-const MODES = ['IONIAN', 'DORIAN', 'PHRYGIAN', 'LYDIAN', 'MIXOLYDIAN', 'AEOLIAN', 'LOCRIAN'];
-const MODE_LABELS: Record<string, string> = {
-  IONIAN: 'Major', DORIAN: 'Dorian', PHRYGIAN: 'Phrygian', LYDIAN: 'Lydian',
-  MIXOLYDIAN: 'Mixolydian', AEOLIAN: 'Minor', LOCRIAN: 'Locrian',
-};
 
 const btnClass = 'px-4 py-2 text-sm rounded-lg border transition-colors';
 
@@ -265,7 +240,7 @@ export default function LickVisualizerPanel() {
           next[pos.string][pos.fret] = {
             degree: pos.degree as 1 | 2 | 3 | 4 | 5 | 6 | 7,
             active: false,
-            note: formatNote(pos.note),
+            note: formatNoteEnum(pos.note),
           };
         }
       }
@@ -629,7 +604,7 @@ export default function LickVisualizerPanel() {
               className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-indigo-400"
             >
               <option value="">— None —</option>
-              {ROOT_NOTES.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
+              {NOTE_KEYS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
             </select>
             <select
               value={buildMode}

@@ -5,10 +5,7 @@ import ChordCard from './ChordCard';
 import { getAllChordVoicings, reseedChordDefaults } from '../../core/api/client';
 import type { ChordVoicing } from '../../core/api/client';
 
-const NOTE_DISPLAY: Record<string, string> = {
-  C: 'C', C_SHARP: 'C#', D: 'D', D_SHARP: 'D#', E: 'E', F: 'F',
-  F_SHARP: 'F#', G: 'G', G_SHARP: 'G#', A: 'A', B_FLAT: 'Bb', B: 'B',
-};
+import { KEY_LABEL } from '../../core/music';
 
 const QUALITIES = [
   { quality: '',     label: 'Major'    },
@@ -39,7 +36,7 @@ function resolveSlashQuality(root: string, quality: string): string {
   const rootIdx = NOTE_KEYS.indexOf(root);
   if (rootIdx === -1) return quality;
   const bassKey = NOTE_KEYS[(rootIdx + semitones) % 12];
-  return `${base}/${NOTE_DISPLAY[bassKey]}`;
+  return `${base}/${KEY_LABEL[bassKey]}`;
 }
 
 export default function ChordsGalleryPage() {
@@ -54,7 +51,7 @@ export default function ChordsGalleryPage() {
 
   useEffect(() => { fetchVoicings(); }, [root]);
 
-  const rootDisplay = NOTE_DISPLAY[root] ?? root;
+  const rootDisplay = KEY_LABEL[root] ?? root;
 
   const extraQualities = Object.keys(allVoicings)
     .filter(q => !KNOWN_QUALITIES.has(q))

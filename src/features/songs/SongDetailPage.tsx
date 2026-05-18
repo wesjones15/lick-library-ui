@@ -9,29 +9,22 @@ import ChordDiagram from '../chords/ChordDiagram';
 import { parseChordName } from './parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { useSongNavContext } from '../../core/context/SongNavContext';
-
-const KEY_LABELS: Record<string, string> = {
-  C: 'C', C_SHARP: 'C#', D: 'D', D_SHARP: 'D#', E: 'E',
-  F: 'F', F_SHARP: 'F#', G: 'G', G_SHARP: 'G#', A: 'A',
-  B_FLAT: 'Bb', B: 'B',
-};
-
-const CHROMATIC = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
+import { KEY_LABEL, CHROMATIC_NOTES } from '../../core/music';
 
 function keyLabel(originalKey: string | null, semitones: number): string {
   if (!originalKey) return '';
-  const display = KEY_LABELS[originalKey] ?? originalKey;
+  const display = KEY_LABEL[originalKey] ?? originalKey;
   const match = display.match(/^([A-G][#b]?)(m?)$/);
   if (!match) return display;
   const [, root, suffix] = match;
-  const idx = CHROMATIC.indexOf(root);
+  const idx = CHROMATIC_NOTES.indexOf(root);
   if (idx === -1) return display;
-  return CHROMATIC[((idx + semitones) % 12 + 12) % 12] + suffix;
+  return CHROMATIC_NOTES[((idx + semitones) % 12 + 12) % 12] + suffix;
 }
 
 function modeLabel(originalKey: string | null): string | null {
   if (!originalKey) return null;
-  const display = KEY_LABELS[originalKey] ?? originalKey;
+  const display = KEY_LABEL[originalKey] ?? originalKey;
   if (/m$/.test(display)) return 'Minor';
   if (/^[A-G][#b]?$/.test(display)) return 'Major';
   return null;

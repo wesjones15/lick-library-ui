@@ -4,26 +4,11 @@ import { getPentatonicDegree, getPentatonicNoteSet, ROOT_CHROMATIC } from './cag
 import PentatonicWidget from './PentatonicWidget';
 import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
+import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum } from '../../core/music';
 
 const STRING_COUNT = 6;
 const FRET_COUNT = 12;
 const OPEN_MIDI = [40, 45, 50, 55, 59, 64]; // low E → high e
-const CHROMATIC_LABELS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
-
-const NOTE_KEYS = [
-  { value: 'C',       label: 'C'  },
-  { value: 'C_SHARP', label: 'C#' },
-  { value: 'D',       label: 'D'  },
-  { value: 'D_SHARP', label: 'D#' },
-  { value: 'E',       label: 'E'  },
-  { value: 'F',       label: 'F'  },
-  { value: 'F_SHARP', label: 'F#' },
-  { value: 'G',       label: 'G'  },
-  { value: 'G_SHARP', label: 'G#' },
-  { value: 'A',       label: 'A'  },
-  { value: 'B_FLAT',  label: 'Bb' },
-  { value: 'B',       label: 'B'  },
-];
 
 const MODES = [
   { value: 'IONIAN',     label: 'Major (Ionian)'          },
@@ -44,11 +29,6 @@ const MODE_INTERVALS: Record<string, string[]> = {
   AEOLIAN:    ['1', '2',  'b3', '4',  '5',  'b6', 'b7'],
   LOCRIAN:    ['1', 'b2', 'b3', '4',  'b5', 'b6', 'b7'],
 };
-
-function formatNote(enumName: string): string {
-  if (enumName === 'B_FLAT') return 'Bb';
-  return enumName.replace('_SHARP', '#');
-}
 
 function blankScaleDots(): NeckDot[][] {
   return Array.from({ length: STRING_COUNT }, () =>
@@ -98,7 +78,7 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
           next[pos.string][pos.fret] = {
             degree: pos.degree as 1 | 2 | 3 | 4 | 5 | 6 | 7,
             active: false,
-            note: formatNote(pos.note),
+            note: formatNoteEnum(pos.note),
           };
         }
       }
@@ -212,7 +192,7 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
         }
 
         if (dot.degree === null) {
-          const note = pentatonicOutOfScale ? CHROMATIC_LABELS[(OPEN_MIDI[s] + f) % 12] : undefined;
+          const note = pentatonicOutOfScale ? CHROMATIC_NOTES[(OPEN_MIDI[s] + f) % 12] : undefined;
           return { ...dot, pentatonicRings, pentatonicOutOfScale, note };
         }
         if (highlightedDegrees.size > 0) {

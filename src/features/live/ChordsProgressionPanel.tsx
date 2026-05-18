@@ -2,24 +2,10 @@ import { useState, useEffect } from 'react';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
 import { getDiatonicChords, type DiatonicChord } from './diatonicUtils';
 import { getChordVoicings, type ChordFrets } from '../../core/api/client';
+import { NOTE_KEYS } from '../../core/music';
 
 const STRING_COUNT = 6;
 const FRET_COUNT = 12;
-
-const NOTE_KEYS = [
-  { value: 'C',       label: 'C'  },
-  { value: 'C_SHARP', label: 'C#' },
-  { value: 'D',       label: 'D'  },
-  { value: 'D_SHARP', label: 'D#' },
-  { value: 'E',       label: 'E'  },
-  { value: 'F',       label: 'F'  },
-  { value: 'F_SHARP', label: 'F#' },
-  { value: 'G',       label: 'G'  },
-  { value: 'G_SHARP', label: 'G#' },
-  { value: 'A',       label: 'A'  },
-  { value: 'B_FLAT',  label: 'Bb' },
-  { value: 'B',       label: 'B'  },
-];
 
 const MODES = [
   { value: 'IONIAN',     label: 'Major (Ionian)'         },

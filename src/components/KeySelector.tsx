@@ -1,17 +1,4 @@
-const NOTES = [
-  { value: 'C',       label: 'C'  },
-  { value: 'C_SHARP', label: 'C#' },
-  { value: 'D',       label: 'D'  },
-  { value: 'D_SHARP', label: 'D#' },
-  { value: 'E',       label: 'E'  },
-  { value: 'F',       label: 'F'  },
-  { value: 'F_SHARP', label: 'F#' },
-  { value: 'G',       label: 'G'  },
-  { value: 'G_SHARP', label: 'G#' },
-  { value: 'A',       label: 'A'  },
-  { value: 'B_FLAT',  label: 'Bb' },
-  { value: 'B',       label: 'B'  },
-];
+import { NOTE_KEYS } from '../core/music';
 
 interface Props {
   value: string;
@@ -25,7 +12,7 @@ export default function KeySelector({ value, onChange }: Props) {
       onChange={e => onChange(e.target.value)}
       className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400"
     >
-      {NOTES.map(note => (
+      {NOTE_KEYS.map(note => (
         <option key={note.value} value={note.value}>{note.label}</option>
       ))}
     </select>
