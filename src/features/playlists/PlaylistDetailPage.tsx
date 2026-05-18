@@ -276,7 +276,7 @@ export default function PlaylistDetailPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6 gap-3">
         <div className="min-w-0 flex-1">
-          <Link to="/playlists" className="text-xs text-gray-400 hover:text-indigo-500 transition-colors">← Playlists</Link>
+          <Link to="/playlists" className="text-sm text-gray-400 hover:text-indigo-500 transition-colors">← Playlists</Link>
           {editingName ? (
             <div className="flex items-center gap-2 mt-1">
               <input
@@ -295,7 +295,7 @@ export default function PlaylistDetailPage() {
               {managing && (
                 <button
                   onClick={() => { setNameInput(playlist.name); setEditingName(true); }}
-                  className="text-gray-400 hover:text-indigo-500 transition-colors text-lg leading-none"
+                  className="text-gray-400 hover:text-indigo-500 transition-colors text-3xl leading-none"
                   title="Rename playlist"
                 >✎</button>
               )}
@@ -319,16 +319,16 @@ export default function PlaylistDetailPage() {
           <button
             onClick={toggleManage}
             className={managing
-              ? 'px-3 py-2 text-sm rounded-lg border border-indigo-300 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors'
-              : 'px-3 py-2 text-sm rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors'}
+              ? 'px-4 py-2 text-sm rounded-lg border border-indigo-300 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors'
+              : 'px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors'}
           >
             {managing ? 'Done' : 'Manage'}
           </button>
         </div>
       </div>
 
-      {/* Add Songs button (manage mode only) */}
-      {managing && (
+      {/* Add Songs button (manage mode, or always when empty) */}
+      {(managing || entries.length === 0) && (
         <button
           onClick={() => setShowAddSongs(true)}
           className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 border border-dashed border-indigo-300 rounded-xl px-4 py-3 w-full hover:bg-indigo-50 transition-colors mb-4"
@@ -370,18 +370,12 @@ export default function PlaylistDetailPage() {
                         {keyLabel(entry.originalKey, entry.keyOffset + entry.capoOffset)}
                       </span>
                     )}
+                    <span className={entry.capoOffset !== 0 ? 'text-indigo-500' : 'text-gray-400'}>
+                      {entry.defaultCapo + entry.capoOffset > 0 ? `Capo ${entry.defaultCapo + entry.capoOffset}` : 'No Capo'}
+                    </span>
                     {entry.tempo != null && <span className="text-gray-400">{entry.tempo} BPM</span>}
                   </div>
                 </div>
-
-                {/* Voicing edit button (manage only) */}
-                {managing && (
-                  <button
-                    onClick={() => setEditingEntry(entry.entryId)}
-                    className="text-xs px-2 py-1 rounded border border-gray-200 text-gray-400 hover:border-indigo-300 hover:text-indigo-600 shrink-0"
-                    title="Edit voicing offset"
-                  >✎</button>
-                )}
 
                 {/* Open song (non-manage) */}
                 {!managing && (
@@ -392,17 +386,25 @@ export default function PlaylistDetailPage() {
                   >›</button>
                 )}
 
-                {/* Remove (manage only) */}
+                {/* Voicing edit + remove (manage only) */}
                 {managing && (
-                  confirmRemove === entry.entryId ? (
-                    <div className="flex gap-1 shrink-0">
-                      <button onClick={() => handleRemoveEntry(entry.entryId)} className="text-xs px-2 py-0.5 rounded bg-red-500 text-white hover:bg-red-600">Remove</button>
-                      <button onClick={() => setConfirmRemove(null)} className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-600">Cancel</button>
-                    </div>
-                  ) : (
-                    <button onClick={() => setConfirmRemove(entry.entryId)}
-                      className="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none shrink-0">×</button>
-                  )
+                  <div className="flex items-center gap-4 shrink-0 ml-2 mr-2">
+                    <button
+                      onClick={() => setEditingEntry(entry.entryId)}
+                      className="text-gray-400 hover:text-indigo-500 transition-colors leading-none"
+                      style={{ fontSize: '2.1875rem' }}
+                      title="Edit voicing offset"
+                    >✎</button>
+                    {confirmRemove === entry.entryId ? (
+                      <div className="flex gap-1">
+                        <button onClick={() => handleRemoveEntry(entry.entryId)} className="text-xs px-2 py-0.5 rounded bg-red-500 text-white hover:bg-red-600">Remove</button>
+                        <button onClick={() => setConfirmRemove(null)} className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-600">Cancel</button>
+                      </div>
+                    ) : (
+                      <button onClick={() => setConfirmRemove(entry.entryId)}
+                        className="text-red-400 hover:text-red-600 transition-colors text-2xl leading-none">×</button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

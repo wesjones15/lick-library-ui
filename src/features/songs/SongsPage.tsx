@@ -105,34 +105,30 @@ export default function SongsPage() {
       {error && <p className="text-red-500 text-sm">{error}</p>}
       {!loading && !error && (
         <>
-          {!showAll && totalPages > 1 && (
+          {totalPages > 1 && (
             <div className="flex items-center justify-center gap-4 mb-4 text-sm text-gray-500">
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                className="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                ← Prev
-              </button>
-              <span>{page} / {totalPages}</span>
-              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                className="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                Next →
-              </button>
-              <button onClick={() => setShowAll(true)}
+              {!showAll && (
+                <>
+                  <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                    className="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                    ← Prev
+                  </button>
+                  <span>{page} / {totalPages}</span>
+                  <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                    className="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                    Next →
+                  </button>
+                </>
+              )}
+              <button onClick={() => setShowAll(v => !v)}
                 className="px-3 py-1 border border-gray-200 rounded-lg text-gray-400 hover:text-indigo-500 hover:border-indigo-300 transition-colors">
-                Show All
+                {showAll ? 'Show Less' : 'Show All'}
               </button>
             </div>
           )}
 
           <SongList songs={paginated} managing={managing} onReparse={fetchSongs} onAddToPlaylist={managing ? s => setAddToPlaylist(s) : undefined} />
 
-          {showAll && (
-            <div className="flex justify-center mt-6">
-              <button onClick={() => setShowAll(false)}
-                className="px-3 py-1 border border-gray-200 rounded-lg text-sm text-gray-400 hover:text-indigo-500 hover:border-indigo-300 transition-colors">
-                Show Less
-              </button>
-            </div>
-          )}
         </>
       )}
 

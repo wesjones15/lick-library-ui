@@ -239,7 +239,7 @@ export default function SongDetailPage() {
   );
 
   return (
-    <div className={`px-3 sm:px-6 pb-4 ${viewMode === 'scroll' ? 'pt-0' : 'pt-4'}`}>
+    <div className={`px-3 sm:px-6 pb-4 ${viewMode === 'scroll' ? 'pt-0' : playlistState ? 'pt-2' : 'pt-4'}`}>
       {song && (
         <>
           {/* Header — hidden when collapsed */}
@@ -257,14 +257,16 @@ export default function SongDetailPage() {
             }
 
             return (
-              <div className="flex items-center gap-3 mb-2 flex-wrap">
-                <Link
-                  to={`/playlist/${playlistId}`}
-                  className="text-xs text-gray-400 hover:text-indigo-500 transition-colors"
-                >
-                  ← {playlistName}
-                </Link>
-                <div className="flex items-center gap-1 ml-auto">
+              <div className="flex items-center mb-1">
+                <div className="flex-1">
+                  <Link
+                    to={`/playlist/${playlistId}`}
+                    className="text-xs px-2 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
+                  >
+                    ← {playlistName}
+                  </Link>
+                </div>
+                <div className="flex items-center gap-1">
                   <button
                     onClick={() => navigateTo((currentIndex - 1 + plEntries.length) % plEntries.length)}
                     className="text-xs px-2 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
@@ -275,6 +277,7 @@ export default function SongDetailPage() {
                     className="text-xs px-2 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
                   >Next →</button>
                 </div>
+                <div className="flex-1" />
               </div>
             );
           })()}
@@ -330,7 +333,7 @@ export default function SongDetailPage() {
               </button>
               <button
                 onClick={() => setAddToPlaylistOpen(true)}
-                className="hidden md:block text-gray-300 hover:text-indigo-500 transition-colors text-xl leading-none"
+                className={`hidden md:block transition-colors text-xl leading-none ${overrideChanged ? 'text-indigo-500 hover:text-indigo-700' : 'text-blue-400 hover:text-blue-600'}`}
                 aria-label="Add to playlist"
                 title="Add to playlist"
               >
@@ -374,7 +377,7 @@ export default function SongDetailPage() {
               </button>
               <button
                 onClick={() => setAddToPlaylistOpen(true)}
-                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors border-gray-200 text-gray-400 hover:text-indigo-500 hover:border-indigo-300`}
+                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${overrideChanged ? 'border-indigo-300 text-indigo-500 hover:text-indigo-700 hover:border-indigo-400' : 'border-blue-200 text-blue-400 hover:text-blue-600 hover:border-blue-300'}`}
                 aria-label="Add to playlist"
                 title="Add to playlist"
               >
@@ -413,7 +416,7 @@ export default function SongDetailPage() {
                     </button>
                     <button
                       onClick={() => { setAddToPlaylistOpen(true); setOverflowOpen(false); }}
-                      className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
+                      className={`px-4 py-2 text-sm text-left hover:bg-gray-50 ${overrideChanged ? 'text-indigo-600' : 'text-blue-500'}`}
                     >
                       Add to playlist
                     </button>
