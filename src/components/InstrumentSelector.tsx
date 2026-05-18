@@ -2,11 +2,12 @@ import type { InstrumentName } from '../core/useInstrument';
 
 interface Props {
   instrument: InstrumentName;
-  customTuning: string;
+  customTuning?: string;
   onInstrumentChange: (name: InstrumentName) => void;
-  onCustomTuningChange: (tuning: string) => void;
+  onCustomTuningChange?: (tuning: string) => void;
   onSubmit?: () => void;
   error?: string | null;
+  excludeCustom?: boolean;
 }
 
 const INSTRUMENTS: { value: InstrumentName; label: string }[] = [
@@ -26,8 +27,9 @@ const SELECT_CLASS =
   'border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400';
 
 export default function InstrumentSelector({
-  instrument, customTuning, onInstrumentChange, onCustomTuningChange, onSubmit, error,
+  instrument, customTuning = '', onInstrumentChange, onCustomTuningChange, onSubmit, error, excludeCustom = false,
 }: Props) {
+  const options = excludeCustom ? INSTRUMENTS.filter(i => i.value !== 'CUSTOM') : INSTRUMENTS;
   return (
     <div className="flex flex-col gap-1">
       <select
@@ -35,17 +37,17 @@ export default function InstrumentSelector({
         onChange={e => onInstrumentChange(e.target.value as InstrumentName)}
         className={SELECT_CLASS}
       >
-        {INSTRUMENTS.map(({ value, label }) => (
+        {options.map(({ value, label }) => (
           <option key={value} value={value}>{label}</option>
         ))}
       </select>
 
-      {instrument === 'CUSTOM' && (
+      {instrument === 'CUSTOM' && !excludeCustom && (
         <div className="flex gap-1">
           <input
             type="text"
             value={customTuning}
-            onChange={e => onCustomTuningChange(e.target.value)}
+            onChange={e => onCustomTuningChange?.(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') onSubmit?.(); }}
             placeholder="e.g. E A D G B E"
             className={SELECT_CLASS + ' w-36'}

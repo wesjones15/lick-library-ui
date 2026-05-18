@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import KeySelector from '../../components/KeySelector';
 import ChordCard from './ChordCard';
+import InstrumentSelector from '../../components/InstrumentSelector';
 import { getAllChordVoicings, reseedChordDefaults } from '../../core/api/client';
 import type { ChordVoicing } from '../../core/api/client';
+import type { InstrumentName } from '../../core/useInstrument';
 
 import { KEY_LABEL } from '../../core/music';
 
@@ -42,14 +44,15 @@ function resolveSlashQuality(root: string, quality: string): string {
 export default function ChordsGalleryPage() {
   const navigate = useNavigate();
   const [root, setRoot] = useState('C');
+  const [instrument, setInstrument] = useState('GUITAR');
   const [allVoicings, setAllVoicings] = useState<Record<string, ChordVoicing[]>>({});
   const [manageMode, setManageMode] = useState(false);
   const [reseedConfirm, setReseedConfirm] = useState(false);
   const [reseeding, setReseeding] = useState(false);
 
-  const fetchVoicings = () => getAllChordVoicings(root).then(setAllVoicings);
+  const fetchVoicings = () => getAllChordVoicings(root, instrument).then(setAllVoicings);
 
-  useEffect(() => { fetchVoicings(); }, [root]);
+  useEffect(() => { fetchVoicings(); }, [root, instrument]);
 
   const rootDisplay = KEY_LABEL[root] ?? root;
 
@@ -76,6 +79,11 @@ export default function ChordsGalleryPage() {
         <h1 className="text-2xl font-bold text-gray-900">Chord Gallery</h1>
         <div className="flex items-center gap-3">
           <KeySelector value={root} onChange={setRoot} />
+          <InstrumentSelector
+            instrument={instrument as InstrumentName}
+            onInstrumentChange={name => setInstrument(name)}
+            excludeCustom
+          />
           {!manageMode && (
             <button
               onClick={() => navigate('/chords/theory')}
@@ -144,6 +152,7 @@ export default function ChordsGalleryPage() {
               label={label}
               voicings={allVoicings[quality] ?? []}
               manageMode={manageMode}
+              instrument={instrument}
               onChanged={fetchVoicings}
             />
           );

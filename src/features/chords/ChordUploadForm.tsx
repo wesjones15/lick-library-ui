@@ -2,29 +2,35 @@ import { useState } from 'react';
 import { uploadChordVoicing } from '../../core/api/client';
 import { parseChordName } from '../songs/parseChordName';
 import ChordDiagram from './ChordDiagram';
-
-// Display order: high e (index 5) on top → low E (index 0) on bottom
-const STRING_DISPLAY = [
-  { label: 'e', fretsIdx: 5 },
-  { label: 'B', fretsIdx: 4 },
-  { label: 'G', fretsIdx: 3 },
-  { label: 'D', fretsIdx: 2 },
-  { label: 'A', fretsIdx: 1 },
-  { label: 'E', fretsIdx: 0 },
-];
+import InstrumentSelector from '../../components/InstrumentSelector';
+import { INSTRUMENT_STRING_DISPLAY } from '../../core/music';
+import type { InstrumentName } from '../../core/useInstrument';
 
 interface Props {
   initialChordName?: string;
   lockChordName?: boolean;
+  initialInstrument?: string;
+  lockInstrument?: boolean;
   onSuccess?: () => void;
 }
 
-export default function ChordUploadForm({ initialChordName = '', lockChordName = false, onSuccess }: Props) {
+export default function ChordUploadForm({
+  initialChordName = '',
+  lockChordName = false,
+  initialInstrument,
+  lockInstrument = false,
+  onSuccess,
+}: Props) {
   const [chordName, setChordName] = useState(initialChordName);
   const [parseError, setParseError] = useState<string | null>(null);
-  const [frets, setFrets] = useState<string[]>(['', '', '', '', '', '']);
+  const [instrument, setInstrument] = useState<string>(initialInstrument ?? 'GUITAR');
+  const [frets, setFrets] = useState<string[]>(() =>
+    Array((INSTRUMENT_STRING_DISPLAY[initialInstrument ?? 'GUITAR'] ?? INSTRUMENT_STRING_DISPLAY.GUITAR).length).fill('')
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const stringDisplay = INSTRUMENT_STRING_DISPLAY[instrument] ?? INSTRUMENT_STRING_DISPLAY.GUITAR;
 
   const handleChordNameChange = (val: string) => {
     setChordName(val);
@@ -34,6 +40,12 @@ export default function ChordUploadForm({ initialChordName = '', lockChordName =
     }
     const parsed = parseChordName(val.trim());
     setParseError(parsed ? null : "Couldn't recognize chord name");
+  };
+
+  const handleInstrumentChange = (name: InstrumentName) => {
+    setInstrument(name);
+    const display = INSTRUMENT_STRING_DISPLAY[name] ?? INSTRUMENT_STRING_DISPLAY.GUITAR;
+    setFrets(Array(display.length).fill(''));
   };
 
   const setFret = (idx: number, val: string) => {
@@ -64,8 +76,8 @@ export default function ChordUploadForm({ initialChordName = '', lockChordName =
     setError(null);
     setLoading(true);
     try {
-      await uploadChordVoicing({ root: parsed.root, quality: parsed.quality, frets });
-      setFrets(['', '', '', '', '', '']);
+      await uploadChordVoicing({ root: parsed.root, quality: parsed.quality, frets, instrument });
+      setFrets(Array(stringDisplay.length).fill(''));
       if (!lockChordName) setChordName(initialChordName);
       onSuccess?.();
     } catch (err) {
@@ -89,17 +101,29 @@ export default function ChordUploadForm({ initialChordName = '', lockChordName =
         {parseError && <p className="text-red-500 text-xs">{parseError}</p>}
       </div>
 
+      {lockInstrument ? (
+        <div className="text-sm text-gray-500 bg-gray-100 rounded-lg px-3 py-2 border border-gray-200">
+          {instrument.charAt(0) + instrument.slice(1).toLowerCase()}
+        </div>
+      ) : (
+        <InstrumentSelector
+          instrument={instrument as InstrumentName}
+          onInstrumentChange={handleInstrumentChange}
+          excludeCustom
+        />
+      )}
+
       <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
         <p className="text-xs text-gray-500 mb-3">Frets — enter a number (0–24) or <code>x</code> for muted</p>
         <div className="flex items-start gap-6">
           <div className="flex flex-col gap-2">
-            {STRING_DISPLAY.map(({ label, fretsIdx }) => (
-              <div key={label} className="flex items-center gap-3">
+            {stringDisplay.map(({ label, fretsIdx }) => (
+              <div key={label + fretsIdx} className="flex items-center gap-3">
                 <span className="w-4 text-right text-sm font-mono text-gray-600">{label}</span>
                 <input
                   type="text"
                   inputMode="text"
-                  value={frets[fretsIdx]}
+                  value={frets[fretsIdx] ?? ''}
                   onChange={e => setFret(fretsIdx, e.target.value)}
                   placeholder="—"
                   className="w-16 border border-gray-300 rounded px-2 py-1 text-sm font-mono text-center focus:outline-none focus:border-indigo-400"
@@ -107,7 +131,7 @@ export default function ChordUploadForm({ initialChordName = '', lockChordName =
               </div>
             ))}
           </div>
-          <ChordDiagram frets={previewFrets} width={130} />
+          <ChordDiagram frets={previewFrets} width={130} stringCount={stringDisplay.length} />
         </div>
       </div>
 

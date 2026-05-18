@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import ChordDiagram from './ChordDiagram';
 import ChordManageModal from './ChordManageModal';
 import type { ChordVoicing } from '../../core/api/client';
+import { getStringCount } from '../../core/music';
 
 interface ChordCardProps {
   rootDisplay: string;
@@ -10,10 +11,11 @@ interface ChordCardProps {
   label: string;
   voicings: ChordVoicing[];
   manageMode?: boolean;
+  instrument?: string;
   onChanged?: () => void;
 }
 
-export default function ChordCard({ rootDisplay, quality, displayQuality, label, voicings, manageMode, onChanged }: ChordCardProps) {
+export default function ChordCard({ rootDisplay, quality, displayQuality, label, voicings, manageMode, instrument, onChanged }: ChordCardProps) {
   const [idx, setIdx] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -34,7 +36,7 @@ export default function ChordCard({ rootDisplay, quality, displayQuality, label,
         </div>
         <div className="flex-1 flex items-center justify-center">
           {voicings.length > 0
-            ? <ChordDiagram frets={voicings[idx].frets} width={140} />
+            ? <ChordDiagram frets={voicings[idx].frets} width={140} stringCount={getStringCount(instrument)} />
             : <span className="text-gray-300 text-sm">???</span>
           }
         </div>
@@ -60,6 +62,7 @@ export default function ChordCard({ rootDisplay, quality, displayQuality, label,
         <ChordManageModal
           chordName={displayName}
           voicings={voicings}
+          instrument={instrument}
           onClose={() => setModalOpen(false)}
           onChanged={() => { onChanged?.(); }}
         />

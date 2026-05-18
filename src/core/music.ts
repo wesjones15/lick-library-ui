@@ -42,3 +42,21 @@ export const EMPTY_TAB =
   'E|----------------|';
 
 export const VALID_INPUT = /^[0-9hp/\\-]$/;
+
+export type StringEntry = { label: string; fretsIdx: number };
+
+export const INSTRUMENT_STRING_DISPLAY: Record<string, StringEntry[]> = {
+  GUITAR:   [{ label: 'e', fretsIdx: 5 }, { label: 'B', fretsIdx: 4 }, { label: 'G', fretsIdx: 3 }, { label: 'D', fretsIdx: 2 }, { label: 'A', fretsIdx: 1 }, { label: 'E', fretsIdx: 0 }],
+  DROP_D:   [{ label: 'e', fretsIdx: 5 }, { label: 'B', fretsIdx: 4 }, { label: 'G', fretsIdx: 3 }, { label: 'D', fretsIdx: 2 }, { label: 'A', fretsIdx: 1 }, { label: 'D', fretsIdx: 0 }],
+  OPEN_G:   [{ label: 'D', fretsIdx: 5 }, { label: 'B', fretsIdx: 4 }, { label: 'G', fretsIdx: 3 }, { label: 'D', fretsIdx: 2 }, { label: 'G', fretsIdx: 1 }, { label: 'D', fretsIdx: 0 }],
+  OPEN_D:   [{ label: 'D', fretsIdx: 5 }, { label: 'A', fretsIdx: 4 }, { label: 'F#', fretsIdx: 3 }, { label: 'D', fretsIdx: 2 }, { label: 'A', fretsIdx: 1 }, { label: 'D', fretsIdx: 0 }],
+  DADGAD:   [{ label: 'D', fretsIdx: 5 }, { label: 'A', fretsIdx: 4 }, { label: 'G', fretsIdx: 3 }, { label: 'D', fretsIdx: 2 }, { label: 'A', fretsIdx: 1 }, { label: 'D', fretsIdx: 0 }],
+  BASS:     [{ label: 'G', fretsIdx: 3 }, { label: 'D', fretsIdx: 2 }, { label: 'A', fretsIdx: 1 }, { label: 'E', fretsIdx: 0 }],
+  UKULELE:  [{ label: 'A', fretsIdx: 3 }, { label: 'E', fretsIdx: 2 }, { label: 'C', fretsIdx: 1 }, { label: 'G', fretsIdx: 0 }],
+  MANDOLIN: [{ label: 'E', fretsIdx: 3 }, { label: 'A', fretsIdx: 2 }, { label: 'D', fretsIdx: 1 }, { label: 'G', fretsIdx: 0 }],
+  BANJO:    [{ label: 'g', fretsIdx: 4 }, { label: 'D', fretsIdx: 3 }, { label: 'B', fretsIdx: 2 }, { label: 'G', fretsIdx: 1 }, { label: 'D', fretsIdx: 0 }],
+};
+
+export function getStringCount(instrument: string | null | undefined): number {
+  return INSTRUMENT_STRING_DISPLAY[instrument ?? 'GUITAR']?.length ?? 6;
+}

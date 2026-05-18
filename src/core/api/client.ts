@@ -201,15 +201,15 @@ export interface ChordVoicing {
   frets: ChordFrets;
 }
 
-export async function getChordVoicings(root: string, quality: string): Promise<ChordVoicing[]> {
-  const params = new URLSearchParams({ root, quality });
+export async function getChordVoicings(root: string, quality: string, instrument = 'GUITAR'): Promise<ChordVoicing[]> {
+  const params = new URLSearchParams({ root, quality, instrument });
   const res = await fetch(`${BASE_URL}/chord?${params}`);
   if (!res.ok) return [];
   return res.json();
 }
 
-export async function getAllChordVoicings(root: string): Promise<Record<string, ChordVoicing[]>> {
-  const params = new URLSearchParams({ root });
+export async function getAllChordVoicings(root: string, instrument = 'GUITAR'): Promise<Record<string, ChordVoicing[]>> {
+  const params = new URLSearchParams({ root, instrument });
   const res = await fetch(`${BASE_URL}/chord/all?${params}`);
   if (!res.ok) return {};
   return res.json();

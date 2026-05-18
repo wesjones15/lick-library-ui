@@ -3,15 +3,17 @@ import ChordDiagram from './ChordDiagram';
 import ChordUploadModal from './ChordUploadModal';
 import { deleteChordVoicing } from '../../core/api/client';
 import type { ChordVoicing } from '../../core/api/client';
+import { getStringCount } from '../../core/music';
 
 interface Props {
   chordName: string;
   voicings: ChordVoicing[];
+  instrument?: string;
   onClose: () => void;
   onChanged: () => void;
 }
 
-export default function ChordManageModal({ chordName, voicings: initialVoicings, onClose, onChanged }: Props) {
+export default function ChordManageModal({ chordName, voicings: initialVoicings, instrument, onClose, onChanged }: Props) {
   const [voicings, setVoicings] = useState(initialVoicings);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -39,6 +41,8 @@ export default function ChordManageModal({ chordName, voicings: initialVoicings,
     return (
       <ChordUploadModal
         chordName={chordName}
+        instrument={instrument}
+        lockInstrument
         onClose={() => setAddOpen(false)}
         onSuccess={() => {
           setAddOpen(false);
@@ -70,7 +74,7 @@ export default function ChordManageModal({ chordName, voicings: initialVoicings,
             <div className="grid grid-cols-2 gap-3">
               {voicings.map(v => (
                 <div key={v.id} className="border border-gray-200 rounded-lg p-2 flex flex-row items-center gap-2">
-                  <ChordDiagram frets={v.frets} width={120} />
+                  <ChordDiagram frets={v.frets} width={120} stringCount={getStringCount(instrument)} />
                   <div className="flex items-center justify-center">
                     {confirmId === v.id ? (
                       <button

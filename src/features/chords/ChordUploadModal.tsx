@@ -2,11 +2,13 @@ import ChordUploadForm from './ChordUploadForm';
 
 interface Props {
   chordName: string;
+  instrument?: string;
+  lockInstrument?: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function ChordUploadModal({ chordName, onClose, onSuccess }: Props) {
+export default function ChordUploadModal({ chordName, instrument, lockInstrument, onClose, onSuccess }: Props) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
@@ -28,6 +30,8 @@ export default function ChordUploadModal({ chordName, onClose, onSuccess }: Prop
         <ChordUploadForm
           initialChordName={chordName}
           lockChordName
+          initialInstrument={instrument}
+          lockInstrument={lockInstrument}
           onSuccess={onSuccess}
         />
       </div>
