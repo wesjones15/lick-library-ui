@@ -59,13 +59,13 @@ function VoicingModal({ entry, onSave, onClose }: {
               <div className="flex gap-2 items-center">
                 <div className="flex flex-col items-center w-8">
                   <span className="text-base font-semibold text-gray-900">
-                    {keyLabel(entry.originalKey, localSemitones)}
+                    {keyLabel(entry.originalKey, localSemitones - entry.defaultCapo)}
                   </span>
                   <span className="text-xs text-gray-400">shape</span>
                 </div>
                 <div className="flex flex-col items-center w-8">
                   <span className="text-base font-semibold text-gray-900">
-                    {keyLabel(entry.originalKey, localSemitones + localCapo)}
+                    {keyLabel(entry.originalKey, localSemitones + localCapo - entry.defaultCapo)}
                   </span>
                   <span className="text-xs text-gray-400">sound</span>
                 </div>
@@ -367,7 +367,7 @@ export default function PlaylistDetailPage() {
                   <div className="flex items-center gap-2 text-xs font-mono mt-0.5">
                     {entry.originalKey && (
                       <span className={entry.keyOffset !== 0 || entry.capoOffset !== 0 ? 'text-indigo-500' : 'text-gray-400'}>
-                        {keyLabel(entry.originalKey, entry.keyOffset)}
+                        {keyLabel(entry.originalKey, entry.keyOffset + entry.capoOffset)}
                       </span>
                     )}
                     {entry.tempo != null && <span className="text-gray-400">{entry.tempo} BPM</span>}
