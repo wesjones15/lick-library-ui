@@ -25,6 +25,8 @@ export interface UploadRequest {
   rawTab: string;
   mode?: string;
   inputKey?: string;
+  instrument?: string;
+  tuning?: string;
 }
 
 export async function getAllLicks(includeSongLicks = false): Promise<LickSummary[]> {

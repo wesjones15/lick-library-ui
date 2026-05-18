@@ -1,7 +1,29 @@
 import { useState, useRef, useLayoutEffect } from 'react';
 import { uploadLick } from '../../core/api/client';
 import type { UploadRequest } from '../../core/api/client';
-import { NOTE_KEYS, MODES, EMPTY_TAB, VALID_INPUT } from '../../core/music';
+import { NOTE_KEYS, MODES, VALID_INPUT } from '../../core/music';
+import InstrumentSelector from '../../components/InstrumentSelector';
+import { useInstrument } from '../../core/useInstrument';
+import type { InstrumentName } from '../../core/useInstrument';
+
+const EMPTY_TAB_LINES: Record<InstrumentName, string[]> = {
+  GUITAR:   ['e', 'B', 'G', 'D', 'A', 'E'],
+  DROP_D:   ['e', 'B', 'G', 'D', 'A', 'D'],
+  OPEN_G:   ['d', 'B', 'G', 'D', 'G', 'D'],
+  OPEN_D:   ['d', 'A', 'F', 'D', 'A', 'D'],
+  DADGAD:   ['d', 'A', 'G', 'D', 'A', 'D'],
+  BASS:     ['g', 'D', 'A', 'E'],
+  UKULELE:  ['a', 'E', 'C', 'G'],
+  MANDOLIN: ['e', 'A', 'D', 'G'],
+  BANJO:    ['g', 'D', 'B', 'G', 'D'],
+  CUSTOM:   ['e', 'B', 'G', 'D', 'A', 'E'],
+};
+
+function getEmptyTab(name: InstrumentName): string {
+  return EMPTY_TAB_LINES[name]
+    .map(label => `${label}|----------------|`)
+    .join('\n');
+}
 
 function expandTab(tab: string): string {
   return tab.split('\n').map(line => {
@@ -23,7 +45,8 @@ interface Props {
 }
 
 export default function LickUploadForm({ onSuccess }: Props) {
-  const [rawTab, setRawTab] = useState(EMPTY_TAB);
+  const { instrument, customTuning, setInstrument, setCustomTuning } = useInstrument();
+  const [rawTab, setRawTab] = useState(() => getEmptyTab(instrument));
   const [mode, setMode] = useState('');
   const [inputKey, setInputKey] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,6 +61,11 @@ export default function LickUploadForm({ onSuccess }: Props) {
       nextCursorRef.current = null;
     }
   });
+
+  function handleInstrumentChange(name: InstrumentName) {
+    setInstrument(name);
+    setRawTab(getEmptyTab(name));
+  }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     const ta = textareaRef.current;
@@ -84,8 +112,13 @@ export default function LickUploadForm({ onSuccess }: Props) {
       const req: UploadRequest = { rawTab };
       if (mode) req.mode = mode;
       if (inputKey) req.inputKey = inputKey;
+      if (instrument === 'CUSTOM' && customTuning.trim()) {
+        req.tuning = customTuning.trim();
+      } else {
+        req.instrument = instrument;
+      }
       await uploadLick(req);
-      setRawTab(EMPTY_TAB);
+      setRawTab(getEmptyTab(instrument));
       setMode('');
       setInputKey('');
       onSuccess();
@@ -96,6 +129,8 @@ export default function LickUploadForm({ onSuccess }: Props) {
     }
   };
 
+  const stringCount = EMPTY_TAB_LINES[instrument].length;
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <textarea
@@ -103,10 +138,16 @@ export default function LickUploadForm({ onSuccess }: Props) {
         value={rawTab}
         onChange={e => setRawTab(e.target.value)}
         onKeyDown={handleKeyDown}
-        rows={7}
+        rows={stringCount + 1}
         className="font-mono text-sm border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:border-indigo-400 bg-gray-50"
       />
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap items-start">
+        <InstrumentSelector
+          instrument={instrument}
+          customTuning={customTuning}
+          onInstrumentChange={handleInstrumentChange}
+          onCustomTuningChange={setCustomTuning}
+        />
         <select
           value={inputKey}
           onChange={e => setInputKey(e.target.value)}
