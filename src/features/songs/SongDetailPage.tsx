@@ -296,6 +296,7 @@ export default function SongDetailPage() {
                     instrument={instrument as InstrumentName}
                     onInstrumentChange={setInstrument}
                     excludeCustom
+                    compact
                   />
                   {modeLabel(song.originalKey) && <span>{modeLabel(song.originalKey)}</span>}
                 </div>

@@ -8,6 +8,7 @@ interface Props {
   onSubmit?: () => void;
   error?: string | null;
   excludeCustom?: boolean;
+  compact?: boolean;
 }
 
 const INSTRUMENTS: { value: InstrumentName; label: string }[] = [
@@ -24,18 +25,19 @@ const INSTRUMENTS: { value: InstrumentName; label: string }[] = [
 ];
 
 const SELECT_CLASS =
-  'border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400';
+  'border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-indigo-400';
 
 export default function InstrumentSelector({
-  instrument, customTuning = '', onInstrumentChange, onCustomTuningChange, onSubmit, error, excludeCustom = false,
+  instrument, customTuning = '', onInstrumentChange, onCustomTuningChange, onSubmit, error, excludeCustom = false, compact = false,
 }: Props) {
   const options = excludeCustom ? INSTRUMENTS.filter(i => i.value !== 'CUSTOM') : INSTRUMENTS;
+  const sizeClass = compact ? 'px-1.5 py-0.5 text-xs' : 'px-3 py-2 text-sm';
   return (
     <div className="flex flex-col gap-1">
       <select
         value={instrument}
         onChange={e => onInstrumentChange(e.target.value as InstrumentName)}
-        className={SELECT_CLASS}
+        className={`${SELECT_CLASS} ${sizeClass}`}
       >
         {options.map(({ value, label }) => (
           <option key={value} value={value}>{label}</option>
