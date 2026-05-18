@@ -7,6 +7,7 @@ export interface LickSummary {
   mode: string | null;
   positions: null;
   autoImported: boolean;
+  instrument: string | null;
 }
 
 export interface PositionResponse {
@@ -29,9 +30,24 @@ export interface UploadRequest {
   tuning?: string;
 }
 
-export async function getAllLicks(includeSongLicks = false): Promise<LickSummary[]> {
-  const params = includeSongLicks ? '?includeSongLicks=true' : '';
-  const res = await fetch(`${BASE_URL}/lick${params}`);
+export async function getAllLicks(
+  includeSongLicks = false,
+  filters: {
+    instrument?: string;
+    mode?: string;
+    minLength?: number;
+    maxLength?: number;
+    intervals?: string;
+  } = {}
+): Promise<LickSummary[]> {
+  const params = new URLSearchParams();
+  if (includeSongLicks) params.set('includeSongLicks', 'true');
+  if (filters.instrument && filters.instrument !== 'CUSTOM') params.set('instrument', filters.instrument);
+  if (filters.mode) params.set('mode', filters.mode);
+  if (filters.minLength != null) params.set('minLength', String(filters.minLength));
+  if (filters.maxLength != null) params.set('maxLength', String(filters.maxLength));
+  if (filters.intervals) params.set('intervals', filters.intervals);
+  const res = await fetch(`${BASE_URL}/lick?${params}`);
   if (!res.ok) throw new Error('Failed to fetch licks');
   return res.json();
 }

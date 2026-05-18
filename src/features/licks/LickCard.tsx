@@ -4,13 +4,14 @@ import type { LickSummary } from '../../core/api/client';
 interface Props {
   lick: LickSummary;
   onDelete: () => void;
+  isManaging: boolean;
 }
 
 function modeLabel(mode: string) {
   return mode.charAt(0) + mode.slice(1).toLowerCase();
 }
 
-export default function LickCard({ lick, onDelete }: Props) {
+export default function LickCard({ lick, onDelete, isManaging }: Props) {
   const navigate = useNavigate();
 
   return (
@@ -21,12 +22,17 @@ export default function LickCard({ lick, onDelete }: Props) {
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs font-mono text-gray-500">{lick.intervalDisplayString}</span>
         <div className="flex items-center gap-2">
+          {lick.instrument && lick.instrument !== 'GUITAR' && (
+            <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full font-medium">
+              {modeLabel(lick.instrument)}
+            </span>
+          )}
           {lick.mode && (
             <span className="text-xs px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full font-medium">
               {modeLabel(lick.mode)}
             </span>
           )}
-          {!lick.autoImported && (
+          {!lick.autoImported && isManaging && (
             <button
               onClick={e => { e.stopPropagation(); onDelete(); }}
               className="text-red-400 hover:text-red-600 text-base leading-none transition-colors"
