@@ -6,11 +6,33 @@ interface Props {
   lickId: string | null;
   rawTab: string;
   currentKey: string | null;
-  isTransposed: boolean;
+  semitones: number;
   fontSize: number;
 }
 
-export default function SongLickCard({ lickId, rawTab, currentKey, isTransposed, fontSize }: Props) {
+function shiftTabFrets(tab: string, semitones: number): string {
+  return tab.split('\n').map(line => {
+    if (line.length < 2) return line;
+    const prefix = line.slice(0, 2);
+    const body = line.slice(2);
+    return prefix + body.replace(/\d+/g, n => String(Math.max(0, parseInt(n, 10) + semitones)));
+  }).join('\n');
+}
+
+function renderColoredTab(tab: string, fontSize: number): React.ReactNode {
+  return (
+    <div style={{ fontSize: `${fontSize}px`, fontFamily: 'monospace' }}>
+      {tab.split('\n').map((line, i) => (
+        <div key={i} style={{ whiteSpace: 'pre' }}>
+          <span style={{ color: '#ef4444' }}>{line[0] ?? ''}</span>
+          <span style={{ color: '#4b5563' }}>{line.slice(1)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function SongLickCard({ lickId, rawTab, currentKey, semitones, fontSize }: Props) {
   const [positions, setPositions] = useState<PositionResponse[]>([]);
   const [posIdx, setPosIdx] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -27,32 +49,20 @@ export default function SongLickCard({ lickId, rawTab, currentKey, isTransposed,
       .finally(() => setLoading(false));
   }, [lickId, currentKey]);
 
-  const hasPositions = positions.length > 0;
-  const displayTab = hasPositions ? positions[posIdx].tabString : rawTab;
-
   if (!lickId) {
-    if (!isTransposed) {
-      return (
-        <div style={{ fontSize: `${fontSize}px`, whiteSpace: 'pre', color: '#4b5563', fontFamily: 'monospace' }}>
-          {rawTab}
-        </div>
-      );
-    }
-    return (
-      <div
-        style={{ fontSize: `${fontSize}px`, fontFamily: 'monospace', color: '#9ca3af', fontStyle: 'italic' }}
-        className="py-1"
-      >
-        [tab unavailable at transposed key]
-      </div>
-    );
+    const tab = semitones !== 0 ? shiftTabFrets(rawTab, semitones) : rawTab;
+    return renderColoredTab(tab, fontSize);
   }
+
+  const hasPositions = positions.length > 0;
+  const displayTab = hasPositions
+    ? positions[posIdx].tabString
+    : semitones !== 0 ? shiftTabFrets(rawTab, semitones) : rawTab;
 
   return (
     <div className="my-1">
-      <div style={{ fontSize: `${fontSize}px`, whiteSpace: 'pre', color: '#4b5563', fontFamily: 'monospace' }}
-           className={loading ? 'opacity-50' : ''}>
-        {displayTab}
+      <div className={loading ? 'opacity-50' : ''}>
+        {renderColoredTab(displayTab, fontSize)}
       </div>
       {hasPositions && (
         <div className="flex items-center gap-2 mt-0.5">

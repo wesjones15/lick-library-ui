@@ -181,10 +181,10 @@ interface Props {
   showTabLicks?: boolean;
   songLicks?: Record<number, SongLickInfo>;
   currentKey?: string | null;
-  isTransposed?: boolean;
+  semitones?: number;
 }
 
-export default function ChordSheet({ chordLines, numColumns, className, fontScale = 1, showTabLicks = false, songLicks = {}, currentKey, isTransposed = false }: Props) {
+export default function ChordSheet({ chordLines, numColumns, className, fontScale = 1, showTabLicks = false, songLicks = {}, currentKey, semitones = 0 }: Props) {
   const perColumn = Math.ceil(chordLines.length / numColumns);
   const columns: ChordSheetLine[][] = [];
   for (let c = 0; c < numColumns; c++) {
@@ -222,7 +222,7 @@ export default function ChordSheet({ chordLines, numColumns, className, fontScal
                       lickId={lickInfo.lickId}
                       rawTab={lickInfo.rawTab}
                       currentKey={currentKey ?? null}
-                      isTransposed={isTransposed}
+                      semitones={semitones}
                       fontSize={line.fontSize * fontScale}
                     />
                   ) : (

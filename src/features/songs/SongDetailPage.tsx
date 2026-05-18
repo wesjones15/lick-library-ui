@@ -576,7 +576,7 @@ export default function SongDetailPage() {
               showTabLicks={showTabLicks}
               songLicks={song.songLicks ?? {}}
               currentKey={currentNoteKey}
-              isTransposed={semitones !== 0}
+              semitones={semitones}
             />
           </div>
 
