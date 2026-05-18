@@ -68,12 +68,35 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
   const strLineY0 = TOP_PAD;
   const strLineYN = TOP_PAD + (STRING_COUNT - 1) * STR_H;
 
+  // Single SVG-level click handler: computes (string, fret) from raw coordinates.
+  // Avoids per-element onClick on SVG <g> elements which have proven unreliable for grey dots.
+  const handleSvgClick = onDotClick
+    ? (e: React.MouseEvent<SVGSVGElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const svgX = (e.clientX - rect.left) * (vbW / rect.width);
+        const svgY = (e.clientY - rect.top) * (vbH / rect.height);
+        if (svgX < LABEL_W) return; // string label margin
+        const rawDi = (svgY - TOP_PAD) / STR_H;
+        if (rawDi < -0.5 || rawDi > STRING_COUNT - 0.5) return; // above/below string band
+        const di = Math.max(0, Math.min(STRING_COUNT - 1, Math.round(rawDi)));
+        const si = STRING_COUNT - 1 - di;
+        let fret: number;
+        if (svgX < fretLineStart) {
+          fret = 0;
+        } else {
+          fret = Math.max(1, Math.min(fretCount, Math.floor((svgX - fretLineStart) / FRET_W) + 1));
+        }
+        onDotClick(si, fret);
+      }
+    : undefined;
+
   return (
     <svg
       viewBox={`0 0 ${vbW} ${vbH}`}
       width={width}
-      style={{ display: 'block' }}
+      style={{ display: 'block', cursor: onDotClick ? 'pointer' : undefined }}
       aria-label="Guitar neck diagram"
+      onClick={handleSvgClick}
     >
       <style>{`
         @keyframes candidate-stroke {
@@ -230,11 +253,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           if (dot.degree === null) {
             if (dot.pentatonicOutOfScale && dot.pentatonicRings?.length) {
               return (
-                <g
-                  key={`d${di}-${fret}`}
-                  onClick={onDotClick ? () => onDotClick(si, fret) : undefined}
-                  style={onDotClick ? { cursor: 'pointer' } : undefined}
-                >
+                <g key={`d${di}-${fret}`}>
                   <circle cx={cx} cy={cy} r={R_NORMAL} fill="#9ca3af" className="active-dot"
                     stroke="#9ca3af" strokeWidth={1} />
                   {dot.pentatonicRings.map((color, i) => (
@@ -256,12 +275,24 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
                 </g>
               );
             }
+            if (dot.active) {
+              const fontSize = dot.note && dot.note.length > 1 ? 7 : 9;
+              return (
+                <g key={`d${di}-${fret}`}>
+                  <circle cx={cx} cy={cy} r={R_NORMAL} fill={OFF_SCALE_COLOR}
+                    className="active-dot" stroke={OFF_SCALE_COLOR} strokeWidth={1} />
+                  {dot.note && (
+                    <text x={cx} y={cy + fontSize * 0.38} textAnchor="middle"
+                      fontSize={fontSize} fill="#111827" fontFamily="sans-serif" fontWeight="600"
+                      style={{ pointerEvents: 'none', userSelect: 'none' }}>
+                      {dot.note}
+                    </text>
+                  )}
+                </g>
+              );
+            }
             return (
-              <g
-                key={`d${di}-${fret}`}
-                onClick={onDotClick ? () => onDotClick(si, fret) : undefined}
-                style={onDotClick ? { cursor: 'pointer' } : undefined}
-              >
+              <g key={`d${di}-${fret}`}>
                 <circle cx={cx} cy={cy} r={R_SMALL} fill={OFF_SCALE_COLOR} />
               </g>
             );
@@ -278,15 +309,12 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           const fontSize = dot.active
             ? (label.length > 1 ? 9 : 11)
             : (label.length > 1 ? 7 : 9);
-          const si = dataIdx(di);
           const candidateStroke = (isCandidate || isSecondCandidate || isThirdCandidate)
             ? (dot.candidateColor ?? DEGREE_COLORS[dot.degree] ?? '#800020')
             : 'none';
           return (
             <g
               key={`d${di}-${fret}`}
-              onClick={onDotClick ? () => onDotClick(si, fret) : undefined}
-              style={onDotClick ? { cursor: 'pointer' } : undefined}
               opacity={isThirdCandidate ? 0.33 : isSecondCandidate ? 0.67 : isCandidate ? 0.8 : 1}
             >
               {/* pale yellow ring — outer border of active pulse */}

@@ -16,6 +16,12 @@ function formatNote(enumName: string): string {
   return enumName.replace('_SHARP', '#');
 }
 
+const STANDARD_OPEN_NOTES = [4, 9, 2, 7, 11, 4]; // E A D G B e in semitones from C
+const NOTE_NAMES_BUILD = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
+function computeNoteName(si: number, fret: number): string {
+  return NOTE_NAMES_BUILD[((STANDARD_OPEN_NOTES[si] ?? 0) + fret) % 12];
+}
+
 const ROOT_NOTES = [
   { value: 'C',       label: 'C'  },
   { value: 'C_SHARP', label: 'C#' },
@@ -236,6 +242,7 @@ export default function LickVisualizerPanel() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pendingNotesRef = useRef<{ string: number; fret: number }[]>([]);
   const chordTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const buildHighlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -283,6 +290,12 @@ export default function LickVisualizerPanel() {
     if (!isBuilding) {
       if (chordTimerRef.current) clearTimeout(chordTimerRef.current);
       commitPendingColumn();
+      setBuildCurrentNote(null);
+    } else {
+      if (buildHighlightTimerRef.current) {
+        clearTimeout(buildHighlightTimerRef.current);
+        buildHighlightTimerRef.current = null;
+      }
     }
   }, [isBuilding, commitPendingColumn]);
 
@@ -307,7 +320,11 @@ export default function LickVisualizerPanel() {
     if (panelMode !== 'build') return;
     const degree = scaleDots[si]?.[fret]?.degree ?? 1;
     setBuildCurrentNote({ string: si, fret, degree });
-    if (!isBuilding) return;
+    if (!isBuilding) {
+      if (buildHighlightTimerRef.current) clearTimeout(buildHighlightTimerRef.current);
+      buildHighlightTimerRef.current = setTimeout(() => setBuildCurrentNote(null), 3000);
+      return;
+    }
 
     if (!chordDetect) {
       setBuiltCols(prev => {
@@ -371,7 +388,9 @@ export default function LickVisualizerPanel() {
 
   // Candidate notes near the current build note
   const buildCandidates = useMemo(() => {
-    if (!buildCurrentNote) return { best: new Map<string, { candidateColor: string; ownNote: boolean }>(), second: new Map<string, { candidateColor: string }>(), third: new Map<string, { candidateColor: string }>() };
+    const empty = { best: new Map<string, { candidateColor: string; ownNote: boolean }>(), second: new Map<string, { candidateColor: string }>(), third: new Map<string, { candidateColor: string }>() };
+    if (!buildCurrentNote) return empty;
+    if (scaleDots[buildCurrentNote.string]?.[buildCurrentNote.fret]?.degree === null) return empty;
     const byDegree = new Map<number, Array<{ string: number; fret: number; dist: number }>>();
     scaleDots.forEach((row, s) => {
       row.forEach((dot, f) => {
@@ -417,7 +436,12 @@ export default function LickVisualizerPanel() {
     if (buildCurrentNote) {
       const { string: s, fret: f } = buildCurrentNote;
       if (s >= 0 && s < STRING_COUNT && f >= 0 && f <= FRET_COUNT) {
-        d[s][f] = { ...d[s][f], degree: d[s][f].degree ?? 1, active: true };
+        if (scaleDots[s][f].degree === null) {
+          // off-scale: override any degree builtCols set, keep grey with note name
+          d[s][f] = { degree: null, active: true, note: computeNoteName(s, f) };
+        } else {
+          d[s][f] = { ...d[s][f], active: true };
+        }
       }
       buildCandidates.best.forEach((info, key) => {
         const [ks, kf] = key.split(',').map(Number);
