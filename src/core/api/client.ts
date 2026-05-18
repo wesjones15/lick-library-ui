@@ -305,7 +305,7 @@ export async function updatePlaylistEntry(
   req: { keyOffset?: number | null; capoOffset?: number | null; position?: number },
 ): Promise<PlaylistDetail> {
   const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}`, {
-    method: 'PUT',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(req),
   });

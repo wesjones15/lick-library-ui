@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { getSong, getChordVoicings, updatePlaylistEntry, clearPlaylistEntryOverrides, reparseSong } from '../../core/api/client';
+import { getSong, getChordVoicings, reparseSong } from '../../core/api/client';
 import AddToPlaylistModal from '../playlists/AddToPlaylistModal';
 import ChordUploadModal from '../chords/ChordUploadModal';
 import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/client';
@@ -84,9 +84,6 @@ export default function SongDetailPage() {
   const isPortrait = usePortrait();
   const [semitones, setSemitones] = useState(() => playlistState?.entries[playlistState.currentIndex]?.keyOffset ?? 0);
   const [capo, setCapo] = useState(0);
-  const [saveState, setSaveState] = useState<'idle' | 'saved' | 'can-reset'>('idle');
-  const [lastSavedKeyOffset, setLastSavedKeyOffset] = useState<number | null>(null);
-  const [lastSavedCapoOffset, setLastSavedCapoOffset] = useState<number | null>(null);
   const [song, setSong] = useState<SongDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -105,9 +102,6 @@ export default function SongDetailPage() {
   const overflowRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Reset save state whenever the user changes key or capo
-  useEffect(() => { setSaveState('idle'); }, [semitones, capo]);
-
   // Reset semitones/capo when navigating to a different song (including within playlist)
   const prevIdRef = useRef<string | undefined>(undefined);
   useEffect(() => {
@@ -116,8 +110,6 @@ export default function SongDetailPage() {
       const ps = (location.state as PlaylistNavState | null);
       const entry = ps?.entries[ps.currentIndex];
       setSemitones(entry?.keyOffset ?? 0);
-      setLastSavedKeyOffset(null);
-      setLastSavedCapoOffset(null);
     }
   }, [id]);
 
@@ -240,6 +232,12 @@ export default function SongDetailPage() {
   const stubBtnClass = (active: boolean) =>
     `px-2 py-1 text-xs rounded border transition-colors ${active ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
 
+  const currentPlaylistEntry = playlistState?.entries[playlistState.currentIndex];
+  const overrideChanged = !!playlistState && song != null && (
+    semitones !== (currentPlaylistEntry?.keyOffset ?? 0) ||
+    (capo - (song.capo ?? 0)) !== (currentPlaylistEntry?.capoOffset ?? 0)
+  );
+
   return (
     <div className={`px-3 sm:px-6 pb-4 ${viewMode === 'scroll' ? 'pt-0' : 'pt-4'}`}>
       {song && (
@@ -251,40 +249,11 @@ export default function SongDetailPage() {
           {/* Playlist breadcrumb + navigation */}
           {playlistState && (() => {
             const { playlistId, playlistName, entries: plEntries, currentIndex } = playlistState;
-            const currentEntry = plEntries[currentIndex];
-            const prevEntry = plEntries[(currentIndex - 1 + plEntries.length) % plEntries.length];
-            const nextEntry = plEntries[(currentIndex + 1) % plEntries.length];
-            const savedKeyOffset = lastSavedKeyOffset ?? (currentEntry?.keyOffset ?? 0);
-            const savedCapoOffset = lastSavedCapoOffset ?? (currentEntry?.capoOffset ?? 0);
-            const overrideChanged = semitones !== savedKeyOffset || (capo - (song?.capo ?? 0)) !== savedCapoOffset;
-
             function navigateTo(idx: number) {
               const entry = plEntries[idx];
               navigate(`/song/${entry.songId}`, {
                 state: { playlistId, playlistName, entries: plEntries, currentIndex: idx },
               });
-            }
-
-            async function saveOverride() {
-              if (!currentEntry) return;
-              await updatePlaylistEntry(playlistId, currentEntry.entryId, {
-                keyOffset: semitones,
-                capoOffset: capo - (song?.capo ?? 0),
-              });
-              setLastSavedKeyOffset(semitones);
-              setLastSavedCapoOffset(capo - (song?.capo ?? 0));
-              setSaveState('saved');
-              setTimeout(() => setSaveState('can-reset'), 2000);
-            }
-
-            async function resetOverride() {
-              if (!currentEntry) return;
-              await clearPlaylistEntryOverrides(playlistId, currentEntry.entryId);
-              setSemitones(0);
-              setCapo(song?.capo ?? 0);
-              setLastSavedKeyOffset(0);
-              setLastSavedCapoOffset(0);
-              setSaveState('idle');
             }
 
             return (
@@ -296,15 +265,6 @@ export default function SongDetailPage() {
                   ← {playlistName}
                 </Link>
                 <div className="flex items-center gap-1 ml-auto">
-                  {saveState === 'saved' && (
-                    <span className="text-green-500 text-sm leading-none">✓</span>
-                  )}
-                  {saveState === 'can-reset' && (
-                    <button onClick={resetOverride} className="text-blue-400 hover:text-blue-600 text-sm transition-colors leading-none" title="Restore defaults">↺</button>
-                  )}
-                  {saveState === 'idle' && overrideChanged && (
-                    <button onClick={saveOverride} className="text-indigo-500 hover:text-indigo-700 text-sm transition-colors leading-none" title="Save voicing">💾</button>
-                  )}
                   <button
                     onClick={() => navigateTo((currentIndex - 1 + plEntries.length) % plEntries.length)}
                     className="text-xs px-2 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
@@ -699,6 +659,8 @@ export default function SongDetailPage() {
           onClose={() => setAddToPlaylistOpen(false)}
           keyOffset={semitones}
           capoOffset={capo - (song?.capo ?? 0)}
+          overrideChanged={overrideChanged}
+          currentPlaylistId={playlistState?.playlistId}
         />
       )}
     </div>

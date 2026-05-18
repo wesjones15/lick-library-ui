@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllPlaylists, addPlaylistEntry, removePlaylistEntry, getPlaylistsContainingSong } from '../../core/api/client';
+import { getAllPlaylists, addPlaylistEntry, removePlaylistEntry, updatePlaylistEntry, getPlaylistsContainingSong } from '../../core/api/client';
 import type { PlaylistSummary } from '../../core/api/client';
 
 interface Props {
@@ -9,14 +9,17 @@ interface Props {
   onClose: () => void;
   keyOffset?: number;
   capoOffset?: number;
+  overrideChanged?: boolean;
+  currentPlaylistId?: string;
 }
 
-export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffset, capoOffset }: Props) {
+export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffset, capoOffset, overrideChanged, currentPlaylistId }: Props) {
   const navigate = useNavigate();
   const [playlists, setPlaylists] = useState<PlaylistSummary[]>([]);
   const [filter, setFilter] = useState('');
   const [added, setAdded] = useState<Set<string>>(new Set());
   const [recentlyAdded, setRecentlyAdded] = useState<Set<string>>(new Set());
+  const [updatedPlaylists, setUpdatedPlaylists] = useState<Set<string>>(new Set());
   const [addedEntryIds, setAddedEntryIds] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
@@ -55,6 +58,22 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
     }
   }
 
+  async function handleUpdate(playlistId: string) {
+    const entryId = addedEntryIds.get(playlistId);
+    if (!entryId) return;
+    try {
+      await updatePlaylistEntry(playlistId, entryId, {
+        keyOffset: keyOffset ?? 0,
+        capoOffset: capoOffset ?? 0,
+      });
+      setUpdatedPlaylists(s => new Set(s).add(playlistId));
+      setRecentlyAdded(s => new Set(s).add(playlistId));
+      setTimeout(() => setRecentlyAdded(s => { const n = new Set(s); n.delete(playlistId); return n; }), 2000);
+    } catch {
+      // swallow
+    }
+  }
+
   const visible = playlists.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
 
   return (
@@ -72,7 +91,6 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
         </div>
 
         <input
-          autoFocus
           type="text"
           value={filter}
           onChange={e => setFilter(e.target.value)}
@@ -87,6 +105,7 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
             {visible.map(pl => {
               const isRecent = recentlyAdded.has(pl.id);
               const isAdded = added.has(pl.id);
+              const showUpdate = !isRecent && overrideChanged && pl.id === currentPlaylistId && isAdded && !updatedPlaylists.has(pl.id);
               return (
                 <div key={pl.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
                   <button
@@ -97,15 +116,20 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
                     <span className="text-xs text-gray-400 ml-2">{pl.songCount} songs</span>
                   </button>
                   <button
-                    onClick={() => { if (!isRecent) isAdded ? handleRemove(pl.id) : handleAdd(pl.id); }}
+                    onClick={() => {
+                      if (isRecent) return;
+                      if (showUpdate) { handleUpdate(pl.id); return; }
+                      isAdded ? handleRemove(pl.id) : handleAdd(pl.id);
+                    }}
                     className={`text-lg leading-none transition-colors ${
                       isRecent ? 'text-green-500 cursor-default'
+                      : showUpdate ? 'text-indigo-500 hover:text-indigo-700'
                       : isAdded ? 'text-red-400 hover:text-red-600'
-                      : 'text-gray-300 hover:text-indigo-500'
+                      : 'text-blue-400 hover:text-blue-600'
                     }`}
                     disabled={isRecent}
                   >
-                    {isRecent ? '✓' : isAdded ? '×' : '+'}
+                    {isRecent ? '✓' : showUpdate ? '↑' : isAdded ? '×' : '+'}
                   </button>
                 </div>
               );
