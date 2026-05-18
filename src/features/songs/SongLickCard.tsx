@@ -8,6 +8,7 @@ interface Props {
   currentKey: string | null;
   semitones: number;
   fontSize: number;
+  instrument?: string;
 }
 
 function shiftTabFrets(tab: string, semitones: number): string {
@@ -32,7 +33,7 @@ function renderColoredTab(tab: string, fontSize: number): React.ReactNode {
   );
 }
 
-export default function SongLickCard({ lickId, rawTab, currentKey, semitones, fontSize }: Props) {
+export default function SongLickCard({ lickId, rawTab, currentKey, semitones, fontSize, instrument }: Props) {
   const [positions, setPositions] = useState<PositionResponse[]>([]);
   const [posIdx, setPosIdx] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -40,14 +41,14 @@ export default function SongLickCard({ lickId, rawTab, currentKey, semitones, fo
   useEffect(() => {
     if (!lickId || !currentKey) return;
     setLoading(true);
-    getLick(lickId, currentKey)
+    getLick(lickId, currentKey, 'greedy', instrument ?? 'GUITAR')
       .then(detail => {
         setPositions(detail.positions);
         setPosIdx(0);
       })
       .catch(() => setPositions([]))
       .finally(() => setLoading(false));
-  }, [lickId, currentKey]);
+  }, [lickId, currentKey, instrument]);
 
   if (!lickId) {
     const tab = semitones !== 0 ? shiftTabFrets(rawTab, semitones) : rawTab;

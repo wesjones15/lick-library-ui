@@ -5,15 +5,17 @@ import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
 import ChordDiagram from '../chords/ChordDiagram';
 import SongLickCard from './SongLickCard';
+import { getStringCount } from '../../core/music';
 
 // Cache fetched voicings so re-hovering the same chord doesn't re-fetch
 const voicingCache = new Map<string, ChordVoicing[]>();
 
 interface ChordTokenProps {
   name: string;
+  instrument?: string;
 }
 
-function ChordToken({ name }: ChordTokenProps) {
+function ChordToken({ name, instrument }: ChordTokenProps) {
   const [voicings, setVoicings] = useState<ChordVoicing[]>([]);
   const [voicingIdx, setVoicingIdx] = useState(0);
   const [open, setOpen] = useState(false);
@@ -41,10 +43,10 @@ function ChordToken({ name }: ChordTokenProps) {
   async function handleMouseEnter() {
     if (!parsed) return;
     const { root, quality } = parsed;
-    const key = `${root}:${quality}`;
+    const key = `${root}:${quality}:${instrument ?? 'GUITAR'}`;
 
     if (!voicingCache.has(key)) {
-      const result = await getChordVoicings(root, quality);
+      const result = await getChordVoicings(root, quality, instrument ?? 'GUITAR');
       voicingCache.set(key, result);
     }
     const cached = voicingCache.get(key)!;
@@ -101,13 +103,18 @@ function ChordToken({ name }: ChordTokenProps) {
             {name}
           </span>
           {voicings.length > 0
-            ? <ChordDiagram frets={voicings[voicingIdx].frets} width={100} />
-            : <div
-                style={{ cursor: 'pointer' }}
-                onClick={e => { e.stopPropagation(); setOpen(false); setModalOpen(true); }}
-              >
-                <ChordDiagram frets={[0, 0, 0, 0, 0, 0]} width={100} />
-              </div>
+            ? <ChordDiagram frets={voicings[voicingIdx].frets} width={100} stringCount={getStringCount(instrument)} />
+            : <>
+                <span style={{ fontSize: '10px', color: '#9ca3af' }}>
+                  {instrument ? instrument.charAt(0) + instrument.slice(1).toLowerCase() : 'Guitar'} • ???
+                </span>
+                <div
+                  style={{ cursor: 'pointer' }}
+                  onClick={e => { e.stopPropagation(); setOpen(false); setModalOpen(true); }}
+                >
+                  <ChordDiagram frets={Array(getStringCount(instrument)).fill(0)} width={100} stringCount={getStringCount(instrument)} />
+                </div>
+              </>
           }
           {voicings.length > 1 && (
             <span style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: '8px', color: '#9ca3af' }}>
@@ -127,11 +134,13 @@ function ChordToken({ name }: ChordTokenProps) {
       {modalOpen && parsed && (
         <ChordUploadModal
           chordName={name}
+          instrument={instrument ?? 'GUITAR'}
+          lockInstrument
           onClose={() => setModalOpen(false)}
           onSuccess={() => {
-            const key = `${parsed.root}:${parsed.quality}`;
+            const key = `${parsed.root}:${parsed.quality}:${instrument ?? 'GUITAR'}`;
             voicingCache.delete(key);
-            getChordVoicings(parsed.root, parsed.quality).then(vs => {
+            getChordVoicings(parsed.root, parsed.quality, instrument ?? 'GUITAR').then(vs => {
               voicingCache.set(key, vs);
               setVoicings(vs);
             });
@@ -143,7 +152,7 @@ function ChordToken({ name }: ChordTokenProps) {
   );
 }
 
-function renderChordToken(part: string, i: number): React.ReactNode {
+function renderChordToken(part: string, i: number, instrument?: string): React.ReactNode {
   const prefix = part.match(/^\(+/)?.[0] ?? '';
   const suffix = part.match(/[)*]+$/)?.[0] ?? '';
   const core = part.slice(prefix.length, part.length - suffix.length);
@@ -154,18 +163,18 @@ function renderChordToken(part: string, i: number): React.ReactNode {
   return (
     <span key={i} style={{ display: 'inline-block' }}>
       {prefix && <span style={{ fontWeight: 'normal' }}>{prefix}</span>}
-      <ChordToken name={core} />
+      <ChordToken name={core} instrument={instrument} />
       {suffix && <span style={{ fontWeight: 'normal' }}>{suffix}</span>}
     </span>
   );
 }
 
-function renderChords(chords: string): React.ReactNode[] {
+function renderChords(chords: string, instrument?: string): React.ReactNode[] {
   const parts = chords.split(/(\s+)/);
   return parts.map((part, i) => {
     if (/^\s+$/.test(part) || part === '') return part;
     if (part === 'NC' || part === 'N.C.') return <span key={i}>{part}</span>;
-    return renderChordToken(part, i);
+    return renderChordToken(part, i, instrument);
   });
 }
 
@@ -182,9 +191,10 @@ interface Props {
   songLicks?: Record<number, SongLickInfo>;
   currentKey?: string | null;
   semitones?: number;
+  instrument?: string;
 }
 
-export default function ChordSheet({ chordLines, numColumns, className, fontScale = 1, showTabLicks = false, songLicks = {}, currentKey, semitones = 0 }: Props) {
+export default function ChordSheet({ chordLines, numColumns, className, fontScale = 1, showTabLicks = false, songLicks = {}, currentKey, semitones = 0, instrument }: Props) {
   const perColumn = Math.ceil(chordLines.length / numColumns);
   const columns: ChordSheetLine[][] = [];
   for (let c = 0; c < numColumns; c++) {
@@ -214,7 +224,7 @@ export default function ChordSheet({ chordLines, numColumns, className, fontScal
                 <div key={li} className="leading-tight my-1">
                   {line.header && (
                     <div style={{ fontSize: `${line.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#111827' }}>
-                      {renderChords(line.header)}
+                      {renderChords(line.header, instrument)}
                     </div>
                   )}
                   {showTabLicks && lickInfo ? (
@@ -224,6 +234,7 @@ export default function ChordSheet({ chordLines, numColumns, className, fontScal
                       currentKey={currentKey ?? null}
                       semitones={semitones}
                       fontSize={line.fontSize * fontScale}
+                      instrument={instrument}
                     />
                   ) : (
                     <div style={{ fontSize: `${line.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#4b5563', fontFamily: 'monospace' }}>
@@ -237,7 +248,7 @@ export default function ChordSheet({ chordLines, numColumns, className, fontScal
             return (
               <div key={li} className="leading-tight">
                 <div style={{ fontSize: `${pair.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#111827' }}>
-                  {renderChords(pair.chords)}
+                  {renderChords(pair.chords, instrument)}
                 </div>
                 <div style={{ fontSize: `${pair.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#111827' }}>
                   {pair.lyrics || ' '}

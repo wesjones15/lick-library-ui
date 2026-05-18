@@ -6,10 +6,12 @@ import ChordUploadModal from '../chords/ChordUploadModal';
 import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/client';
 import ChordSheet from './ChordSheet';
 import ChordDiagram from '../chords/ChordDiagram';
+import InstrumentSelector from '../../components/InstrumentSelector';
+import type { InstrumentName } from '../../core/useInstrument';
 import { parseChordName } from './parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { useSongNavContext } from '../../core/context/SongNavContext';
-import { KEY_LABEL, CHROMATIC_NOTES } from '../../core/music';
+import { KEY_LABEL, CHROMATIC_NOTES, getStringCount } from '../../core/music';
 
 function keyLabel(originalKey: string | null, semitones: number): string {
   if (!originalKey) return '';
@@ -98,6 +100,7 @@ export default function SongDetailPage() {
   const [capTranspOpen, setCapTranspOpen] = useState(false);
   const [addToPlaylistOpen, setAddToPlaylistOpen] = useState(false);
   const [scrollFontScale, setScrollFontScale] = useState<number | null>(null);
+  const [instrument, setInstrument] = useState('GUITAR');
   const loadedSongIdRef = useRef<string | null>(null);
   const overflowRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -172,14 +175,14 @@ export default function SongDetailPage() {
       names.map(async name => {
         const parsed = parseChordName(name);
         if (!parsed) return [name, []] as [string, ChordVoicing[]];
-        const voicings = await getChordVoicings(parsed.root, parsed.quality);
+        const voicings = await getChordVoicings(parsed.root, parsed.quality, instrument);
         return [name, voicings] as [string, ChordVoicing[]];
       })
     ).then(results => {
       setChordVoicings(Object.fromEntries(results));
       setChordVoicingIdx({});
     });
-  }, [showChords, song]);
+  }, [showChords, song, instrument]);
 
   const baseFontScale = isPortrait ? 1.5 : 2;
   const effectiveFontScale = viewMode === 'scroll' ? (scrollFontScale ?? baseFontScale) : undefined;
@@ -289,7 +292,11 @@ export default function SongDetailPage() {
               <h1 className="text-xl font-bold text-gray-900">{song.title}</h1>
               <div className="flex flex-col md:flex-row md:gap-3 mt-0.5 text-xs text-gray-400 gap-0.5">
                 <div className="flex gap-2 items-center">
-                  <span>Standard</span>
+                  <InstrumentSelector
+                    instrument={instrument as InstrumentName}
+                    onInstrumentChange={setInstrument}
+                    excludeCustom
+                  />
                   {modeLabel(song.originalKey) && <span>{modeLabel(song.originalKey)}</span>}
                 </div>
                 {song.tempo != null && (
@@ -533,6 +540,7 @@ export default function SongDetailPage() {
               songLicks={song.songLicks ?? {}}
               currentKey={currentNoteKey}
               semitones={semitones}
+              instrument={instrument}
             />
           </div>
 
@@ -604,7 +612,7 @@ export default function SongDetailPage() {
                 {extractChordNames(song).map(name => {
                   const voicings = chordVoicings[name] ?? [];
                   const idx = chordVoicingIdx[name] ?? 0;
-                  const frets = voicings.length > 0 ? voicings[idx].frets : [0, 0, 0, 0, 0, 0];
+                  const frets = voicings.length > 0 ? voicings[idx].frets : Array(getStringCount(instrument)).fill(0);
                   const isEmpty = voicings.length === 0;
                   return (
                     <div
@@ -616,7 +624,7 @@ export default function SongDetailPage() {
                         style={isEmpty ? { cursor: 'pointer' } : undefined}
                         onClick={isEmpty ? () => setUploadChord(name) : undefined}
                       >
-                        <ChordDiagram frets={frets} width={90} />
+                        <ChordDiagram frets={frets} width={90} stringCount={getStringCount(instrument)} />
                       </div>
                       {voicings.length > 1 && (
                         <div className="flex items-center justify-between w-full text-xs text-gray-400 mt-1">
@@ -646,11 +654,18 @@ export default function SongDetailPage() {
       {uploadChord && (
         <ChordUploadModal
           chordName={uploadChord}
+          instrument={instrument}
+          lockInstrument
           onClose={() => setUploadChord(null)}
           onSuccess={() => {
             const name = uploadChord;
             setUploadChord(null);
-            setChordVoicings(s => { const n = { ...s }; delete n[name]; return n; });
+            const parsed = parseChordName(name);
+            if (parsed) {
+              getChordVoicings(parsed.root, parsed.quality, instrument).then(vs => {
+                setChordVoicings(s => ({ ...s, [name]: vs }));
+              });
+            }
           }}
         />
       )}
