@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getScalePositions } from '../../core/api/client';
+import type { ChordVoicing } from '../../core/api/client';
 import type { NeckDot } from '../live/GuitarNeck';
 import { parseChordName } from '../songs/parseChordName';
-import { CHROMATIC_NOTES, formatNoteEnum, getStringCount } from '../../core/music';
+import { CHROMATIC_NOTES, formatNoteEnum, getStringCount, INSTRUMENT_OPEN_SEMITONES } from '../../core/music';
 
 const FRET_COUNT = 12;
 
@@ -40,6 +41,18 @@ function blankDots(stringCount: number): NeckDot[][] {
   );
 }
 
+function semitonesFromVoicing(voicing: ChordVoicing, instrument: string, capoOffset: number): Set<number> {
+  const openSemitones = INSTRUMENT_OPEN_SEMITONES[instrument];
+  const result = new Set<number>();
+  voicing.frets.forEach((fret, stringIdx) => {
+    if (fret === null) return;
+    const open = openSemitones?.[stringIdx];
+    if (open === undefined) return;
+    result.add((open + fret + capoOffset) % 12);
+  });
+  return result;
+}
+
 function chordToneSemitones(chordName: string, capoOffset: number): Set<number> | null {
   const parsed = parseChordName(chordName);
   if (!parsed) return null;
@@ -56,6 +69,7 @@ export function useChordHighlight(
   mode: string,
   instrument: string,
   capoOffset: number,
+  voicing?: ChordVoicing | null,
 ): NeckDot[][] {
   const stringCount = getStringCount(instrument);
   const [scaleDots, setScaleDots] = useState<NeckDot[][]>(() => blankDots(stringCount));
@@ -79,8 +93,10 @@ export function useChordHighlight(
 
   return useMemo(() => {
     if (!chordName) return scaleDots;
-    const tones = chordToneSemitones(chordName, capoOffset);
-    if (!tones) return scaleDots;
+    const tones: Set<number> | null = voicing
+      ? semitonesFromVoicing(voicing, instrument, capoOffset)
+      : chordToneSemitones(chordName, capoOffset);
+    if (!tones || tones.size === 0) return scaleDots;
 
     return scaleDots.map(string =>
       string.map(dot => {
@@ -90,5 +106,5 @@ export function useChordHighlight(
         return { ...dot, highlighted: tones.has(semitone) };
       })
     );
-  }, [scaleDots, chordName, capoOffset]);
+  }, [scaleDots, chordName, capoOffset, voicing, instrument]);
 }

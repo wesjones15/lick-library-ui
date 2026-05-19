@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { getSong } from '../../core/api/client';
-import type { SongDetail, ChordLyric, GuitarTabLine } from '../../core/api/client';
+import { getSong, getChordVoicings } from '../../core/api/client';
+import type { SongDetail, ChordLyric, GuitarTabLine, ChordVoicing } from '../../core/api/client';
+import { parseChordName } from '../songs/parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { useMetronome } from '../../core/metronome/useMetronome';
 import { CHROMATIC_NOTES, KEY_LABEL, getStringLabels } from '../../core/music';
@@ -116,6 +117,7 @@ export default function NoodlePage() {
   const [chordIdx, setChordIdx] = useState(0);
   const [freeRoot, setFreeRoot] = useState('C');
   const [freeMode, setFreeMode] = useState('IONIAN');
+  const [cachedVoicings, setCachedVoicings] = useState<Record<string, ChordVoicing[]>>({});
 
   // true when active song came from URL param on mount (Song Detail nav)
   const loadedViaUrl = useRef(!!urlSongId);
@@ -153,6 +155,21 @@ export default function NoodlePage() {
         !isTabLine(l) && !((l as ChordLyric).chords.trim() === '' && (l as ChordLyric).lyrics.trim() === '')
     );
   }, [song]);
+
+  useEffect(() => {
+    if (!contentLines.length) return;
+    const unique = [...new Set(contentLines.flatMap(l => parseChordsFromLine(l.chords)))];
+    setCachedVoicings({});
+    Promise.all(
+      unique.map(async name => {
+        const parsed = parseChordName(name);
+        if (!parsed) return [name, []] as const;
+        const voicings = await getChordVoicings(parsed.root, parsed.quality, instrument);
+        return [name, voicings] as const;
+      })
+    ).then(results => setCachedVoicings(Object.fromEntries(results)))
+     .catch(() => {});
+  }, [contentLines, instrument]);
 
   const { soundingRoot, soundingMode } = useMemo(() => {
     if (noodleMode === 'freeChords') return { soundingRoot: freeRoot, soundingMode: freeMode };
@@ -232,7 +249,8 @@ export default function NoodlePage() {
   useMetronome(bpm, isPlaying, onBeat);
 
   const capoOffset = noodleMode === 'song' ? localCapo : 0;
-  const dots = useChordHighlight(activeChord, soundingRoot, soundingMode, instrument, capoOffset);
+  const activeVoicing = (activeChord ? cachedVoicings[activeChord]?.[0] : null) ?? null;
+  const dots = useChordHighlight(activeChord, soundingRoot, soundingMode, instrument, capoOffset, activeVoicing);
 
   function loadSongById(id: string) {
     setShowLibrary(false);
