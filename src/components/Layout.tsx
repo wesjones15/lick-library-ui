@@ -140,7 +140,7 @@ export default function Layout() {
                     <div className="relative w-8 h-8 flex items-center justify-center" ref={playlistPanelRef}>
                       <button
                         onClick={() => setPlaylistPanelOpen(o => !o)}
-                        className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${playlistPanelOpen ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
+                        className={`w-8 h-8 flex items-center justify-center text-sm leading-none transition-colors ${playlistPanelOpen ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
                         aria-label="Playlist controls"
                       >
                         🎵
@@ -225,7 +225,7 @@ export default function Layout() {
 
                   <button
                     onClick={() => { miniActions?.navigateManage(); setIconsOpen(false); }}
-                    className="w-8 h-8 flex items-center justify-center text-xl leading-none text-gray-400 hover:text-indigo-500 transition-colors"
+                    className="w-8 h-8 flex items-center justify-center text-2xl leading-none text-gray-400 hover:text-indigo-500 transition-colors"
                     aria-label="Manage"
                   >
                     ✎
@@ -239,7 +239,7 @@ export default function Layout() {
                 className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${iconsOpen ? 'text-indigo-500 hover:text-indigo-700' : 'text-gray-400 hover:text-indigo-500'}`}
                 aria-label={iconsOpen ? 'Less options' : 'More options'}
               >
-                {iconsOpen ? '✕' : '⋮'}
+                {iconsOpen ? '>' : '<'}
               </button>
 
               {/* Add to playlist — always visible */}
