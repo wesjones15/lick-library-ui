@@ -4,7 +4,7 @@ import { getAllLicks, deleteLick } from '../../core/api/client';
 import type { LickSummary } from '../../core/api/client';
 import LickList from './LickList';
 import InstrumentSelector from '../../components/InstrumentSelector';
-import { useInstrument } from '../../core/useInstrument';
+import type { InstrumentName } from '../../core/useInstrument';
 import { MODES } from '../../core/music';
 
 const TOGGLE_BASE = 'px-3 py-1.5 text-xs rounded-lg border transition-colors';
@@ -22,7 +22,8 @@ export default function LickLibraryPage() {
   const [maxLength, setMaxLength] = useState('');
   const [intervalSearch, setIntervalSearch] = useState('');
   const [isManaging, setIsManaging] = useState(false);
-  const { instrument, customTuning, setInstrument, setCustomTuning } = useInstrument();
+  const [instrument, setInstrument] = useState<InstrumentName>('GUITAR');
+  const [customTuning, setCustomTuning] = useState('');
 
   const fetchLicks = useCallback(async () => {
     try {
