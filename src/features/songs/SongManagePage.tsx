@@ -5,8 +5,7 @@ import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/cli
 import ChordDiagram from '../chords/ChordDiagram';
 import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
-import { CHROMATIC_NOTES } from '../../core/music';
-const MODES = [{ value: '', label: 'Major' }, { value: 'm', label: 'Minor' }];
+import { CHROMATIC_NOTES, SONG_MODES } from '../../core/music';
 
 const LEGACY_KEY_MAP: Record<string, string> = {
   C_SHARP: 'C#', D_SHARP: 'D#', F_SHARP: 'F#', G_SHARP: 'G#', B_FLAT: 'Bb',
@@ -15,9 +14,10 @@ const LEGACY_KEY_MAP: Record<string, string> = {
 function parseStoredKey(stored: string): { root: string; mode: string } {
   if (!stored) return { root: '', mode: '' };
   const display = LEGACY_KEY_MAP[stored] ?? stored;
-  const match = display.match(/^([A-G][#b]?)(m?)$/);
+  const match = display.match(/^([A-G][#b]?)(m?)(?: (.+))?$/);
   if (!match) return { root: display, mode: '' };
-  return { root: match[1], mode: match[2] };
+  const [, root, minorSuffix, modeName] = match;
+  return { root, mode: modeName ? ` ${modeName}` : minorSuffix };
 }
 
 const inputClass = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400';
@@ -205,7 +205,7 @@ export default function SongManagePage() {
               disabled={!keyRoot}
               className={`${inputClass} w-24 bg-white disabled:opacity-40`}
             >
-              {MODES.map(m => (
+              {SONG_MODES.map(m => (
                 <option key={m.value} value={m.value}>{m.label}</option>
               ))}
             </select>

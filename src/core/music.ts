@@ -23,6 +23,16 @@ export const KEY_LABEL: Record<string, string> = {
 
 export const MODES = ['IONIAN', 'DORIAN', 'PHRYGIAN', 'LYDIAN', 'MIXOLYDIAN', 'AEOLIAN', 'LOCRIAN'];
 
+export const SONG_MODES: { value: string; label: string }[] = [
+  { value: '',            label: 'Major' },
+  { value: 'm',           label: 'Minor' },
+  { value: ' Dorian',     label: 'Dorian' },
+  { value: ' Phrygian',   label: 'Phrygian' },
+  { value: ' Lydian',     label: 'Lydian' },
+  { value: ' Mixolydian', label: 'Mixolydian' },
+  { value: ' Locrian',    label: 'Locrian' },
+];
+
 export const MODE_LABELS: Record<string, string> = {
   IONIAN: 'Major', DORIAN: 'Dorian', PHRYGIAN: 'Phrygian', LYDIAN: 'Lydian',
   MIXOLYDIAN: 'Mixolydian', AEOLIAN: 'Minor', LOCRIAN: 'Locrian',

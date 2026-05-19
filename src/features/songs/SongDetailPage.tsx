@@ -16,20 +16,13 @@ import { KEY_LABEL, CHROMATIC_NOTES, getStringCount } from '../../core/music';
 function keyLabel(originalKey: string | null, semitones: number): string {
   if (!originalKey) return '';
   const display = KEY_LABEL[originalKey] ?? originalKey;
-  const match = display.match(/^([A-G][#b]?)(m?)$/);
+  const match = display.match(/^([A-G][#b]?)(m?)(?: (.+))?$/);
   if (!match) return display;
-  const [, root, suffix] = match;
+  const [, root, minorSuffix, modeName] = match;
   const idx = CHROMATIC_NOTES.indexOf(root);
   if (idx === -1) return display;
+  const suffix = modeName ? ` ${modeName}` : minorSuffix;
   return CHROMATIC_NOTES[((idx + semitones) % 12 + 12) % 12] + suffix;
-}
-
-function modeLabel(originalKey: string | null): string | null {
-  if (!originalKey) return null;
-  const display = KEY_LABEL[originalKey] ?? originalKey;
-  if (/m$/.test(display)) return 'Minor';
-  if (/^[A-G][#b]?$/.test(display)) return 'Major';
-  return null;
 }
 
 function usePortrait() {
@@ -305,7 +298,7 @@ export default function SongDetailPage() {
                     excludeCustom
                     compact
                   />
-                  {modeLabel(song.originalKey) && <span>{modeLabel(song.originalKey)}</span>}
+                  {song.originalKey && <span>{keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0))}</span>}
                 </div>
                 {song.tempo != null && (
                   <button

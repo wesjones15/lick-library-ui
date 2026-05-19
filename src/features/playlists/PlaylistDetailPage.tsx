@@ -12,11 +12,12 @@ import { KEY_LABEL, CHROMATIC_NOTES } from '../../core/music';
 function keyLabel(originalKey: string | null, semitones: number): string {
   if (!originalKey) return '?';
   const display = KEY_LABEL[originalKey] ?? originalKey;
-  const match = display.match(/^([A-G][#b]?)(m?)$/);
+  const match = display.match(/^([A-G][#b]?)(m?)(?: (.+))?$/);
   if (!match) return display;
-  const [, root, suffix] = match;
+  const [, root, minorSuffix, modeName] = match;
   const idx = CHROMATIC_NOTES.indexOf(root);
   if (idx === -1) return display;
+  const suffix = modeName ? ` ${modeName}` : minorSuffix;
   return CHROMATIC_NOTES[((idx + semitones) % 12 + 12) % 12] + suffix;
 }
 
