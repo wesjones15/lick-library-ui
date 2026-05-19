@@ -25,6 +25,10 @@ function keyLabel(originalKey: string | null, semitones: number): string {
   return CHROMATIC_NOTES[((idx + semitones) % 12 + 12) % 12] + suffix;
 }
 
+function rootKeyLabel(originalKey: string | null, semitones: number): string {
+  return keyLabel(originalKey, semitones).replace(/ .+$/, '');
+}
+
 function usePortrait() {
   const [p, setP] = useState(() => window.matchMedia('(orientation: portrait)').matches);
   useEffect(() => {
@@ -501,7 +505,7 @@ export default function SongDetailPage() {
                   <div className="flex gap-3 items-center">
                     <div className="flex flex-col items-center w-10">
                       <span className="text-base font-semibold text-gray-900">
-                        {keyLabel(song.originalKey, semitones - (song.capo ?? 0))}
+                        {rootKeyLabel(song.originalKey, semitones - (song.capo ?? 0))}
                       </span>
                       <span className="text-xs text-gray-400">shape</span>
                     </div>
@@ -510,7 +514,7 @@ export default function SongDetailPage() {
                     </span>
                     <div className="flex flex-col items-center w-10">
                       <span className="text-base font-semibold text-gray-900">
-                        {keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0))}
+                        {rootKeyLabel(song.originalKey, semitones + capo - (song.capo ?? 0))}
                       </span>
                       <span className="text-xs text-gray-400">sound</span>
                     </div>
@@ -581,7 +585,7 @@ export default function SongDetailPage() {
                     <div className="flex gap-3 items-center">
                       <div className="flex flex-col items-center w-10">
                         <span className="text-base font-semibold text-gray-900">
-                          {keyLabel(song?.originalKey ?? null, semitones - (song?.capo ?? 0))}
+                          {rootKeyLabel(song?.originalKey ?? null, semitones - (song?.capo ?? 0))}
                         </span>
                         <span className="text-xs text-gray-400">shape</span>
                       </div>
@@ -590,7 +594,7 @@ export default function SongDetailPage() {
                       </span>
                       <div className="flex flex-col items-center w-10">
                         <span className="text-base font-semibold text-gray-900">
-                          {keyLabel(song?.originalKey ?? null, semitones + capo - (song?.capo ?? 0))}
+                          {rootKeyLabel(song?.originalKey ?? null, semitones + capo - (song?.capo ?? 0))}
                         </span>
                         <span className="text-xs text-gray-400">sound</span>
                       </div>
