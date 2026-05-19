@@ -30,6 +30,7 @@ export interface MiniActions {
   onPlaylistBack: () => void;
   instrument: string;
   setInstrument: (v: string) => void;
+  navigateNoodle: () => void;
 }
 
 interface SongNavContextValue {

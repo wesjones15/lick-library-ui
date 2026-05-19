@@ -30,7 +30,7 @@ const MODE_NAME_TO_ENUM: Record<string, string> = {
   'Ionian': 'IONIAN', 'Aeolian': 'AEOLIAN',
 };
 
-const selectClass = 'border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-indigo-400 bg-white';
+const selectClass = 'border border-gray-300 rounded-lg px-1.5 py-0.5 text-xs focus:outline-none focus:border-indigo-400 bg-white';
 
 function parseSongKey(originalKey: string | null, semitones: number): { root: string; mode: string } {
   if (!originalKey) return { root: 'C', mode: 'IONIAN' };
@@ -106,6 +106,8 @@ export default function NoodlePage() {
   const loadedViaUrl = useRef(!!urlSongId);
   // tracks last song ID we prefilled controls for; prevents re-prefill on semitone changes
   const prevSongIdForPrefill = useRef<string | null>(null);
+  // skips first beat-0 after pressing Play so a full warmup measure plays before advancing
+  const warmupRef = useRef(true);
 
   // Fetch song whenever activeSongId or localSemitones changes
   useEffect(() => {
@@ -181,7 +183,13 @@ export default function NoodlePage() {
   };
 
   const onBeat = useCallback((beat: number) => {
-    if (beat === 0) advanceRef.current();
+    if (beat === 0) {
+      if (warmupRef.current) {
+        warmupRef.current = false;
+        return;
+      }
+      advanceRef.current();
+    }
   }, []);
 
   useMetronome(bpm, isPlaying, onBeat);
@@ -203,6 +211,7 @@ export default function NoodlePage() {
     if (!isPlaying) {
       const parsed = parseInt(bpmInput, 10);
       if (!isNaN(parsed) && parsed > 0) setBpm(parsed);
+      warmupRef.current = true;
     }
     setIsPlaying(!isPlaying);
   }
@@ -213,33 +222,67 @@ export default function NoodlePage() {
     setIsPlaying(false);
   }
 
-  const btnBase = 'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border';
+  const btnBase = 'px-3 py-1 rounded-lg text-sm font-medium transition-colors border';
   const btnActive = `${btnBase} bg-indigo-600 text-white border-indigo-600`;
   const btnInactive = `${btnBase} border-gray-300 text-gray-600 hover:bg-gray-50`;
 
   const showBackLink = !!(activeSongId && loadedViaUrl.current && urlSongId === activeSongId);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col gap-4">
+    <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col gap-2">
 
       {/* Header row */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <h1 className="text-3xl font-bold text-gray-900 shrink-0">Noodle</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => { setIsPlaying(false); setNoodleMode('freeChords'); }}
-            className={noodleMode === 'freeChords' ? btnActive : btnInactive}
-          >
-            Free Chords
-          </button>
-          <button
-            onClick={() => setShowLibrary(true)}
-            className={noodleMode === 'song' ? btnActive : btnInactive}
-          >
-            Load Song
-          </button>
+      <div className="relative flex items-center">
+        {/* Left: title + mode buttons */}
+        <div className="flex items-center gap-2 shrink-0">
+          <h1 className="text-3xl font-bold text-gray-900">Noodle</h1>
+          <div className="flex gap-2">
+            <button
+              onClick={() => { setIsPlaying(false); setNoodleMode('freeChords'); }}
+              className={noodleMode === 'freeChords' ? btnActive : btnInactive}
+            >
+              Free Chords
+            </button>
+            <button
+              onClick={() => setShowLibrary(true)}
+              className={noodleMode === 'song' ? btnActive : btnInactive}
+            >
+              Load Song
+            </button>
+          </div>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+
+        {/* Center: song name + artist — absolutely centered on the container */}
+        {noodleMode === 'song' && song && (
+          <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-start">
+            {song.artist && (
+              <span className="text-xs text-gray-400 leading-tight whitespace-nowrap">{song.artist}</span>
+            )}
+            {showBackLink ? (
+              <Link
+                to={`/song/${activeSongId}`}
+                className="font-bold text-base text-gray-900 hover:text-indigo-600 leading-tight whitespace-nowrap"
+              >
+                {song.title}
+              </Link>
+            ) : (
+              <span className="font-bold text-base text-gray-900 leading-tight whitespace-nowrap">{song.title}</span>
+            )}
+          </div>
+        )}
+
+        {/* Right: play + restart */}
+        <div className="ml-auto flex items-center gap-2 shrink-0">
+          <button
+            onClick={handlePlay}
+            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+              isPlaying
+                ? 'bg-red-50 border border-red-300 text-red-500 hover:bg-red-100'
+                : 'bg-indigo-600 text-white hover:bg-indigo-700'
+            }`}
+          >
+            {isPlaying ? '⏸ Pause' : '▶ Play'}
+          </button>
           <button
             onClick={handleRestart}
             className="w-8 h-8 flex items-center justify-center text-xl text-gray-400 hover:text-indigo-500 transition-colors"
@@ -248,32 +291,8 @@ export default function NoodlePage() {
           >
             ↺
           </button>
-          <button
-            onClick={handlePlay}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              isPlaying
-                ? 'bg-red-50 border border-red-300 text-red-500 hover:bg-red-100'
-                : 'bg-indigo-600 text-white hover:bg-indigo-700'
-            }`}
-          >
-            {isPlaying ? '⏸ Pause' : '▶ Play'}
-          </button>
         </div>
       </div>
-
-      {/* Back link — only when song came from Song Detail page via URL */}
-      {showBackLink && (
-        <Link to={`/song/${activeSongId}`} className="text-sm text-indigo-500 hover:text-indigo-700 w-fit">
-          ← {song?.title ?? '…'}
-        </Link>
-      )}
-
-      {/* Song info */}
-      {noodleMode === 'song' && song && (
-        <div className="text-sm text-gray-500">
-          {song.title}{song.artist ? ` · ${song.artist}` : ''}
-        </div>
-      )}
 
       {/* Guitar Neck — always shown */}
       <GuitarNeck dots={dots} stringLabels={getStringLabels(instrument)} />
@@ -286,7 +305,7 @@ export default function NoodlePage() {
             type="number"
             value={bpmInput}
             onChange={e => setBpmInput(e.target.value)}
-            className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-indigo-400 bg-white w-16 text-center"
+            className="border border-gray-300 rounded-lg px-1.5 py-0.5 text-xs focus:outline-none focus:border-indigo-400 bg-white w-12 text-center"
             min={20}
             max={300}
           />
@@ -302,7 +321,7 @@ export default function NoodlePage() {
             </select>
           </>
         ) : keyDisplay ? (
-          <span className="text-sm font-medium text-gray-600 px-2 py-1.5">{keyDisplay}</span>
+          <span className="text-xs font-medium text-gray-600 px-1.5 py-0.5">{keyDisplay}</span>
         ) : null}
 
         <InstrumentSelector

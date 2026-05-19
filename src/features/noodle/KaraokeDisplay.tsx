@@ -18,7 +18,7 @@ function KaraokeSlot({ line, variant }: { line: ChordLyric | undefined; variant:
 
 export default function KaraokeDisplay({ lines, currentIdx }: Props) {
   return (
-    <div className="flex flex-col gap-2 px-2 py-2 bg-gray-50 rounded-xl overflow-x-auto">
+    <div className="flex flex-col items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl overflow-x-auto">
       <KaraokeSlot line={lines[currentIdx - 1]} variant="prev" />
       <KaraokeSlot line={lines[currentIdx]} variant="current" />
       <KaraokeSlot line={lines[currentIdx + 1]} variant="next" />

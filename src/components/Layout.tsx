@@ -176,6 +176,17 @@ export default function Layout() {
                     </div>
                   )}
 
+                  {miniActions && (
+                    <button
+                      onClick={() => { miniActions.navigateNoodle(); setIconsOpen(false); }}
+                      className="w-12 h-12 flex items-center justify-center text-4xl leading-none text-yellow-500 hover:text-yellow-600 transition-colors"
+                      aria-label="Noodle"
+                      title="Noodle"
+                    >
+                      <span className="inline-block -translate-y-[0.15em]">∿</span>
+                    </button>
+                  )}
+
                   {miniActions?.hasTabLines && (
                     <button
                       onClick={() => miniActions?.toggleTabLicks()}

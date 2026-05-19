@@ -191,9 +191,10 @@ export default function SongDetailPage() {
       onPlaylistBack: () => { if (ps) navigate(`/playlist/${ps.playlistId}`); },
       instrument,
       setInstrument,
+      navigateNoodle: () => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}`),
     });
     return () => setMiniActions(null);
-  }, [song, viewMode, autoScrolling, showTabLicks, hasTabLines, playlistState, instrument, semitones, id]);
+  }, [song, viewMode, autoScrolling, showTabLicks, hasTabLines, playlistState, instrument, semitones, id, capo]);
 
   useEffect(() => {
     if (!overflowOpen) return;
@@ -330,6 +331,14 @@ export default function SongDetailPage() {
               )}
 
               {/* Desktop (md+): named text buttons */}
+              <button
+                onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}`)}
+                className="hidden md:flex items-center text-yellow-400 hover:text-yellow-500 transition-colors text-5xl leading-none"
+                aria-label="Noodle"
+                title="Noodle"
+              >
+                <span className="inline-block -translate-y-[0.15em]">∿</span>
+              </button>
               {hasTabLines && (
                 <button
                   onClick={handleTabLicksToggle}
@@ -369,16 +378,16 @@ export default function SongDetailPage() {
               >
                 ✎
               </button>
+
+              {/* Landscape (sm–md): icon buttons */}
               <button
                 onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}`)}
-                className="hidden md:block text-gray-300 hover:text-indigo-500 transition-colors text-2xl leading-none"
+                className="hidden sm:flex md:hidden w-12 h-12 rounded-lg border border-yellow-200 items-center justify-center text-4xl leading-none transition-colors text-yellow-500 hover:text-yellow-600"
                 aria-label="Noodle"
                 title="Noodle"
               >
-                ∿
+                <span className="inline-block -translate-y-[0.15em]">∿</span>
               </button>
-
-              {/* Landscape (sm–md): icon buttons */}
               {hasTabLines && (
                 <button
                   onClick={handleTabLicksToggle}
@@ -420,14 +429,6 @@ export default function SongDetailPage() {
                 aria-label="Manage song"
               >
                 ✎
-              </button>
-              <button
-                onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}`)}
-                className="hidden sm:flex md:hidden w-8 h-8 rounded-lg border border-gray-200 items-center justify-center text-base transition-colors text-gray-400 hover:text-indigo-500"
-                aria-label="Noodle"
-                title="Noodle"
-              >
-                ∿
               </button>
 
               {/* Portrait (<sm): hamburger ⋮ */}

@@ -38,7 +38,6 @@ export default function SongLibraryModal({ onSelect, onClose }: Props) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search songs…"
-            autoFocus
             className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-indigo-400"
           />
         </div>
