@@ -12,6 +12,7 @@ import GuitarNeck from '../live/GuitarNeck';
 import KaraokeDisplay from './KaraokeDisplay';
 import SongLibraryModal from './SongLibraryModal';
 import { useChordHighlight } from './useChordHighlight';
+import ChordInfoBox from './ChordInfoBox';
 
 type NoodleMode = 'none' | 'song' | 'freeChords';
 
@@ -118,6 +119,7 @@ export default function NoodlePage() {
   const [freeRoot, setFreeRoot] = useState('C');
   const [freeMode, setFreeMode] = useState('IONIAN');
   const [cachedVoicings, setCachedVoicings] = useState<Record<string, ChordVoicing[]>>({});
+  const [pulsed, setPulsed] = useState(false);
 
   // true when active song came from URL param on mount (Song Detail nav)
   const loadedViaUrl = useRef(!!urlSongId);
@@ -238,6 +240,8 @@ export default function NoodlePage() {
   };
 
   const onBeat = useCallback((beat: number) => {
+    setPulsed(true);
+    setTimeout(() => setPulsed(false), 120);
     if (beat !== 0 && beat !== 2) return;
     if (warmupRef.current > 0) {
       warmupRef.current--;
@@ -292,11 +296,11 @@ export default function NoodlePage() {
     <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col gap-2">
 
       {/* Header row */}
-      <div className="relative flex items-center">
-        {/* Left: title + mode buttons */}
-        <div className="flex items-center gap-2 shrink-0">
-          <h1 className="text-3xl font-bold text-gray-900">Noodle</h1>
-          <div className="flex gap-2">
+      <div className="flex items-center">
+        {/* Left: title + mode buttons + song info + chord box (song mode) */}
+        <div className="flex items-center gap-2 min-w-0">
+          <h1 className="text-3xl font-bold text-gray-900 shrink-0">Noodle</h1>
+          <div className="flex gap-2 shrink-0">
             <button
               onClick={() => { setIsPlaying(false); setNoodleMode('freeChords'); }}
               className={noodleMode === 'freeChords' ? btnActive : btnInactive}
@@ -310,29 +314,53 @@ export default function NoodlePage() {
               Load Song
             </button>
           </div>
+
+          {noodleMode === 'song' && song && (
+            <div className="flex flex-col min-w-0">
+              {song.artist && (
+                <span className="text-xs text-gray-400 leading-tight truncate">{song.artist}</span>
+              )}
+              {showBackLink ? (
+                <Link
+                  to={`/song/${activeSongId}`}
+                  className="font-bold text-base text-gray-900 hover:text-indigo-600 leading-tight truncate"
+                >
+                  {song.title}
+                </Link>
+              ) : (
+                <span className="font-bold text-base text-gray-900 leading-tight truncate">{song.title}</span>
+              )}
+            </div>
+          )}
+
+          {noodleMode === 'song' && activeChord && (
+            <ChordInfoBox
+              chordName={activeChord}
+              voicing={activeVoicing}
+              instrument={instrument}
+              capoOffset={capoOffset}
+              pulsed={pulsed}
+              isPlaying={isPlaying}
+            />
+          )}
         </div>
 
-        {/* Center: song name + artist — absolutely centered on the container */}
-        {noodleMode === 'song' && song && (
-          <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-start">
-            {song.artist && (
-              <span className="text-xs text-gray-400 leading-tight whitespace-nowrap">{song.artist}</span>
-            )}
-            {showBackLink ? (
-              <Link
-                to={`/song/${activeSongId}`}
-                className="font-bold text-base text-gray-900 hover:text-indigo-600 leading-tight whitespace-nowrap"
-              >
-                {song.title}
-              </Link>
-            ) : (
-              <span className="font-bold text-base text-gray-900 leading-tight whitespace-nowrap">{song.title}</span>
-            )}
-          </div>
-        )}
+        {/* Center: chord box (free chords mode) — centered in remaining space */}
+        <div className="flex-1 flex items-center justify-center">
+          {noodleMode === 'freeChords' && activeChord && (
+            <ChordInfoBox
+              chordName={activeChord}
+              voicing={null}
+              instrument={instrument}
+              capoOffset={0}
+              pulsed={pulsed}
+              isPlaying={isPlaying}
+            />
+          )}
+        </div>
 
         {/* Right: play + restart */}
-        <div className="ml-auto flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={handlePlay}
             className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
@@ -424,27 +452,15 @@ export default function NoodlePage() {
 
       {/* Free chords section */}
       {noodleMode === 'freeChords' && (
-        <div className="flex flex-col gap-3">
-          {freeChords.length > 0 && (
-            <div className="text-center py-2">
-              <span className="text-3xl font-bold text-indigo-600">
-                {freeChords[chordIdx % freeChords.length]}
-              </span>
-              <span className="text-sm text-gray-400 ml-2">
-                {(chordIdx % freeChords.length) + 1}/{freeChords.length}
-              </span>
-            </div>
-          )}
-          <div>
-            <label className="text-xs text-gray-400 mb-1 block">Chord progression — separate measures with |</label>
-            <textarea
-              value={freeInput}
-              onChange={e => setFreeInput(e.target.value)}
-              placeholder="G | Am | F | C"
-              rows={2}
-              className="w-full border border-gray-200 rounded-lg p-3 font-mono text-sm focus:outline-none focus:border-indigo-400 resize-none"
-            />
-          </div>
+        <div>
+          <label className="text-xs text-gray-400 mb-1 block">Chord progression — separate measures with |</label>
+          <textarea
+            value={freeInput}
+            onChange={e => setFreeInput(e.target.value)}
+            placeholder="G | Am | F | C"
+            rows={2}
+            className="w-full border border-gray-200 rounded-lg p-3 font-mono text-sm focus:outline-none focus:border-indigo-400 resize-none"
+          />
         </div>
       )}
 

@@ -76,7 +76,8 @@ export function useChordHighlight(
 
   useEffect(() => {
     if (!root || !mode) return;
-    getScalePositions(root, mode, instrument).then(res => {
+    const enumRoot = root === 'Bb' ? 'B_FLAT' : root.replace('#', '_SHARP').toUpperCase();
+    getScalePositions(enumRoot, mode, instrument).then(res => {
       const dots = blankDots(getStringCount(instrument));
       for (const pos of res.positions) {
         if (pos.string >= 0 && pos.string < dots.length && pos.fret >= 0 && pos.fret <= FRET_COUNT) {
