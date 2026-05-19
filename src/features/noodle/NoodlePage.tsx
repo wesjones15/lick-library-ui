@@ -433,7 +433,7 @@ export default function NoodlePage() {
       <div className="flex items-center">
         {/* Left: title + mode buttons + song info + chord box (song mode) */}
         <div className="flex items-center gap-2 min-w-0">
-          <h1 className="text-3xl font-bold text-gray-900 shrink-0">Noodle</h1>
+          <h1 className="text-3xl font-bold text-gray-900 shrink-0">{guitarKaraokeMode && noodleMode === 'song' ? 'Guitar Karaoke' : 'Noodle'}</h1>
           <div className="flex gap-2 shrink-0">
             <button
               onClick={() => { setIsPlaying(false); setNoodleMode('freeChords'); halfBeatRef.current = 0; setChordIdx(0); setFreeHasAdvanced(false); }}
