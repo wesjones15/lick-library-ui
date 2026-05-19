@@ -10,6 +10,13 @@ import { getStringCount } from '../../core/music';
 // Cache fetched voicings so re-hovering the same chord doesn't re-fetch
 const voicingCache = new Map<string, ChordVoicing[]>();
 
+function formatInstrumentLabel(instrument?: string): string {
+  if (!instrument) return 'Guitar';
+  return instrument.split('_')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+}
+
 interface ChordTokenProps {
   name: string;
   instrument?: string;
@@ -104,31 +111,37 @@ function ChordToken({ name, instrument }: ChordTokenProps) {
           </span>
           {voicings.length > 0
             ? <ChordDiagram frets={voicings[voicingIdx].frets} width={100} stringCount={getStringCount(instrument)} />
-            : <>
-                <span style={{ fontSize: '10px', color: '#9ca3af' }}>
-                  {instrument ? instrument.charAt(0) + instrument.slice(1).toLowerCase() : 'Guitar'} • ???
-                </span>
-                <div
-                  style={{ cursor: 'pointer' }}
-                  onClick={e => { e.stopPropagation(); setOpen(false); setModalOpen(true); }}
-                >
-                  <ChordDiagram frets={Array(getStringCount(instrument)).fill(0)} width={100} stringCount={getStringCount(instrument)} />
-                </div>
-              </>
+            : <div
+                style={{ position: 'relative', cursor: 'pointer' }}
+                onClick={e => { e.stopPropagation(); setOpen(false); setModalOpen(true); }}
+              >
+                <ChordDiagram frets={Array(getStringCount(instrument)).fill(0)} width={100} stringCount={getStringCount(instrument)} />
+                <div style={{
+                  position: 'absolute',
+                  top: '50%', left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '18px', fontWeight: 700,
+                  color: 'rgba(107,114,128,0.65)',
+                  pointerEvents: 'none',
+                }}>???</div>
+              </div>
           }
-          {voicings.length > 1 && (
-            <span style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: '8px', color: '#9ca3af' }}>
-              <button
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6b7280', fontSize: '24px', lineHeight: 1 }}
-                onClick={e => { e.stopPropagation(); setVoicingIdx(i => (i - 1 + voicings.length) % voicings.length); }}
-              >‹</button>
-              <span>{voicingIdx + 1}/{voicings.length}</span>
-              <button
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6b7280', fontSize: '24px', lineHeight: 1 }}
-                onClick={e => { e.stopPropagation(); setVoicingIdx(i => (i + 1) % voicings.length); }}
-              >›</button>
+          <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <button
+              style={{ background: 'none', border: 'none', cursor: voicings.length > 1 ? 'pointer' : 'default', padding: 0, color: voicings.length > 1 ? '#6b7280' : 'transparent', fontSize: '24px', lineHeight: 1 }}
+              onClick={e => { e.stopPropagation(); if (voicings.length > 1) setVoicingIdx(i => (i - 1 + voicings.length) % voicings.length); }}
+            >‹</button>
+            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' }}>
+              {voicings.length > 1 && (
+                <span style={{ fontSize: '8px', color: '#9ca3af', lineHeight: 1 }}>{voicingIdx + 1}/{voicings.length}</span>
+              )}
+              <span style={{ fontSize: '7px', color: '#9ca3af', lineHeight: 1 }}>{formatInstrumentLabel(instrument)}</span>
             </span>
-          )}
+            <button
+              style={{ background: 'none', border: 'none', cursor: voicings.length > 1 ? 'pointer' : 'default', padding: 0, color: voicings.length > 1 ? '#6b7280' : 'transparent', fontSize: '24px', lineHeight: 1 }}
+              onClick={e => { e.stopPropagation(); if (voicings.length > 1) setVoicingIdx(i => (i + 1) % voicings.length); }}
+            >›</button>
+          </span>
         </span>
       )}
       {modalOpen && parsed && (
