@@ -88,8 +88,8 @@ function parseFreeLines(input: string): string[][] {
 }
 
 function FreeChordsKaraokeSlot({
-  line, intraIdx, variant,
-}: { line: string[] | undefined; intraIdx?: number; variant: 'prev' | 'current' | 'next' }) {
+  line, intraIdx, highlightActive, variant,
+}: { line: string[] | undefined; intraIdx?: number; highlightActive?: boolean; variant: 'prev' | 'current' | 'next' }) {
   if (!line) return <div className="h-8" />;
   const isCurrent = variant === 'current';
   return (
@@ -98,7 +98,7 @@ function FreeChordsKaraokeSlot({
         {line.map((chord, i) => (
           <span key={i}>
             {i > 0 && ' | '}
-            {isCurrent && i === intraIdx
+            {isCurrent && highlightActive && i === intraIdx
               ? <span className="font-bold">{chord}</span>
               : chord}
           </span>
@@ -108,15 +108,16 @@ function FreeChordsKaraokeSlot({
   );
 }
 
-function FreeChordsKaraoke({ lines, currentLineIdx, intraIdx }: {
+function FreeChordsKaraoke({ lines, currentLineIdx, intraIdx, highlightActive }: {
   lines: string[][];
   currentLineIdx: number;
   intraIdx: number;
+  highlightActive: boolean;
 }) {
   return (
     <div className="flex flex-col items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl overflow-x-auto">
       <FreeChordsKaraokeSlot line={lines[currentLineIdx - 1]} variant="prev" />
-      <FreeChordsKaraokeSlot line={lines[currentLineIdx]} intraIdx={intraIdx} variant="current" />
+      <FreeChordsKaraokeSlot line={lines[currentLineIdx]} intraIdx={intraIdx} highlightActive={highlightActive} variant="current" />
       <FreeChordsKaraokeSlot line={lines[currentLineIdx + 1]} variant="next" />
     </div>
   );
@@ -158,6 +159,7 @@ export default function NoodlePage() {
   const [freeMode, setFreeMode] = useState('IONIAN');
   const [cachedVoicings, setCachedVoicings] = useState<Record<string, ChordVoicing[]>>({});
   const [pulsed, setPulsed] = useState(false);
+  const [freeHasAdvanced, setFreeHasAdvanced] = useState(false);
 
   const freeInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -288,6 +290,12 @@ export default function NoodlePage() {
         });
       }
     } else if (noodleMode === 'freeChords' && freeChords.length > 0) {
+      if (!freeHasAdvanced) {
+        // First call after warmup: start the clock on chord 0, don't advance yet
+        setFreeHasAdvanced(true);
+        halfBeatRef.current = 0;
+        return;
+      }
       halfBeatRef.current++;
       if (halfBeatRef.current >= 2) {
         halfBeatRef.current = 0;
@@ -331,6 +339,7 @@ export default function NoodlePage() {
       const parsed = parseInt(bpmInput, 10);
       if (!isNaN(parsed) && parsed > 0) setBpm(parsed);
       warmupRef.current = 2;
+      setFreeHasAdvanced(false);
     }
     setIsPlaying(!isPlaying);
   }
@@ -340,6 +349,7 @@ export default function NoodlePage() {
     setChordIdx(0);
     halfBeatRef.current = 0;
     setIntraChordIdx(0);
+    setFreeHasAdvanced(false);
     setIsPlaying(false);
   }
 
@@ -350,6 +360,7 @@ export default function NoodlePage() {
     setFreeChords(chords);
     setChordIdx(0);
     halfBeatRef.current = 0;
+    setFreeHasAdvanced(false);
     if (!chords.length) return;
     const unique = [...new Set(chords)];
     Promise.all(
@@ -380,7 +391,7 @@ export default function NoodlePage() {
           <h1 className="text-3xl font-bold text-gray-900 shrink-0">Noodle</h1>
           <div className="flex gap-2 shrink-0">
             <button
-              onClick={() => { setIsPlaying(false); setNoodleMode('freeChords'); halfBeatRef.current = 0; setChordIdx(0); }}
+              onClick={() => { setIsPlaying(false); setNoodleMode('freeChords'); halfBeatRef.current = 0; setChordIdx(0); setFreeHasAdvanced(false); }}
               className={noodleMode === 'freeChords' ? btnActive : btnInactive}
             >
               Free Chords
@@ -566,7 +577,7 @@ export default function NoodlePage() {
           {/* Center: karaoke display */}
           <div>
             {freeLines.length > 0 && (
-              <FreeChordsKaraoke lines={freeLines} currentLineIdx={currentFreeLineIdx} intraIdx={currentFreeIntraIdx} />
+              <FreeChordsKaraoke lines={freeLines} currentLineIdx={currentFreeLineIdx} intraIdx={currentFreeIntraIdx} highlightActive={freeHasAdvanced} />
             )}
           </div>
 
