@@ -159,6 +159,8 @@ export default function NoodlePage() {
   const [cachedVoicings, setCachedVoicings] = useState<Record<string, ChordVoicing[]>>({});
   const [pulsed, setPulsed] = useState(false);
 
+  const freeInputRef = useRef<HTMLTextAreaElement>(null);
+
   // true when active song came from URL param on mount (Song Detail nav)
   const loadedViaUrl = useRef(!!urlSongId);
   // tracks last song ID we prefilled controls for; prevents re-prefill on semitone changes
@@ -533,9 +535,22 @@ export default function NoodlePage() {
           <div className="flex flex-col gap-2">
             <label className="text-xs text-gray-400">Separate chords with |, lines with ↵</label>
             <textarea
+              ref={freeInputRef}
               value={freeInput}
               onChange={e => setFreeInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleFreeSubmit(); }}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { handleFreeSubmit(); return; }
+                if (e.key === ' ') {
+                  e.preventDefault();
+                  const el = freeInputRef.current;
+                  if (!el) return;
+                  const start = el.selectionStart;
+                  const end = el.selectionEnd;
+                  const insert = ' | ';
+                  setFreeInput(prev => prev.slice(0, start) + insert + prev.slice(end));
+                  requestAnimationFrame(() => el.setSelectionRange(start + insert.length, start + insert.length));
+                }
+              }}
               placeholder="G | Am | F | C"
               rows={3}
               className="w-full border border-gray-200 rounded-lg p-3 font-mono text-sm focus:outline-none focus:border-indigo-400 resize-none"
