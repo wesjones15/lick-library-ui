@@ -121,7 +121,7 @@ export default function Layout() {
             </div>
 
             {/* Right-side mini bar actions */}
-            <div className="ml-auto flex items-center gap-5 shrink-0">
+            <div className="ml-auto flex items-center gap-3 shrink-0">
 
               {/* Revealed icons — only when expanded */}
               {iconsOpen && (
@@ -205,7 +205,7 @@ export default function Layout() {
                     <div className="relative w-8 h-8 flex items-center justify-center" ref={instrumentPanelRef}>
                       <button
                         onClick={() => setInstrumentPanelOpen(o => !o)}
-                        className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${instrumentPanelOpen ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
+                        className={`w-8 h-8 flex items-center justify-center text-sm leading-none transition-colors ${instrumentPanelOpen ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
                         aria-label="Instrument"
                       >
                         🎸
