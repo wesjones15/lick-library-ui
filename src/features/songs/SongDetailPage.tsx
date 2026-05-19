@@ -228,18 +228,22 @@ export default function SongDetailPage() {
   const baseFontScale = isPortrait ? 1.5 : 2;
   const effectiveFontScale = viewMode === 'scroll' ? (scrollFontScale ?? baseFontScale) : undefined;
 
-  useEffect(() => {
-    setScrollFontScale(null);
-  }, [song?.id, viewMode, isPortrait]);
-
   useLayoutEffect(() => {
-    if (viewMode !== 'scroll' || !scrollContainerRef.current) return;
+    if (viewMode !== 'scroll' || !scrollContainerRef.current || !song) return;
     const el = scrollContainerRef.current;
-    if (el.scrollWidth > el.clientWidth + 1) {
-      const ratio = el.clientWidth / el.scrollWidth;
-      setScrollFontScale(prev => (prev ?? baseFontScale) * ratio);
+    const { numColumns } = song;
+    function computeScale() {
+      const containerWidth = el.clientWidth;
+      if (containerWidth <= 0) return;
+      // 1100 matches ChordSheetParser.CONTENT_WIDTH on the backend
+      const backendColumnWidth = 1100 / Math.max(1, numColumns);
+      setScrollFontScale(Math.min(baseFontScale, containerWidth / backendColumnWidth));
     }
-  }, [viewMode, song, semitones, capo, isPortrait, scrollFontScale]);
+    computeScale();
+    const ro = new ResizeObserver(computeScale);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [viewMode, song, isPortrait]);
 
   const btnClass = "w-8 h-8 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-lg font-medium";
 
