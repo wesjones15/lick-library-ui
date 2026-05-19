@@ -193,6 +193,24 @@ export async function reparseSong(id: string): Promise<SongDetail> {
   return res.json();
 }
 
+export interface BeatmapData { beats: number[]; }
+
+export async function getBeatmap(songId: string): Promise<BeatmapData> {
+  const res = await fetch(`${BASE_URL}/song/${songId}/beatmap`);
+  if (!res.ok) throw new Error('no beatmap');
+  return res.json();
+}
+
+export async function saveBeatmap(songId: string, beats: number[]): Promise<BeatmapData> {
+  const res = await fetch(`${BASE_URL}/song/${songId}/beatmap`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ beats }),
+  });
+  if (!res.ok) throw new Error('save failed');
+  return res.json();
+}
+
 // null = muted (x), 0 = open, positive = fret number; index 0 = low E, 5 = high e
 export type ChordFrets = (number | null)[];
 
