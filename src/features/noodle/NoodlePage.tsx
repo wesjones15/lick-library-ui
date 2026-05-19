@@ -618,25 +618,22 @@ export default function NoodlePage() {
                   offset += tokens.length;
                   return (
                     <div key={li} className="flex flex-col gap-1">
-                      {/* Chord inputs */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {tokens.map((chord, ci) => (
-                          <div key={ci} className="flex flex-col items-center gap-0.5">
-                            <span className="font-mono text-xs text-indigo-600">{chord}</span>
-                            <input
-                              type="number"
-                              min={1}
-                              max={16}
-                              step={1}
-                              value={beatmapDraft[start + ci] ?? 4}
-                              onChange={e => {
-                                const v = Math.max(1, parseInt(e.target.value) || 1);
-                                setBeatmapDraft(d => { const n = [...d]; n[start + ci] = v; return n; });
-                              }}
-                              className="w-10 border border-gray-300 rounded px-1 py-0.5 text-xs text-center focus:outline-none focus:border-indigo-400"
-                            />
-                          </div>
-                        ))}
+                      {/* Chord steppers */}
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {tokens.map((chord, ci) => {
+                          const val = beatmapDraft[start + ci] ?? 4;
+                          const set = (v: number) => setBeatmapDraft(d => { const n = [...d]; n[start + ci] = Math.max(1, Math.min(16, v)); return n; });
+                          return (
+                            <div key={ci} className="flex flex-col items-center gap-1">
+                              <span className="font-mono text-xs text-indigo-600">{chord}</span>
+                              <div className="flex items-center gap-1">
+                                <button onClick={() => set(val - 1)} className="w-7 h-7 flex items-center justify-center text-sm border border-gray-200 rounded text-gray-500 hover:bg-gray-100 active:bg-gray-200">−</button>
+                                <span className="w-6 text-center text-xs tabular-nums">{val}</span>
+                                <button onClick={() => set(val + 1)} className="w-7 h-7 flex items-center justify-center text-sm border border-gray-200 rounded text-gray-500 hover:bg-gray-100 active:bg-gray-200">+</button>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                       {/* Lyric reference */}
                       {line.lyrics.trim() && (
