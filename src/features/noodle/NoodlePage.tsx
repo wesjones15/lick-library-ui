@@ -55,13 +55,28 @@ function keyDisplayLabel(originalKey: string | null, semitones: number): string 
   return `${root} ${modeLabel}`;
 }
 
-function firstChordToken(chords: string): string | null {
-  const tokens = chords.trim().split(/\s+/);
-  for (const t of tokens) {
-    const core = t.replace(/^\(+/, '').replace(/[)*]+$/, '');
-    if (/^[A-G]/.test(core) && core !== 'NC' && core !== 'N.C.') return core;
-  }
-  return null;
+function parseChordsFromLine(chords: string): string[] {
+  return chords.split(/[\s|]+/)
+    .map(t => t.replace(/^\(+/, '').replace(/[)*]+$/, ''))
+    .filter(t => /^[A-G]/.test(t) && t !== 'NC' && t !== 'N.C.');
+}
+
+function countBars(chords: string): number {
+  return Math.max(1, chords.split('|').map(s => s.trim()).filter(Boolean).length);
+}
+
+function totalHalfBeats(chords: string): number {
+  const bars = countBars(chords);
+  if (bars > 1) return bars * 2;
+  const n = parseChordsFromLine(chords).length;
+  return n <= 3 ? 4 : 8;
+}
+
+function halfBeatsPerChord(n: number, total: number): number[] {
+  if (n === 0) return [];
+  if (n === 1) return [total];
+  const x = Math.max(0, Math.min(n, total - n));
+  return Array.from({ length: n }, (_, i) => i < x ? 2 : 1);
 }
 
 function parseFreeChords(input: string): string[] {
@@ -106,8 +121,10 @@ export default function NoodlePage() {
   const loadedViaUrl = useRef(!!urlSongId);
   // tracks last song ID we prefilled controls for; prevents re-prefill on semitone changes
   const prevSongIdForPrefill = useRef<string | null>(null);
-  // skips first beat-0 after pressing Play so a full warmup measure plays before advancing
-  const warmupRef = useRef(true);
+  // skips first 2 half-beats after pressing Play so a full warmup measure plays before advancing
+  const warmupRef = useRef(2);
+  const halfBeatRef = useRef(0);
+  const [intraChordIdx, setIntraChordIdx] = useState(0);
 
   // Fetch song whenever activeSongId or localSemitones changes
   useEffect(() => {
@@ -157,39 +174,59 @@ export default function NoodlePage() {
 
   const activeChord = useMemo(() => {
     if (noodleMode === 'song' && contentLines.length > 0) {
-      return firstChordToken(contentLines[currentIdx]?.chords ?? '');
+      const chords = contentLines[currentIdx]?.chords ?? '';
+      const tokens = parseChordsFromLine(chords);
+      return tokens[intraChordIdx] ?? tokens[0] ?? null;
     }
     if (noodleMode === 'freeChords' && freeChords.length > 0) {
       return freeChords[chordIdx % freeChords.length] ?? null;
     }
     return null;
-  }, [noodleMode, contentLines, currentIdx, freeChords, chordIdx]);
+  }, [noodleMode, contentLines, currentIdx, intraChordIdx, freeChords, chordIdx]);
 
   const advanceRef = useRef<() => void>(() => {});
   advanceRef.current = () => {
     if (noodleMode === 'song' && contentLines.length > 0) {
-      setCurrentIdx(i => {
-        let next = (i + 1) % contentLines.length;
-        let guard = 0;
-        while (isSectionHeader(contentLines[next]) && guard < contentLines.length) {
-          next = (next + 1) % contentLines.length;
-          guard++;
-        }
-        return next;
-      });
+      const chords = contentLines[currentIdx]?.chords ?? '';
+      const tokens = parseChordsFromLine(chords);
+      const total = totalHalfBeats(chords);
+      const dist = halfBeatsPerChord(tokens.length, total);
+
+      halfBeatRef.current++;
+
+      let accum = 0;
+      let newChordIdx = Math.max(0, tokens.length - 1);
+      for (let i = 0; i < dist.length; i++) {
+        accum += dist[i];
+        if (halfBeatRef.current <= accum) { newChordIdx = i; break; }
+      }
+      setIntraChordIdx(newChordIdx);
+
+      if (halfBeatRef.current >= total) {
+        halfBeatRef.current = 0;
+        setIntraChordIdx(0);
+        setCurrentIdx(i => {
+          let next = (i + 1) % contentLines.length;
+          let guard = 0;
+          while (isSectionHeader(contentLines[next]) && guard < contentLines.length) {
+            next = (next + 1) % contentLines.length;
+            guard++;
+          }
+          return next;
+        });
+      }
     } else if (noodleMode === 'freeChords' && freeChords.length > 0) {
       setChordIdx(i => (i + 1) % freeChords.length);
     }
   };
 
   const onBeat = useCallback((beat: number) => {
-    if (beat === 0) {
-      if (warmupRef.current) {
-        warmupRef.current = false;
-        return;
-      }
-      advanceRef.current();
+    if (beat !== 0 && beat !== 2) return;
+    if (warmupRef.current > 0) {
+      warmupRef.current--;
+      return;
     }
+    advanceRef.current();
   }, []);
 
   useMetronome(bpm, isPlaying, onBeat);
@@ -199,19 +236,22 @@ export default function NoodlePage() {
 
   function loadSongById(id: string) {
     setShowLibrary(false);
+    setIsPlaying(false);
     loadedViaUrl.current = false;
     setActiveSongId(id);
     setLocalSemitones(0);
     setLocalCapo(0);
     setNoodleMode('song');
     setCurrentIdx(0);
+    halfBeatRef.current = 0;
+    setIntraChordIdx(0);
   }
 
   function handlePlay() {
     if (!isPlaying) {
       const parsed = parseInt(bpmInput, 10);
       if (!isNaN(parsed) && parsed > 0) setBpm(parsed);
-      warmupRef.current = true;
+      warmupRef.current = 2;
     }
     setIsPlaying(!isPlaying);
   }
@@ -219,6 +259,8 @@ export default function NoodlePage() {
   function handleRestart() {
     setCurrentIdx(0);
     setChordIdx(0);
+    halfBeatRef.current = 0;
+    setIntraChordIdx(0);
     setIsPlaying(false);
   }
 
