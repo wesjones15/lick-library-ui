@@ -448,21 +448,6 @@ export default function LickVisualizerPanel() {
     <div className="py-3">
       {/* Panel mode toggle + action buttons */}
       <div className="flex gap-3 items-center mb-2 flex-wrap">
-        <div className="flex rounded-md overflow-hidden border border-gray-300">
-          <button
-            className={`${toggleBtnBase} rounded-none border-0 border-r border-gray-300 ${panelMode === 'visualize' ? toggleActive : toggleInactive}`}
-            onClick={() => setPanelMode('visualize')}
-          >
-            Visualize
-          </button>
-          <button
-            className={`${toggleBtnBase} rounded-none border-0 ${panelMode === 'build' ? toggleActive : toggleInactive}`}
-            onClick={() => setPanelMode('build')}
-          >
-            Build
-          </button>
-        </div>
-
         {panelMode === 'visualize' && (
           <>
             <button

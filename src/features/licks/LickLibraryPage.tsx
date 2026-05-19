@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import LickSubNav from './LickSubNav';
 import { getAllLicks, deleteLick } from '../../core/api/client';
 import type { LickSummary } from '../../core/api/client';
 import LickList from './LickList';
@@ -54,7 +55,7 @@ export default function LickLibraryPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Lick Library</h1>
+      <LickSubNav active="library" />
 
       <div className="mb-4 flex items-start gap-3 flex-wrap">
         <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest pt-2.5">Instrument</span>

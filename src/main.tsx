@@ -6,7 +6,7 @@ import Layout from './components/Layout'
 import { MetronomeProvider } from './core/metronome/MetronomeContext'
 import { SongNavProvider } from './core/context/SongNavContext'
 import HomePage from './features/home/HomePage'
-import LicksPage from './features/licks/LicksPage'
+import LickUploadPage from './features/licks/LickUploadPage'
 import LickDetailPage from './features/licks/LickDetailPage'
 import SongsPage from './features/songs/SongsPage'
 import SongDetailPage from './features/songs/SongDetailPage'
@@ -30,7 +30,8 @@ createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<HomePage />} />
-            <Route path="/licks" element={<LicksPage />} />
+            <Route path="/licks" element={<LickLibraryPage />} />
+            <Route path="/licks/upload" element={<LickUploadPage />} />
             <Route path="/lick/:id" element={<LickDetailPage />} />
             <Route path="/songs" element={<SongsPage />} />
             <Route path="/songs/upload" element={<SongUploadPage />} />
