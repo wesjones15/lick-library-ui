@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
 import { getPentatonicDegree, getPentatonicNoteSet, ROOT_CHROMATIC } from './cagedUtils';
 import PentatonicWidget from './PentatonicWidget';
+import ChordsWidget from './ChordsWidget';
 import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
 import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum, getStringCount, getStringLabels } from '../../core/music';
@@ -63,6 +64,8 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
   const [currentNote, setCurrentNote] = useState<CurrentNote | null>(null);
   const [highlightedDegrees, setHighlightedDegrees] = useState<Set<number>>(new Set());
   const [showPentatonicWidget, setShowPentatonicWidget] = useState(false);
+  const [showChordsWidget, setShowChordsWidget] = useState(false);
+  const [chordSelectedPositions, setChordSelectedPositions] = useState<Set<string>>(new Set());
   const [activePentKeys, setActivePentKeys] = useState<string[]>([]);
   const [pentWidgetMode, setPentWidgetMode] = useState(mode);
   const [pentModeSynced, setPentModeSynced] = useState(true);
@@ -100,7 +103,7 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
     third: Map<string, { candidateColor: string }>;
   }>(() => {
     const empty = { best: new Map(), second: new Map(), third: new Map() };
-    if (!currentNote || highlightedDegrees.size > 0) return empty;
+    if (!currentNote || highlightedDegrees.size > 0 || showChordsWidget) return empty;
 
     const byDegree = new Map<number, Array<{ string: number; fret: number; dist: number }>>();
     scaleDots.forEach((row, s) => {
@@ -129,7 +132,7 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
     });
 
     return { best, second, third };
-  }, [scaleDots, currentNote, highlightedDegrees]);
+  }, [scaleDots, currentNote, highlightedDegrees, showChordsWidget]);
 
   const bestCandidates = allCandidates.best;
   const secondCandidates = allCandidates.second;
@@ -194,6 +197,18 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
           }
         }
 
+        if (showChordsWidget) {
+          const posKey = `${s},${f}`;
+          const isSelected = chordSelectedPositions.has(posKey);
+          if (dot.degree === null) {
+            if (isSelected) {
+              return { ...dot, active: true, note: CHROMATIC_NOTES[(OPEN_MIDI[s] + f) % 12], pentatonicRings };
+            }
+            return { ...dot, pentatonicRings };
+          }
+          return { ...dot, active: false, highlighted: isSelected, candidate: false, pentatonicRings };
+        }
+
         if (dot.degree === null) {
           const note = pentatonicOutOfScale ? CHROMATIC_NOTES[(OPEN_MIDI[s] + f) % 12] : undefined;
           return { ...dot, pentatonicRings, pentatonicOutOfScale, note };
@@ -218,7 +233,7 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
         };
       })
     );
-  }, [scaleDots, currentNote, allCandidates, highlightedDegrees, activePentKeys, pentWidgetMode]);
+  }, [scaleDots, currentNote, allCandidates, highlightedDegrees, activePentKeys, pentWidgetMode, showChordsWidget, chordSelectedPositions]);
 
   function selectNote(s: number, f: number, degree: number) {
     if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
@@ -238,6 +253,22 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
   }, [midiNote]);
 
   function handleDotClick(stringIndex: number, fret: number) {
+    if (showChordsWidget) {
+      const key = `${stringIndex},${fret}`;
+      setChordSelectedPositions(prev => {
+        const next = new Set(prev);
+        if (next.has(key)) {
+          next.delete(key);
+        } else {
+          for (const k of next) {
+            if (k.startsWith(`${stringIndex},`)) next.delete(k);
+          }
+          next.add(key);
+        }
+        return next;
+      });
+      return;
+    }
     if (highlightedDegrees.size > 0) return;
     const dot = scaleDots[stringIndex]?.[fret];
     if (!dot || dot.degree === null) return;
@@ -371,20 +402,32 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
         onDotClick={pageMode === 'theory' ? handleDotClick : undefined}
       />
 
-      {/* Pentatonic widget: theory mode only */}
+      {/* Pentatonic and Chords widgets: theory mode only */}
       {pageMode === 'theory' && (
-        <PentatonicWidget
-          activePentKeys={activePentKeys}
-          pentWidgetMode={pentWidgetMode}
-          pentModeSynced={pentModeSynced}
-          recognizedPentKeys={recognizedPentKeys}
-          onKeyToggle={key => setActivePentKeys(prev =>
-            prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
-          )}
-          onModeChange={m => { setPentWidgetMode(m); setPentModeSynced(false); }}
-          show={showPentatonicWidget}
-          onToggle={() => setShowPentatonicWidget(v => !v)}
-        />
+        <div className="flex gap-3 flex-wrap items-start">
+          <PentatonicWidget
+            activePentKeys={activePentKeys}
+            pentWidgetMode={pentWidgetMode}
+            pentModeSynced={pentModeSynced}
+            recognizedPentKeys={recognizedPentKeys}
+            onKeyToggle={key => setActivePentKeys(prev =>
+              prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+            )}
+            onModeChange={m => { setPentWidgetMode(m); setPentModeSynced(false); }}
+            show={showPentatonicWidget}
+            onToggle={() => setShowPentatonicWidget(v => !v)}
+          />
+          <ChordsWidget
+            show={showChordsWidget}
+            onToggle={() => {
+              setShowChordsWidget(v => !v);
+              setChordSelectedPositions(new Set());
+            }}
+            selectedPositions={chordSelectedPositions}
+            root={root}
+            onClear={() => setChordSelectedPositions(new Set())}
+          />
+        </div>
       )}
     </div>
   );
