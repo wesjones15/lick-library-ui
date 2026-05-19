@@ -369,6 +369,14 @@ export default function SongDetailPage() {
               >
                 ✎
               </button>
+              <button
+                onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}`)}
+                className="hidden md:block text-gray-300 hover:text-indigo-500 transition-colors text-2xl leading-none"
+                aria-label="Noodle"
+                title="Noodle"
+              >
+                ∿
+              </button>
 
               {/* Landscape (sm–md): icon buttons */}
               {hasTabLines && (
@@ -413,6 +421,14 @@ export default function SongDetailPage() {
               >
                 ✎
               </button>
+              <button
+                onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}`)}
+                className="hidden sm:flex md:hidden w-8 h-8 rounded-lg border border-gray-200 items-center justify-center text-base transition-colors text-gray-400 hover:text-indigo-500"
+                aria-label="Noodle"
+                title="Noodle"
+              >
+                ∿
+              </button>
 
               {/* Portrait (<sm): hamburger ⋮ */}
               <div ref={overflowRef} className="relative sm:hidden">
@@ -448,6 +464,12 @@ export default function SongDetailPage() {
                       className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
                     >
                       Manage
+                    </button>
+                    <button
+                      onClick={() => { navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}`); setOverflowOpen(false); }}
+                      className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
+                    >
+                      Noodle
                     </button>
                     {hasTabLines && (
                       <button

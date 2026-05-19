@@ -22,6 +22,7 @@ const NAV_LINKS: { label: ReactNode; to: string }[] = [
   { label: 'Playlists', to: '/playlists' },
   { label: 'Theory', to: '/theory' },
   { label: 'Live', to: '/live' },
+  { label: 'Noodle', to: '/noodle' },
 ];
 
 export default function Layout() {

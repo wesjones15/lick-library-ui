@@ -21,6 +21,7 @@ import LivePage from './features/live/LivePage'
 import LickVisualizerPage from './features/licks/LickVisualizerPage'
 import LickLibraryPage from './features/licks/LickLibraryPage'
 import ChordsTheoryPage from './features/chords/ChordsTheoryPage'
+import NoodlePage from './features/noodle/NoodlePage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -46,6 +47,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/lick/visualizer" element={<LickVisualizerPage />} />
             <Route path="/licks/library" element={<LickLibraryPage />} />
             <Route path="/chords/theory" element={<ChordsTheoryPage />} />
+            <Route path="/noodle" element={<NoodlePage />} />
           </Route>
         </Routes>
       </BrowserRouter>
