@@ -15,12 +15,14 @@ export interface NeckDot {
 }
 
 interface GuitarNeckProps {
-  // dots[string][fret]: string 0 = low E, string 5 = high e; fret 0 = open
+  // dots[string][fret]: string 0 = lowest, string N-1 = highest; fret 0 = open
   dots: NeckDot[][];
   fretCount?: number;
   width?: number | string;
   onDotClick?: (stringIndex: number, fret: number) => void;
   cagedZones?: CagedZone[];
+  // Labels displayed left of each string, high string first. Defaults to standard guitar.
+  stringLabels?: string[];
 }
 
 export const DEGREE_COLORS: Record<number, string> = {
@@ -35,8 +37,7 @@ export const DEGREE_COLORS: Record<number, string> = {
 const OFF_SCALE_COLOR = '#d1d5db';
 const ACTIVE_RING_COLOR = '#fef08a';
 
-const STRING_LABELS = ['e', 'B', 'G', 'D', 'A', 'E']; // display top → bottom
-const STRING_COUNT = 6;
+const STRING_LABELS_DEFAULT = ['e', 'B', 'G', 'D', 'A', 'E']; // display top → bottom (guitar)
 const INLAY_SINGLE = [3, 5, 7, 9];
 const INLAY_DOUBLE = 12;
 
@@ -47,26 +48,41 @@ const FRET_W = 52;
 const TOP_PAD = 28;
 const STR_H = 36;
 const BOT_PAD = 14;
+const TOTAL_STR_H = STR_H * 5; // = 180; total height for 5 string gaps (6-string max)
 const R_SMALL = 5;
 const R_NORMAL = 9;
 const R_RING = 13;
 
 const STRING_WEIGHTS = [0.5, 0.75, 1.0, 1.35, 1.75, 2.2]; // high e → low E
 
-export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDotClick, cagedZones }: GuitarNeckProps) {
+export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDotClick, cagedZones, stringLabels }: GuitarNeckProps) {
+  const n = Math.min(dots.length, 6);
+  if (dots.length > 6) console.error(`GuitarNeck: max 6 strings supported, got ${dots.length}`);
+  const labels = (stringLabels ?? STRING_LABELS_DEFAULT).slice(0, n);
+  const strH = n > 1 ? TOTAL_STR_H / (n - 1) : TOTAL_STR_H;
+
   const vbW = LABEL_W + OPEN_W + NUT_W + fretCount * FRET_W;
-  const vbH = TOP_PAD + (STRING_COUNT - 1) * STR_H + BOT_PAD;
+  const vbH = TOP_PAD + TOTAL_STR_H + BOT_PAD; // always 222 regardless of string count
 
   const xOpen = LABEL_W + OPEN_W / 2;
   const xFret = (f: number) => LABEL_W + OPEN_W + NUT_W + (f - 0.5) * FRET_W;
   const xForFret = (f: number) => (f === 0 ? xOpen : xFret(f));
-  const yStr = (di: number) => TOP_PAD + di * STR_H; // di 0 = high e (top)
-  const dataIdx = (di: number) => STRING_COUNT - 1 - di;
+  const yStr = (di: number) => TOP_PAD + di * strH; // di 0 = highest string (top)
+  const dataIdx = (di: number) => n - 1 - di;
+
+  function getStringWeight(di: number): number {
+    if (n <= 1) return 1.0;
+    if (n === 6) return STRING_WEIGHTS[di];
+    const t = di * 5 / (n - 1);
+    const lo = Math.floor(t);
+    const hi = Math.min(5, lo + 1);
+    return STRING_WEIGHTS[lo] * (1 - (t - lo)) + STRING_WEIGHTS[hi] * (t - lo);
+  }
 
   const fretLineStart = LABEL_W + OPEN_W + NUT_W;
   const fretLineEnd = fretLineStart + fretCount * FRET_W;
   const strLineY0 = TOP_PAD;
-  const strLineYN = TOP_PAD + (STRING_COUNT - 1) * STR_H;
+  const strLineYN = TOP_PAD + TOTAL_STR_H;
 
   // Single SVG-level click handler: computes (string, fret) from raw coordinates.
   // Avoids per-element onClick on SVG <g> elements which have proven unreliable for grey dots.
@@ -76,10 +92,10 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
         const svgX = (e.clientX - rect.left) * (vbW / rect.width);
         const svgY = (e.clientY - rect.top) * (vbH / rect.height);
         if (svgX < LABEL_W) return; // string label margin
-        const rawDi = (svgY - TOP_PAD) / STR_H;
-        if (rawDi < -0.5 || rawDi > STRING_COUNT - 0.5) return; // above/below string band
-        const di = Math.max(0, Math.min(STRING_COUNT - 1, Math.round(rawDi)));
-        const si = STRING_COUNT - 1 - di;
+        const rawDi = (svgY - TOP_PAD) / strH;
+        if (rawDi < -0.5 || rawDi > n - 0.5) return; // above/below string band
+        const di = Math.max(0, Math.min(n - 1, Math.round(rawDi)));
+        const si = n - 1 - di;
         let fret: number;
         if (svgX < fretLineStart) {
           fret = 0;
@@ -115,7 +131,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
         x={fretLineStart}
         y={strLineY0 - 6}
         width={fretCount * FRET_W}
-        height={(STRING_COUNT - 1) * STR_H + 12}
+        height={TOTAL_STR_H + 12}
         fill="#e8d5b7"
         rx={2}
       />
@@ -125,7 +141,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
         const x = fretLineStart + (zone.fretStart - 1) * FRET_W;
         const w = (zone.fretEnd - zone.fretStart + 1) * FRET_W;
         const y = strLineY0 - 6;
-        const h = (STRING_COUNT - 1) * STR_H + 12;
+        const h = TOTAL_STR_H + 12;
         return (
           <g key={`caged-${zone.shape}`}>
             <rect x={x} y={y} width={w} height={h} fill={zone.color} rx={2} />
@@ -161,7 +177,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
       ))}
 
       {/* String lines */}
-      {STRING_LABELS.map((_, di) => (
+      {Array.from({ length: n }, (_, di) => (
         <line
           key={`sl${di}`}
           x1={LABEL_W}
@@ -169,7 +185,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           x2={fretLineEnd}
           y2={yStr(di)}
           stroke="#374151"
-          strokeWidth={STRING_WEIGHTS[di]}
+          strokeWidth={getStringWeight(di)}
         />
       ))}
 
@@ -178,7 +194,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
         x={LABEL_W + OPEN_W}
         y={strLineY0}
         width={NUT_W}
-        height={strLineYN - strLineY0}
+        height={TOTAL_STR_H}
         fill="#374151"
       />
 
@@ -189,7 +205,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           x={fretLineStart + f * FRET_W - 1.5}
           y={strLineY0}
           width={3}
-          height={strLineYN - strLineY0}
+          height={TOTAL_STR_H}
           fill="#c0c0c0"
           stroke="#374151"
           strokeWidth={0.5}
@@ -201,7 +217,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
         <circle
           key={`in${f}`}
           cx={xFret(f)}
-          cy={TOP_PAD + (STRING_COUNT - 1) * STR_H / 2}
+          cy={TOP_PAD + TOTAL_STR_H / 2}
           r={4}
           fill="#e5e7eb"
           opacity={0.8}
@@ -211,14 +227,14 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
         <>
           <circle
             cx={xFret(INLAY_DOUBLE)}
-            cy={TOP_PAD + 1.5 * STR_H}
+            cy={TOP_PAD + TOTAL_STR_H * 1.5 / 5}
             r={4}
             fill="#e5e7eb"
             opacity={0.8}
           />
           <circle
             cx={xFret(INLAY_DOUBLE)}
-            cy={TOP_PAD + 3.5 * STR_H}
+            cy={TOP_PAD + TOTAL_STR_H * 3.5 / 5}
             r={4}
             fill="#e5e7eb"
             opacity={0.8}
@@ -227,7 +243,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
       )}
 
       {/* String labels */}
-      {STRING_LABELS.map((label, di) => (
+      {Array.from({ length: n }, (_, di) => (
         <text
           key={`lbl${di}`}
           x={LABEL_W - 5}
@@ -237,12 +253,12 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           fill="#6b7280"
           fontFamily="monospace"
         >
-          {label}
+          {labels[di]}
         </text>
       ))}
 
       {/* Note dots */}
-      {STRING_LABELS.map((_, di) => {
+      {Array.from({ length: n }, (_, di) => {
         const si = dataIdx(di);
         const row = dots[si] ?? [];
         return Array.from({ length: fretCount + 1 }, (_, fret) => {

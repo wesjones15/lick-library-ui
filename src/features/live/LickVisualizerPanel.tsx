@@ -5,16 +5,16 @@ import LickLibraryModal from './LickLibraryModal';
 import LickInputModal from './LickInputModal';
 import { uploadLick, getScalePositions } from '../../core/api/client';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
-import { NOTE_KEYS, CHROMATIC_NOTES, MODES, MODE_LABELS, formatNoteEnum } from '../../core/music';
+import { NOTE_KEYS, CHROMATIC_NOTES, MODES, MODE_LABELS, formatNoteEnum, getStringCount, getStringLabels, INSTRUMENT_OPEN_SEMITONES } from '../../core/music';
+import InstrumentSelector from '../../components/InstrumentSelector';
+import type { InstrumentName } from '../../core/useInstrument';
 
-const STRING_COUNT = 6;
 const FRET_COUNT = 12;
 const SPREAD_SLOT = 4;
-const BUILD_LABELS = ['e|', 'B|', 'G|', 'D|', 'A|', 'E|'];
 
-const STANDARD_OPEN_NOTES = [4, 9, 2, 7, 11, 4]; // E A D G B e in semitones from C
-function computeNoteName(si: number, fret: number): string {
-  return CHROMATIC_NOTES[((STANDARD_OPEN_NOTES[si] ?? 0) + fret) % 12];
+function computeNoteName(si: number, fret: number, instrument: string): string {
+  const openSemis = INSTRUMENT_OPEN_SEMITONES[instrument] ?? INSTRUMENT_OPEN_SEMITONES.GUITAR;
+  return CHROMATIC_NOTES[((openSemis[si] ?? 0) + fret) % 12];
 }
 
 const btnClass = 'px-4 py-2 text-sm rounded-lg border transition-colors';
@@ -77,29 +77,29 @@ function parseTabString(tabString: string): TabColumn[] {
     );
 }
 
-function blankDots(): NeckDot[][] {
-  return Array.from({ length: STRING_COUNT }, () =>
+function blankDots(n: number): NeckDot[][] {
+  return Array.from({ length: n }, () =>
     Array.from({ length: FRET_COUNT + 1 }, () => ({ degree: null, active: false }))
   );
 }
 
-function buildDotsForColumn(col: TabColumn): NeckDot[][] {
-  if (col.isRest) return blankDots();
-  const dots = blankDots();
+function buildDotsForColumn(col: TabColumn, n: number): NeckDot[][] {
+  if (col.isRest) return blankDots(n);
+  const dots = blankDots(n);
   for (const { string: s, fret: f } of col.notes) {
-    if (s >= 0 && s < STRING_COUNT && f >= 0 && f <= FRET_COUNT) {
+    if (s >= 0 && s < n && f >= 0 && f <= FRET_COUNT) {
       dots[s][f] = { degree: 1, active: true };
     }
   }
   return dots;
 }
 
-function buildDotsForAllColumns(cols: TabColumn[]): NeckDot[][] {
-  const dots = blankDots();
+function buildDotsForAllColumns(cols: TabColumn[], n: number): NeckDot[][] {
+  const dots = blankDots(n);
   for (const col of cols) {
     if (col.isRest) continue;
     for (const { string: s, fret: f } of col.notes) {
-      if (s >= 0 && s < STRING_COUNT && f >= 0 && f <= FRET_COUNT) {
+      if (s >= 0 && s < n && f >= 0 && f <= FRET_COUNT) {
         dots[s][f] = { degree: 1, active: true };
       }
     }
@@ -201,7 +201,7 @@ export default function LickVisualizerPanel() {
   const [builtTabText, setBuiltTabText] = useState('');
   const [buildRoot, setBuildRoot] = useState('');
   const [buildMode, setBuildMode] = useState('IONIAN');
-  const [scaleDots, setScaleDots] = useState<NeckDot[][]>(blankDots);
+  const [scaleDots, setScaleDots] = useState<NeckDot[][]>(() => blankDots(6));
   const [buildCurrentNote, setBuildCurrentNote] = useState<{ string: number; fret: number; degree: number } | null>(null);
   const [isBuilding, setIsBuilding] = useState(false);
   const [chordDetect, setChordDetect] = useState(false);
@@ -213,6 +213,10 @@ export default function LickVisualizerPanel() {
   const [showLibrary, setShowLibrary] = useState(false);
   const [showNewLick, setShowNewLick] = useState(false);
   const [showEditLick, setShowEditLick] = useState(false);
+
+  const [instrument, setInstrument] = useState('GUITAR');
+  const stringCount = getStringCount(instrument);
+  const buildLabels = getStringLabels(instrument).map(l => l + '|');
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pendingNotesRef = useRef<{ string: number; fret: number }[]>([]);
@@ -232,11 +236,11 @@ export default function LickVisualizerPanel() {
   // Scale overlay — fetch when root/mode changes or when switching to build mode
   useEffect(() => {
     if (panelMode !== 'build') return;
-    if (!buildRoot) { setScaleDots(blankDots()); return; }
-    getScalePositions(buildRoot, buildMode).then(res => {
-      const next = blankDots();
+    if (!buildRoot) { setScaleDots(blankDots(stringCount)); return; }
+    getScalePositions(buildRoot, buildMode, instrument).then(res => {
+      const next = blankDots(stringCount);
       for (const pos of res.positions) {
-        if (pos.string >= 0 && pos.string < STRING_COUNT && pos.fret >= 0 && pos.fret <= FRET_COUNT) {
+        if (pos.string >= 0 && pos.string < stringCount && pos.fret >= 0 && pos.fret <= FRET_COUNT) {
           next[pos.string][pos.fret] = {
             degree: pos.degree as 1 | 2 | 3 | 4 | 5 | 6 | 7,
             active: false,
@@ -246,7 +250,7 @@ export default function LickVisualizerPanel() {
       }
       setScaleDots(next);
     }).catch(() => {});
-  }, [buildRoot, buildMode, panelMode]);
+  }, [buildRoot, buildMode, panelMode, instrument, stringCount]);
 
   const commitPendingColumn = useCallback(() => {
     if (pendingNotesRef.current.length === 0) return;
@@ -255,10 +259,10 @@ export default function LickVisualizerPanel() {
     setBuiltCols(prev => {
       const newCols = [...prev, notes];
       const tabCols: TabColumn[] = newCols.map(col => ({ isRest: false, notes: col }));
-      setBuiltTabText(buildNormalizedTab(BUILD_LABELS, tabCols));
+      setBuiltTabText(buildNormalizedTab(buildLabels, tabCols));
       return newCols;
     });
-  }, []);
+  }, [buildLabels]);
 
   // Flush pending chord on Stop
   useEffect(() => {
@@ -305,7 +309,7 @@ export default function LickVisualizerPanel() {
       setBuiltCols(prev => {
         const newCols = [...prev, [{ string: si, fret }]];
         const tabCols: TabColumn[] = newCols.map(col => ({ isRest: false, notes: col }));
-        setBuiltTabText(buildNormalizedTab(BUILD_LABELS, tabCols));
+        setBuiltTabText(buildNormalizedTab(buildLabels, tabCols));
         return newCols;
       });
       return;
@@ -319,20 +323,20 @@ export default function LickVisualizerPanel() {
     pendingNotesRef.current = [...pendingNotesRef.current, { string: si, fret }];
     if (chordTimerRef.current) clearTimeout(chordTimerRef.current);
     chordTimerRef.current = setTimeout(() => commitPendingColumn(), 1500);
-  }, [panelMode, isBuilding, chordDetect, scaleDots, commitPendingColumn]);
+  }, [panelMode, isBuilding, chordDetect, scaleDots, commitPendingColumn, buildLabels]);
 
   const handleSaveLick = useCallback(async () => {
     setSaveLoading(true);
     setSaveError(null);
     try {
-      await uploadLick({ rawTab, inputKey: savedInputKey, mode: savedMode });
+      await uploadLick({ rawTab, inputKey: savedInputKey, mode: savedMode, instrument });
       setLickSource('library');
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Save failed');
     } finally {
       setSaveLoading(false);
     }
-  }, [rawTab, savedInputKey, savedMode]);
+  }, [rawTab, savedInputKey, savedMode, instrument]);
 
   const handleSaveBuiltLick = useCallback(async () => {
     if (!builtTabText.trim()) return;
@@ -340,7 +344,7 @@ export default function LickVisualizerPanel() {
     setBuildSaveError(null);
     try {
       const normalized = normalizeTab(builtTabText);
-      await uploadLick({ rawTab: normalized, inputKey: savedInputKey, mode: savedMode });
+      await uploadLick({ rawTab: normalized, inputKey: savedInputKey, mode: savedMode, instrument });
       setRawTab(normalized);
       analyzeTab(normalized);
       setLickSource('library');
@@ -352,14 +356,14 @@ export default function LickVisualizerPanel() {
     } finally {
       setBuildSaveLoading(false);
     }
-  }, [builtTabText, analyzeTab, savedInputKey, savedMode]);
+  }, [builtTabText, analyzeTab, savedInputKey, savedMode, instrument]);
 
   const dots = useMemo(() => {
-    if (columns.length === 0) return blankDots();
-    if (displayMode === 'all') return buildDotsForAllColumns(columns);
-    if (currentCol >= columns.length) return blankDots();
-    return buildDotsForColumn(columns[currentCol]);
-  }, [columns, currentCol, displayMode]);
+    if (columns.length === 0) return blankDots(stringCount);
+    if (displayMode === 'all') return buildDotsForAllColumns(columns, stringCount);
+    if (currentCol >= columns.length) return blankDots(stringCount);
+    return buildDotsForColumn(columns[currentCol], stringCount);
+  }, [columns, currentCol, displayMode, stringCount]);
 
   // Candidate notes near the current build note
   const buildCandidates = useMemo(() => {
@@ -397,23 +401,23 @@ export default function LickVisualizerPanel() {
     const d = scaleDots.map(row => row.map(dot => ({ ...dot })));
     for (const col of builtCols) {
       for (const { string: s, fret: f } of col) {
-        if (s >= 0 && s < STRING_COUNT && f >= 0 && f <= FRET_COUNT) {
+        if (s >= 0 && s < stringCount && f >= 0 && f <= FRET_COUNT) {
           if (d[s][f].degree === null) d[s][f] = { ...d[s][f], degree: 1, active: false };
         }
       }
     }
     for (const { string: s, fret: f } of pendingNotesRef.current) {
-      if (s >= 0 && s < STRING_COUNT && f >= 0 && f <= FRET_COUNT) {
+      if (s >= 0 && s < stringCount && f >= 0 && f <= FRET_COUNT) {
         const deg = d[s][f].degree ?? 1;
         d[s][f] = { ...d[s][f], degree: deg, active: true };
       }
     }
     if (buildCurrentNote) {
       const { string: s, fret: f } = buildCurrentNote;
-      if (s >= 0 && s < STRING_COUNT && f >= 0 && f <= FRET_COUNT) {
+      if (s >= 0 && s < stringCount && f >= 0 && f <= FRET_COUNT) {
         if (scaleDots[s][f].degree === null) {
           // off-scale: override any degree builtCols set, keep grey with note name
-          d[s][f] = { degree: null, active: true, note: computeNoteName(s, f) };
+          d[s][f] = { degree: null, active: true, note: computeNoteName(s, f, instrument) };
         } else {
           d[s][f] = { ...d[s][f], active: true };
         }
@@ -432,7 +436,7 @@ export default function LickVisualizerPanel() {
       });
     }
     return d;
-  }, [scaleDots, builtCols, buildCurrentNote, buildCandidates]);
+  }, [scaleDots, builtCols, buildCurrentNote, buildCandidates, stringCount, instrument]);
 
   const canSave = lickSource === 'new' || lickSource === 'modified';
 
@@ -482,6 +486,7 @@ export default function LickVisualizerPanel() {
         dots={panelMode === 'build' ? buildDots : dots}
         fretCount={FRET_COUNT}
         onDotClick={panelMode === 'build' ? handleNeckClick : undefined}
+        stringLabels={getStringLabels(instrument)}
       />
 
       {/* Visualize mode content */}
@@ -613,6 +618,17 @@ export default function LickVisualizerPanel() {
             >
               {MODES.map(m => <option key={m} value={m}>{MODE_LABELS[m]}</option>)}
             </select>
+            <InstrumentSelector
+              instrument={instrument as InstrumentName}
+              onInstrumentChange={(name) => {
+                setInstrument(name);
+                setBuiltCols([]);
+                setBuiltTabText('');
+                setBuildCurrentNote(null);
+              }}
+              excludeCustom
+              compact
+            />
             <button
               onClick={() => setIsBuilding(b => !b)}
               className={`${btnClass} ${isBuilding

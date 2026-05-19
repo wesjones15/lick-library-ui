@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
 import { getDiatonicChords, type DiatonicChord } from './diatonicUtils';
 import { getChordVoicings, type ChordFrets } from '../../core/api/client';
-import { NOTE_KEYS } from '../../core/music';
+import { NOTE_KEYS, getStringCount, getStringLabels } from '../../core/music';
+import InstrumentSelector from '../../components/InstrumentSelector';
+import type { InstrumentName } from '../../core/useInstrument';
 
-const STRING_COUNT = 6;
 const FRET_COUNT = 12;
 
 const MODES = [
@@ -19,27 +20,16 @@ const MODES = [
 
 const selectClass = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 bg-white';
 
-function blankDots(): NeckDot[][] {
-  return Array.from({ length: STRING_COUNT }, () =>
+function blankDots(n: number): NeckDot[][] {
+  return Array.from({ length: n }, () =>
     Array.from({ length: FRET_COUNT + 1 }, () => ({ degree: null, active: false }))
   );
 }
 
-// Map a ChordFrets array (index 0 = low E = string 0) to NeckDot[][]
-// Color dots by interval degree relative to chord root (degree 1 = red, etc.)
-function chordFretsToNeckDots(frets: ChordFrets): NeckDot[][] {
-  const dots = blankDots();
-  // Collect fretted positions to determine which degree each note is
-  // For simplicity, mark all chord notes as degree 1 (root color) by default;
-  // sort fretted positions by pitch to assign interval roles (root, 3rd, 5th)
-  const positions: Array<{ string: number; fret: number }> = [];
-  frets.forEach((f, s) => {
-    if (f !== null && f >= 0 && f <= FRET_COUNT) positions.push({ string: s, fret: f });
-  });
-  // Degree assignment: lowest fret note = root (1), then 3 (5th), then 5 (3rd), etc.
-  // Simple approach: assign degree 1 to root string notes; others get 3 or 5
-  positions.forEach(({ string: s, fret: f }) => {
-    dots[s][f] = { degree: 1, active: true };
+function chordFretsToNeckDots(frets: ChordFrets, n: number): NeckDot[][] {
+  const dots = blankDots(n);
+  frets.slice(0, n).forEach((f, s) => {
+    if (f !== null && f >= 0 && f <= FRET_COUNT) dots[s][f] = { degree: 1, active: true };
   });
   return dots;
 }
@@ -52,6 +42,7 @@ interface Props {
 export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode = 'IONIAN' }: Props) {
   const [root, setRoot] = useState(initialRoot);
   const [mode, setMode] = useState(initialMode);
+  const [instrument, setInstrument] = useState('GUITAR');
   const [selectedDegree, setSelectedDegree] = useState<number | null>(null);
   const [voicingDots, setVoicingDots] = useState<NeckDot[][] | null>(null);
   const [voicingIdx, setVoicingIdx] = useState(0);
@@ -60,13 +51,13 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
 
   const chords = getDiatonicChords(root, mode);
 
-  // Reset selection when root or mode changes
+  // Reset selection when root, mode, or instrument changes
   useEffect(() => {
     setSelectedDegree(null);
     setVoicingDots(null);
     setAllVoicings([]);
     setVoicingIdx(0);
-  }, [root, mode]);
+  }, [root, mode, instrument]);
 
   async function selectChord(chord: DiatonicChord) {
     if (selectedDegree === chord.degree) {
@@ -77,11 +68,12 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
     setSelectedDegree(chord.degree);
     setLoadingVoicing(true);
     try {
-      const voicings = await getChordVoicings(chord.rootApi, chord.apiSuffix);
+      const n = getStringCount(instrument);
+      const voicings = await getChordVoicings(chord.rootApi, chord.apiSuffix, instrument);
       if (voicings.length > 0) {
         setAllVoicings(voicings.map(v => v.frets));
         setVoicingIdx(0);
-        setVoicingDots(chordFretsToNeckDots(voicings[0].frets));
+        setVoicingDots(chordFretsToNeckDots(voicings[0].frets, n));
       } else {
         setAllVoicings([]);
         setVoicingDots(null);
@@ -97,7 +89,7 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
     const next = voicingIdx + delta;
     if (next < 0 || next >= allVoicings.length) return;
     setVoicingIdx(next);
-    setVoicingDots(chordFretsToNeckDots(allVoicings[next]));
+    setVoicingDots(chordFretsToNeckDots(allVoicings[next], getStringCount(instrument)));
   }
 
   const qualityBadgeColor: Record<string, string> = {
@@ -122,6 +114,11 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
             <option key={m.value} value={m.value}>{m.label}</option>
           ))}
         </select>
+        <InstrumentSelector
+          instrument={instrument as InstrumentName}
+          onInstrumentChange={setInstrument}
+          excludeCustom
+        />
       </div>
 
       {/* Chord cards */}
@@ -164,7 +161,7 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
           {loadingVoicing && <p className="text-sm text-gray-400 mb-2">Loading voicing…</p>}
           {!loadingVoicing && voicingDots && (
             <>
-              <GuitarNeck dots={voicingDots} fretCount={FRET_COUNT} />
+              <GuitarNeck dots={voicingDots} fretCount={FRET_COUNT} stringLabels={getStringLabels(instrument)} />
               {allVoicings.length > 1 && (
                 <div className="flex items-center gap-3 mt-3">
                   <button

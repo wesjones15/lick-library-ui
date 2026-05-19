@@ -4,11 +4,12 @@ import { getPentatonicDegree, getPentatonicNoteSet, ROOT_CHROMATIC } from './cag
 import PentatonicWidget from './PentatonicWidget';
 import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
-import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum } from '../../core/music';
+import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum, getStringCount, getStringLabels } from '../../core/music';
+import InstrumentSelector from '../../components/InstrumentSelector';
+import type { InstrumentName } from '../../core/useInstrument';
 
-const STRING_COUNT = 6;
 const FRET_COUNT = 12;
-const OPEN_MIDI = [40, 45, 50, 55, 59, 64]; // low E → high e
+const OPEN_MIDI = [40, 45, 50, 55, 59, 64]; // low E → high e (guitar standard; pitch detection is guitar-only)
 
 const MODES = [
   { value: 'IONIAN',     label: 'Major (Ionian)'          },
@@ -30,15 +31,15 @@ const MODE_INTERVALS: Record<string, string[]> = {
   LOCRIAN:    ['1', 'b2', 'b3', '4',  'b5', 'b6', 'b7'],
 };
 
-function blankScaleDots(): NeckDot[][] {
-  return Array.from({ length: STRING_COUNT }, () =>
+function blankScaleDots(n: number): NeckDot[][] {
+  return Array.from({ length: n }, () =>
     Array.from({ length: FRET_COUNT + 1 }, () => ({ degree: null, active: false }))
   );
 }
 
 function midiToPositions(midi: number): Array<{ string: number; fret: number }> {
   const result: Array<{ string: number; fret: number }> = [];
-  for (let s = 0; s < STRING_COUNT; s++) {
+  for (let s = 0; s < OPEN_MIDI.length; s++) {
     const fret = midi - OPEN_MIDI[s];
     if (fret >= 0 && fret <= FRET_COUNT) result.push({ string: s, fret });
   }
@@ -57,7 +58,8 @@ interface LivePageProps {
 export default function LivePage({ pageMode = 'live' }: LivePageProps) {
   const [root, setRoot] = useState('C');
   const [mode, setMode] = useState('IONIAN');
-  const [scaleDots, setScaleDots] = useState<NeckDot[][]>(blankScaleDots);
+  const [instrument, setInstrument] = useState('GUITAR');
+  const [scaleDots, setScaleDots] = useState<NeckDot[][]>(() => blankScaleDots(6));
   const [currentNote, setCurrentNote] = useState<CurrentNote | null>(null);
   const [highlightedDegrees, setHighlightedDegrees] = useState<Set<number>>(new Set());
   const [showPentatonicWidget, setShowPentatonicWidget] = useState(false);
@@ -70,11 +72,12 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
   const { midiNote, error: micError } = usePitchDetection(pageMode === 'live' && listening);
 
   useEffect(() => {
-    if (!root) { setScaleDots(blankScaleDots()); return; }
-    getScalePositions(root, mode).then(res => {
-      const next = blankScaleDots();
+    const sc = getStringCount(instrument);
+    if (!root) { setScaleDots(blankScaleDots(sc)); return; }
+    getScalePositions(root, mode, instrument).then(res => {
+      const next = blankScaleDots(sc);
       for (const pos of res.positions) {
-        if (pos.string >= 0 && pos.string < STRING_COUNT && pos.fret >= 0 && pos.fret <= FRET_COUNT) {
+        if (pos.string >= 0 && pos.string < sc && pos.fret >= 0 && pos.fret <= FRET_COUNT) {
           next[pos.string][pos.fret] = {
             degree: pos.degree as 1 | 2 | 3 | 4 | 5 | 6 | 7,
             active: false,
@@ -85,7 +88,7 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
       setScaleDots(next);
       setCurrentNote(null);
     }).catch(() => {});
-  }, [root, mode]);
+  }, [root, mode, instrument]);
 
   useEffect(() => {
     if (pentModeSynced) setPentWidgetMode(mode);
@@ -275,6 +278,12 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
             <option key={m.value} value={m.value}>{m.label}</option>
           ))}
         </select>
+        <InstrumentSelector
+          instrument={instrument as InstrumentName}
+          onInstrumentChange={name => { setInstrument(name); setCurrentNote(null); setHighlightedDegrees(new Set()); }}
+          excludeCustom
+          compact
+        />
 
         {pageMode === 'live' && (
           <>
@@ -358,6 +367,7 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
       <GuitarNeck
         dots={dots}
         fretCount={FRET_COUNT}
+        stringLabels={getStringLabels(instrument)}
         onDotClick={pageMode === 'theory' ? handleDotClick : undefined}
       />
 

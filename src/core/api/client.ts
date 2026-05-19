@@ -356,8 +356,8 @@ export async function clearPlaylistEntryOverrides(playlistId: string, entryId: s
 export interface ScalePosition { string: number; fret: number; degree: number; note: string; }
 export interface ScaleResponse { root: string; mode: string; positions: ScalePosition[]; }
 
-export async function getScalePositions(root: string, mode: string): Promise<ScaleResponse> {
-  const params = new URLSearchParams({ root, mode });
+export async function getScalePositions(root: string, mode: string, instrument = 'GUITAR'): Promise<ScaleResponse> {
+  const params = new URLSearchParams({ root, mode, instrument });
   const res = await fetch(`${BASE_URL}/scale?${params}`);
   if (!res.ok) throw new Error('Failed to fetch scale');
   return res.json();

@@ -60,3 +60,20 @@ export const INSTRUMENT_STRING_DISPLAY: Record<string, StringEntry[]> = {
 export function getStringCount(instrument: string | null | undefined): number {
   return INSTRUMENT_STRING_DISPLAY[instrument ?? 'GUITAR']?.length ?? 6;
 }
+
+export function getStringLabels(instrument: string): string[] {
+  return (INSTRUMENT_STRING_DISPLAY[instrument] ?? INSTRUMENT_STRING_DISPLAY.GUITAR).map(e => e.label);
+}
+
+// Open-string semitone values from C=0, low string first (index = backend string index)
+export const INSTRUMENT_OPEN_SEMITONES: Record<string, number[]> = {
+  GUITAR:   [4,  9,  2,  7, 11,  4],  // E A D G B e
+  DROP_D:   [2,  9,  2,  7, 11,  4],  // D A D G B e
+  OPEN_G:   [2,  7,  2,  7, 11,  2],  // D G D G B D
+  OPEN_D:   [2,  9,  2,  6,  9,  2],  // D A D F# A D
+  DADGAD:   [2,  9,  2,  7,  9,  2],  // D A D G A D
+  BASS:     [4,  9,  2,  7],           // E A D G
+  UKULELE:  [7,  0,  4,  9],           // G C E A (reentrant)
+  MANDOLIN: [7,  2,  9,  4],           // G D A E
+  BANJO:    [2,  7, 11,  2,  7],       // D G B D g
+};
