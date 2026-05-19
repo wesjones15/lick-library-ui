@@ -3,25 +3,73 @@ import type { ChordLyric } from '../../core/api/client';
 interface Props {
   lines: ChordLyric[];
   currentIdx: number;
+  intraChordIdx?: number;
+  guitarKaraoke?: boolean;
 }
 
-function KaraokeSlot({ line, variant }: { line: ChordLyric | undefined; variant: 'prev' | 'current' | 'next' }) {
-  if (!line) return <div className="h-10" />;
-  const isCurrent = variant === 'current';
+function renderChordLine(chords: string, boldIdx?: number): React.ReactNode {
+  const text = chords.trimEnd() || ' ';
+  if (boldIdx === undefined || boldIdx < 0) return text;
+  const matches = [...text.matchAll(/[A-G][A-Za-z#b/0-9]*/g)]
+    .filter(m => m[0] !== 'NC' && m[0] !== 'N.C.');
+  const target = matches[boldIdx];
+  if (!target || target.index === undefined) return text;
+  const s = target.index, e = s + target[0].length;
+  return <>{text.slice(0, s)}<strong>{text.slice(s, e)}</strong>{text.slice(e)}</>;
+}
+
+function KaraokeSlot({
+  line, variant, expanded, boldIdx,
+}: {
+  line: ChordLyric | undefined;
+  variant: 'active' | 'secondary' | 'dim';
+  expanded: boolean;
+  boldIdx?: number;
+}) {
+  if (!line) return null;
+  const isActive = variant === 'active';
+  const opacity = isActive ? 1 : variant === 'secondary' ? 0.6 : 0.25;
+  const sizeClass = expanded
+    ? (isActive ? 'text-xl' : variant === 'secondary' ? 'text-base' : 'text-sm')
+    : (isActive ? 'text-lg' : variant === 'secondary' ? 'text-sm' : 'text-xs');
+
   return (
-    <div className={`font-mono transition-opacity ${isCurrent ? 'text-base' : 'text-sm opacity-35'}`}>
-      <div style={{ color: '#4f46e5', whiteSpace: 'pre' }}>{line.chords.trimEnd() || ' '}</div>
+    <div className={`font-mono transition-opacity ${sizeClass}`} style={{ opacity }}>
+      <div style={{ color: '#4f46e5', whiteSpace: 'pre' }}>
+        {isActive ? renderChordLine(line.chords, boldIdx) : (line.chords.trimEnd() || ' ')}
+      </div>
       <div style={{ color: '#111827', whiteSpace: 'pre' }}>{line.lyrics.trimEnd() || ' '}</div>
     </div>
   );
 }
 
-export default function KaraokeDisplay({ lines, currentIdx }: Props) {
+export default function KaraokeDisplay({ lines, currentIdx, intraChordIdx, guitarKaraoke }: Props) {
+  const exp = !!guitarKaraoke;
+  const slot = (offset: number, variant: 'active' | 'secondary' | 'dim', boldIdx?: number) => (
+    <KaraokeSlot line={lines[currentIdx + offset]} variant={variant} expanded={exp} boldIdx={boldIdx} />
+  );
+
   return (
-    <div className="flex flex-col items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl overflow-x-auto">
-      <KaraokeSlot line={lines[currentIdx - 1]} variant="prev" />
-      <KaraokeSlot line={lines[currentIdx]} variant="current" />
-      <KaraokeSlot line={lines[currentIdx + 1]} variant="next" />
+    <div className={`flex flex-col flex-1 items-center bg-gray-50 rounded-xl px-4 overflow-hidden ${exp ? 'justify-center py-3 gap-2' : 'justify-start pt-2 pb-3 gap-1'}`}>
+      {exp ? (
+        <>
+          {slot(-2, 'dim')}
+          {slot(-1, 'secondary')}
+          {slot( 0, 'active', intraChordIdx)}
+          {slot(+1, 'active')}
+          {slot(+2, 'secondary')}
+          {slot(+3, 'dim')}
+          {slot(+4, 'dim')}
+        </>
+      ) : (
+        <>
+          {slot(-2, 'dim')}
+          {slot(-1, 'secondary')}
+          {slot( 0, 'active', intraChordIdx)}
+          {slot(+1, 'active')}
+          {slot(+2, 'secondary')}
+        </>
+      )}
     </div>
   );
 }

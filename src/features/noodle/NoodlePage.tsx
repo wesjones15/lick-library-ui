@@ -427,7 +427,7 @@ export default function NoodlePage() {
   const showBackLink = !!(activeSongId && loadedViaUrl.current && urlSongId === activeSongId);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col gap-2">
+    <div className={`max-w-6xl mx-auto px-6 py-4 flex flex-col gap-2 ${noodleMode === 'song' ? 'min-h-[calc(100vh-3.5rem)]' : ''}`}>
 
       {/* Header row */}
       <div className="flex items-center">
@@ -732,7 +732,12 @@ export default function NoodlePage() {
 
       {/* Karaoke display */}
       {noodleMode === 'song' && contentLines.length > 0 && (
-        <KaraokeDisplay lines={contentLines} currentIdx={currentIdx} />
+        <KaraokeDisplay
+          lines={contentLines}
+          currentIdx={currentIdx}
+          intraChordIdx={intraChordIdx}
+          guitarKaraoke={guitarKaraokeMode}
+        />
       )}
 
       {showLibrary && (
