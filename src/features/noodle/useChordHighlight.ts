@@ -40,14 +40,14 @@ function blankDots(stringCount: number): NeckDot[][] {
   );
 }
 
-function chordToneSemitones(chordName: string): Set<number> | null {
+function chordToneSemitones(chordName: string, capoOffset: number): Set<number> | null {
   const parsed = parseChordName(chordName);
   if (!parsed) return null;
   const baseQuality = parsed.quality.replace(/\/\d+$/, '');
   const rootSemitone = ENUM_SEMITONES[parsed.root];
   if (rootSemitone === undefined) return null;
   const intervals = QUALITY_INTERVALS[baseQuality] ?? QUALITY_INTERVALS[''];
-  return new Set(intervals.map(i => (rootSemitone + i) % 12));
+  return new Set(intervals.map(i => (rootSemitone + i + capoOffset) % 12));
 }
 
 export function useChordHighlight(
@@ -55,6 +55,7 @@ export function useChordHighlight(
   root: string,
   mode: string,
   instrument: string,
+  capoOffset: number,
 ): NeckDot[][] {
   const stringCount = getStringCount(instrument);
   const [scaleDots, setScaleDots] = useState<NeckDot[][]>(() => blankDots(stringCount));
@@ -78,7 +79,7 @@ export function useChordHighlight(
 
   return useMemo(() => {
     if (!chordName) return scaleDots;
-    const tones = chordToneSemitones(chordName);
+    const tones = chordToneSemitones(chordName, capoOffset);
     if (!tones) return scaleDots;
 
     return scaleDots.map(string =>
@@ -89,5 +90,5 @@ export function useChordHighlight(
         return { ...dot, highlighted: tones.has(semitone) };
       })
     );
-  }, [scaleDots, chordName]);
+  }, [scaleDots, chordName, capoOffset]);
 }
