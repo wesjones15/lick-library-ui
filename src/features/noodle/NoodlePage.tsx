@@ -145,11 +145,6 @@ export default function NoodlePage() {
     }).catch(() => {});
   }, [activeSongId, localSemitones, noodleMode]);
 
-  useEffect(() => {
-    setFreeChords(parseFreeChords(freeInput));
-    setChordIdx(0);
-  }, [freeInput]);
-
   const contentLines = useMemo((): ChordLyric[] => {
     if (!song) return [];
     return song.chordLines.filter(
@@ -157,6 +152,11 @@ export default function NoodlePage() {
         !isTabLine(l) && !((l as ChordLyric).chords.trim() === '' && (l as ChordLyric).lyrics.trim() === '')
     );
   }, [song]);
+
+  const freeChordLines = useMemo((): ChordLyric[] =>
+    freeChords.map(c => ({ chords: c, lyrics: '', fontSize: 0 })),
+    [freeChords]
+  );
 
   useEffect(() => {
     if (!contentLines.length) return;
@@ -235,7 +235,11 @@ export default function NoodlePage() {
         });
       }
     } else if (noodleMode === 'freeChords' && freeChords.length > 0) {
-      setChordIdx(i => (i + 1) % freeChords.length);
+      halfBeatRef.current++;
+      if (halfBeatRef.current >= 2) {
+        halfBeatRef.current = 0;
+        setChordIdx(i => (i + 1) % freeChords.length);
+      }
     }
   };
 
@@ -286,6 +290,25 @@ export default function NoodlePage() {
     setIsPlaying(false);
   }
 
+  function handleFreeSubmit() {
+    const chords = parseFreeChords(freeInput);
+    setFreeChords(chords);
+    setChordIdx(0);
+    halfBeatRef.current = 0;
+    if (!chords.length) return;
+    const unique = [...new Set(chords)];
+    Promise.all(
+      unique.map(async name => {
+        const parsed = parseChordName(name);
+        if (!parsed) return [name, []] as const;
+        const voicings = await getChordVoicings(parsed.root, parsed.quality, instrument);
+        return [name, voicings] as const;
+      })
+    ).then(results =>
+      setCachedVoicings(prev => ({ ...prev, ...Object.fromEntries(results) }))
+    ).catch(() => {});
+  }
+
   const btnBase = 'px-3 py-1 rounded-lg text-sm font-medium transition-colors border';
   const btnActive = `${btnBase} bg-indigo-600 text-white border-indigo-600`;
   const btnInactive = `${btnBase} border-gray-300 text-gray-600 hover:bg-gray-50`;
@@ -302,7 +325,7 @@ export default function NoodlePage() {
           <h1 className="text-3xl font-bold text-gray-900 shrink-0">Noodle</h1>
           <div className="flex gap-2 shrink-0">
             <button
-              onClick={() => { setIsPlaying(false); setNoodleMode('freeChords'); }}
+              onClick={() => { setIsPlaying(false); setNoodleMode('freeChords'); halfBeatRef.current = 0; setChordIdx(0); }}
               className={noodleMode === 'freeChords' ? btnActive : btnInactive}
             >
               Free Chords
@@ -350,7 +373,7 @@ export default function NoodlePage() {
           {noodleMode === 'freeChords' && activeChord && (
             <ChordInfoBox
               chordName={activeChord}
-              voicing={null}
+              voicing={activeVoicing}
               instrument={instrument}
               capoOffset={0}
               pulsed={pulsed}
@@ -452,15 +475,35 @@ export default function NoodlePage() {
 
       {/* Free chords section */}
       {noodleMode === 'freeChords' && (
-        <div>
-          <label className="text-xs text-gray-400 mb-1 block">Chord progression — separate measures with |</label>
-          <textarea
-            value={freeInput}
-            onChange={e => setFreeInput(e.target.value)}
-            placeholder="G | Am | F | C"
-            rows={2}
-            className="w-full border border-gray-200 rounded-lg p-3 font-mono text-sm focus:outline-none focus:border-indigo-400 resize-none"
-          />
+        <div className="grid grid-cols-3 gap-4 items-start">
+          {/* Left: input + submit */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs text-gray-400">Chord progression — separate with |</label>
+            <textarea
+              value={freeInput}
+              onChange={e => setFreeInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleFreeSubmit(); }}
+              placeholder="G | Am | F | C"
+              rows={3}
+              className="w-full border border-gray-200 rounded-lg p-3 font-mono text-sm focus:outline-none focus:border-indigo-400 resize-none"
+            />
+            <button
+              onClick={handleFreeSubmit}
+              className="self-start px-3 py-1 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+            >
+              Apply
+            </button>
+          </div>
+
+          {/* Center: karaoke display */}
+          <div>
+            {freeChordLines.length > 0 && (
+              <KaraokeDisplay lines={freeChordLines} currentIdx={chordIdx} />
+            )}
+          </div>
+
+          {/* Right: empty */}
+          <div />
         </div>
       )}
 
