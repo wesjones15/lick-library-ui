@@ -121,7 +121,7 @@ export default function Layout() {
             </div>
 
             {/* Right-side mini bar actions */}
-            <div className="ml-auto flex items-center gap-3 shrink-0">
+            <div className="ml-auto flex items-center gap-5 shrink-0">
 
               {/* Revealed icons — only when expanded */}
               {iconsOpen && (
@@ -129,7 +129,7 @@ export default function Layout() {
                   {miniActions?.viewMode === 'scroll' && (
                     <button
                       onClick={() => miniActions?.toggleAutoScroll()}
-                      className={`text-xl leading-none transition-colors ${miniActions?.autoScrolling ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
+                      className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.autoScrolling ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
                       aria-label={miniActions?.autoScrolling ? 'Pause autoscroll' : 'Start autoscroll'}
                     >
                       {miniActions?.autoScrolling ? '⏸' : '▶'}
@@ -137,10 +137,10 @@ export default function Layout() {
                   )}
 
                   {miniActions?.hasPlaylist && (
-                    <div className="relative" ref={playlistPanelRef}>
+                    <div className="relative w-8 h-8 flex items-center justify-center" ref={playlistPanelRef}>
                       <button
                         onClick={() => setPlaylistPanelOpen(o => !o)}
-                        className={`text-xl leading-none transition-colors ${playlistPanelOpen ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
+                        className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${playlistPanelOpen ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
                         aria-label="Playlist controls"
                       >
                         🎵
@@ -178,7 +178,7 @@ export default function Layout() {
                   {miniActions?.hasTabLines && (
                     <button
                       onClick={() => miniActions?.toggleTabLicks()}
-                      className={`text-xl leading-none transition-colors ${miniActions?.showTabLicks ? 'text-red-500' : 'text-gray-400 hover:text-gray-600'}`}
+                      className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.showTabLicks ? 'text-red-500' : 'text-gray-400 hover:text-gray-600'}`}
                       aria-label="Tab positions"
                     >
                       ≡
@@ -187,7 +187,7 @@ export default function Layout() {
 
                   <button
                     onClick={() => miniActions?.toggleViewMode()}
-                    className={`text-xl leading-none transition-colors ${miniActions?.viewMode === 'scroll' ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
+                    className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.viewMode === 'scroll' ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
                     aria-label="Toggle view"
                   >
                     {miniActions?.viewMode === 'scroll' ? '↕' : '⊞'}
@@ -195,17 +195,17 @@ export default function Layout() {
 
                   <button
                     onClick={() => miniActions?.openTranspose()}
-                    className="text-xl leading-none text-gray-400 hover:text-indigo-500 transition-colors"
+                    className="w-8 h-8 flex items-center justify-center text-xl leading-none text-gray-400 hover:text-indigo-500 transition-colors"
                     aria-label="Capo / Transpose"
                   >
                     Δ
                   </button>
 
                   {miniActions && (
-                    <div className="relative" ref={instrumentPanelRef}>
+                    <div className="relative w-8 h-8 flex items-center justify-center" ref={instrumentPanelRef}>
                       <button
                         onClick={() => setInstrumentPanelOpen(o => !o)}
-                        className={`text-xl leading-none transition-colors ${instrumentPanelOpen ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
+                        className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${instrumentPanelOpen ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
                         aria-label="Instrument"
                       >
                         🎸
@@ -225,7 +225,7 @@ export default function Layout() {
 
                   <button
                     onClick={() => { miniActions?.navigateManage(); setIconsOpen(false); }}
-                    className="text-xl leading-none text-gray-400 hover:text-indigo-500 transition-colors"
+                    className="w-8 h-8 flex items-center justify-center text-xl leading-none text-gray-400 hover:text-indigo-500 transition-colors"
                     aria-label="Manage"
                   >
                     ✎
@@ -236,7 +236,7 @@ export default function Layout() {
               {/* Toggle button: ⋮ when closed, ✕ when open — leftmost of right section */}
               <button
                 onClick={() => { setIconsOpen(o => !o); setPlaylistPanelOpen(false); setInstrumentPanelOpen(false); }}
-                className={`text-xl leading-none transition-colors ${iconsOpen ? 'text-indigo-500 hover:text-indigo-700' : 'text-gray-400 hover:text-indigo-500'}`}
+                className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${iconsOpen ? 'text-indigo-500 hover:text-indigo-700' : 'text-gray-400 hover:text-indigo-500'}`}
                 aria-label={iconsOpen ? 'Less options' : 'More options'}
               >
                 {iconsOpen ? '✕' : '⋮'}
@@ -245,7 +245,7 @@ export default function Layout() {
               {/* Add to playlist — always visible */}
               <button
                 onClick={() => miniActions?.addToPlaylist()}
-                className="text-xl leading-none text-blue-400 hover:text-blue-600 transition-colors"
+                className="w-8 h-8 flex items-center justify-center text-xl leading-none text-blue-400 hover:text-blue-600 transition-colors"
                 aria-label="Add to playlist"
               >
                 ♪+
@@ -254,7 +254,7 @@ export default function Layout() {
               {/* Show chords — always visible */}
               <button
                 onClick={() => setShowChords(v => !v)}
-                className={`text-xl leading-none transition-colors ${showChords ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
+                className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${showChords ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
                 aria-label="Show chords"
                 title="Show chords"
               >
@@ -264,7 +264,7 @@ export default function Layout() {
               {/* Restore — always rightmost */}
               <button
                 onClick={() => setCollapsed(false)}
-                className="text-gray-400 hover:text-indigo-500 transition-colors text-xl leading-none"
+                className="w-8 h-8 flex items-center justify-center text-xl leading-none text-gray-400 hover:text-indigo-500 transition-colors"
                 aria-label="Restore full view"
                 title="Restore full view"
               >
