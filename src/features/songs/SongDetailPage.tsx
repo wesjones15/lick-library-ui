@@ -82,7 +82,7 @@ export default function SongDetailPage() {
   const location = useLocation();
   const playlistState = (location.state as PlaylistNavState | null) ?? null;
   const { setBpm, setIsPlaying, bpm, isPlaying } = useMetronomeContext();
-  const { setInfo, collapsed, showChords, setShowChords } = useSongNavContext();
+  const { setInfo, collapsed, showChords, setShowChords, setMiniActions } = useSongNavContext();
   const isPortrait = usePortrait();
   const [semitones, setSemitones] = useState(() => playlistState?.entries[playlistState.currentIndex]?.keyOffset ?? 0);
   const [capo, setCapo] = useState(0);
@@ -157,6 +157,47 @@ export default function SongDetailPage() {
     return () => setInfo(null);
   }, [song, semitones, capo]);
 
+  const hasTabLines = song?.chordLines.some(line => (line as GuitarTabLine).type === 'tab') ?? false;
+  const hasSongLicks = Object.keys(song?.songLicks ?? {}).length > 0;
+
+  // Populate mini-navbar action bundle
+  useEffect(() => {
+    if (!song) { setMiniActions(null); return; }
+    const ps = playlistState;
+    setMiniActions({
+      addToPlaylist: () => setAddToPlaylistOpen(true),
+      openTranspose: () => setCapTranspOpen(true),
+      navigateManage: () => navigate(`/song/${id}/manage?semitones=${semitones}`),
+      viewMode,
+      toggleViewMode: () => setViewMode(m => m === 'columns' ? 'scroll' : 'columns'),
+      autoScrolling,
+      toggleAutoScroll: () => setAutoScrolling(a => !a),
+      showTabLicks,
+      toggleTabLicks: handleTabLicksToggle,
+      hasTabLines,
+      hasPlaylist: !!ps,
+      playlistName: ps?.playlistName ?? null,
+      playlistCurrentIndex: ps?.currentIndex ?? 0,
+      playlistTotal: ps?.entries.length ?? 0,
+      onPlaylistPrev: () => {
+        if (!ps) return;
+        const idx = (ps.currentIndex - 1 + ps.entries.length) % ps.entries.length;
+        const e = ps.entries[idx];
+        navigate(`/song/${e.songId}`, { state: { ...ps, currentIndex: idx } });
+      },
+      onPlaylistNext: () => {
+        if (!ps) return;
+        const idx = (ps.currentIndex + 1) % ps.entries.length;
+        const e = ps.entries[idx];
+        navigate(`/song/${e.songId}`, { state: { ...ps, currentIndex: idx } });
+      },
+      onPlaylistBack: () => { if (ps) navigate(`/playlist/${ps.playlistId}`); },
+      instrument,
+      setInstrument,
+    });
+    return () => setMiniActions(null);
+  }, [song, viewMode, autoScrolling, showTabLicks, hasTabLines, playlistState, instrument, semitones, id]);
+
   useEffect(() => {
     if (!overflowOpen) return;
     function handle(e: MouseEvent) {
@@ -201,9 +242,6 @@ export default function SongDetailPage() {
   }, [viewMode, song, semitones, capo, isPortrait, scrollFontScale]);
 
   const btnClass = "w-8 h-8 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-lg font-medium";
-
-  const hasTabLines = song?.chordLines.some(line => (line as GuitarTabLine).type === 'tab') ?? false;
-  const hasSongLicks = Object.keys(song?.songLicks ?? {}).length > 0;
 
   // Compute Note enum key for the lick positions API (e.g. "C_SHARP")
   const DISPLAY_TO_NOTE: Record<string, string> = {
@@ -313,6 +351,17 @@ export default function SongDetailPage() {
 
             {/* Right: action buttons + capo/transpose */}
             <div className="flex items-center gap-2 md:gap-4">
+
+              {/* Play/pause — inline in toolbar when scroll mode is active */}
+              {viewMode === 'scroll' && (
+                <button
+                  onClick={() => setAutoScrolling(a => !a)}
+                  className={`w-8 h-8 rounded-lg border flex items-center justify-center text-xl leading-none transition-colors ${autoScrolling ? 'border-indigo-300 bg-indigo-50 text-indigo-500' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+                  aria-label={autoScrolling ? 'Pause autoscroll' : 'Start autoscroll'}
+                >
+                  {autoScrolling ? '⏸' : '▶'}
+                </button>
+              )}
 
               {/* Desktop (md+): named text buttons */}
               {hasTabLines && (
@@ -516,16 +565,6 @@ export default function SongDetailPage() {
 
             </div>
           </div>
-          {viewMode === 'scroll' && (
-            <button
-              onClick={() => setAutoScrolling(a => !a)}
-              style={{ position: 'absolute', top: '100%', marginTop: '4px', left: 0 }}
-              className={`text-xl leading-none transition-colors ${autoScrolling ? 'text-indigo-500' : 'text-gray-300 hover:text-gray-500'}`}
-              aria-label={autoScrolling ? 'Pause autoscroll' : 'Start autoscroll'}
-            >
-              {autoScrolling ? '⏸' : '▶'}
-            </button>
-          )}
           </div>
           )} {/* end !collapsed */}
 

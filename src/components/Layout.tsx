@@ -4,6 +4,8 @@ import type { ReactNode } from 'react';
 import Metronome from '../core/metronome/MetronomeWidget';
 import { useSongNavContext } from '../core/context/SongNavContext';
 import { useMetronomeContext } from '../core/metronome/MetronomeContext';
+import InstrumentSelector from './InstrumentSelector';
+import type { InstrumentName } from '../core/useInstrument';
 
 const NAV_LINKS: { label: ReactNode; to: string }[] = [
   { label: 'Licks', to: '/licks' },
@@ -24,10 +26,15 @@ const NAV_LINKS: { label: ReactNode; to: string }[] = [
 
 export default function Layout() {
   const { pathname } = useLocation();
-  const { info, collapsed, setCollapsed, showChords, setShowChords } = useSongNavContext();
+  const { info, collapsed, setCollapsed, showChords, setShowChords, miniActions } = useSongNavContext();
   const { setBpm, setIsPlaying, bpm, isPlaying } = useMetronomeContext();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [iconsOpen, setIconsOpen] = useState(false);
+  const [playlistPanelOpen, setPlaylistPanelOpen] = useState(false);
+  const [instrumentPanelOpen, setInstrumentPanelOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const playlistPanelRef = useRef<HTMLDivElement>(null);
+  const instrumentPanelRef = useRef<HTMLDivElement>(null);
 
   // Close hamburger on outside click
   useEffect(() => {
@@ -41,10 +48,40 @@ export default function Layout() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!instrumentPanelOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (instrumentPanelRef.current && !instrumentPanelRef.current.contains(e.target as Node)) {
+        setInstrumentPanelOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [instrumentPanelOpen]);
+
+  // Close playlist panel on outside click
+  useEffect(() => {
+    if (!playlistPanelOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (playlistPanelRef.current && !playlistPanelRef.current.contains(e.target as Node)) {
+        setPlaylistPanelOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [playlistPanelOpen]);
+
   // Reset collapsed when leaving song detail
   useEffect(() => {
     if (!info) setCollapsed(false);
   }, [info]);
+
+  // Reset expanded state when collapsing/expanding mini bar
+  useEffect(() => {
+    setIconsOpen(false);
+    setPlaylistPanelOpen(false);
+    setInstrumentPanelOpen(false);
+  }, [collapsed]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -82,18 +119,152 @@ export default function Layout() {
                 <span className="text-xs text-gray-400">Capo {info.capo}</span>
               )}
             </div>
-            <div className="ml-auto flex items-center shrink-0">
+
+            {/* Right-side mini bar actions */}
+            <div className="ml-auto flex items-center gap-3 shrink-0">
+
+              {/* Revealed icons — only when expanded */}
+              {iconsOpen && (
+                <>
+                  {miniActions?.viewMode === 'scroll' && (
+                    <button
+                      onClick={() => miniActions?.toggleAutoScroll()}
+                      className={`text-xl leading-none transition-colors ${miniActions?.autoScrolling ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
+                      aria-label={miniActions?.autoScrolling ? 'Pause autoscroll' : 'Start autoscroll'}
+                    >
+                      {miniActions?.autoScrolling ? '⏸' : '▶'}
+                    </button>
+                  )}
+
+                  {miniActions?.hasPlaylist && (
+                    <div className="relative" ref={playlistPanelRef}>
+                      <button
+                        onClick={() => setPlaylistPanelOpen(o => !o)}
+                        className={`text-xl leading-none transition-colors ${playlistPanelOpen ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
+                        aria-label="Playlist controls"
+                      >
+                        🎵
+                      </button>
+                      {playlistPanelOpen && (
+                        <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-3 flex flex-col gap-2">
+                          <button
+                            onClick={() => { miniActions?.onPlaylistBack(); setPlaylistPanelOpen(false); setIconsOpen(false); }}
+                            className="text-xs text-left text-gray-500 hover:text-indigo-500 transition-colors"
+                          >
+                            ← {miniActions?.playlistName}
+                          </button>
+                          <div className="flex items-center justify-between">
+                            <button
+                              onClick={() => miniActions?.onPlaylistPrev()}
+                              className="text-xs px-2 py-1 rounded border border-gray-200 text-gray-500 hover:bg-gray-50"
+                            >
+                              Prev
+                            </button>
+                            <span className="text-xs text-gray-400">
+                              {(miniActions?.playlistCurrentIndex ?? 0) + 1}/{miniActions?.playlistTotal ?? 0}
+                            </span>
+                            <button
+                              onClick={() => miniActions?.onPlaylistNext()}
+                              className="text-xs px-2 py-1 rounded border border-gray-200 text-gray-500 hover:bg-gray-50"
+                            >
+                              Next
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {miniActions?.hasTabLines && (
+                    <button
+                      onClick={() => miniActions?.toggleTabLicks()}
+                      className={`text-xl leading-none transition-colors ${miniActions?.showTabLicks ? 'text-red-500' : 'text-gray-400 hover:text-gray-600'}`}
+                      aria-label="Tab positions"
+                    >
+                      ≡
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => miniActions?.toggleViewMode()}
+                    className={`text-xl leading-none transition-colors ${miniActions?.viewMode === 'scroll' ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
+                    aria-label="Toggle view"
+                  >
+                    {miniActions?.viewMode === 'scroll' ? '↕' : '⊞'}
+                  </button>
+
+                  <button
+                    onClick={() => miniActions?.openTranspose()}
+                    className="text-xl leading-none text-gray-400 hover:text-indigo-500 transition-colors"
+                    aria-label="Capo / Transpose"
+                  >
+                    Δ
+                  </button>
+
+                  {miniActions && (
+                    <div className="relative" ref={instrumentPanelRef}>
+                      <button
+                        onClick={() => setInstrumentPanelOpen(o => !o)}
+                        className={`text-xl leading-none transition-colors ${instrumentPanelOpen ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
+                        aria-label="Instrument"
+                      >
+                        🎸
+                      </button>
+                      {instrumentPanelOpen && (
+                        <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-2">
+                          <InstrumentSelector
+                            instrument={miniActions.instrument as InstrumentName}
+                            onInstrumentChange={v => { miniActions.setInstrument(v); setInstrumentPanelOpen(false); }}
+                            excludeCustom
+                            compact
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => { miniActions?.navigateManage(); setIconsOpen(false); }}
+                    className="text-xl leading-none text-gray-400 hover:text-indigo-500 transition-colors"
+                    aria-label="Manage"
+                  >
+                    ✎
+                  </button>
+                </>
+              )}
+
+              {/* Toggle button: ⋮ when closed, ✕ when open — leftmost of right section */}
+              <button
+                onClick={() => { setIconsOpen(o => !o); setPlaylistPanelOpen(false); setInstrumentPanelOpen(false); }}
+                className={`text-xl leading-none transition-colors ${iconsOpen ? 'text-indigo-500 hover:text-indigo-700' : 'text-gray-400 hover:text-indigo-500'}`}
+                aria-label={iconsOpen ? 'Less options' : 'More options'}
+              >
+                {iconsOpen ? '✕' : '⋮'}
+              </button>
+
+              {/* Add to playlist — always visible */}
+              <button
+                onClick={() => miniActions?.addToPlaylist()}
+                className="text-xl leading-none text-blue-400 hover:text-blue-600 transition-colors"
+                aria-label="Add to playlist"
+              >
+                ♪+
+              </button>
+
+              {/* Show chords — always visible */}
               <button
                 onClick={() => setShowChords(v => !v)}
-                className={`text-lg leading-none transition-colors ${showChords ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
+                className={`text-xl leading-none transition-colors ${showChords ? 'text-indigo-500' : 'text-gray-400 hover:text-indigo-500'}`}
                 aria-label="Show chords"
                 title="Show chords"
               >
                 ♬
               </button>
+
+              {/* Restore — always rightmost */}
               <button
                 onClick={() => setCollapsed(false)}
-                className="text-gray-400 hover:text-indigo-500 transition-colors text-xl leading-none ml-4"
+                className="text-gray-400 hover:text-indigo-500 transition-colors text-xl leading-none"
                 aria-label="Restore full view"
                 title="Restore full view"
               >
