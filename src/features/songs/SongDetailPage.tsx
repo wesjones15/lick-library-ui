@@ -287,41 +287,6 @@ export default function SongDetailPage() {
           {!collapsed && (
           <div className={viewMode === 'scroll' ? 'sticky top-14 z-40 bg-white border-b border-gray-100 relative' : ''}>
 
-          {/* Playlist breadcrumb + navigation */}
-          {playlistState && (() => {
-            const { playlistId, playlistName, entries: plEntries, currentIndex } = playlistState;
-            function navigateTo(idx: number) {
-              const entry = plEntries[idx];
-              navigate(`/song/${entry.songId}`, {
-                state: { playlistId, playlistName, entries: plEntries, currentIndex: idx },
-              });
-            }
-
-            return (
-              <div className="flex items-center mb-1">
-                <div className="flex-1">
-                  <Link
-                    to={`/playlist/${playlistId}`}
-                    className="text-xs px-2 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
-                  >
-                    ← {playlistName}
-                  </Link>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => navigateTo((currentIndex - 1 + plEntries.length) % plEntries.length)}
-                    className="text-xs px-2 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
-                  >← Prev</button>
-                  <span className="text-xs text-gray-300">{currentIndex + 1}/{plEntries.length}</span>
-                  <button
-                    onClick={() => navigateTo((currentIndex + 1) % plEntries.length)}
-                    className="text-xs px-2 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
-                  >Next →</button>
-                </div>
-                <div className="flex-1" />
-              </div>
-            );
-          })()}
 
           <div className="flex items-start justify-between mb-1">
             {/* Left: title + meta */}

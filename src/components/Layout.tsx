@@ -332,10 +332,32 @@ export default function Layout() {
             </div>
 
             <div className="ml-auto flex items-center gap-3">
+              {miniActions?.hasPlaylist && (
+                <>
+                  <button
+                    onClick={() => miniActions?.onPlaylistBack()}
+                    className="w-6 h-6 flex items-center justify-center text-base text-gray-400 hover:text-indigo-500 transition-colors"
+                    aria-label="Back to playlist"
+                  >↩</button>
+                  <button
+                    onClick={() => miniActions?.onPlaylistPrev()}
+                    className="w-6 h-6 flex items-center justify-center text-base text-gray-400 hover:text-indigo-500 transition-colors"
+                    aria-label="Previous song"
+                  >←</button>
+                  <span className="text-xs text-gray-400 tabular-nums">
+                    {(miniActions?.playlistCurrentIndex ?? 0) + 1}/{miniActions?.playlistTotal ?? 0}
+                  </span>
+                  <button
+                    onClick={() => miniActions?.onPlaylistNext()}
+                    className="w-6 h-6 flex items-center justify-center text-base text-gray-400 hover:text-indigo-500 transition-colors"
+                    aria-label="Next song"
+                  >→</button>
+                </>
+              )}
               {info && (
                 <button
                   onClick={() => setCollapsed(true)}
-                  className="text-gray-400 hover:text-indigo-500 transition-colors text-2xl leading-none"
+                  className="text-gray-400 hover:text-indigo-500 transition-colors text-2xl leading-none ml-4"
                   aria-label="Collapse song view"
                   title="Collapse navbar"
                 >
