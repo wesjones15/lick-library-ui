@@ -81,8 +81,45 @@ function halfBeatsPerChord(n: number, total: number): number[] {
   return Array.from({ length: n }, (_, i) => i < x ? 2 : 1);
 }
 
-function parseFreeChords(input: string): string[] {
-  return input.split('|').map(s => s.trim()).filter(s => /^[A-G]/.test(s));
+function parseFreeLines(input: string): string[][] {
+  return input.split('\n')
+    .map(line => line.split('|').map(s => s.trim()).filter(s => /^[A-G]/.test(s)))
+    .filter(line => line.length > 0);
+}
+
+function FreeChordsKaraokeSlot({
+  line, intraIdx, variant,
+}: { line: string[] | undefined; intraIdx?: number; variant: 'prev' | 'current' | 'next' }) {
+  if (!line) return <div className="h-8" />;
+  const isCurrent = variant === 'current';
+  return (
+    <div className={`font-mono transition-opacity ${isCurrent ? 'text-base' : 'text-sm opacity-35'}`}>
+      <div style={{ color: '#4f46e5', whiteSpace: 'pre' }}>
+        {line.map((chord, i) => (
+          <span key={i}>
+            {i > 0 && ' | '}
+            {isCurrent && i === intraIdx
+              ? <span className="font-bold">{chord}</span>
+              : chord}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FreeChordsKaraoke({ lines, currentLineIdx, intraIdx }: {
+  lines: string[][];
+  currentLineIdx: number;
+  intraIdx: number;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl overflow-x-auto">
+      <FreeChordsKaraokeSlot line={lines[currentLineIdx - 1]} variant="prev" />
+      <FreeChordsKaraokeSlot line={lines[currentLineIdx]} intraIdx={intraIdx} variant="current" />
+      <FreeChordsKaraokeSlot line={lines[currentLineIdx + 1]} variant="next" />
+    </div>
+  );
 }
 
 function isTabLine(l: { type?: string }): l is GuitarTabLine {
@@ -115,6 +152,7 @@ export default function NoodlePage() {
 
   const [freeInput, setFreeInput] = useState('');
   const [freeChords, setFreeChords] = useState<string[]>([]);
+  const [freeLines, setFreeLines] = useState<string[][]>([]);
   const [chordIdx, setChordIdx] = useState(0);
   const [freeRoot, setFreeRoot] = useState('C');
   const [freeMode, setFreeMode] = useState('IONIAN');
@@ -153,10 +191,23 @@ export default function NoodlePage() {
     );
   }, [song]);
 
-  const freeChordLines = useMemo((): ChordLyric[] =>
-    freeChords.map(c => ({ chords: c, lyrics: '', fontSize: 0 })),
-    [freeChords]
-  );
+  const currentFreeLineIdx = useMemo(() => {
+    let offset = 0;
+    for (let i = 0; i < freeLines.length; i++) {
+      if (chordIdx < offset + freeLines[i].length) return i;
+      offset += freeLines[i].length;
+    }
+    return Math.max(0, freeLines.length - 1);
+  }, [chordIdx, freeLines]);
+
+  const currentFreeIntraIdx = useMemo(() => {
+    let offset = 0;
+    for (let i = 0; i < freeLines.length; i++) {
+      if (chordIdx < offset + freeLines[i].length) return chordIdx - offset;
+      offset += freeLines[i].length;
+    }
+    return 0;
+  }, [chordIdx, freeLines]);
 
   useEffect(() => {
     if (!contentLines.length) return;
@@ -291,7 +342,9 @@ export default function NoodlePage() {
   }
 
   function handleFreeSubmit() {
-    const chords = parseFreeChords(freeInput);
+    const lines = parseFreeLines(freeInput);
+    const chords = lines.flat();
+    setFreeLines(lines);
     setFreeChords(chords);
     setChordIdx(0);
     halfBeatRef.current = 0;
@@ -478,7 +531,7 @@ export default function NoodlePage() {
         <div className="grid grid-cols-3 gap-4 items-start">
           {/* Left: input + submit */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs text-gray-400">Chord progression — separate with |</label>
+            <label className="text-xs text-gray-400">Separate chords with |, lines with ↵</label>
             <textarea
               value={freeInput}
               onChange={e => setFreeInput(e.target.value)}
@@ -497,8 +550,8 @@ export default function NoodlePage() {
 
           {/* Center: karaoke display */}
           <div>
-            {freeChordLines.length > 0 && (
-              <KaraokeDisplay lines={freeChordLines} currentIdx={chordIdx} />
+            {freeLines.length > 0 && (
+              <FreeChordsKaraoke lines={freeLines} currentLineIdx={currentFreeLineIdx} intraIdx={currentFreeIntraIdx} />
             )}
           </div>
 
