@@ -272,7 +272,7 @@ export default function NoodlePage() {
 
   const { soundingRoot, soundingMode } = useMemo(() => {
     if (noodleMode === 'freeChords') return { soundingRoot: freeRoot, soundingMode: freeMode };
-    if (noodleMode !== 'song' || !song?.originalKey) return { soundingRoot: '', soundingMode: 'IONIAN' };
+    if (noodleMode !== 'song' || !song) return { soundingRoot: '', soundingMode: 'IONIAN' };
     const totalOffset = localSemitones + localCapo - (song.capo ?? 0);
     return parseSongKey(song.originalKey, totalOffset);
   }, [noodleMode, song, localSemitones, localCapo, freeRoot, freeMode]);
@@ -310,15 +310,7 @@ export default function NoodlePage() {
 
       halfBeatRef.current++;
 
-      let accum = 0;
-      let newChordIdx = Math.max(0, tokens.length - 1);
-      for (let i = 0; i < dist.length; i++) {
-        accum += dist[i];
-        if (halfBeatRef.current <= accum) { newChordIdx = i; break; }
-      }
-      setIntraChordIdx(newChordIdx);
-
-      if (halfBeatRef.current >= total) {
+      if (halfBeatRef.current > total) {
         halfBeatRef.current = 0;
         setIntraChordIdx(0);
         setCurrentIdx(i => {
@@ -330,7 +322,16 @@ export default function NoodlePage() {
           }
           return next;
         });
+        return;
       }
+
+      let accum = 0;
+      let newChordIdx = Math.max(0, tokens.length - 1);
+      for (let i = 0; i < dist.length; i++) {
+        accum += dist[i];
+        if (halfBeatRef.current <= accum) { newChordIdx = i; break; }
+      }
+      setIntraChordIdx(newChordIdx);
     } else if (noodleMode === 'freeChords' && freeChords.length > 0) {
       if (!freeHasAdvanced) {
         // First call after warmup: start the clock on chord 0, don't advance yet
@@ -367,6 +368,7 @@ export default function NoodlePage() {
     setShowLibrary(false);
     setIsPlaying(false);
     loadedViaUrl.current = false;
+    setSong(null);
     setActiveSongId(id);
     setLocalSemitones(0);
     setLocalCapo(0);
@@ -526,7 +528,7 @@ export default function NoodlePage() {
       </div>
 
       {/* Guitar Neck */}
-      {!guitarKaraokeMode && <GuitarNeck dots={dots} stringLabels={getStringLabels(instrument)} />}
+      {!guitarKaraokeMode && <GuitarNeck dots={dots} stringLabels={getStringLabels(instrument)} bpm={isPlaying ? bpm : undefined} />}
 
       {/* Controls row */}
       <div className="flex items-center gap-3 flex-wrap">

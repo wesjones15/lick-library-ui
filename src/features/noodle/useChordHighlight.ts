@@ -76,8 +76,10 @@ export function useChordHighlight(
 
   useEffect(() => {
     if (!root || !mode) return;
+    let cancelled = false;
     const enumRoot = root === 'Bb' ? 'B_FLAT' : root.replace('#', '_SHARP').toUpperCase();
     getScalePositions(enumRoot, mode, instrument).then(res => {
+      if (cancelled) return;
       const dots = blankDots(getStringCount(instrument));
       for (const pos of res.positions) {
         if (pos.string >= 0 && pos.string < dots.length && pos.fret >= 0 && pos.fret <= FRET_COUNT) {
@@ -88,8 +90,23 @@ export function useChordHighlight(
           };
         }
       }
+      // Populate note for off-scale positions so chord-tone highlighting can reach them
+      const openSemitones = INSTRUMENT_OPEN_SEMITONES[instrument];
+      if (openSemitones) {
+        for (let si = 0; si < dots.length; si++) {
+          for (let fret = 0; fret <= FRET_COUNT; fret++) {
+            if (!dots[si][fret].note) {
+              dots[si][fret] = {
+                ...dots[si][fret],
+                note: CHROMATIC_NOTES[(openSemitones[si] + fret) % 12],
+              };
+            }
+          }
+        }
+      }
       setScaleDots(dots);
     }).catch(() => {});
+    return () => { cancelled = true; };
   }, [root, mode, instrument]);
 
   return useMemo(() => {

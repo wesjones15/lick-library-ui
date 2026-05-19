@@ -23,6 +23,7 @@ interface GuitarNeckProps {
   cagedZones?: CagedZone[];
   // Labels displayed left of each string, high string first. Defaults to standard guitar.
   stringLabels?: string[];
+  bpm?: number;
 }
 
 export const DEGREE_COLORS: Record<number, string> = {
@@ -55,7 +56,8 @@ const R_RING = 13;
 
 const STRING_WEIGHTS = [0.5, 0.75, 1.0, 1.35, 1.75, 2.2]; // high e → low E
 
-export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDotClick, cagedZones, stringLabels }: GuitarNeckProps) {
+export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDotClick, cagedZones, stringLabels, bpm }: GuitarNeckProps) {
+  const pulseDuration = bpm ? `${Math.round(60000 / bpm)}ms` : '800ms';
   const n = Math.min(dots.length, 6);
   if (dots.length > 6) console.error(`GuitarNeck: max 6 strings supported, got ${dots.length}`);
   const labels = (stringLabels ?? STRING_LABELS_DEFAULT).slice(0, n);
@@ -119,12 +121,12 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           0%, 100% { stroke-width: 1; }
           50%       { stroke-width: 4; }
         }
-        .candidate-dot { animation: candidate-stroke 0.8s ease-in-out infinite; }
+        .candidate-dot { animation: candidate-stroke ${pulseDuration} ease-in-out infinite; }
         @keyframes active-stroke {
           0%, 100% { stroke-width: 1; }
           50%       { stroke-width: 4; }
         }
-        .active-dot { animation: active-stroke 0.8s ease-in-out infinite; }
+        .active-dot { animation: active-stroke ${pulseDuration} ease-in-out infinite; }
       `}</style>
       {/* Tan fretboard backdrop */}
       <rect
@@ -291,7 +293,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
                 </g>
               );
             }
-            if (dot.active) {
+            if (dot.active || dot.highlighted) {
               const fontSize = dot.note && dot.note.length > 1 ? 7 : 9;
               return (
                 <g key={`d${di}-${fret}`}>
