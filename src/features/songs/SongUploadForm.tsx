@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { uploadSong } from '../../core/api/client';
-import { CHROMATIC_NOTES, SONG_MODES } from '../../core/music';
+import { CHROMATIC_NOTES, SONG_MODES, SONG_MODE_TO_ENUM } from '../../core/music';
 
 interface Props {
   onSuccess: () => void;
@@ -26,7 +26,8 @@ export default function SongUploadForm({ onSuccess }: Props) {
       await uploadSong({
         title: title.trim(),
         artist: artist.trim() || undefined,
-        originalKey: keyRoot ? keyRoot + keyMode : undefined,
+        originalKey: keyRoot || undefined,
+        mode: keyRoot ? (SONG_MODE_TO_ENUM[keyMode] ?? 'IONIAN') : undefined,
         capo: capo ? parseInt(capo, 10) : undefined,
         tempo: tempo ? parseInt(tempo, 10) : undefined,
         rawChordSheet,

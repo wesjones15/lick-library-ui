@@ -33,6 +33,16 @@ export const SONG_MODES: { value: string; label: string }[] = [
   { value: ' Locrian',    label: 'Locrian' },
 ];
 
+export const SONG_MODE_TO_ENUM: Record<string, string> = {
+  '':            'IONIAN',
+  'm':           'AEOLIAN',
+  ' Dorian':     'DORIAN',
+  ' Phrygian':   'PHRYGIAN',
+  ' Lydian':     'LYDIAN',
+  ' Mixolydian': 'MIXOLYDIAN',
+  ' Locrian':    'LOCRIAN',
+};
+
 export const MODE_LABELS: Record<string, string> = {
   IONIAN: 'Major', DORIAN: 'Dorian', PHRYGIAN: 'Phrygian', LYDIAN: 'Lydian',
   MIXOLYDIAN: 'Mixolydian', AEOLIAN: 'Minor', LOCRIAN: 'Locrian',

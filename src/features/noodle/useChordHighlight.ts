@@ -76,11 +76,20 @@ export function useChordHighlight(
   const [scaleDots, setScaleDots] = useState<NeckDot[][]>(() => blankDots(stringCount));
 
   useEffect(() => {
-    if (!root || !mode) return;
+    console.log('[useChordHighlight] effect fired', { root, mode, instrument, refreshToken });
+    if (!root || !mode) {
+      console.log('[useChordHighlight] early return — root or mode empty');
+      return;
+    }
     let cancelled = false;
     const enumRoot = root === 'Bb' ? 'B_FLAT' : root.replace('#', '_SHARP').toUpperCase();
+    console.log('[useChordHighlight] fetching scale', { enumRoot, mode, instrument });
     getScalePositions(enumRoot, mode, instrument).then(res => {
-      if (cancelled) return;
+      if (cancelled) {
+        console.log('[useChordHighlight] fetch completed but CANCELLED', { enumRoot, mode });
+        return;
+      }
+      console.log('[useChordHighlight] fetch SUCCESS, positions:', res.positions.length);
       const dots = blankDots(getStringCount(instrument));
       for (const pos of res.positions) {
         if (pos.string >= 0 && pos.string < dots.length && pos.fret >= 0 && pos.fret <= FRET_COUNT) {
@@ -106,7 +115,7 @@ export function useChordHighlight(
         }
       }
       setScaleDots(dots);
-    }).catch(() => {});
+    }).catch(err => { console.error('[useChordHighlight] fetch FAILED', err); });
     return () => { cancelled = true; };
   }, [root, mode, instrument, refreshToken]);
 

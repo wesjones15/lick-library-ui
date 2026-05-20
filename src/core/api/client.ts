@@ -108,6 +108,7 @@ export interface SongSummary {
   title: string;
   artist: string | null;
   originalKey: string | null;
+  mode: string | null;
   canReparse: boolean;
   tempo: number | null;
 }
@@ -122,6 +123,7 @@ export interface SongDetail {
   title: string;
   artist: string | null;
   originalKey: string | null;
+  mode: string | null;
   capo: number | null;
   tempo: number | null;
   chordLines: ChordSheetLine[];
@@ -135,6 +137,7 @@ export interface UpdateSongRequest {
   title?: string;
   artist?: string;
   originalKey?: string;
+  mode?: string;
   capo?: number;
   tempo?: number;
   rawChordSheet?: string;
@@ -144,6 +147,7 @@ export interface UploadSongRequest {
   title: string;
   artist?: string;
   originalKey?: string;
+  mode?: string;
   capo?: number;
   tempo?: number;
   rawChordSheet: string;

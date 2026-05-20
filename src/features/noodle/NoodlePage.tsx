@@ -5,7 +5,7 @@ import type { SongDetail, SongSummary, ChordLyric, GuitarTabLine, ChordVoicing }
 import { parseChordName } from '../songs/parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { useMetronome } from '../../core/metronome/useMetronome';
-import { CHROMATIC_NOTES, KEY_LABEL, getStringLabels } from '../../core/music';
+import { CHROMATIC_NOTES, getStringLabels } from '../../core/music';
 import type { InstrumentName } from '../../core/useInstrument';
 import InstrumentSelector from '../../components/InstrumentSelector';
 import GuitarNeck from '../live/GuitarNeck';
@@ -26,36 +26,7 @@ const MODES_LIST = [
   { value: 'LOCRIAN',    label: 'Locrian' },
 ];
 
-const MODE_NAME_TO_ENUM: Record<string, string> = {
-  'Dorian': 'DORIAN', 'Phrygian': 'PHRYGIAN', 'Lydian': 'LYDIAN',
-  'Mixolydian': 'MIXOLYDIAN', 'Locrian': 'LOCRIAN',
-  'Ionian': 'IONIAN', 'Aeolian': 'AEOLIAN',
-};
-
 const selectClass = 'border border-gray-300 rounded-lg px-1.5 py-0.5 text-xs focus:outline-none focus:border-indigo-400 bg-white';
-
-function parseSongKey(originalKey: string | null, semitones: number): { root: string; mode: string } {
-  if (!originalKey) return { root: 'C', mode: 'IONIAN' };
-  const display = KEY_LABEL[originalKey] ?? originalKey;
-  const match = display.match(/^([A-G][#b]?)(m?)(?: (.+))?$/);
-  if (!match) return { root: 'C', mode: 'IONIAN' };
-  const [, root, minorSuffix, modeName] = match;
-  let modeEnum = 'IONIAN';
-  if (minorSuffix === 'm') modeEnum = 'AEOLIAN';
-  else if (modeName) modeEnum = MODE_NAME_TO_ENUM[modeName] ?? 'IONIAN';
-  const idx = CHROMATIC_NOTES.indexOf(root);
-  const transposedRoot = idx !== -1 ? CHROMATIC_NOTES[((idx + semitones) % 12 + 12) % 12] : root;
-  return { root: transposedRoot, mode: modeEnum };
-}
-
-function keyDisplayLabel(originalKey: string | null, semitones: number): string {
-  if (!originalKey) return '';
-  const { root, mode } = parseSongKey(originalKey, semitones);
-  const modeLabel = MODES_LIST.find(m => m.value === mode)?.label ?? '';
-  if (mode === 'IONIAN') return root;
-  if (mode === 'AEOLIAN') return `${root}m`;
-  return `${root} ${modeLabel}`;
-}
 
 function parseChordsFromLine(chords: string): string[] {
   return chords.split(/[\s|]+/)
@@ -149,8 +120,6 @@ export default function NoodlePage() {
 
   const [noodleMode, setNoodleMode] = useState<NoodleMode>(urlSongId ? 'song' : 'none');
   const [song, setSong] = useState<SongDetail | null>(null);
-  const [pendingKey, setPendingKey] = useState<string | null>(null);
-  const [pendingCapo, setPendingCapo] = useState<number>(0);
   const [activeSongId, setActiveSongId] = useState<string | null>(urlSongId);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [showLibrary, setShowLibrary] = useState(false);
@@ -275,13 +244,15 @@ export default function NoodlePage() {
 
   const { soundingRoot, soundingMode } = useMemo(() => {
     if (noodleMode === 'freeChords') return { soundingRoot: freeRoot, soundingMode: freeMode };
-    if (noodleMode !== 'song') return { soundingRoot: '', soundingMode: 'IONIAN' };
-    const key = song?.originalKey ?? pendingKey;
-    const capo = song ? (song.capo ?? 0) : pendingCapo;
-    if (!key) return { soundingRoot: '', soundingMode: 'IONIAN' };
-    const totalOffset = localSemitones + localCapo - capo;
-    return parseSongKey(key, totalOffset);
-  }, [noodleMode, song, pendingKey, pendingCapo, localSemitones, localCapo, freeRoot, freeMode]);
+    if (noodleMode !== 'song' || !song) return { soundingRoot: '', soundingMode: 'IONIAN' };
+    const totalOffset = localSemitones + localCapo - (song.capo ?? 0);
+    const root = song.originalKey ?? 'C';
+    const mode = song.mode ?? 'IONIAN';
+    const idx = CHROMATIC_NOTES.indexOf(root);
+    const transposedRoot = idx !== -1 ? CHROMATIC_NOTES[((idx + totalOffset) % 12 + 12) % 12] : root;
+    return { soundingRoot: transposedRoot, soundingMode: mode };
+  }, [noodleMode, song, localSemitones, localCapo, freeRoot, freeMode]);
+  console.log('[NoodlePage] soundingRoot:', soundingRoot, 'soundingMode:', soundingMode, 'noodleMode:', noodleMode, 'song.originalKey:', song?.originalKey ?? null, 'song.mode:', song?.mode ?? null);
 
   const keyDisplay = useMemo(() => {
     if (noodleMode === 'freeChords') {
@@ -291,8 +262,12 @@ export default function NoodlePage() {
       return `${freeRoot} ${modeLabel}`;
     }
     if (noodleMode !== 'song' || !song?.originalKey) return '';
-    return keyDisplayLabel(song.originalKey, localSemitones + localCapo - (song.capo ?? 0));
-  }, [noodleMode, song, localSemitones, localCapo, freeRoot, freeMode]);
+    const mode = song.mode ?? 'IONIAN';
+    const modeLabel = MODES_LIST.find(m => m.value === mode)?.label ?? '';
+    if (mode === 'IONIAN') return soundingRoot;
+    if (mode === 'AEOLIAN') return `${soundingRoot}m`;
+    return `${soundingRoot} ${modeLabel}`;
+  }, [noodleMode, song, soundingRoot, freeRoot, freeMode]);
 
   const activeChord = useMemo(() => {
     if (noodleMode === 'song' && contentLines.length > 0) {
@@ -375,8 +350,6 @@ export default function NoodlePage() {
     setIsPlaying(false);
     loadedViaUrl.current = false;
     setSong(null);
-    setPendingKey(summary.originalKey);
-    setPendingCapo(summary.capo ?? 0);
     setActiveSongId(summary.id);
     setLocalSemitones(0);
     setLocalCapo(summary.capo ?? 0);
@@ -595,14 +568,14 @@ export default function NoodlePage() {
           <div className="flex items-center gap-1">
             <span className="text-xs text-gray-400">Transpose</span>
             <button
-              onClick={() => setLocalSemitones(s => s - 1)}
+              onClick={() => { setLocalSemitones(s => s - 1); setNeckRefresh(n => n + 1); }}
               className="w-6 h-6 flex items-center justify-center text-sm text-gray-500 hover:text-indigo-500 border border-gray-200 rounded"
             >−</button>
             <span className="text-sm text-gray-700 w-6 text-center tabular-nums">
               {localSemitones > 0 ? `+${localSemitones}` : localSemitones}
             </span>
             <button
-              onClick={() => setLocalSemitones(s => s + 1)}
+              onClick={() => { setLocalSemitones(s => s + 1); setNeckRefresh(n => n + 1); }}
               className="w-6 h-6 flex items-center justify-center text-sm text-gray-500 hover:text-indigo-500 border border-gray-200 rounded"
             >+</button>
           </div>

@@ -5,7 +5,7 @@ import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/cli
 import ChordDiagram from '../chords/ChordDiagram';
 import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
-import { CHROMATIC_NOTES, SONG_MODES } from '../../core/music';
+import { CHROMATIC_NOTES, SONG_MODES, SONG_MODE_TO_ENUM } from '../../core/music';
 
 const LEGACY_KEY_MAP: Record<string, string> = {
   C_SHARP: 'C#', D_SHARP: 'D#', F_SHARP: 'F#', G_SHARP: 'G#', B_FLAT: 'Bb',
@@ -77,9 +77,14 @@ export default function SongManagePage() {
       setSong(s);
       setTitle(s.title);
       setArtist(s.artist ?? '');
-      const { root, mode } = parseStoredKey(s.originalKey ?? '');
+      const { root, mode: parsedMode } = parseStoredKey(s.originalKey ?? '');
       setKeyRoot(root);
-      setKeyMode(mode);
+      if (s.mode) {
+        const modeEntry = Object.entries(SONG_MODE_TO_ENUM).find(([, v]) => v === s.mode);
+        setKeyMode(modeEntry ? modeEntry[0] : '');
+      } else {
+        setKeyMode(parsedMode);
+      }
       setCapo(s.capo != null ? String(s.capo) : '');
       setTempo(s.tempo != null ? String(s.tempo) : '');
       setRawChordSheet(s.rawChordSheet ?? '');
@@ -102,9 +107,16 @@ export default function SongManagePage() {
     });
   }, [mode, song]);
 
-  const currentKey = keyRoot ? keyRoot + keyMode : '';
+  const currentKey = keyRoot + keyMode;
   const savedKey = song
-    ? (() => { const { root, mode } = parseStoredKey(song.originalKey ?? ''); return root ? root + mode : ''; })()
+    ? (() => {
+        if (song.mode) {
+          const modeEntry = Object.entries(SONG_MODE_TO_ENUM).find(([, v]) => v === song.mode);
+          return (song.originalKey ?? '') + (modeEntry ? modeEntry[0] : '');
+        }
+        const { root, mode } = parseStoredKey(song.originalKey ?? '');
+        return root ? root + mode : '';
+      })()
     : '';
   const metadataIsDirty = song && (
     title !== song.title ||
@@ -125,7 +137,8 @@ export default function SongManagePage() {
       await updateSong(id, {
         title: title.trim(),
         artist: artist.trim() || undefined,
-        originalKey: currentKey || undefined,
+        originalKey: keyRoot || undefined,
+        mode: keyRoot ? (SONG_MODE_TO_ENUM[keyMode] ?? 'IONIAN') : undefined,
         capo: capo ? parseInt(capo, 10) : undefined,
         tempo: tempo ? parseInt(tempo, 10) : undefined,
       });
