@@ -227,6 +227,8 @@ export default function Layout() {
                           <InstrumentSelector
                             instrument={miniActions.instrument as InstrumentName}
                             onInstrumentChange={v => { miniActions.setInstrument(v); setInstrumentPanelOpen(false); }}
+                            customTuning={miniActions.customTuning ?? ''}
+                            onCustomTuningChange={miniActions.setCustomTuning}
                             excludeCustom
                             compact
                           />

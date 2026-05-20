@@ -30,6 +30,8 @@ export interface MiniActions {
   onPlaylistBack: () => void;
   instrument: string;
   setInstrument: (v: string) => void;
+  customTuning?: string;
+  setCustomTuning?: (t: string) => void;
   navigateNoodle: () => void;
 }
 

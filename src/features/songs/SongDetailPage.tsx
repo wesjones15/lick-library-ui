@@ -7,6 +7,7 @@ import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/cli
 import ChordSheet from './ChordSheet';
 import ChordDiagram from '../chords/ChordDiagram';
 import InstrumentSelector from '../../components/InstrumentSelector';
+import { useInstrument } from '../../core/useInstrument';
 import type { InstrumentName } from '../../core/useInstrument';
 import { parseChordName } from './parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
@@ -97,7 +98,7 @@ export default function SongDetailPage() {
   const [capTranspOpen, setCapTranspOpen] = useState(false);
   const [addToPlaylistOpen, setAddToPlaylistOpen] = useState(false);
   const [scrollFontScale, setScrollFontScale] = useState<number | null>(null);
-  const [instrument, setInstrument] = useState('GUITAR');
+  const { instrument, customTuning, setInstrument, setCustomTuning } = useInstrument();
   const loadedSongIdRef = useRef<string | null>(null);
   const overflowRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -191,6 +192,8 @@ export default function SongDetailPage() {
       onPlaylistBack: () => { if (ps) navigate(`/playlist/${ps.playlistId}`); },
       instrument,
       setInstrument,
+      customTuning,
+      setCustomTuning,
       navigateNoodle: () => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}`),
     });
     return () => setMiniActions(null);
@@ -570,6 +573,7 @@ export default function SongDetailPage() {
               currentKey={currentNoteKey}
               semitones={semitones}
               instrument={instrument}
+              customTuning={customTuning}
             />
           </div>
 

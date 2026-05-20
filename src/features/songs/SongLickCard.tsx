@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getLick } from '../../core/api/client';
 import type { PositionResponse } from '../../core/api/client';
+import { getStringLabels } from '../../core/music';
 
 interface Props {
   lickId: string | null;
@@ -9,6 +10,16 @@ interface Props {
   semitones: number;
   fontSize: number;
   instrument?: string;
+  customTuning?: string;
+}
+
+function emptyTabForInstrument(instrument: string, customTuning?: string): string {
+  if (instrument === 'CUSTOM' && customTuning?.trim()) {
+    const notes = customTuning.trim().split(/\s+/).reverse();
+    return notes.map(n => `${n}|--|`).join('\n');
+  }
+  const labels = getStringLabels(instrument);
+  return labels.map(l => `${l}|--|`).join('\n');
 }
 
 function shiftTabFrets(tab: string, semitones: number): string {
@@ -33,7 +44,7 @@ function renderColoredTab(tab: string, fontSize: number): React.ReactNode {
   );
 }
 
-export default function SongLickCard({ lickId, rawTab, currentKey, semitones, fontSize, instrument }: Props) {
+export default function SongLickCard({ lickId, rawTab, currentKey, semitones, fontSize, instrument, customTuning }: Props) {
   const [positions, setPositions] = useState<PositionResponse[]>([]);
   const [posIdx, setPosIdx] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -41,7 +52,7 @@ export default function SongLickCard({ lickId, rawTab, currentKey, semitones, fo
   useEffect(() => {
     if (!lickId || !currentKey) return;
     setLoading(true);
-    getLick(lickId, currentKey, 'greedy', instrument ?? 'GUITAR')
+    getLick(lickId, currentKey, 'greedy', instrument ?? 'GUITAR', customTuning)
       .then(detail => {
         setPositions(detail.positions);
         setPosIdx(0);
@@ -56,6 +67,19 @@ export default function SongLickCard({ lickId, rawTab, currentKey, semitones, fo
   }
 
   const hasPositions = positions.length > 0;
+  const isGuitarStandard = !instrument || instrument === 'GUITAR';
+
+  if (!loading && !hasPositions && !isGuitarStandard) {
+    return (
+      <div className="my-1">
+        {renderColoredTab(emptyTabForInstrument(instrument, customTuning), fontSize)}
+        <p className="text-[10px] text-red-400 mt-0.5 font-mono">
+          no valid positions found for lick with {instrument.toLowerCase()}
+        </p>
+      </div>
+    );
+  }
+
   const displayTab = hasPositions
     ? positions[posIdx].tabString
     : semitones !== 0 ? shiftTabFrets(rawTab, semitones) : rawTab;

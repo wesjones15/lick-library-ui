@@ -205,9 +205,10 @@ interface Props {
   currentKey?: string | null;
   semitones?: number;
   instrument?: string;
+  customTuning?: string;
 }
 
-export default function ChordSheet({ chordLines, numColumns, className, fontScale = 1, showTabLicks = false, songLicks = {}, currentKey, semitones = 0, instrument }: Props) {
+export default function ChordSheet({ chordLines, numColumns, className, fontScale = 1, showTabLicks = false, songLicks = {}, currentKey, semitones = 0, instrument, customTuning }: Props) {
   const perColumn = Math.ceil(chordLines.length / numColumns);
   const columns: ChordSheetLine[][] = [];
   for (let c = 0; c < numColumns; c++) {
@@ -248,6 +249,7 @@ export default function ChordSheet({ chordLines, numColumns, className, fontScal
                       semitones={semitones}
                       fontSize={line.fontSize * fontScale}
                       instrument={instrument}
+                      customTuning={customTuning}
                     />
                   ) : (
                     <div style={{ fontSize: `${line.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#4b5563', fontFamily: 'monospace' }}>
