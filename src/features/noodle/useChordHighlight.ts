@@ -70,6 +70,7 @@ export function useChordHighlight(
   instrument: string,
   capoOffset: number,
   voicing?: ChordVoicing | null,
+  refreshToken?: number,
 ): NeckDot[][] {
   const stringCount = getStringCount(instrument);
   const [scaleDots, setScaleDots] = useState<NeckDot[][]>(() => blankDots(stringCount));
@@ -107,7 +108,7 @@ export function useChordHighlight(
       setScaleDots(dots);
     }).catch(() => {});
     return () => { cancelled = true; };
-  }, [root, mode, instrument]);
+  }, [root, mode, instrument, refreshToken]);
 
   return useMemo(() => {
     if (!chordName) return scaleDots;

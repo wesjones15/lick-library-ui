@@ -3,7 +3,7 @@ import { getAllSongs } from '../../core/api/client';
 import type { SongSummary } from '../../core/api/client';
 
 interface Props {
-  onSelect: (songId: string) => void;
+  onSelect: (song: SongSummary) => void;
   onClose: () => void;
 }
 
@@ -45,7 +45,7 @@ export default function SongLibraryModal({ onSelect, onClose }: Props) {
           {filtered.map(song => (
             <button
               key={song.id}
-              onClick={() => onSelect(song.id)}
+              onClick={() => onSelect(song)}
               className="w-full text-left px-4 py-3 hover:bg-indigo-50 transition-colors"
             >
               <div className="text-sm font-medium text-gray-800">{song.title}</div>
