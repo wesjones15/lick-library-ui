@@ -457,6 +457,8 @@ export default function NoodlePage() {
               capoOffset={capoOffset}
               pulsed={pulsed}
               isPlaying={isPlaying}
+              soundingRoot={soundingRoot}
+              soundingMode={soundingMode}
             />
           )}
         </div>
@@ -471,6 +473,8 @@ export default function NoodlePage() {
               capoOffset={0}
               pulsed={pulsed}
               isPlaying={isPlaying}
+              soundingRoot={soundingRoot}
+              soundingMode={soundingMode}
             />
           )}
         </div>

@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import type { ChordVoicing } from '../../core/api/client';
 import { parseChordName } from '../songs/parseChordName';
-import { INSTRUMENT_OPEN_SEMITONES } from '../../core/music';
+import { INSTRUMENT_OPEN_SEMITONES, CHROMATIC_NOTES } from '../../core/music';
+import { DEGREE_COLORS } from '../live/GuitarNeck';
 
 const INTERVAL_NAMES: Record<number, string> = {
   0: '1', 1: 'b2', 2: '2', 3: 'b3', 4: '3', 5: '4',
@@ -23,7 +24,67 @@ const QUALITY_INTERVALS: Record<string, number[]> = {
   '9': [0, 4, 7, 10, 2], 'maj9': [0, 4, 7, 11, 2], 'm9': [0, 3, 7, 10, 2], 'add9': [0, 4, 7, 2],
 };
 
-function computeIntervalLabels(
+const MODE_INTERVALS: Record<string, number[]> = {
+  IONIAN:     [0, 2, 4, 5, 7, 9, 11],
+  DORIAN:     [0, 2, 3, 5, 7, 9, 10],
+  PHRYGIAN:   [0, 1, 3, 5, 7, 8, 10],
+  LYDIAN:     [0, 2, 4, 6, 7, 9, 11],
+  MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10],
+  AEOLIAN:    [0, 2, 3, 5, 7, 8, 10],
+  LOCRIAN:    [0, 1, 3, 5, 6, 8, 10],
+};
+
+const OFF_SCALE_COLOR = '#6b7280';
+
+type ToneInfo = { chordLabel: string; scaleLabel: string; color: string };
+
+function computeToneInfo(
+  chordName: string,
+  voicing: ChordVoicing | null,
+  instrument: string,
+  capoOffset: number,
+  soundingRoot: string,
+  soundingMode: string,
+): ToneInfo[] {
+  const parsed = parseChordName(chordName);
+  if (!parsed) return [];
+  const chordRootSemitone = ENUM_SEMITONES[parsed.root];
+  if (chordRootSemitone === undefined) return [];
+  const songRootSemitone = CHROMATIC_NOTES.indexOf(soundingRoot);
+  if (songRootSemitone === -1) return [];
+
+  const modeScale = MODE_INTERVALS[soundingMode] ?? MODE_INTERVALS.IONIAN;
+
+  let semitones: number[];
+  if (voicing) {
+    const openSemitones = INSTRUMENT_OPEN_SEMITONES[instrument];
+    const seen = new Set<number>();
+    voicing.frets.forEach((fret, i) => {
+      if (fret === null) return;
+      const open = openSemitones?.[i];
+      if (open === undefined) return;
+      seen.add((open + fret + capoOffset) % 12);
+    });
+    semitones = [...seen].sort((a, b) => a - b);
+  } else {
+    const quality = parsed.quality.replace(/\/\d+$/, '');
+    semitones = (QUALITY_INTERVALS[quality] ?? QUALITY_INTERVALS['']).map(i => (chordRootSemitone + i) % 12);
+  }
+
+  return semitones.map(s => {
+    const chordOffset = (s - chordRootSemitone + 12) % 12;
+    const scaleOffset = (s - songRootSemitone + 12) % 12;
+    const degreeIdx = modeScale.indexOf(scaleOffset);
+    const degree = degreeIdx !== -1 ? degreeIdx + 1 : null;
+    return {
+      chordLabel: INTERVAL_NAMES[chordOffset] ?? String(chordOffset),
+      scaleLabel: INTERVAL_NAMES[scaleOffset] ?? String(scaleOffset),
+      color: degree !== null ? (DEGREE_COLORS[degree] ?? OFF_SCALE_COLOR) : OFF_SCALE_COLOR,
+    };
+  });
+}
+
+function computePlainIntervals(
   chordName: string,
   voicing: ChordVoicing | null,
   instrument: string,
@@ -33,7 +94,6 @@ function computeIntervalLabels(
   if (!parsed) return [];
   const rootSemitone = ENUM_SEMITONES[parsed.root];
   if (rootSemitone === undefined) return [];
-
   if (voicing) {
     const openSemitones = INSTRUMENT_OPEN_SEMITONES[instrument];
     const offsets = new Set<number>();
@@ -45,7 +105,6 @@ function computeIntervalLabels(
     });
     return [...offsets].sort((a, b) => a - b).map(o => INTERVAL_NAMES[o] ?? String(o));
   }
-
   const quality = parsed.quality.replace(/\/\d+$/, '');
   return (QUALITY_INTERVALS[quality] ?? QUALITY_INTERVALS['']).map(i => INTERVAL_NAMES[i] ?? String(i));
 }
@@ -57,13 +116,24 @@ interface Props {
   capoOffset: number;
   pulsed: boolean;
   isPlaying: boolean;
+  soundingRoot?: string;
+  soundingMode?: string;
 }
 
-export default function ChordInfoBox({ chordName, voicing, instrument, capoOffset, pulsed, isPlaying }: Props) {
-  const intervals = useMemo(
-    () => computeIntervalLabels(chordName, voicing, instrument, capoOffset),
-    [chordName, voicing, instrument, capoOffset],
+export default function ChordInfoBox({ chordName, voicing, instrument, capoOffset, pulsed, isPlaying, soundingRoot = '', soundingMode = 'IONIAN' }: Props) {
+  const [showScale, setShowScale] = useState(false);
+
+  const tones = useMemo(
+    () => soundingRoot ? computeToneInfo(chordName, voicing, instrument, capoOffset, soundingRoot, soundingMode) : [],
+    [chordName, voicing, instrument, capoOffset, soundingRoot, soundingMode],
   );
+
+  const plainIntervals = useMemo(
+    () => tones.length === 0 ? computePlainIntervals(chordName, voicing, instrument, capoOffset) : [],
+    [chordName, voicing, instrument, capoOffset, tones.length],
+  );
+
+  const hasScale = tones.length > 0;
 
   return (
     <div className="flex flex-col px-3 py-1 bg-gray-50 rounded-lg border border-gray-100 shrink-0">
@@ -74,10 +144,28 @@ export default function ChordInfoBox({ chordName, voicing, instrument, capoOffse
             isPlaying && pulsed ? 'bg-indigo-500' : 'bg-gray-200'
           }`}
         />
+        {hasScale && (
+          <button
+            onClick={() => setShowScale(v => !v)}
+            className={`ml-auto text-[10px] leading-none transition-colors ${showScale ? 'text-indigo-400' : 'text-gray-300 hover:text-gray-500'}`}
+            title={showScale ? 'Show chord intervals' : 'Show scale degrees'}
+          >
+            ⇄
+          </button>
+        )}
       </div>
-      {intervals.length > 0 && (
-        <span className="text-xs text-gray-500 font-mono leading-tight">{intervals.join(' · ')}</span>
-      )}
+      {hasScale ? (
+        <span className="text-xs font-mono leading-tight">
+          {tones.map((t, i) => (
+            <span key={i}>
+              {i > 0 && <span className="text-gray-300"> · </span>}
+              <span style={{ color: t.color }}>{showScale ? t.scaleLabel : t.chordLabel}</span>
+            </span>
+          ))}
+        </span>
+      ) : plainIntervals.length > 0 ? (
+        <span className="text-xs text-gray-500 font-mono leading-tight">{plainIntervals.join(' · ')}</span>
+      ) : null}
     </div>
   );
 }
