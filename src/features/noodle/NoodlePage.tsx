@@ -245,13 +245,12 @@ export default function NoodlePage() {
   const { soundingRoot, soundingMode } = useMemo(() => {
     if (noodleMode === 'freeChords') return { soundingRoot: freeRoot, soundingMode: freeMode };
     if (noodleMode !== 'song' || !song) return { soundingRoot: '', soundingMode: 'IONIAN' };
-    const totalOffset = localSemitones + localCapo - (song.capo ?? 0);
     const root = song.originalKey ?? 'C';
     const mode = song.mode ?? 'IONIAN';
     const idx = CHROMATIC_NOTES.indexOf(root);
-    const transposedRoot = idx !== -1 ? CHROMATIC_NOTES[((idx + totalOffset) % 12 + 12) % 12] : root;
+    const transposedRoot = idx !== -1 ? CHROMATIC_NOTES[((idx + localSemitones) % 12 + 12) % 12] : root;
     return { soundingRoot: transposedRoot, soundingMode: mode };
-  }, [noodleMode, song, localSemitones, localCapo, freeRoot, freeMode]);
+  }, [noodleMode, song, localSemitones, freeRoot, freeMode]);
   console.log('[NoodlePage] soundingRoot:', soundingRoot, 'soundingMode:', soundingMode, 'noodleMode:', noodleMode, 'song.originalKey:', song?.originalKey ?? null, 'song.mode:', song?.mode ?? null);
 
   const keyDisplay = useMemo(() => {
