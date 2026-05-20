@@ -138,17 +138,6 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
   const secondCandidates = allCandidates.second;
   const thirdCandidates = allCandidates.third;
 
-  const candidateDegrees = useMemo(() => {
-    if (highlightedDegrees.size > 0) return new Set<number>();
-    const s = new Set<number>();
-    bestCandidates.forEach(({ ownNote }, key) => {
-      const [str, fret] = key.split(',').map(Number);
-      const deg = scaleDots[str]?.[fret]?.degree;
-      if (deg && !ownNote) s.add(deg);
-    });
-    return s;
-  }, [allCandidates, highlightedDegrees, scaleDots]);
-
   const recognizedPentKeys = useMemo<Map<string, 'partial' | 'full'>>(() => {
     if (highlightedDegrees.size < 2 || !root) return new Map();
     const rootIdx = ROOT_CHROMATIC[root] ?? 0;
@@ -285,11 +274,7 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       <style>{`
-        @keyframes legend-pulse {
-          0%, 100% { box-shadow: 0 0 0 1px #800020; }
-          50%       { box-shadow: 0 0 0 3px #800020; }
-        }
-        .legend-candidate { animation: legend-pulse 0.8s ease-in-out infinite; }
+
       `}</style>
 
       {/* Top toolbar */}
@@ -340,12 +325,10 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
             const degree = idx + 1;
             const isNoteActive = currentNote?.degree === degree;
             const isDegreeHighlighted = highlightedDegrees.has(degree);
-            const isCandidate = candidateDegrees.has(degree);
-            const lit = isNoteActive || isDegreeHighlighted || isCandidate;
+            const lit = isNoteActive || isDegreeHighlighted;
             return (
               <div
                 key={degree}
-                className={isCandidate && !isNoteActive && !isDegreeHighlighted ? 'legend-candidate' : undefined}
                 onClick={() => {
                   setCurrentNote(null);
                   if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
