@@ -257,7 +257,7 @@ export default function NoodlePage() {
     const root = song.originalKey ?? 'C';
     const mode = song.mode ?? 'IONIAN';
     const idx = CHROMATIC_NOTES.indexOf(root);
-    const transposedRoot = idx !== -1 ? CHROMATIC_NOTES[((idx + localSemitones + localCapo) % 12 + 12) % 12] : root;
+    const transposedRoot = idx !== -1 ? CHROMATIC_NOTES[((idx + localSemitones + localCapo - (song.capo ?? 0)) % 12 + 12) % 12] : root;
     return { soundingRoot: transposedRoot, soundingMode: mode };
   }, [noodleMode, song, localSemitones, localCapo, freeRoot, freeMode]);
   console.log('[NoodlePage] soundingRoot:', soundingRoot, 'soundingMode:', soundingMode, 'noodleMode:', noodleMode, 'song.originalKey:', song?.originalKey ?? null, 'song.mode:', song?.mode ?? null);
