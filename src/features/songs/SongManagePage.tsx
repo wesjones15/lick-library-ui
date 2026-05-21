@@ -6,6 +6,8 @@ import ChordDiagram from '../chords/ChordDiagram';
 import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
 import { CHROMATIC_NOTES, SONG_MODES, SONG_MODE_TO_ENUM } from '../../core/music';
+import InstrumentSelector from '../../components/InstrumentSelector';
+import type { InstrumentName } from '../../core/useInstrument';
 
 const LEGACY_KEY_MAP: Record<string, string> = {
   C_SHARP: 'C#', D_SHARP: 'D#', F_SHARP: 'F#', G_SHARP: 'G#', B_FLAT: 'Bb',
@@ -55,6 +57,7 @@ export default function SongManagePage() {
   const [artist, setArtist] = useState('');
   const [keyRoot, setKeyRoot] = useState('');
   const [keyMode, setKeyMode] = useState('');
+  const [instrument, setInstrument] = useState<InstrumentName>('GUITAR');
   const [capo, setCapo] = useState('');
   const [tempo, setTempo] = useState('');
 
@@ -85,6 +88,7 @@ export default function SongManagePage() {
       } else {
         setKeyMode(parsedMode);
       }
+      setInstrument((s.instrument ?? 'GUITAR') as InstrumentName);
       setCapo(s.capo != null ? String(s.capo) : '');
       setTempo(s.tempo != null ? String(s.tempo) : '');
       setRawChordSheet(s.rawChordSheet ?? '');
@@ -122,6 +126,7 @@ export default function SongManagePage() {
     title !== song.title ||
     artist !== (song.artist ?? '') ||
     currentKey !== savedKey ||
+    instrument !== (song.instrument ?? 'GUITAR') ||
     capo !== (song.capo != null ? String(song.capo) : '') ||
     tempo !== (song.tempo != null ? String(song.tempo) : '')
   );
@@ -139,6 +144,7 @@ export default function SongManagePage() {
         artist: artist.trim() || undefined,
         originalKey: keyRoot || undefined,
         mode: keyRoot ? (SONG_MODE_TO_ENUM[keyMode] ?? 'IONIAN') : undefined,
+        instrument,
         capo: capo ? parseInt(capo, 10) : undefined,
         tempo: tempo ? parseInt(tempo, 10) : undefined,
       });
@@ -240,6 +246,12 @@ export default function SongManagePage() {
               className={`${inputClass} w-24`}
             />
           </div>
+          <InstrumentSelector
+            excludeCustom
+            compact
+            instrument={instrument}
+            onInstrumentChange={setInstrument}
+          />
           <button
             type="submit"
             disabled={loading || !metadataIsDirty || !title.trim()}

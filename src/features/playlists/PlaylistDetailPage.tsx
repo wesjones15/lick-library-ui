@@ -8,6 +8,8 @@ import {
 import type { PlaylistDetail, PlaylistEntry, SongSummary } from '../../core/api/client';
 
 import { KEY_LABEL, CHROMATIC_NOTES, MODE_SUFFIX } from '../../core/music';
+import InstrumentSelector from '../../components/InstrumentSelector';
+import type { InstrumentName } from '../../core/useInstrument';
 
 function keyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
   if (!originalKey) return '?';
@@ -26,11 +28,15 @@ function rootKeyLabel(originalKey: string | null, semitones: number, mode?: stri
 
 function VoicingModal({ entry, onSave, onClose }: {
   entry: PlaylistEntry;
-  onSave: (keyOffset: number, capoOffset: number) => void;
+  onSave: (keyOffset: number, capoOffset: number, instrument: string) => void;
   onClose: () => void;
 }) {
   const [localSemitones, setLocalSemitones] = useState(entry.keyOffset);
   const [localCapo, setLocalCapo] = useState(entry.defaultCapo + entry.capoOffset);
+  const defaultInstrument = (entry.defaultInstrument ?? 'GUITAR') as InstrumentName;
+  const [localInstrument, setLocalInstrument] = useState<InstrumentName>(
+    (entry.instrument ?? entry.defaultInstrument ?? 'GUITAR') as InstrumentName
+  );
   const btnClass = "w-8 h-8 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-lg font-medium";
 
   return (
@@ -82,8 +88,19 @@ function VoicingModal({ entry, onSave, onClose }: {
             >reset</button>
           </div>
         </div>
+
+        {/* Instrument selector */}
+        <div className="flex flex-col items-center gap-1 mb-6">
+          <span className="text-xs text-gray-400">Instrument</span>
+          <InstrumentSelector excludeCustom compact instrument={localInstrument} onInstrumentChange={setLocalInstrument} />
+          <button
+            onClick={() => setLocalInstrument(defaultInstrument)}
+            className={`text-xs transition-colors ${localInstrument !== defaultInstrument ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+          >reset</button>
+        </div>
+
         <button
-          onClick={() => { onSave(localSemitones, localCapo - entry.defaultCapo); onClose(); }}
+          onClick={() => { onSave(localSemitones, localCapo - entry.defaultCapo, localInstrument); onClose(); }}
           className="w-full px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
         >Save</button>
       </div>
@@ -243,17 +260,19 @@ export default function PlaylistDetailPage() {
     setPlaylist(updated);
   }
 
-  async function handleSaveOverride(entryId: string, keyOffset: number, capoOffset: number) {
-    const clearing = keyOffset === 0 && capoOffset === 0;
+  async function handleSaveOverride(entryId: string, keyOffset: number, capoOffset: number, instrument: string) {
+    const entry = entries.find(e => e.entryId === entryId);
+    const defaultInstrument = entry?.defaultInstrument ?? 'GUITAR';
+    const clearing = keyOffset === 0 && capoOffset === 0 && instrument === defaultInstrument;
     setPlaylist(p => p ? {
       ...p,
       entries: p.entries.map(e => e.entryId === entryId
-        ? { ...e, keyOffset: clearing ? 0 : keyOffset, capoOffset: clearing ? 0 : capoOffset }
+        ? { ...e, keyOffset: clearing ? 0 : keyOffset, capoOffset: clearing ? 0 : capoOffset, instrument: clearing ? null : instrument }
         : e),
     } : p);
     const updated = clearing
       ? await clearPlaylistEntryOverrides(playlist!.id, entryId)
-      : await updatePlaylistEntry(playlist!.id, entryId, { keyOffset, capoOffset });
+      : await updatePlaylistEntry(playlist!.id, entryId, { keyOffset, capoOffset, instrument });
     setPlaylist(updated);
   }
 
@@ -269,6 +288,7 @@ export default function PlaylistDetailPage() {
           title: e.title,
           keyOffset: e.keyOffset,
           capoOffset: e.capoOffset,
+          instrument: e.instrument,
         })),
         currentIndex: index,
       },
@@ -421,7 +441,7 @@ export default function PlaylistDetailPage() {
         return entry ? (
           <VoicingModal
             entry={entry}
-            onSave={(k, c) => handleSaveOverride(entry.entryId, k, c)}
+            onSave={(k, c, instr) => handleSaveOverride(entry.entryId, k, c, instr)}
             onClose={() => setEditingEntry(null)}
           />
         ) : null;

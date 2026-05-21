@@ -65,6 +65,7 @@ interface PlaylistNavEntry {
   title: string;
   keyOffset: number;
   capoOffset: number;
+  instrument?: string | null;
 }
 
 interface PlaylistNavState {
@@ -130,6 +131,14 @@ export default function SongDetailPage() {
       .catch(() => setError('Failed to load song.'))
       .finally(() => setLoading(false));
   }, [id, semitones]);
+
+  // Apply instrument from playlist entry override, song default, or GUITAR — fires once per song navigation
+  useEffect(() => {
+    if (!song) return;
+    const navEntry = playlistState?.entries[playlistState.currentIndex];
+    const target = (navEntry?.instrument ?? song.instrument ?? 'GUITAR') as InstrumentName;
+    setInstrument(target);
+  }, [song?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!autoScrolling) return;

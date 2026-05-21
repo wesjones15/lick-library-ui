@@ -124,6 +124,7 @@ export interface SongDetail {
   artist: string | null;
   originalKey: string | null;
   mode: string | null;
+  instrument: string | null;
   capo: number | null;
   tempo: number | null;
   chordLines: ChordSheetLine[];
@@ -138,6 +139,7 @@ export interface UpdateSongRequest {
   artist?: string;
   originalKey?: string;
   mode?: string;
+  instrument?: string;
   capo?: number;
   tempo?: number;
   rawChordSheet?: string;
@@ -283,6 +285,8 @@ export interface PlaylistEntry {
   defaultCapo: number;
   tempo: number | null;
   mode: string | null;
+  instrument: string | null;
+  defaultInstrument: string | null;
 }
 
 export interface PlaylistDetail { id: string; name: string; entries: PlaylistEntry[]; }
@@ -343,7 +347,7 @@ export async function addPlaylistEntry(
 export async function updatePlaylistEntry(
   playlistId: string,
   entryId: string,
-  req: { keyOffset?: number | null; capoOffset?: number | null; position?: number },
+  req: { keyOffset?: number | null; capoOffset?: number | null; position?: number; instrument?: string | null },
 ): Promise<PlaylistDetail> {
   const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}`, {
     method: 'POST',
