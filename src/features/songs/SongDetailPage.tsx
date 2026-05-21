@@ -12,22 +12,22 @@ import type { InstrumentName } from '../../core/useInstrument';
 import { parseChordName } from './parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { useSongNavContext } from '../../core/context/SongNavContext';
-import { KEY_LABEL, CHROMATIC_NOTES, getStringCount } from '../../core/music';
+import { KEY_LABEL, CHROMATIC_NOTES, MODE_SUFFIX, getStringCount } from '../../core/music';
 
-function keyLabel(originalKey: string | null, semitones: number): string {
+function keyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
   if (!originalKey) return '';
   const display = KEY_LABEL[originalKey] ?? originalKey;
-  const match = display.match(/^([A-G][#b]?)(m?)(?: (.+))?$/);
+  const match = display.match(/^([A-G][#b]?)/);
   if (!match) return display;
-  const [, root, minorSuffix, modeName] = match;
-  const idx = CHROMATIC_NOTES.indexOf(root);
+  const idx = CHROMATIC_NOTES.indexOf(match[1]);
   if (idx === -1) return display;
-  const suffix = modeName ? ` ${modeName}` : minorSuffix;
-  return CHROMATIC_NOTES[((idx + semitones) % 12 + 12) % 12] + suffix;
+  const root = CHROMATIC_NOTES[((idx + semitones) % 12 + 12) % 12];
+  return root + (mode ? (MODE_SUFFIX[mode] ?? '') : '');
 }
 
-function rootKeyLabel(originalKey: string | null, semitones: number): string {
-  return keyLabel(originalKey, semitones).replace(/ .+$/, '');
+// Strips mode label suffixes (e.g. " Dorian") but preserves "m" (AEOLIAN) for transpose modal.
+function rootKeyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
+  return keyLabel(originalKey, semitones, mode).replace(/ .+$/, '');
 }
 
 function usePortrait() {
@@ -148,8 +148,8 @@ export default function SongDetailPage() {
       title: song.title,
       artist: song.artist ?? undefined,
       bpm: song.tempo ?? undefined,
-      shapeKey: keyLabel(song.originalKey, semitones - (song.capo ?? 0)),
-      soundKey: keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0)),
+      shapeKey: keyLabel(song.originalKey, semitones - (song.capo ?? 0), song.mode),
+      soundKey: keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0), song.mode),
       capo,
     });
     return () => setInfo(null);
@@ -306,7 +306,7 @@ export default function SongDetailPage() {
                     excludeCustom
                     compact
                   />
-                  {song.originalKey && <span>{keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0))}</span>}
+                  {song.originalKey && <span>{keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0), song.mode)}</span>}
                 </div>
                 {song.tempo != null && (
                   <button
@@ -531,7 +531,7 @@ export default function SongDetailPage() {
                   <div className="flex gap-3 items-center">
                     <div className="flex flex-col items-center w-10">
                       <span className="text-base font-semibold text-gray-900">
-                        {rootKeyLabel(song.originalKey, semitones - (song.capo ?? 0))}
+                        {rootKeyLabel(song.originalKey, semitones - (song.capo ?? 0), song.mode)}
                       </span>
                       <span className="text-xs text-gray-400">shape</span>
                     </div>
@@ -540,7 +540,7 @@ export default function SongDetailPage() {
                     </span>
                     <div className="flex flex-col items-center w-10">
                       <span className="text-base font-semibold text-gray-900">
-                        {rootKeyLabel(song.originalKey, semitones + capo - (song.capo ?? 0))}
+                        {rootKeyLabel(song.originalKey, semitones + capo - (song.capo ?? 0), song.mode)}
                       </span>
                       <span className="text-xs text-gray-400">sound</span>
                     </div>
@@ -612,7 +612,7 @@ export default function SongDetailPage() {
                     <div className="flex gap-3 items-center">
                       <div className="flex flex-col items-center w-10">
                         <span className="text-base font-semibold text-gray-900">
-                          {rootKeyLabel(song?.originalKey ?? null, semitones - (song?.capo ?? 0))}
+                          {rootKeyLabel(song?.originalKey ?? null, semitones - (song?.capo ?? 0), song?.mode)}
                         </span>
                         <span className="text-xs text-gray-400">shape</span>
                       </div>
@@ -621,7 +621,7 @@ export default function SongDetailPage() {
                       </span>
                       <div className="flex flex-col items-center w-10">
                         <span className="text-base font-semibold text-gray-900">
-                          {rootKeyLabel(song?.originalKey ?? null, semitones + capo - (song?.capo ?? 0))}
+                          {rootKeyLabel(song?.originalKey ?? null, semitones + capo - (song?.capo ?? 0), song?.mode)}
                         </span>
                         <span className="text-xs text-gray-400">sound</span>
                       </div>

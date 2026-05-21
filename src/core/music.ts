@@ -48,6 +48,15 @@ export const MODE_LABELS: Record<string, string> = {
   MIXOLYDIAN: 'Mixolydian', AEOLIAN: 'Minor', LOCRIAN: 'Locrian',
 };
 
+export const MODE_SUFFIX: Record<string, string> = {
+  AEOLIAN:    'm',
+  DORIAN:     ' Dorian',
+  PHRYGIAN:   ' Phrygian',
+  LYDIAN:     ' Lydian',
+  MIXOLYDIAN: ' Mixolydian',
+  LOCRIAN:    ' Locrian',
+};
+
 export function formatNoteEnum(enumName: string): string {
   if (enumName === 'B_FLAT') return 'Bb';
   return enumName.replace('_SHARP', '#');

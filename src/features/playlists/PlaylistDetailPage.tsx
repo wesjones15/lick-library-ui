@@ -7,22 +7,21 @@ import {
 } from '../../core/api/client';
 import type { PlaylistDetail, PlaylistEntry, SongSummary } from '../../core/api/client';
 
-import { KEY_LABEL, CHROMATIC_NOTES } from '../../core/music';
+import { KEY_LABEL, CHROMATIC_NOTES, MODE_SUFFIX } from '../../core/music';
 
-function keyLabel(originalKey: string | null, semitones: number): string {
+function keyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
   if (!originalKey) return '?';
   const display = KEY_LABEL[originalKey] ?? originalKey;
-  const match = display.match(/^([A-G][#b]?)(m?)(?: (.+))?$/);
+  const match = display.match(/^([A-G][#b]?)/);
   if (!match) return display;
-  const [, root, minorSuffix, modeName] = match;
-  const idx = CHROMATIC_NOTES.indexOf(root);
+  const idx = CHROMATIC_NOTES.indexOf(match[1]);
   if (idx === -1) return display;
-  const suffix = modeName ? ` ${modeName}` : minorSuffix;
-  return CHROMATIC_NOTES[((idx + semitones) % 12 + 12) % 12] + suffix;
+  const root = CHROMATIC_NOTES[((idx + semitones) % 12 + 12) % 12];
+  return root + (mode ? (MODE_SUFFIX[mode] ?? '') : '');
 }
 
-function rootKeyLabel(originalKey: string | null, semitones: number): string {
-  return keyLabel(originalKey, semitones).replace(/ .+$/, '');
+function rootKeyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
+  return keyLabel(originalKey, semitones, mode).replace(/ .+$/, '');
 }
 
 function VoicingModal({ entry, onSave, onClose }: {
@@ -64,13 +63,13 @@ function VoicingModal({ entry, onSave, onClose }: {
               <div className="flex gap-2 items-center">
                 <div className="flex flex-col items-center w-8">
                   <span className="text-base font-semibold text-gray-900">
-                    {rootKeyLabel(entry.originalKey, localSemitones - entry.defaultCapo)}
+                    {rootKeyLabel(entry.originalKey, localSemitones - entry.defaultCapo, entry.mode)}
                   </span>
                   <span className="text-xs text-gray-400">shape</span>
                 </div>
                 <div className="flex flex-col items-center w-8">
                   <span className="text-base font-semibold text-gray-900">
-                    {rootKeyLabel(entry.originalKey, localSemitones + localCapo - entry.defaultCapo)}
+                    {rootKeyLabel(entry.originalKey, localSemitones + localCapo - entry.defaultCapo, entry.mode)}
                   </span>
                   <span className="text-xs text-gray-400">sound</span>
                 </div>
@@ -372,7 +371,7 @@ export default function PlaylistDetailPage() {
                   <div className="flex items-center gap-2 text-xs font-mono mt-0.5">
                     {entry.originalKey && (
                       <span className={entry.keyOffset !== 0 || entry.capoOffset !== 0 ? 'text-indigo-500' : 'text-gray-400'}>
-                        {keyLabel(entry.originalKey, entry.keyOffset + entry.capoOffset)}
+                        {keyLabel(entry.originalKey, entry.keyOffset + entry.capoOffset, entry.mode)}
                       </span>
                     )}
                     <span className={entry.capoOffset !== 0 ? 'text-indigo-500' : 'text-gray-400'}>

@@ -282,6 +282,7 @@ export interface PlaylistEntry {
   originalKey: string | null;
   defaultCapo: number;
   tempo: number | null;
+  mode: string | null;
 }
 
 export interface PlaylistDetail { id: string; name: string; entries: PlaylistEntry[]; }
