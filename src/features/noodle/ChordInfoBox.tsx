@@ -68,7 +68,7 @@ function computeToneInfo(
     semitones = [...seen].sort((a, b) => a - b);
   } else {
     const quality = parsed.quality.replace(/\/\d+$/, '');
-    semitones = (QUALITY_INTERVALS[quality] ?? QUALITY_INTERVALS['']).map(i => (chordRootSemitone + i) % 12);
+    semitones = (QUALITY_INTERVALS[quality] ?? QUALITY_INTERVALS['']).map(i => (chordRootSemitone + i + capoOffset) % 12);
   }
 
   return semitones.map(s => {
