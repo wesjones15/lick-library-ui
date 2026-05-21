@@ -221,7 +221,7 @@ export default function NoodlePage() {
     let offset = 0;
     return contentLines.map(l => {
       const n = parseChordsFromLine(l.chords).length;
-      const slice = beatmap.slice(offset, offset + n).map(b => Math.max(1, Math.round(b / 2)));
+      const slice = beatmap.slice(offset, offset + n).map(b => Math.max(0, Math.round(b / 2)));
       offset += n;
       return slice;
     });
@@ -624,7 +624,7 @@ export default function NoodlePage() {
                       <div className="flex items-center gap-3 flex-wrap">
                         {tokens.map((chord, ci) => {
                           const val = beatmapDraft[start + ci] ?? 4;
-                          const set = (v: number) => setBeatmapDraft(d => { const n = [...d]; n[start + ci] = Math.max(1, Math.min(16, v)); return n; });
+                          const set = (v: number) => setBeatmapDraft(d => { const n = [...d]; n[start + ci] = Math.max(0, Math.min(16, v)); return n; });
                           return (
                             <div key={ci} className="flex flex-col items-center gap-1">
                               <span className="font-mono text-xs text-indigo-600">{chord}</span>
