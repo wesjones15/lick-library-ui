@@ -150,6 +150,7 @@ export interface UploadSongRequest {
   artist?: string;
   originalKey?: string;
   mode?: string;
+  instrument?: string;
   capo?: number;
   tempo?: number;
   rawChordSheet: string;

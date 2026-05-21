@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { uploadSong } from '../../core/api/client';
 import { CHROMATIC_NOTES, SONG_MODES, SONG_MODE_TO_ENUM } from '../../core/music';
+import InstrumentSelector from '../../components/InstrumentSelector';
+import type { InstrumentName } from '../../core/useInstrument';
 
 interface Props {
   onSuccess: () => void;
@@ -11,6 +13,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
   const [artist, setArtist] = useState('');
   const [keyRoot, setKeyRoot] = useState('');
   const [keyMode, setKeyMode] = useState('');
+  const [instrument, setInstrument] = useState<InstrumentName>('GUITAR');
   const [capo, setCapo] = useState('');
   const [tempo, setTempo] = useState('');
   const [rawChordSheet, setRawChordSheet] = useState('');
@@ -28,6 +31,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
         artist: artist.trim() || undefined,
         originalKey: keyRoot || undefined,
         mode: keyRoot ? (SONG_MODE_TO_ENUM[keyMode] ?? 'IONIAN') : undefined,
+        instrument,
         capo: capo ? parseInt(capo, 10) : undefined,
         tempo: tempo ? parseInt(tempo, 10) : undefined,
         rawChordSheet,
@@ -36,6 +40,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
       setArtist('');
       setKeyRoot('');
       setKeyMode('');
+      setInstrument('GUITAR');
       setCapo('');
       setTempo('');
       setRawChordSheet('');
@@ -105,6 +110,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
           className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
         />
       </div>
+      <InstrumentSelector excludeCustom compact instrument={instrument} onInstrumentChange={setInstrument} />
       <textarea
         placeholder="Paste chord sheet here..."
         value={rawChordSheet}
