@@ -305,7 +305,7 @@ export default function SongManagePage() {
 
       {mode === 'chart' && (
         <form onSubmit={handleChartSubmit} className="flex flex-col gap-3 mt-4">
-          <button type="button" onClick={() => setMode('metadata')} className="text-sm text-indigo-500 hover:text-indigo-700 self-start">
+          <button type="button" onClick={() => { setRawChordSheet(song.rawChordSheet ?? ''); setMode('metadata'); }} className="text-sm text-indigo-500 hover:text-indigo-700 self-start">
             ← Back
           </button>
           <textarea
