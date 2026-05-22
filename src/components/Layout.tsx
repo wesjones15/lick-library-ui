@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import Metronome from '../core/metronome/MetronomeWidget';
 import { useSongNavContext } from '../core/context/SongNavContext';
 import { useMetronomeContext } from '../core/metronome/MetronomeContext';
+import { useAuth } from '../core/auth/AuthContext';
 import InstrumentSelector from './InstrumentSelector';
 import type { InstrumentName } from '../core/useInstrument';
 
@@ -29,6 +30,8 @@ export default function Layout() {
   const { pathname } = useLocation();
   const { info, collapsed, setCollapsed, showChords, setShowChords, miniActions } = useSongNavContext();
   const { setBpm, setIsPlaying, bpm, isPlaying } = useMetronomeContext();
+  const { currentUser, logout } = useAuth();
+  const BACKEND = `http://${window.location.hostname}:8080`;
   const [menuOpen, setMenuOpen] = useState(false);
   const [iconsOpen, setIconsOpen] = useState(false);
   const [playlistPanelOpen, setPlaylistPanelOpen] = useState(false);
@@ -367,6 +370,23 @@ export default function Layout() {
                     aria-label="Next song"
                   >→</button>
                 </>
+              )}
+              {!currentUser && (
+                <a
+                  href={`${BACKEND}/api/oauth2/authorize/google`}
+                  className="text-sm text-gray-500 hover:text-indigo-600 transition-colors px-2 py-1"
+                >
+                  Sign in
+                </a>
+              )}
+              {currentUser && (
+                <button
+                  onClick={logout}
+                  className="text-sm text-gray-400 hover:text-gray-700 transition-colors px-2 py-1"
+                  title={`${currentUser.role} · ${currentUser.status}`}
+                >
+                  Sign out
+                </button>
               )}
               {info && (
                 <button

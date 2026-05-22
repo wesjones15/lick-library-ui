@@ -1,10 +1,13 @@
 import { StrictMode } from 'react'
+import type { ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './index.css'
 import Layout from './components/Layout'
 import { MetronomeProvider } from './core/metronome/MetronomeContext'
 import { SongNavProvider } from './core/context/SongNavContext'
+import { AuthProvider, useAuth } from './core/auth/AuthContext'
+import AuthCallbackPage from './features/auth/AuthCallbackPage'
 import HomePage from './features/home/HomePage'
 import LickUploadPage from './features/licks/LickUploadPage'
 import LickDetailPage from './features/licks/LickDetailPage'
@@ -23,35 +26,46 @@ import LickLibraryPage from './features/licks/LickLibraryPage'
 import ChordsTheoryPage from './features/chords/ChordsTheoryPage'
 import NoodlePage from './features/noodle/NoodlePage'
 
+function ProtectedRoute({ children, adminOnly = false }: { children: ReactNode; adminOnly?: boolean }) {
+  const { currentUser } = useAuth();
+  if (!currentUser) return <Navigate to="/" replace />;
+  if (currentUser.status !== 'APPROVED' && currentUser.role !== 'ADMIN') return <Navigate to="/" replace />;
+  if (adminOnly && currentUser.role !== 'ADMIN') return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <MetronomeProvider>
-      <SongNavProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/licks" element={<LickLibraryPage />} />
-            <Route path="/licks/upload" element={<LickUploadPage />} />
-            <Route path="/lick/:id" element={<LickDetailPage />} />
-            <Route path="/songs" element={<SongsPage />} />
-            <Route path="/songs/upload" element={<SongUploadPage />} />
-            <Route path="/song/:id" element={<SongDetailPage />} />
-            <Route path="/song/:id/manage" element={<SongManagePage />} />
-            <Route path="/chords" element={<ChordsGalleryPage />} />
-            <Route path="/chords/upload" element={<ChordUploadPage />} />
-            <Route path="/playlists" element={<PlaylistsPage />} />
-            <Route path="/playlist/:id" element={<PlaylistDetailPage />} />
-            <Route path="/theory" element={<TheoryPage />} />
-            <Route path="/live" element={<LivePage />} />
-            <Route path="/lick/visualizer" element={<LickVisualizerPage />} />
-            <Route path="/licks/library" element={<LickLibraryPage />} />
-            <Route path="/chords/theory" element={<ChordsTheoryPage />} />
-            <Route path="/noodle" element={<NoodlePage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-      </SongNavProvider>
-    </MetronomeProvider>
+    <AuthProvider>
+      <MetronomeProvider>
+        <SongNavProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/auth" element={<AuthCallbackPage />} />
+              <Route element={<Layout />}>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/licks" element={<ProtectedRoute><LickLibraryPage /></ProtectedRoute>} />
+                <Route path="/licks/upload" element={<ProtectedRoute><LickUploadPage /></ProtectedRoute>} />
+                <Route path="/lick/:id" element={<ProtectedRoute><LickDetailPage /></ProtectedRoute>} />
+                <Route path="/songs" element={<ProtectedRoute><SongsPage /></ProtectedRoute>} />
+                <Route path="/songs/upload" element={<ProtectedRoute><SongUploadPage /></ProtectedRoute>} />
+                <Route path="/song/:id" element={<ProtectedRoute><SongDetailPage /></ProtectedRoute>} />
+                <Route path="/song/:id/manage" element={<ProtectedRoute><SongManagePage /></ProtectedRoute>} />
+                <Route path="/chords" element={<ProtectedRoute><ChordsGalleryPage /></ProtectedRoute>} />
+                <Route path="/chords/upload" element={<ProtectedRoute><ChordUploadPage /></ProtectedRoute>} />
+                <Route path="/playlists" element={<ProtectedRoute><PlaylistsPage /></ProtectedRoute>} />
+                <Route path="/playlist/:id" element={<ProtectedRoute><PlaylistDetailPage /></ProtectedRoute>} />
+                <Route path="/theory" element={<ProtectedRoute><TheoryPage /></ProtectedRoute>} />
+                <Route path="/live" element={<ProtectedRoute adminOnly><LivePage /></ProtectedRoute>} />
+                <Route path="/lick/visualizer" element={<ProtectedRoute><LickVisualizerPage /></ProtectedRoute>} />
+                <Route path="/licks/library" element={<ProtectedRoute><LickLibraryPage /></ProtectedRoute>} />
+                <Route path="/chords/theory" element={<ProtectedRoute><ChordsTheoryPage /></ProtectedRoute>} />
+                <Route path="/noodle" element={<ProtectedRoute><NoodlePage /></ProtectedRoute>} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </SongNavProvider>
+      </MetronomeProvider>
+    </AuthProvider>
   </StrictMode>,
 )

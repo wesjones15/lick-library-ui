@@ -1,4 +1,17 @@
+import { TOKEN_KEY } from '../auth/AuthContext';
+
 const BASE_URL = `http://${window.location.hostname}:8080/api`;
+
+function getAuthHeaders(): Record<string, string> {
+  const token = localStorage.getItem(TOKEN_KEY);
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+function handleUnauthorized(res: Response): void {
+  if (res.status === 401) {
+    window.dispatchEvent(new Event('auth:unauthorized'));
+  }
+}
 
 export interface LickSummary {
   id: string;
@@ -47,7 +60,8 @@ export async function getAllLicks(
   if (filters.minLength != null) params.set('minLength', String(filters.minLength));
   if (filters.maxLength != null) params.set('maxLength', String(filters.maxLength));
   if (filters.intervals) params.set('intervals', filters.intervals);
-  const res = await fetch(`${BASE_URL}/lick?${params}`);
+  const res = await fetch(`${BASE_URL}/lick?${params}`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to fetch licks');
   return res.json();
 }
@@ -55,9 +69,10 @@ export async function getAllLicks(
 export async function uploadLick(request: UploadRequest): Promise<LickSummary> {
   const res = await fetch(`${BASE_URL}/lick`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(request),
   });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to upload lick');
   return res.json();
 }
@@ -75,13 +90,18 @@ export async function getLick(
   } else {
     params.set('instrument', instrument);
   }
-  const res = await fetch(`${BASE_URL}/lick/${id}?${params}`);
+  const res = await fetch(`${BASE_URL}/lick/${id}?${params}`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error(`${res.status}`);
   return res.json();
 }
 
 export async function deleteLick(id: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/lick/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${BASE_URL}/lick/${id}`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to delete lick');
 }
 
@@ -157,7 +177,8 @@ export interface UploadSongRequest {
 }
 
 export async function getAllSongs(): Promise<SongSummary[]> {
-  const res = await fetch(`${BASE_URL}/song`);
+  const res = await fetch(`${BASE_URL}/song`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to fetch songs');
   return res.json();
 }
@@ -165,37 +186,48 @@ export async function getAllSongs(): Promise<SongSummary[]> {
 export async function uploadSong(request: UploadSongRequest): Promise<SongSummary> {
   const res = await fetch(`${BASE_URL}/song`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(request),
   });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to upload song');
   return res.json();
 }
 
 export async function getSong(id: string, semitones = 0): Promise<SongDetail> {
   const params = new URLSearchParams({ semitones: String(semitones) });
-  const res = await fetch(`${BASE_URL}/song/${id}?${params}`);
+  const res = await fetch(`${BASE_URL}/song/${id}?${params}`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error(`${res.status}`);
   return res.json();
 }
 
 export async function deleteSong(id: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/song/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${BASE_URL}/song/${id}`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to delete song');
 }
 
 export async function updateSong(id: string, request: UpdateSongRequest): Promise<SongDetail> {
-  const res = await fetch(`${BASE_URL}/song/${id}/update`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const res = await fetch(`${BASE_URL}/song/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(request),
   });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to update song');
   return res.json();
 }
 
 export async function reparseSong(id: string): Promise<SongDetail> {
-  const res = await fetch(`${BASE_URL}/song/${id}/reparse`, { method: 'POST' });
+  const res = await fetch(`${BASE_URL}/song/${id}/reparse`, {
+    method: 'PUT',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Re-parse failed');
   return res.json();
 }
@@ -203,7 +235,8 @@ export async function reparseSong(id: string): Promise<SongDetail> {
 export interface BeatmapData { beats: number[]; }
 
 export async function getBeatmap(songId: string): Promise<BeatmapData> {
-  const res = await fetch(`${BASE_URL}/song/${songId}/beatmap`);
+  const res = await fetch(`${BASE_URL}/song/${songId}/beatmap`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('no beatmap');
   return res.json();
 }
@@ -211,9 +244,10 @@ export async function getBeatmap(songId: string): Promise<BeatmapData> {
 export async function saveBeatmap(songId: string, beats: number[]): Promise<BeatmapData> {
   const res = await fetch(`${BASE_URL}/song/${songId}/beatmap`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify({ beats }),
   });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('save failed');
   return res.json();
 }
@@ -228,25 +262,35 @@ export interface ChordVoicing {
 
 export async function getChordVoicings(root: string, quality: string, instrument = 'GUITAR'): Promise<ChordVoicing[]> {
   const params = new URLSearchParams({ root, quality, instrument });
-  const res = await fetch(`${BASE_URL}/chord?${params}`);
+  const res = await fetch(`${BASE_URL}/chord?${params}`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
   if (!res.ok) return [];
   return res.json();
 }
 
 export async function getAllChordVoicings(root: string, instrument = 'GUITAR'): Promise<Record<string, ChordVoicing[]>> {
   const params = new URLSearchParams({ root, instrument });
-  const res = await fetch(`${BASE_URL}/chord/all?${params}`);
+  const res = await fetch(`${BASE_URL}/chord/all?${params}`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
   if (!res.ok) return {};
   return res.json();
 }
 
 export async function deleteChordVoicing(id: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/chord/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${BASE_URL}/chord/${id}`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to delete voicing');
 }
 
 export async function reseedChordDefaults(): Promise<void> {
-  const res = await fetch(`${BASE_URL}/chord/reseed`, { method: 'POST' });
+  const res = await fetch(`${BASE_URL}/chord/reseed`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Reseed failed');
 }
 
@@ -261,9 +305,10 @@ export interface UploadChordRequest {
 export async function uploadChordVoicing(request: UploadChordRequest): Promise<void> {
   const res = await fetch(`${BASE_URL}/chord`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(request),
   });
+  handleUnauthorized(res);
   if (!res.ok) {
     const text = await res.text();
     throw new Error(text || 'Upload failed');
@@ -293,7 +338,8 @@ export interface PlaylistEntry {
 export interface PlaylistDetail { id: string; name: string; entries: PlaylistEntry[]; }
 
 export async function getAllPlaylists(): Promise<PlaylistSummary[]> {
-  const res = await fetch(`${BASE_URL}/playlist`);
+  const res = await fetch(`${BASE_URL}/playlist`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to fetch playlists');
   return res.json();
 }
@@ -301,15 +347,17 @@ export async function getAllPlaylists(): Promise<PlaylistSummary[]> {
 export async function createPlaylist(name: string): Promise<PlaylistSummary> {
   const res = await fetch(`${BASE_URL}/playlist`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify({ name }),
   });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to create playlist');
   return res.json();
 }
 
 export async function getPlaylist(id: string): Promise<PlaylistDetail> {
-  const res = await fetch(`${BASE_URL}/playlist/${id}`);
+  const res = await fetch(`${BASE_URL}/playlist/${id}`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to fetch playlist');
   return res.json();
 }
@@ -317,15 +365,20 @@ export async function getPlaylist(id: string): Promise<PlaylistDetail> {
 export async function renamePlaylist(id: string, name: string): Promise<PlaylistSummary> {
   const res = await fetch(`${BASE_URL}/playlist/${id}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify({ name }),
   });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to rename playlist');
   return res.json();
 }
 
 export async function deletePlaylist(id: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/playlist/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${BASE_URL}/playlist/${id}`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to delete playlist');
 }
 
@@ -337,9 +390,10 @@ export async function addPlaylistEntry(
 ): Promise<PlaylistDetail> {
   const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify({ songId, keyOffset, capoOffset }),
   });
+  handleUnauthorized(res);
   if (res.status === 409) throw new Error('DUPLICATE');
   if (!res.ok) throw new Error('Failed to add entry');
   return res.json();
@@ -351,16 +405,21 @@ export async function updatePlaylistEntry(
   req: { keyOffset?: number | null; capoOffset?: number | null; position?: number; instrument?: string | null },
 ): Promise<PlaylistDetail> {
   const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(req),
   });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to update entry');
   return res.json();
 }
 
 export async function removePlaylistEntry(playlistId: string, entryId: string): Promise<PlaylistDetail> {
-  const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}`, { method: 'DELETE' });
+  const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to remove entry');
   return res.json();
 }
@@ -368,13 +427,20 @@ export async function removePlaylistEntry(playlistId: string, entryId: string): 
 export async function getPlaylistsContainingSong(
   songId: string
 ): Promise<{ playlistId: string; entryId: string }[]> {
-  const res = await fetch(`${BASE_URL}/playlist/containing?songId=${songId}`);
+  const res = await fetch(`${BASE_URL}/playlist/containing?songId=${songId}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
   if (!res.ok) return [];
   return res.json();
 }
 
 export async function clearPlaylistEntryOverrides(playlistId: string, entryId: string): Promise<PlaylistDetail> {
-  const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}/overrides`, { method: 'DELETE' });
+  const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}/overrides`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to clear overrides');
   return res.json();
 }
@@ -386,7 +452,8 @@ export interface ScaleResponse { root: string; mode: string; positions: ScalePos
 
 export async function getScalePositions(root: string, mode: string, instrument = 'GUITAR'): Promise<ScaleResponse> {
   const params = new URLSearchParams({ root, mode, instrument });
-  const res = await fetch(`${BASE_URL}/scale?${params}`);
+  const res = await fetch(`${BASE_URL}/scale?${params}`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to fetch scale');
   return res.json();
 }

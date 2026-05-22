@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../core/auth/AuthContext';
 
 const FEATURES = [
   {
@@ -35,10 +36,30 @@ const FEATURES = [
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const BACKEND = `http://${window.location.hostname}:8080`;
+
   return (
     <div className="max-w-3xl mx-auto px-6 py-16">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">Lick Library</h1>
-      <p className="text-gray-400 text-sm mb-10">A guitar practice tool.</p>
+      <div className="flex items-center justify-between mb-2">
+        <h1 className="text-3xl font-bold text-gray-900">Lick Library</h1>
+        {!currentUser && (
+          <a
+            href={`${BACKEND}/api/oauth2/authorize/google`}
+            className="text-sm px-4 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition-all"
+          >
+            Sign in with Google
+          </a>
+        )}
+      </div>
+      <p className="text-gray-400 text-sm mb-6">A guitar practice tool.</p>
+      {currentUser && currentUser.status !== 'APPROVED' && currentUser.role !== 'ADMIN' && (
+        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          {currentUser.status === 'REJECTED'
+            ? 'Your account request was not approved.'
+            : "Your account is pending approval. You'll have full access once an admin approves your request."}
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {FEATURES.map(f => (
           <button
