@@ -230,7 +230,7 @@ export default function NoodlePage() {
     let offset = 0;
     return contentLines.map(l => {
       const n = parseChordsFromLine(l.chords).length;
-      const slice = beatmap.slice(offset, offset + n).map(b => Math.max(0, Math.round(b / 2)));
+      const slice = beatmap.slice(offset, offset + n).map(b => Math.max(0, b));
       offset += n;
       return slice;
     });
@@ -297,10 +297,11 @@ export default function NoodlePage() {
       const dist = beatmapByLine?.[currentIdx] ?? halfBeatsPerChord(tokens.length, totalHalfBeats(chords));
       const total = dist.reduce((a, b) => a + b, 0);
 
+      console.log('[advance] currentIdx:', currentIdx, 'halfBeatRef:', halfBeatRef.current, 'dist:', dist, 'total:', total, 'beatmapByLine?.[currentIdx]:', beatmapByLine?.[currentIdx]);
       halfBeatRef.current++;
 
       if (halfBeatRef.current > total) {
-        halfBeatRef.current = 0;
+        halfBeatRef.current = 1;
         setIntraChordIdx(0);
         setCurrentIdx(i => {
           let next = (i + 1) % contentLines.length;
@@ -329,7 +330,7 @@ export default function NoodlePage() {
         return;
       }
       halfBeatRef.current++;
-      if (halfBeatRef.current >= 2) {
+      if (halfBeatRef.current >= 4) {
         halfBeatRef.current = 0;
         setChordIdx(i => (i + 1) % freeChords.length);
       }
@@ -339,7 +340,6 @@ export default function NoodlePage() {
   const onBeat = useCallback((beat: number) => {
     setPulsed(true);
     setTimeout(() => setPulsed(false), 120);
-    if (beat !== 0 && beat !== 2) return;
     if (warmupRef.current > 0) {
       warmupRef.current--;
       return;
@@ -374,8 +374,10 @@ export default function NoodlePage() {
     if (!isPlaying) {
       const parsed = parseInt(bpmInput, 10);
       if (!isNaN(parsed) && parsed > 0) setBpm(parsed);
-      warmupRef.current = 2;
+      warmupRef.current = 4;
+      halfBeatRef.current = 0;
       setFreeHasAdvanced(false);
+      console.log('[handlePlay] halfBeatRef reset to 0, beatmap:', beatmap);
     }
     setIsPlaying(!isPlaying);
   }
