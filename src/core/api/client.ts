@@ -1,6 +1,6 @@
 import { TOKEN_KEY } from '../auth/AuthContext';
 
-const BASE_URL = `http://${window.location.hostname}:8080/api`;
+const BASE_URL = import.meta.env.VITE_API_URL ?? `http://${window.location.hostname}:8080/api`;
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem(TOKEN_KEY);
