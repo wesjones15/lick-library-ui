@@ -28,7 +28,8 @@ import NoodlePage from './features/noodle/NoodlePage'
 import UserPage from './features/user/UserPage'
 
 function ProtectedRoute({ children, adminOnly = false, allowPending = false }: { children: ReactNode; adminOnly?: boolean; allowPending?: boolean }) {
-  const { currentUser } = useAuth();
+  const { currentUser, statusResolved } = useAuth();
+  if (!statusResolved) return null;
   if (!currentUser) return <Navigate to="/" replace />;
   if (!allowPending && currentUser.status !== 'APPROVED' && currentUser.role !== 'ADMIN') return <Navigate to="/" replace />;
   if (adminOnly && currentUser.role !== 'ADMIN') return <Navigate to="/" replace />;

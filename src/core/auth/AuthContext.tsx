@@ -22,6 +22,7 @@ function decodeJwt(token: string): UserProfile | null {
 interface AuthContextValue {
   currentUser: UserProfile | null;
   token: string | null;
+  statusResolved: boolean;
   login: (token: string) => void;
   logout: () => void;
 }
@@ -34,6 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const t = localStorage.getItem(TOKEN_KEY);
     return t ? decodeJwt(t) : null;
   });
+  const [statusResolved, setStatusResolved] = useState<boolean>(!localStorage.getItem(TOKEN_KEY));
 
   const login = (newToken: string) => {
     localStorage.setItem(TOKEN_KEY, newToken);
@@ -54,16 +56,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [logout]);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      setStatusResolved(true);
+      return;
+    }
     getUserProfile()
       .then(profile => {
         setCurrentUser(u => u ? { ...u, role: profile.role, status: profile.status } : u);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setStatusResolved(true));
   }, [token]);
 
   return (
-    <AuthContext.Provider value={{ currentUser, token, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, token, statusResolved, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
