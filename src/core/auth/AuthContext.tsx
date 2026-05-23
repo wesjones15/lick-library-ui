@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
+import { getUserProfile } from '../api/client';
 
 export const TOKEN_KEY = 'lick_library_token';
 
@@ -51,6 +52,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.addEventListener('auth:unauthorized', handler);
     return () => window.removeEventListener('auth:unauthorized', handler);
   }, [logout]);
+
+  useEffect(() => {
+    if (!token) return;
+    getUserProfile()
+      .then(profile => {
+        setCurrentUser(u => u ? { ...u, role: profile.role, status: profile.status } : u);
+      })
+      .catch(() => {});
+  }, [token]);
 
   return (
     <AuthContext.Provider value={{ currentUser, token, login, logout }}>
