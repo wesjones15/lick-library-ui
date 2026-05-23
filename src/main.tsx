@@ -25,11 +25,12 @@ import LickVisualizerPage from './features/licks/LickVisualizerPage'
 import LickLibraryPage from './features/licks/LickLibraryPage'
 import ChordsTheoryPage from './features/chords/ChordsTheoryPage'
 import NoodlePage from './features/noodle/NoodlePage'
+import UserPage from './features/user/UserPage'
 
-function ProtectedRoute({ children, adminOnly = false }: { children: ReactNode; adminOnly?: boolean }) {
+function ProtectedRoute({ children, adminOnly = false, allowPending = false }: { children: ReactNode; adminOnly?: boolean; allowPending?: boolean }) {
   const { currentUser } = useAuth();
   if (!currentUser) return <Navigate to="/" replace />;
-  if (currentUser.status !== 'APPROVED' && currentUser.role !== 'ADMIN') return <Navigate to="/" replace />;
+  if (!allowPending && currentUser.status !== 'APPROVED' && currentUser.role !== 'ADMIN') return <Navigate to="/" replace />;
   if (adminOnly && currentUser.role !== 'ADMIN') return <Navigate to="/" replace />;
   return <>{children}</>;
 }
@@ -61,6 +62,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/licks/library" element={<ProtectedRoute><LickLibraryPage /></ProtectedRoute>} />
                 <Route path="/chords/theory" element={<ProtectedRoute><ChordsTheoryPage /></ProtectedRoute>} />
                 <Route path="/noodle" element={<ProtectedRoute><NoodlePage /></ProtectedRoute>} />
+                <Route path="/user" element={<ProtectedRoute allowPending><UserPage /></ProtectedRoute>} />
               </Route>
             </Routes>
           </BrowserRouter>

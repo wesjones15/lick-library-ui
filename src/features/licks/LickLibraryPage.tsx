@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import LickSubNav from './LickSubNav';
-import { getAllLicks, deleteLick } from '../../core/api/client';
+import { getAllLicks, deleteLick, forkLick } from '../../core/api/client';
 import type { LickSummary } from '../../core/api/client';
 import LickList from './LickList';
 import InstrumentSelector from '../../components/InstrumentSelector';
@@ -51,6 +51,15 @@ export default function LickLibraryPage() {
       fetchLicks();
     } catch {
       setError('Failed to delete lick.');
+    }
+  };
+
+  const handleFork = async (id: string) => {
+    try {
+      await forkLick(id);
+      fetchLicks();
+    } catch {
+      setError('Failed to fork lick.');
     }
   };
 
@@ -119,7 +128,7 @@ export default function LickLibraryPage() {
       {loading && <p className="text-gray-400 text-sm">Loading…</p>}
       {error && <p className="text-red-500 text-sm">{error}</p>}
       {!loading && !error && (
-        <LickList licks={licks} onDelete={handleDelete} isManaging={isManaging} />
+        <LickList licks={licks} onDelete={handleDelete} onFork={handleFork} isManaging={isManaging} />
       )}
     </div>
   );

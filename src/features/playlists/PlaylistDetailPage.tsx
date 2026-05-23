@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   getPlaylist, deletePlaylist, addPlaylistEntry,
   removePlaylistEntry, updatePlaylistEntry, renamePlaylist,
-  clearPlaylistEntryOverrides, getAllSongs,
+  clearPlaylistEntryOverrides, getAllSongs, setPlaylistVisibility,
 } from '../../core/api/client';
 import type { PlaylistDetail, PlaylistEntry, SongSummary } from '../../core/api/client';
 
@@ -248,6 +248,12 @@ export default function PlaylistDetailPage() {
     navigate('/playlists');
   }
 
+  async function handleToggleVisibility() {
+    const newValue = !playlist!.isPublic;
+    await setPlaylistVisibility(playlist!.id, newValue);
+    setPlaylist(p => p ? { ...p, isPublic: newValue } : p);
+  }
+
   async function handleRemoveEntry(entryId: string) {
     const updated = await removePlaylistEntry(playlist!.id, entryId);
     setPlaylist(updated);
@@ -316,7 +322,7 @@ export default function PlaylistDetailPage() {
           ) : (
             <div className="flex items-center gap-2 mt-1">
               <h1 className="text-3xl font-bold text-gray-900">{playlist.name}</h1>
-              {managing && (
+              {managing && playlist.ownedByCurrentUser && (
                 <button
                   onClick={() => { setNameInput(playlist.name); setEditingName(true); }}
                   className="text-gray-400 hover:text-indigo-500 transition-colors text-3xl leading-none"
@@ -325,34 +331,50 @@ export default function PlaylistDetailPage() {
               )}
             </div>
           )}
-          <div className="text-xs text-gray-400 mt-0.5">{entries.length} {entries.length === 1 ? 'song' : 'songs'}</div>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-xs text-gray-400">{entries.length} {entries.length === 1 ? 'song' : 'songs'}</span>
+            <span className={`text-xs px-1.5 py-0.5 rounded-full ${playlist.isPublic ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+              {playlist.isPublic ? 'Public' : 'Private'}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {managing && confirmDelete && (
+          {managing && playlist.ownedByCurrentUser && confirmDelete && (
             <div className="flex gap-2">
               <button onClick={handleDeletePlaylist} className="text-xs px-3 py-1.5 rounded bg-red-500 text-white hover:bg-red-600">Delete playlist</button>
               <button onClick={() => setConfirmDelete(false)} className="text-xs px-3 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">Cancel</button>
             </div>
           )}
-          {managing && !confirmDelete && (
-            <button onClick={() => setConfirmDelete(true)}
-              className="px-3 py-2 text-sm rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors"
-              title="Delete playlist">Delete</button>
+          {managing && playlist.ownedByCurrentUser && !confirmDelete && (
+            <>
+              <button
+                onClick={handleToggleVisibility}
+                className="px-3 py-2 text-sm rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
+                title={playlist.isPublic ? 'Make private' : 'Make public'}
+              >
+                {playlist.isPublic ? 'Make Private' : 'Make Public'}
+              </button>
+              <button onClick={() => setConfirmDelete(true)}
+                className="px-3 py-2 text-sm rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors"
+                title="Delete playlist">Delete</button>
+            </>
           )}
-          <button
-            onClick={toggleManage}
-            className={managing
-              ? 'px-4 py-2 text-sm rounded-lg border border-indigo-300 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors'
-              : 'px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors'}
-          >
-            {managing ? 'Done' : 'Manage'}
-          </button>
+          {playlist.ownedByCurrentUser && (
+            <button
+              onClick={toggleManage}
+              className={managing
+                ? 'px-4 py-2 text-sm rounded-lg border border-indigo-300 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors'
+                : 'px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors'}
+            >
+              {managing ? 'Done' : 'Manage'}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Add Songs button (manage mode, or always when empty) */}
-      {(managing || entries.length === 0) && (
+      {/* Add Songs button (owner only, manage mode, or always when empty) */}
+      {playlist.ownedByCurrentUser && (managing || entries.length === 0) && (
         <button
           onClick={() => setShowAddSongs(true)}
           className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 border border-dashed border-indigo-300 rounded-xl px-4 py-3 w-full hover:bg-indigo-50 transition-colors mb-4"
@@ -371,8 +393,8 @@ export default function PlaylistDetailPage() {
               <div className="flex items-center gap-3">
                 <span className="text-xs text-gray-300 w-5 text-right shrink-0">{idx + 1}</span>
 
-                {/* Reorder (manage only) */}
-                {managing && (
+                {/* Reorder (owner + manage only) */}
+                {managing && playlist.ownedByCurrentUser && (
                   <div className="flex flex-col gap-0.5 shrink-0">
                     <button onClick={() => handleReorder(entry.entryId, -1)} disabled={idx === 0}
                       className="text-gray-300 hover:text-gray-600 disabled:opacity-20 text-xs leading-none">▲</button>
@@ -410,8 +432,8 @@ export default function PlaylistDetailPage() {
                   >›</button>
                 )}
 
-                {/* Voicing edit + remove (manage only) */}
-                {managing && (
+                {/* Voicing edit + remove (owner + manage only) */}
+                {managing && playlist.ownedByCurrentUser && (
                   <div className="flex items-center gap-4 shrink-0 ml-2 mr-2">
                     <button
                       onClick={() => setEditingEntry(entry.entryId)}

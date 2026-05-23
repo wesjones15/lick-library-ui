@@ -51,7 +51,7 @@ export default function SongCard({ song, managing = false, onReparse, onAddToPla
 
       {managing ? (
         <div className="flex gap-2 mt-1">
-          {song.canReparse && (
+          {song.canReparse && song.ownedByCurrentUser && (
             <button
               onClick={reparsed ? undefined : handleReparse}
               title={reparsed ? 'done' : 'reparse'}
@@ -63,14 +63,16 @@ export default function SongCard({ song, managing = false, onReparse, onAddToPla
               {reparsed ? '✓' : '↺'}
             </button>
           )}
-          <button
-            onClick={e => { e.stopPropagation(); navigate(`/song/${song.id}/manage`); }}
-            title="manage"
-            className="flex-1 flex items-center justify-center py-0.5 rounded-lg text-4xl leading-none text-gray-300 hover:text-indigo-500 hover:bg-indigo-50 transition-colors"
-            aria-label="Manage song"
-          >
-            ✎
-          </button>
+          {song.ownedByCurrentUser && (
+            <button
+              onClick={e => { e.stopPropagation(); navigate(`/song/${song.id}/manage`); }}
+              title="manage"
+              className="flex-1 flex items-center justify-center py-0.5 rounded-lg text-4xl leading-none text-gray-300 hover:text-indigo-500 hover:bg-indigo-50 transition-colors"
+              aria-label="Manage song"
+            >
+              ✎
+            </button>
+          )}
           {onAddToPlaylist && (
             <button
               onClick={e => { e.stopPropagation(); onAddToPlaylist(); }}
@@ -87,6 +89,9 @@ export default function SongCard({ song, managing = false, onReparse, onAddToPla
           <div className="flex items-center gap-2 text-xs text-gray-400 font-mono portrait:flex-col portrait:items-end portrait:gap-0">
             {song.originalKey && <span>{keyDisplay(song.originalKey, song.mode)}</span>}
             {song.tempo != null && <span>{song.tempo} BPM</span>}
+            {song.authorName && song.authorName !== 'unknown' && (
+              <span className="text-gray-300 font-sans">{song.authorName}</span>
+            )}
           </div>
         </div>
       )}

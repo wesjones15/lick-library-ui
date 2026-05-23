@@ -383,13 +383,15 @@ export default function SongDetailPage() {
               >
                 ♪+
               </button>
-              <button
-                onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-                className="hidden md:block text-gray-300 hover:text-indigo-500 transition-colors text-4xl leading-none"
-                aria-label="Manage song"
-              >
-                ✎
-              </button>
+              {song?.ownedByCurrentUser && (
+                <button
+                  onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
+                  className="hidden md:block text-gray-300 hover:text-indigo-500 transition-colors text-4xl leading-none"
+                  aria-label="Manage song"
+                >
+                  ✎
+                </button>
+              )}
 
               {/* Landscape (sm–md): icon buttons */}
               <button
@@ -435,13 +437,15 @@ export default function SongDetailPage() {
               >
                 ♪+
               </button>
-              <button
-                onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-                className="hidden sm:block md:hidden text-gray-300 hover:text-indigo-500 transition-colors text-3xl leading-none"
-                aria-label="Manage song"
-              >
-                ✎
-              </button>
+              {song?.ownedByCurrentUser && (
+                <button
+                  onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
+                  className="hidden sm:block md:hidden text-gray-300 hover:text-indigo-500 transition-colors text-3xl leading-none"
+                  aria-label="Manage song"
+                >
+                  ✎
+                </button>
+              )}
 
               {/* Portrait (<sm): hamburger ⋮ */}
               <div ref={overflowRef} className="relative sm:hidden">
@@ -472,12 +476,14 @@ export default function SongDetailPage() {
                     >
                       Add to playlist
                     </button>
-                    <button
-                      onClick={() => { navigate(`/song/${id}/manage?semitones=${semitones}`); setOverflowOpen(false); }}
-                      className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
-                    >
-                      Manage
-                    </button>
+                    {song?.ownedByCurrentUser && (
+                      <button
+                        onClick={() => { navigate(`/song/${id}/manage?semitones=${semitones}`); setOverflowOpen(false); }}
+                        className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
+                      >
+                        Manage
+                      </button>
+                    )}
                     <button
                       onClick={() => { navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}`); setOverflowOpen(false); }}
                       className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"

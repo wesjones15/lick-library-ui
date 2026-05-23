@@ -28,9 +28,9 @@ const FEATURES = [
     description: 'Circle of fifths, CAGED shapes, mode reference, and chord progressions.',
   },
   {
-    to: '/live',
-    title: 'Live',
-    description: 'Real-time pitch detection with an animated neck and scale overlays.',
+    to: '/noodle',
+    title: 'Noodle',
+    description: 'Chord-driven fretboard practice with beatmap sync and guitar karaoke.',
   },
 ];
 

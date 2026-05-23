@@ -183,6 +183,19 @@ export default function SongManagePage() {
 
   if (!song) return <div className="px-6 pt-8 text-sm text-gray-400">Loading…</div>;
 
+  if (!song.ownedByCurrentUser) {
+    return (
+      <div className={`mx-auto px-6 py-8 max-w-lg`}>
+        <Link to={`/song/${id}`} className="text-sm text-indigo-500 hover:text-indigo-700 mb-6 inline-block">
+          ← {song.title}
+        </Link>
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 mt-4">
+          You don't own this song and cannot edit it.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`mx-auto px-6 py-8 ${mode === 'chords' ? 'max-w-3xl' : 'max-w-lg'}`}>
       {/* Breadcrumb */}

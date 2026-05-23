@@ -4,6 +4,7 @@ import type { LickSummary } from '../../core/api/client';
 interface Props {
   lick: LickSummary;
   onDelete: () => void;
+  onFork: () => void;
   isManaging: boolean;
 }
 
@@ -11,7 +12,7 @@ function modeLabel(mode: string) {
   return mode.charAt(0) + mode.slice(1).toLowerCase();
 }
 
-export default function LickCard({ lick, onDelete, isManaging }: Props) {
+export default function LickCard({ lick, onDelete, onFork, isManaging }: Props) {
   const navigate = useNavigate();
 
   return (
@@ -20,8 +21,13 @@ export default function LickCard({ lick, onDelete, isManaging }: Props) {
       className="border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-indigo-400 hover:shadow-sm transition-all bg-white"
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-mono text-gray-500">{lick.intervalDisplayString}</span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-xs font-mono text-gray-500 truncate">{lick.intervalDisplayString}</span>
+          {lick.authorName && (
+            <span className="text-xs text-gray-300 shrink-0">{lick.authorName}</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
           {lick.instrument && lick.instrument !== 'GUITAR' && (
             <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full font-medium">
               {modeLabel(lick.instrument)}
@@ -32,13 +38,23 @@ export default function LickCard({ lick, onDelete, isManaging }: Props) {
               {modeLabel(lick.mode)}
             </span>
           )}
-          {!lick.autoImported && isManaging && (
+          {!lick.autoImported && isManaging && lick.ownedByCurrentUser && (
             <button
               onClick={e => { e.stopPropagation(); onDelete(); }}
               className="text-red-400 hover:text-red-600 text-base leading-none transition-colors"
               aria-label="Delete lick"
             >
               ×
+            </button>
+          )}
+          {!lick.autoImported && isManaging && !lick.ownedByCurrentUser && (
+            <button
+              onClick={e => { e.stopPropagation(); onFork(); }}
+              className="text-indigo-400 hover:text-indigo-600 text-xs leading-none transition-colors border border-indigo-200 rounded px-1.5 py-0.5"
+              aria-label="Fork lick"
+              title="Fork — save a copy to your library"
+            >
+              fork
             </button>
           )}
         </div>

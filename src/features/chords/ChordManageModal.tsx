@@ -75,22 +75,27 @@ export default function ChordManageModal({ chordName, voicings: initialVoicings,
               {voicings.map(v => (
                 <div key={v.id} className="border border-gray-200 rounded-lg p-2 flex flex-row items-center gap-2">
                   <ChordDiagram frets={v.frets} width={120} stringCount={getStringCount(instrument)} />
-                  <div className="flex items-center justify-center">
-                    {confirmId === v.id ? (
-                      <button
-                        onClick={() => handleDelete(v.id)}
-                        disabled={deleting}
-                        className="text-red-500 hover:text-red-700 font-semibold text-sm disabled:opacity-50"
-                      >
-                        delete?
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setConfirmId(v.id)}
-                        className="text-gray-300 hover:text-red-400 text-5xl leading-none"
-                      >
-                        ✕
-                      </button>
+                  <div className="flex flex-col items-center justify-center gap-1">
+                    {v.authorName && (
+                      <span className="text-xs text-gray-300">{v.authorName}</span>
+                    )}
+                    {v.ownedByCurrentUser && (
+                      confirmId === v.id ? (
+                        <button
+                          onClick={() => handleDelete(v.id)}
+                          disabled={deleting}
+                          className="text-red-500 hover:text-red-700 font-semibold text-sm disabled:opacity-50"
+                        >
+                          delete?
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmId(v.id)}
+                          className="text-gray-300 hover:text-red-400 text-5xl leading-none"
+                        >
+                          ✕
+                        </button>
+                      )
                     )}
                   </div>
                 </div>

@@ -3,9 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { getAllPlaylists, createPlaylist, deletePlaylist, renamePlaylist } from '../../core/api/client';
 import type { PlaylistSummary } from '../../core/api/client';
 
+type PlaylistFilter = 'all' | 'mine' | 'public';
+
 export default function PlaylistsPage() {
   const navigate = useNavigate();
   const [playlists, setPlaylists] = useState<PlaylistSummary[]>([]);
+  const [filter, setFilter] = useState<PlaylistFilter>('all');
   const [managing, setManaging] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [newName, setNewName] = useState('');
@@ -38,6 +41,12 @@ export default function PlaylistsPage() {
     setPlaylists(p => p.filter(pl => pl.id !== id));
     setConfirmDelete(null);
   }
+
+  const filtered = playlists.filter(pl => {
+    if (filter === 'mine') return pl.ownedByCurrentUser;
+    if (filter === 'public') return pl.isPublic;
+    return true;
+  });
 
   async function handleSaveCardName(id: string) {
     const trimmed = nameInput.trim();
@@ -79,11 +88,26 @@ export default function PlaylistsPage() {
         </div>
       </div>
 
-      {playlists.length === 0 ? (
+      {/* Filter buttons */}
+      {playlists.length > 0 && (
+        <div className="flex items-center gap-2 mb-4">
+          {(['all', 'mine', 'public'] as PlaylistFilter[]).map(f => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 py-1 text-xs rounded-lg border transition-colors ${filter === f ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+            >
+              {f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {filtered.length === 0 ? (
         <p className="text-gray-400 text-sm">No playlists yet. Create one to get started.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {playlists.map(pl => (
+          {filtered.map(pl => (
             <div
               key={pl.id}
               className={`border border-gray-200 rounded-xl p-4 flex items-start justify-between transition-colors ${managing ? 'cursor-default' : 'hover:border-indigo-300 cursor-pointer group'}`}
@@ -103,10 +127,18 @@ export default function PlaylistsPage() {
                 ) : (
                   <div className="font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors truncate">{pl.name}</div>
                 )}
-                <div className="text-xs text-gray-400 mt-0.5">{pl.songCount} {pl.songCount === 1 ? 'song' : 'songs'}</div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-xs text-gray-400">{pl.songCount} {pl.songCount === 1 ? 'song' : 'songs'}</span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${pl.isPublic ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                    {pl.isPublic ? 'Public' : 'Private'}
+                  </span>
+                  {pl.authorName && (
+                    <span className="text-xs text-gray-300">{pl.authorName}</span>
+                  )}
+                </div>
               </div>
 
-              {managing && (
+              {managing && pl.ownedByCurrentUser && (
                 editingCardId === pl.id ? (
                   <button
                     onClick={e => { e.stopPropagation(); handleSaveCardName(pl.id); }}

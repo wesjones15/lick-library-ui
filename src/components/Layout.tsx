@@ -22,7 +22,6 @@ const NAV_LINKS: { label: ReactNode; to: string }[] = [
   },
   { label: 'Playlists', to: '/playlists' },
   { label: 'Theory', to: '/theory' },
-  { label: 'Live', to: '/live' },
   { label: 'Noodle', to: '/noodle' },
 ];
 
@@ -380,13 +379,21 @@ export default function Layout() {
                 </a>
               )}
               {currentUser && (
-                <button
-                  onClick={logout}
-                  className="text-sm text-gray-400 hover:text-gray-700 transition-colors px-2 py-1"
-                  title={`${currentUser.role} · ${currentUser.status}`}
-                >
-                  Sign out
-                </button>
+                <>
+                  <Link
+                    to="/user"
+                    className={`text-sm transition-colors px-2 py-1 ${currentUser.role === 'ADMIN' ? 'text-indigo-600 font-medium hover:text-indigo-800' : 'text-gray-500 hover:text-gray-900'}`}
+                    title={`${currentUser.role} · ${currentUser.status}`}
+                  >
+                    {currentUser.role === 'ADMIN' ? 'Admin' : 'Account'}
+                  </Link>
+                  <button
+                    onClick={logout}
+                    className="text-sm text-gray-400 hover:text-gray-700 transition-colors px-2 py-1"
+                  >
+                    Sign out
+                  </button>
+                </>
               )}
               {info && (
                 <button

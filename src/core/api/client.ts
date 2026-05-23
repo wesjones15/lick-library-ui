@@ -13,6 +13,24 @@ function handleUnauthorized(res: Response): void {
   }
 }
 
+export interface UserProfileResponse {
+  id: number;
+  email: string;
+  username: string;
+  role: 'ADMIN' | 'USER';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  creationTs: string;
+}
+
+export interface AdminUserResponse {
+  id: number;
+  email: string;
+  username: string;
+  role: 'ADMIN' | 'USER';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  creationTs: string;
+}
+
 export interface LickSummary {
   id: string;
   rawTab: string;
@@ -21,6 +39,8 @@ export interface LickSummary {
   positions: null;
   autoImported: boolean;
   instrument: string | null;
+  authorName: string;
+  ownedByCurrentUser: boolean;
 }
 
 export interface PositionResponse {
@@ -51,6 +71,7 @@ export async function getAllLicks(
     minLength?: number;
     maxLength?: number;
     intervals?: string;
+    mine?: boolean;
   } = {}
 ): Promise<LickSummary[]> {
   const params = new URLSearchParams();
@@ -60,9 +81,20 @@ export async function getAllLicks(
   if (filters.minLength != null) params.set('minLength', String(filters.minLength));
   if (filters.maxLength != null) params.set('maxLength', String(filters.maxLength));
   if (filters.intervals) params.set('intervals', filters.intervals);
+  if (filters.mine) params.set('mine', 'true');
   const res = await fetch(`${BASE_URL}/lick?${params}`, { headers: { ...getAuthHeaders() } });
   handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to fetch licks');
+  return res.json();
+}
+
+export async function forkLick(id: string): Promise<LickSummary> {
+  const res = await fetch(`${BASE_URL}/lick/${id}/fork`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to fork lick');
   return res.json();
 }
 
@@ -131,6 +163,8 @@ export interface SongSummary {
   mode: string | null;
   canReparse: boolean;
   tempo: number | null;
+  authorName: string;
+  ownedByCurrentUser: boolean;
 }
 
 export interface SongLickInfo {
@@ -152,6 +186,7 @@ export interface SongDetail {
   canReparse: boolean;
   rawChordSheet: string | null;
   songLicks: Record<number, SongLickInfo>;
+  ownedByCurrentUser: boolean;
 }
 
 export interface UpdateSongRequest {
@@ -176,11 +211,61 @@ export interface UploadSongRequest {
   rawChordSheet: string;
 }
 
-export async function getAllSongs(): Promise<SongSummary[]> {
-  const res = await fetch(`${BASE_URL}/song`, { headers: { ...getAuthHeaders() } });
+export async function getAllSongs(mine = false): Promise<SongSummary[]> {
+  const params = new URLSearchParams();
+  if (mine) params.set('mine', 'true');
+  const res = await fetch(`${BASE_URL}/song?${params}`, { headers: { ...getAuthHeaders() } });
   handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to fetch songs');
   return res.json();
+}
+
+export async function getUserProfile(): Promise<UserProfileResponse> {
+  const res = await fetch(`${BASE_URL}/user/me`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to fetch profile');
+  return res.json();
+}
+
+export async function deleteOwnAccount(): Promise<void> {
+  const res = await fetch(`${BASE_URL}/user/me`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to delete account');
+}
+
+export async function getAdminUsers(): Promise<AdminUserResponse[]> {
+  const res = await fetch(`${BASE_URL}/admin/users`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to fetch users');
+  return res.json();
+}
+
+export async function getAdminQueue(): Promise<AdminUserResponse[]> {
+  const res = await fetch(`${BASE_URL}/admin/queue`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to fetch queue');
+  return res.json();
+}
+
+export async function approveUser(userId: number): Promise<void> {
+  const res = await fetch(`${BASE_URL}/admin/approve/${userId}`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to approve user');
+}
+
+export async function rejectUser(userId: number): Promise<void> {
+  const res = await fetch(`${BASE_URL}/admin/reject/${userId}`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to reject user');
 }
 
 export async function uploadSong(request: UploadSongRequest): Promise<SongSummary> {
@@ -258,6 +343,8 @@ export type ChordFrets = (number | null)[];
 export interface ChordVoicing {
   id: string;
   frets: ChordFrets;
+  authorName: string;
+  ownedByCurrentUser: boolean;
 }
 
 export async function getChordVoicings(root: string, quality: string, instrument = 'GUITAR'): Promise<ChordVoicing[]> {
@@ -317,7 +404,14 @@ export async function uploadChordVoicing(request: UploadChordRequest): Promise<v
 
 // --- Playlists ---
 
-export interface PlaylistSummary { id: string; name: string; songCount: number; }
+export interface PlaylistSummary {
+  id: string;
+  name: string;
+  songCount: number;
+  authorName: string;
+  ownedByCurrentUser: boolean;
+  isPublic: boolean;
+}
 
 export interface PlaylistEntry {
   entryId: string;
@@ -335,7 +429,13 @@ export interface PlaylistEntry {
   defaultInstrument: string | null;
 }
 
-export interface PlaylistDetail { id: string; name: string; entries: PlaylistEntry[]; }
+export interface PlaylistDetail {
+  id: string;
+  name: string;
+  entries: PlaylistEntry[];
+  ownedByCurrentUser: boolean;
+  isPublic: boolean;
+}
 
 export async function getAllPlaylists(): Promise<PlaylistSummary[]> {
   const res = await fetch(`${BASE_URL}/playlist`, { headers: { ...getAuthHeaders() } });
@@ -433,6 +533,16 @@ export async function getPlaylistsContainingSong(
   handleUnauthorized(res);
   if (!res.ok) return [];
   return res.json();
+}
+
+export async function setPlaylistVisibility(id: string, isPublic: boolean): Promise<void> {
+  const params = new URLSearchParams({ isPublic: String(isPublic) });
+  const res = await fetch(`${BASE_URL}/playlist/${id}/visibility?${params}`, {
+    method: 'PATCH',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to set visibility');
 }
 
 export async function clearPlaylistEntryOverrides(playlistId: string, entryId: string): Promise<PlaylistDetail> {
