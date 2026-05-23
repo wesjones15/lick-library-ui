@@ -268,6 +268,15 @@ export async function rejectUser(userId: number): Promise<void> {
   if (!res.ok) throw new Error('Failed to reject user');
 }
 
+export async function deleteAdminUser(userId: number): Promise<void> {
+  const res = await fetch(`${BASE_URL}/admin/users/${userId}`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to delete user');
+}
+
 export async function uploadSong(request: UploadSongRequest): Promise<SongSummary> {
   const res = await fetch(`${BASE_URL}/song`, {
     method: 'POST',

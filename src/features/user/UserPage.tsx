@@ -4,7 +4,7 @@ import { useAuth } from '../../core/auth/AuthContext';
 import {
   getUserProfile, deleteOwnAccount,
   getAllLicks, getAllSongs, getAllPlaylists,
-  getAdminQueue, getAdminUsers, approveUser, rejectUser,
+  getAdminQueue, getAdminUsers, approveUser, rejectUser, deleteAdminUser,
 } from '../../core/api/client';
 import type { UserProfileResponse, AdminUserResponse, LickSummary, SongSummary, PlaylistSummary } from '../../core/api/client';
 
@@ -23,6 +23,7 @@ export default function UserPage() {
   // Admin
   const [queue, setQueue] = useState<AdminUserResponse[]>([]);
   const [allUsers, setAllUsers] = useState<AdminUserResponse[]>([]);
+  const [confirmDeleteUserId, setConfirmDeleteUserId] = useState<number | null>(null);
 
   useEffect(() => {
     getUserProfile().then(setProfile).catch(() => {});
@@ -47,6 +48,12 @@ export default function UserPage() {
     await rejectUser(userId);
     setQueue(q => q.filter(u => u.id !== userId));
     getAdminUsers().then(setAllUsers).catch(() => {});
+  }
+
+  async function handleDeleteUser(userId: number) {
+    await deleteAdminUser(userId);
+    setAllUsers(u => u.filter(x => x.id !== userId));
+    setConfirmDeleteUserId(null);
   }
 
   async function handleDeleteAccount() {
@@ -183,7 +190,8 @@ export default function UserPage() {
                   <th className="pb-2 pr-4">Username</th>
                   <th className="pb-2 pr-4">Email</th>
                   <th className="pb-2 pr-4">Role</th>
-                  <th className="pb-2">Status</th>
+                  <th className="pb-2 pr-4">Status</th>
+                  <th className="pb-2"></th>
                 </tr>
               </thead>
               <tbody>
@@ -197,7 +205,7 @@ export default function UserPage() {
                         {u.role}
                       </span>
                     </td>
-                    <td className="py-1.5">
+                    <td className="py-1.5 pr-4">
                       <span className={`px-1.5 py-0.5 rounded text-xs ${
                         u.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
                         u.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
@@ -205,6 +213,34 @@ export default function UserPage() {
                       }`}>
                         {u.status}
                       </span>
+                    </td>
+                    <td className="py-1.5">
+                      {u.id !== profile?.id && (
+                        confirmDeleteUserId === u.id ? (
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-red-500">Sure?</span>
+                            <button
+                              onClick={() => handleDeleteUser(u.id)}
+                              className="text-xs px-2 py-0.5 rounded bg-red-500 text-white hover:bg-red-600 transition-colors"
+                            >
+                              Confirm
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteUserId(null)}
+                              className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmDeleteUserId(u.id)}
+                            className="text-xs text-red-300 hover:text-red-500 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        )
+                      )}
                     </td>
                   </tr>
                 ))}
