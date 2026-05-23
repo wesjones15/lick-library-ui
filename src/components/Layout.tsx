@@ -30,7 +30,7 @@ export default function Layout() {
   const { info, collapsed, setCollapsed, showChords, setShowChords, miniActions } = useSongNavContext();
   const { setBpm, setIsPlaying, bpm, isPlaying } = useMetronomeContext();
   const { currentUser, logout } = useAuth();
-  const BACKEND = `http://${window.location.hostname}:8080`;
+  const BACKEND = (import.meta.env.VITE_API_URL ?? `http://${window.location.hostname}:8080/api`).replace(/\/api$/, '');
   const [menuOpen, setMenuOpen] = useState(false);
   const [iconsOpen, setIconsOpen] = useState(false);
   const [playlistPanelOpen, setPlaylistPanelOpen] = useState(false);

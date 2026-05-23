@@ -37,7 +37,7 @@ const FEATURES = [
 export default function HomePage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const BACKEND = `http://${window.location.hostname}:8080`;
+  const BACKEND = (import.meta.env.VITE_API_URL ?? `http://${window.location.hostname}:8080/api`).replace(/\/api$/, '');
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-16">
