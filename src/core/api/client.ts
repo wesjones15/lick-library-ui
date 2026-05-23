@@ -20,6 +20,7 @@ export interface UserProfileResponse {
   role: 'ADMIN' | 'USER';
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   creationTs: string;
+  requestType: string;
 }
 
 export interface AdminUserResponse {
@@ -29,6 +30,7 @@ export interface AdminUserResponse {
   role: 'ADMIN' | 'USER';
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   creationTs: string;
+  requestType: string;
 }
 
 export interface LickSummary {
@@ -225,6 +227,15 @@ export async function getUserProfile(): Promise<UserProfileResponse> {
   handleUnauthorized(res);
   if (!res.ok) throw new Error('Failed to fetch profile');
   return res.json();
+}
+
+export async function requestDeletion(): Promise<void> {
+  const res = await fetch(`${BASE_URL}/user/request-deletion`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to request deletion');
 }
 
 export async function deleteOwnAccount(): Promise<void> {

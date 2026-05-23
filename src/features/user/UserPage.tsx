@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../core/auth/AuthContext';
 import {
-  getUserProfile, deleteOwnAccount,
+  getUserProfile, requestDeletion, deleteOwnAccount,
   getAllLicks, getAllSongs, getAllPlaylists,
   getAdminQueue, getAdminUsers, approveUser, rejectUser, deleteAdminUser,
 } from '../../core/api/client';
@@ -59,7 +59,7 @@ export default function UserPage() {
   async function handleDeleteAccount() {
     setDeleting(true);
     try {
-      await deleteOwnAccount();
+      await requestDeletion();
       logout();
       navigate('/');
     } finally {
@@ -113,7 +113,9 @@ export default function UserPage() {
       {/* Status banners for non-approved non-admin */}
       {isPending && !isAdmin && (
         <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-          Your account is pending approval. You'll have full access once an admin approves your request.
+          {currentUser.requestType === 'ACCOUNT_DELETION'
+            ? 'Your deletion request is pending admin review.'
+            : "Your account is pending approval. You'll have full access once an admin approves your request."}
         </div>
       )}
       {isRejected && !isAdmin && (
@@ -154,7 +156,16 @@ export default function UserPage() {
               {queue.map(u => (
                 <div key={u.id} className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-2.5 bg-white">
                   <div>
-                    <div className="text-sm font-medium text-gray-800">{u.username}</div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm font-medium text-gray-800">{u.username}</div>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        u.requestType === 'ACCOUNT_DELETION'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-blue-100 text-blue-700'
+                      }`}>
+                        {u.requestType === 'ACCOUNT_DELETION' ? 'Deletion' : 'Account Creation'}
+                      </span>
+                    </div>
                     <div className="text-xs text-gray-400">{u.email}</div>
                   </div>
                   <div className="flex gap-2">
@@ -254,13 +265,13 @@ export default function UserPage() {
       <div className="mt-8 pt-6 border-t border-gray-100">
         {confirmDelete ? (
           <div className="flex items-center gap-3">
-            <span className="text-sm text-red-600">Delete your account and all your data?</span>
+            <span className="text-sm text-red-600">Submit a deletion request for admin review?</span>
             <button
               onClick={handleDeleteAccount}
               disabled={deleting}
               className="text-xs px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
             >
-              {deleting ? 'Deleting…' : 'Confirm delete'}
+              {deleting ? 'Submitting…' : 'Submit request'}
             </button>
             <button
               onClick={() => setConfirmDelete(false)}

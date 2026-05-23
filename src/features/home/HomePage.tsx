@@ -57,6 +57,8 @@ export default function HomePage() {
         <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
           {currentUser.status === 'REJECTED'
             ? 'Your account request was not approved.'
+            : currentUser.requestType === 'ACCOUNT_DELETION'
+            ? 'Your deletion request is pending admin review.'
             : "Your account is pending approval. You'll have full access once an admin approves your request."}
         </div>
       )}

@@ -8,6 +8,7 @@ export interface UserProfile {
   userId: number;
   role: 'ADMIN' | 'USER';
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  requestType?: string;
 }
 
 function decodeJwt(token: string): UserProfile | null {
@@ -62,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     getUserProfile()
       .then(profile => {
-        setCurrentUser(u => u ? { ...u, role: profile.role, status: profile.status } : u);
+        setCurrentUser(u => u ? { ...u, role: profile.role, status: profile.status, requestType: profile.requestType } : u);
       })
       .catch(() => {})
       .finally(() => setStatusResolved(true));
