@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import Metronome from '../core/metronome/MetronomeWidget';
 import { useSongNavContext } from '../core/context/SongNavContext';
@@ -27,6 +27,7 @@ const NAV_LINKS: { label: ReactNode; to: string }[] = [
 
 export default function Layout() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const { info, collapsed, setCollapsed, showChords, setShowChords, miniActions } = useSongNavContext();
   const { setBpm, setIsPlaying, bpm, isPlaying } = useMetronomeContext();
   const { currentUser, logout } = useAuth();
@@ -380,13 +381,13 @@ export default function Layout() {
               )}
               {currentUser && (
                 <>
-                  <Link
-                    to="/user"
+                  <button
+                    onClick={() => navigate('/user')}
                     className={`text-sm transition-colors px-2 py-1 ${currentUser.role === 'ADMIN' ? 'text-indigo-600 font-medium hover:text-indigo-800' : 'text-gray-500 hover:text-gray-900'}`}
                     title={`${currentUser.role} · ${currentUser.status}`}
                   >
                     {currentUser.role === 'ADMIN' ? 'Admin' : 'Account'}
-                  </Link>
+                  </button>
                   <button
                     onClick={logout}
                     className="text-sm text-gray-400 hover:text-gray-700 transition-colors px-2 py-1"

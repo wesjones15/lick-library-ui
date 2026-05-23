@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../core/auth/AuthContext';
 import {
   getUserProfile, requestDeletion, deleteOwnAccount,
@@ -11,6 +11,7 @@ import type { UserProfileResponse, AdminUserResponse, LickSummary, SongSummary, 
 export default function UserPage() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const { key: locationKey } = useLocation();
   const [profile, setProfile] = useState<UserProfileResponse | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -36,7 +37,7 @@ export default function UserPage() {
       getAdminQueue().then(setQueue).catch(() => {});
       getAdminUsers().then(setAllUsers).catch(() => {});
     }
-  }, [currentUser]);
+  }, [currentUser, locationKey]);
 
   async function handleApprove(userId: number) {
     await approveUser(userId);
