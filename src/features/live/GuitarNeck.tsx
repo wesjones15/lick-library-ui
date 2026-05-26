@@ -128,6 +128,11 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           50%       { stroke-width: 4; }
         }
         .active-dot { animation: active-stroke ${pulseDuration} ease-in-out infinite; }
+        @keyframes next-chord-scale {
+          0%, 100% { transform: scale(1); }
+          50%       { transform: scale(1.4); }
+        }
+        .next-chord-dot { animation: next-chord-scale ${pulseDuration} ease-in-out infinite; }
       `}</style>
       {/* Tan fretboard backdrop */}
       <rect
@@ -297,7 +302,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
             if (dot.nextChord && !dot.active && !dot.highlighted) {
               const fontSize = dot.note && dot.note.length > 1 ? 7 : 9;
               return (
-                <g key={`d${di}-${fret}`}>
+                <g key={`d${di}-${fret}`} className="next-chord-dot" style={{ transformOrigin: `${cx}px ${cy}px` }}>
                   <circle cx={cx} cy={cy} r={R_NORMAL} fill={OFF_SCALE_COLOR} />
                   {dot.note && (
                     <text x={cx} y={cy + fontSize * 0.38} textAnchor="middle"
@@ -351,17 +356,19 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
             <g
               key={`d${di}-${fret}`}
               opacity={isThirdCandidate ? 0.33 : isSecondCandidate ? 0.67 : isCandidate ? 0.8 : 1}
+              className={isNextChord ? 'next-chord-dot' : undefined}
+              style={isNextChord ? { transformOrigin: `${cx}px ${cy}px` } : undefined}
             >
               {/* pale yellow ring — outer border of active pulse */}
               {dot.active && (
                 <circle cx={cx} cy={cy} r={R_RING} fill={ACTIVE_RING_COLOR} />
               )}
               {/* white backing for inactive dots — dim color stays opaque, not translucent */}
-              {!bright && !isSecondCandidate && !isThirdCandidate && !isNextChord && <circle cx={cx} cy={cy} r={R_NORMAL} fill="#ffffff" />}
+              {!bright && !isSecondCandidate && !isThirdCandidate && <circle cx={cx} cy={cy} r={R_NORMAL} fill="#ffffff" />}
               {/* colored circle — stroke pulses via CSS for active, candidate, and second candidate */}
               <circle
                 cx={cx} cy={cy} r={R_NORMAL}
-                fill={color} opacity={isNextChord ? 0.65 : (bright || isSecondCandidate || isThirdCandidate ? 1 : 0.4)}
+                fill={color} opacity={bright || isSecondCandidate || isThirdCandidate ? 1 : 0.4}
                 stroke={dot.active ? color : candidateStroke}
                 strokeWidth={dot.active || isCandidate || isSecondCandidate || isThirdCandidate || isHighlighted ? 1 : 0}
                 style={dot.active ? { stroke: color } : ((isCandidate || isSecondCandidate || isThirdCandidate) ? { stroke: candidateStroke } : (isHighlighted ? { stroke: color } : undefined))}
