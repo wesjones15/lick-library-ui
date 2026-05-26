@@ -5,9 +5,13 @@ interface Props {
   currentIdx: number;
   intraChordIdx?: number;
   guitarKaraoke?: boolean;
+  beatInChord?: number;
+  currentChordBeats?: number;
+  nextChordBeats?: number;
+  pulsed?: boolean;
 }
 
-function renderChordLine(chords: string, boldIdx?: number): React.ReactNode {
+function renderChordLine(chords: string, boldIdx?: number, pulsed?: boolean): React.ReactNode {
   const text = chords.trimEnd() || ' ';
   if (boldIdx === undefined || boldIdx < 0) return text;
   const matches = [...text.matchAll(/[A-G][A-Za-z#b/0-9]*/g)]
@@ -15,16 +19,42 @@ function renderChordLine(chords: string, boldIdx?: number): React.ReactNode {
   const target = matches[boldIdx];
   if (!target || target.index === undefined) return text;
   const s = target.index, e = s + target[0].length;
-  return <>{text.slice(0, s)}<strong>{text.slice(s, e)}</strong>{text.slice(e)}</>;
+  return (
+    <>
+      {text.slice(0, s)}
+      <strong className={`transition-colors duration-75 ${pulsed ? 'text-indigo-600' : 'text-indigo-400'}`}>
+        {text.slice(s, e)}
+      </strong>
+      {text.slice(e)}
+    </>
+  );
+}
+
+function BeatDots({ count, filled, small }: { count: number; filled: number; small?: boolean }) {
+  const size = small ? 6 : count > 8 ? 8 : 10;
+  return (
+    <div className="flex gap-1 justify-center">
+      {Array.from({ length: count }).map((_, i) => (
+        <span
+          key={i}
+          className={`inline-block rounded-full transition-colors duration-75 ${
+            i < filled ? 'bg-indigo-500' : 'bg-gray-200'
+          }`}
+          style={{ width: size, height: size }}
+        />
+      ))}
+    </div>
+  );
 }
 
 function KaraokeSlot({
-  line, variant, expanded, boldIdx,
+  line, variant, expanded, boldIdx, pulsed,
 }: {
   line: ChordLyric | undefined;
   variant: 'active' | 'secondary' | 'dim';
   expanded: boolean;
   boldIdx?: number;
+  pulsed?: boolean;
 }) {
   if (!line) return null;
   const isActive = variant === 'active';
@@ -36,17 +66,20 @@ function KaraokeSlot({
   return (
     <div className={`font-mono transition-opacity ${sizeClass}`} style={{ opacity }}>
       <div style={{ color: '#4f46e5', whiteSpace: 'pre' }}>
-        {isActive ? renderChordLine(line.chords, boldIdx) : (line.chords.trimEnd() || ' ')}
+        {isActive ? renderChordLine(line.chords, boldIdx, pulsed) : (line.chords.trimEnd() || ' ')}
       </div>
       <div style={{ color: '#111827', whiteSpace: 'pre' }}>{line.lyrics.trimEnd() || ' '}</div>
     </div>
   );
 }
 
-export default function KaraokeDisplay({ lines, currentIdx, intraChordIdx, guitarKaraoke }: Props) {
+export default function KaraokeDisplay({
+  lines, currentIdx, intraChordIdx, guitarKaraoke,
+  beatInChord = 0, currentChordBeats = 0, nextChordBeats = 0, pulsed,
+}: Props) {
   const exp = !!guitarKaraoke;
-  const slot = (offset: number, variant: 'active' | 'secondary' | 'dim', boldIdx?: number) => (
-    <KaraokeSlot line={lines[currentIdx + offset]} variant={variant} expanded={exp} boldIdx={boldIdx} />
+  const slot = (offset: number, variant: 'active' | 'secondary' | 'dim', boldIdx?: number, slotPulsed?: boolean) => (
+    <KaraokeSlot line={lines[currentIdx + offset]} variant={variant} expanded={exp} boldIdx={boldIdx} pulsed={slotPulsed} />
   );
 
   return (
@@ -55,7 +88,9 @@ export default function KaraokeDisplay({ lines, currentIdx, intraChordIdx, guita
         <>
           {slot(-2, 'dim')}
           {slot(-1, 'secondary')}
-          {slot( 0, 'active', intraChordIdx)}
+          {currentChordBeats > 0 && <BeatDots count={currentChordBeats} filled={beatInChord} />}
+          {slot( 0, 'active', intraChordIdx, pulsed)}
+          {nextChordBeats > 0 && <BeatDots count={nextChordBeats} filled={0} small />}
           {slot(+1, 'active')}
           {slot(+2, 'secondary')}
           {slot(+3, 'dim')}
@@ -65,7 +100,9 @@ export default function KaraokeDisplay({ lines, currentIdx, intraChordIdx, guita
         <>
           {slot(-2, 'dim')}
           {slot(-1, 'secondary')}
-          {slot( 0, 'active', intraChordIdx)}
+          {currentChordBeats > 0 && <BeatDots count={currentChordBeats} filled={beatInChord} />}
+          {slot( 0, 'active', intraChordIdx, pulsed)}
+          {nextChordBeats > 0 && <BeatDots count={nextChordBeats} filled={0} small />}
           {slot(+1, 'active')}
           {slot(+2, 'secondary')}
         </>

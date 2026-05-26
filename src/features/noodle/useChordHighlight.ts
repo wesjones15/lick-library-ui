@@ -71,6 +71,7 @@ export function useChordHighlight(
   capoOffset: number,
   voicing?: ChordVoicing | null,
   refreshToken?: number,
+  nextChordName?: string | null,
 ): NeckDot[][] {
   const stringCount = getStringCount(instrument);
   const [scaleDots, setScaleDots] = useState<NeckDot[][]>(() => blankDots(stringCount));
@@ -120,19 +121,30 @@ export function useChordHighlight(
   }, [root, mode, instrument, refreshToken]);
 
   return useMemo(() => {
-    if (!chordName) return scaleDots;
-    const tones: Set<number> | null = voicing
-      ? semitonesFromVoicing(voicing, instrument, capoOffset)
-      : chordToneSemitones(chordName, capoOffset);
-    if (!tones || tones.size === 0) return scaleDots;
+    const tones: Set<number> | null = chordName
+      ? (voicing
+          ? semitonesFromVoicing(voicing, instrument, capoOffset)
+          : chordToneSemitones(chordName, capoOffset))
+      : null;
+    const nextTones: Set<number> | null = nextChordName
+      ? chordToneSemitones(nextChordName, capoOffset)
+      : null;
+
+    if (!tones && !nextTones) return scaleDots;
 
     return scaleDots.map(string =>
       string.map(dot => {
         if (!dot.note) return dot;
         const semitone = CHROMATIC_NOTES.indexOf(dot.note);
         if (semitone === -1) return dot;
-        return { ...dot, highlighted: tones.has(semitone) };
+        const isCurrentTone = tones?.has(semitone) ?? false;
+        const isNextTone = nextTones?.has(semitone) ?? false;
+        return {
+          ...dot,
+          highlighted: isCurrentTone,
+          ...(isNextTone && !isCurrentTone ? { candidate: true, candidateColor: '#94a3b8' } : {}),
+        };
       })
     );
-  }, [scaleDots, chordName, capoOffset, voicing, instrument]);
+  }, [scaleDots, chordName, capoOffset, voicing, instrument, nextChordName]);
 }

@@ -155,6 +155,7 @@ export default function NoodlePage() {
   const [showBeatmapEditor, setShowBeatmapEditor] = useState(false);
   const [beatmapDraft, setBeatmapDraft] = useState<number[]>([]);
   const [beatmapSubmitSuccess, setBeatmapSubmitSuccess] = useState(false);
+  const [beatInChord, setBeatInChord] = useState(0);
   const [neckRefresh, setNeckRefresh] = useState(0);
   const beatmapFetchedForRef = useRef<string | null>(null);
 
@@ -290,6 +291,30 @@ export default function NoodlePage() {
     return null;
   }, [noodleMode, contentLines, currentIdx, intraChordIdx, freeChords, chordIdx]);
 
+  const nextActiveChord = useMemo(() => {
+    if (noodleMode !== 'song' || !contentLines.length) return null;
+    const tokens = parseChordsFromLine(contentLines[currentIdx]?.chords ?? '');
+    if (intraChordIdx + 1 < tokens.length) return tokens[intraChordIdx + 1];
+    for (let i = currentIdx + 1; i < contentLines.length; i++) {
+      if (!isSectionHeader(contentLines[i])) {
+        const t = parseChordsFromLine(contentLines[i].chords);
+        if (t.length) return t[0];
+      }
+    }
+    return null;
+  }, [noodleMode, contentLines, currentIdx, intraChordIdx]);
+
+  const currentChordBeats = (isPlaying && beatmapByLine && noodleMode === 'song')
+    ? (beatmapByLine[currentIdx]?.[intraChordIdx] ?? 0)
+    : 0;
+
+  const nextChordBeats = useMemo(() => {
+    if (!isPlaying || !beatmapByLine || noodleMode !== 'song') return 0;
+    const lineBeats = beatmapByLine[currentIdx];
+    if (lineBeats && intraChordIdx + 1 < lineBeats.length) return lineBeats[intraChordIdx + 1];
+    return beatmapByLine[currentIdx + 1]?.[0] ?? 0;
+  }, [isPlaying, beatmapByLine, currentIdx, intraChordIdx, noodleMode]);
+
   const advanceRef = useRef<() => void>(() => {});
   advanceRef.current = () => {
     if (noodleMode === 'song' && contentLines.length > 0) {
@@ -303,6 +328,7 @@ export default function NoodlePage() {
 
       if (halfBeatRef.current > total) {
         halfBeatRef.current = 1;
+        setBeatInChord(1);
         setIntraChordIdx(0);
         setCurrentIdx(i => {
           let next = (i + 1) % contentLines.length;
@@ -322,6 +348,8 @@ export default function NoodlePage() {
         accum += dist[i];
         if (halfBeatRef.current <= accum) { newChordIdx = i; break; }
       }
+      const priorBeats = dist.slice(0, newChordIdx).reduce((a, b) => a + b, 0);
+      setBeatInChord(halfBeatRef.current - priorBeats);
       setIntraChordIdx(newChordIdx);
     } else if (noodleMode === 'freeChords' && freeChords.length > 0) {
       if (!freeHasAdvanced) {
@@ -352,7 +380,7 @@ export default function NoodlePage() {
 
   const capoOffset = noodleMode === 'song' ? localCapo : 0;
   const activeVoicing = (activeChord ? cachedVoicings[activeChord]?.[0] : null) ?? null;
-  const dots = useChordHighlight(activeChord, soundingRoot, soundingMode, instrument, capoOffset, activeVoicing, neckRefresh);
+  const dots = useChordHighlight(activeChord, soundingRoot, soundingMode, instrument, capoOffset, activeVoicing, neckRefresh, nextActiveChord);
 
   function loadSongById(summary: SongSummary) {
     setShowLibrary(false);
@@ -755,6 +783,10 @@ export default function NoodlePage() {
           currentIdx={currentIdx}
           intraChordIdx={intraChordIdx}
           guitarKaraoke={guitarKaraokeMode}
+          beatInChord={beatInChord}
+          currentChordBeats={currentChordBeats}
+          nextChordBeats={nextChordBeats}
+          pulsed={pulsed}
         />
       )}
 
