@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { getSong, updateSong, deleteSong, getChordVoicings } from '../../core/api/client';
+import { getSong, updateSong, deleteSong, getChordVoicings, submitSongUpdateRequest } from '../../core/api/client';
 import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/client';
 import ChordDiagram from '../chords/ChordDiagram';
 import { parseChordName } from './parseChordName';
@@ -73,6 +73,7 @@ export default function SongManagePage() {
   const [selectedChord, setSelectedChord] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -183,18 +184,47 @@ export default function SongManagePage() {
 
   if (!song) return <div className="px-6 pt-8 text-sm text-gray-400">Loading…</div>;
 
-  if (!song.ownedByCurrentUser) {
-    return (
-      <div className={`mx-auto px-6 py-8 max-w-lg`}>
-        <Link to={`/song/${id}`} className="text-sm text-indigo-500 hover:text-indigo-700 mb-6 inline-block">
-          ← {song.title}
-        </Link>
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 mt-4">
-          You don't own this song and cannot edit it.
-        </div>
-      </div>
-    );
-  }
+  const isOwner = song.ownedByCurrentUser;
+
+  const handleMetadataSubmitNonOwner = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id || !metadataIsDirty) return;
+    setError(null);
+    setLoading(true);
+    setSubmitSuccess(false);
+    try {
+      await submitSongUpdateRequest(id, {
+        title: title.trim(),
+        artist: artist.trim() || undefined,
+        originalKey: keyRoot || undefined,
+        mode: keyRoot ? (SONG_MODE_TO_ENUM[keyMode] ?? 'IONIAN') : undefined,
+        instrument,
+        capo: capo ? parseInt(capo, 10) : undefined,
+        tempo: tempo ? parseInt(tempo, 10) : undefined,
+      });
+      setSubmitSuccess(true);
+    } catch {
+      setError('Submit failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChartSubmitNonOwner = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id || !chartIsDirty) return;
+    setError(null);
+    setLoading(true);
+    setSubmitSuccess(false);
+    try {
+      await submitSongUpdateRequest(id, { rawChordSheet });
+      setSubmitSuccess(true);
+    } catch {
+      setError('Submit failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={`mx-auto px-6 py-8 ${mode === 'chords' ? 'max-w-3xl' : 'max-w-lg'}`}>
@@ -203,8 +233,20 @@ export default function SongManagePage() {
         ← {song.title}
       </Link>
 
+      {!isOwner && (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          You are not the owner of this song. Changes will be submitted for admin review.
+        </div>
+      )}
+
+      {submitSuccess && (
+        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          Update submitted — an admin will review your changes.
+        </div>
+      )}
+
       {mode === 'metadata' && (
-        <form onSubmit={handleMetadataSubmit} className="flex flex-col gap-3 mt-4">
+        <form onSubmit={isOwner ? handleMetadataSubmit : handleMetadataSubmitNonOwner} className="flex flex-col gap-3 mt-4">
           <input
             type="text"
             value={title}
@@ -270,18 +312,20 @@ export default function SongManagePage() {
             disabled={loading || !metadataIsDirty || !title.trim()}
             className="px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end"
           >
-            {loading ? 'Saving…' : 'Save'}
+            {loading ? 'Saving…' : isOwner ? 'Save' : 'Submit for review'}
           </button>
 
           {/* Mode switchers */}
           <div className="flex flex-col gap-2 mt-2 pt-4 border-t border-gray-100">
-            <button type="button" onClick={() => setMode('chart')} className={btnSecondary}>
+            <button type="button" onClick={() => { setMode('chart'); setSubmitSuccess(false); }} className={btnSecondary}>
               Update Song Chart
             </button>
-            <button type="button" onClick={() => setMode('chords')} className={btnSecondary}>
-              Manage Chords
-            </button>
-            {!showDeleteConfirm ? (
+            {isOwner && (
+              <button type="button" onClick={() => setMode('chords')} className={btnSecondary}>
+                Manage Chords
+              </button>
+            )}
+            {isOwner && (!showDeleteConfirm ? (
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
@@ -309,7 +353,7 @@ export default function SongManagePage() {
                   </button>
                 </div>
               </div>
-            )}
+            ))}
           </div>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -317,8 +361,8 @@ export default function SongManagePage() {
       )}
 
       {mode === 'chart' && (
-        <form onSubmit={handleChartSubmit} className="flex flex-col gap-3 mt-4">
-          <button type="button" onClick={() => { setRawChordSheet(song.rawChordSheet ?? ''); setMode('metadata'); }} className="text-sm text-indigo-500 hover:text-indigo-700 self-start">
+        <form onSubmit={isOwner ? handleChartSubmit : handleChartSubmitNonOwner} className="flex flex-col gap-3 mt-4">
+          <button type="button" onClick={() => { setRawChordSheet(song.rawChordSheet ?? ''); setMode('metadata'); setSubmitSuccess(false); }} className="text-sm text-indigo-500 hover:text-indigo-700 self-start">
             ← Back
           </button>
           <textarea
@@ -332,7 +376,7 @@ export default function SongManagePage() {
             disabled={loading || !chartIsDirty}
             className="px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end"
           >
-            {loading ? 'Saving…' : 'Save & Re-parse'}
+            {loading ? 'Saving…' : isOwner ? 'Save & Re-parse' : 'Submit for review'}
           </button>
           {error && <p className="text-red-500 text-sm">{error}</p>}
         </form>

@@ -576,6 +576,84 @@ export async function setPlaylistVisibility(id: string, isPublic: boolean): Prom
   if (!res.ok) throw new Error('Failed to set visibility');
 }
 
+// --- Song Update Requests ---
+
+export interface SongUpdateRequestSummary {
+  id: string;
+  songId: string;
+  songTitle: string;
+  songArtist: string | null;
+  submitterUsername: string;
+  requestType: 'SONG_METADATA' | 'SONG_CHART' | 'SONG_BEATMAP';
+  createdAt: string;
+}
+
+export interface SongUpdateReviewResponse {
+  id: string;
+  songId: string;
+  songTitle: string;
+  songArtist: string | null;
+  submitterUsername: string;
+  requestType: 'SONG_METADATA' | 'SONG_CHART' | 'SONG_BEATMAP';
+  currentValue: string;
+  proposedValue: string;
+  createdAt: string;
+}
+
+export async function submitSongUpdateRequest(songId: string, request: UpdateSongRequest): Promise<SongUpdateRequestSummary> {
+  const res = await fetch(`${BASE_URL}/song/${songId}/update-request`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify(request),
+  });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to submit update request');
+  return res.json();
+}
+
+export async function submitBeatmapUpdateRequest(songId: string, beats: number[]): Promise<SongUpdateRequestSummary> {
+  const res = await fetch(`${BASE_URL}/song/${songId}/beatmap-request`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify({ beats }),
+  });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to submit beatmap update request');
+  return res.json();
+}
+
+export async function getAdminSongUpdateQueue(): Promise<SongUpdateRequestSummary[]> {
+  const res = await fetch(`${BASE_URL}/admin/song-updates`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to fetch song update queue');
+  return res.json();
+}
+
+export async function getSongUpdateForReview(updateId: string): Promise<SongUpdateReviewResponse> {
+  const res = await fetch(`${BASE_URL}/admin/song-updates/${updateId}`, { headers: { ...getAuthHeaders() } });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to fetch song update');
+  return res.json();
+}
+
+export async function approveSongUpdate(updateId: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/admin/song-updates/${updateId}/approve`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to approve song update');
+}
+
+export async function rejectSongUpdate(updateId: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/admin/song-updates/${updateId}/reject`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders() },
+  });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to reject song update');
+}
+
 export async function clearPlaylistEntryOverrides(playlistId: string, entryId: string): Promise<PlaylistDetail> {
   const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}/overrides`, {
     method: 'DELETE',

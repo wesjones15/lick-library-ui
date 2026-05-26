@@ -5,9 +5,10 @@ import {
   getUserProfile, requestDeletion, deleteOwnAccount,
   getAllLicks, getAllSongs, getAllPlaylists,
   getAdminQueue, getAdminUsers, approveUser, rejectUser, deleteAdminUser,
-  updateUsername,
+  updateUsername, getAdminSongUpdateQueue,
 } from '../../core/api/client';
-import type { UserProfileResponse, AdminUserResponse, LickSummary, SongSummary, PlaylistSummary } from '../../core/api/client';
+import type { UserProfileResponse, AdminUserResponse, LickSummary, SongSummary, PlaylistSummary, SongUpdateRequestSummary } from '../../core/api/client';
+import SongUpdateReviewModal from '../songs/SongUpdateReviewModal';
 
 export default function UserPage() {
   const { currentUser, logout } = useAuth();
@@ -28,6 +29,8 @@ export default function UserPage() {
   const [queue, setQueue] = useState<AdminUserResponse[]>([]);
   const [allUsers, setAllUsers] = useState<AdminUserResponse[]>([]);
   const [confirmDeleteUserId, setConfirmDeleteUserId] = useState<number | null>(null);
+  const [songUpdateQueue, setSongUpdateQueue] = useState<SongUpdateRequestSummary[]>([]);
+  const [reviewingUpdateId, setReviewingUpdateId] = useState<string | null>(null);
 
   const loadData = useCallback(() => {
     if (!currentUser) return;
@@ -40,6 +43,7 @@ export default function UserPage() {
     if (currentUser.role === 'ADMIN') {
       getAdminQueue().then(setQueue).catch(() => {});
       getAdminUsers().then(setAllUsers).catch(() => {});
+      getAdminSongUpdateQueue().then(setSongUpdateQueue).catch(() => {});
     }
   }, [currentUser]);
 
@@ -110,6 +114,7 @@ export default function UserPage() {
   );
 
   return (
+    <>
     <div className="max-w-3xl mx-auto px-6 py-10">
       {isAdmin && (
         <h1 className="text-3xl font-bold text-indigo-700 mb-1">Welcome aboard, captain.</h1>
@@ -353,6 +358,42 @@ export default function UserPage() {
         </div>
       )}
 
+      {/* Admin: Song Update Requests */}
+      {isAdmin && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-800 mb-3">Song Update Requests</h2>
+          {songUpdateQueue.length === 0 ? (
+            <p className="text-sm text-gray-400">No pending song updates.</p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {songUpdateQueue.map(req => (
+                <div key={req.id} className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-2.5 bg-white">
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="text-sm font-medium text-gray-800">{req.songTitle}{req.songArtist ? ` — ${req.songArtist}` : ''}</div>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        req.requestType === 'SONG_METADATA' ? 'bg-blue-100 text-blue-700' :
+                        req.requestType === 'SONG_CHART' ? 'bg-purple-100 text-purple-700' :
+                        'bg-teal-100 text-teal-700'
+                      }`}>
+                        {req.requestType === 'SONG_METADATA' ? 'Metadata' : req.requestType === 'SONG_CHART' ? 'Chart' : 'Beatmap'}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-400">submitted by {req.submitterUsername}</div>
+                  </div>
+                  <button
+                    onClick={() => setReviewingUpdateId(req.id)}
+                    className="text-xs px-3 py-1 rounded-lg border border-indigo-300 text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  >
+                    Review
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Delete Account — only visible in manage mode */}
       {managing && (
         <div className="mt-8 pt-6 border-t border-gray-100">
@@ -386,5 +427,17 @@ export default function UserPage() {
         </div>
       )}
     </div>
+
+      {reviewingUpdateId && (
+        <SongUpdateReviewModal
+          updateId={reviewingUpdateId}
+          onClose={() => setReviewingUpdateId(null)}
+          onDone={(doneId) => {
+            setSongUpdateQueue(q => q.filter(r => r.id !== doneId));
+            setReviewingUpdateId(null);
+          }}
+        />
+      )}
+    </>
   );
 }
