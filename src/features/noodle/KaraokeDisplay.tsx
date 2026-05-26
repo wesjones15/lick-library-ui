@@ -79,13 +79,13 @@ function ActiveChordLine({
     const showCurrentDots = isCurrent && currentChordBeats > 0;
     const showNextDots = isNext && nextChordBeats > 0;
     const currentDotSize = currentChordBeats > 8 ? 7 : 9;
-    const nextDotBottom = wouldOverlap ? 'calc(100% + 13px)' : '100%';
+    const nextDotBottom = wouldOverlap ? 'calc(100% + 10px)' : 'calc(100% - 3px)';
 
     nodes.push(
       <span key={`c${i}`} style={{ display: 'inline-block', position: 'relative' }}>
         {showCurrentDots && (
           <span style={{
-            position: 'absolute', bottom: '100%', left: '50%',
+            position: 'absolute', bottom: 'calc(100% - 3px)', left: '50%',
             transform: 'translateX(-50%)', whiteSpace: 'nowrap',
             display: 'flex', gap: '3px', paddingBottom: '0',
           }}>
