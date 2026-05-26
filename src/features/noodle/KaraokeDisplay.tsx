@@ -33,18 +33,19 @@ function dotRow(count: number, filled: number, size: number): React.ReactNode {
 }
 
 function ActiveChordLine({
-  chords, boldIdx, pulsed, currentChordBeats, beatInChord, nextChordBeats,
+  chords, boldIdx, pulsed, currentChordBeats, beatInChord, nextChordBeats, nextOnlyDotIdx,
 }: {
   chords: string;
-  boldIdx: number;
+  boldIdx?: number;
   pulsed?: boolean;
   currentChordBeats: number;
   beatInChord: number;
   nextChordBeats: number;
+  nextOnlyDotIdx?: number;
 }) {
   const text = chords.trimEnd() || ' ';
   const matches = parseChordMatches(text);
-  const nextTokenIdx = boldIdx + 1 < matches.length ? boldIdx + 1 : null;
+  const nextTokenIdx = boldIdx !== undefined && boldIdx + 1 < matches.length ? boldIdx + 1 : null;
 
   // Overlap check: would the two dot rows bleed into each other?
   let wouldOverlap = false;
@@ -71,8 +72,10 @@ function ActiveChordLine({
       );
     }
 
-    const isCurrent = i === boldIdx;
-    const isNext = i === nextTokenIdx;
+    const isCurrent = boldIdx !== undefined && i === boldIdx;
+    const isNext =
+      (nextTokenIdx !== null && i === nextTokenIdx) ||
+      (nextOnlyDotIdx !== undefined && i === nextOnlyDotIdx);
     const showCurrentDots = isCurrent && currentChordBeats > 0;
     const showNextDots = isNext && nextChordBeats > 0;
     const currentDotSize = currentChordBeats > 8 ? 7 : 9;
@@ -84,7 +87,7 @@ function ActiveChordLine({
           <span style={{
             position: 'absolute', bottom: '100%', left: '50%',
             transform: 'translateX(-50%)', whiteSpace: 'nowrap',
-            display: 'flex', gap: '3px', paddingBottom: '2px',
+            display: 'flex', gap: '3px', paddingBottom: '0',
           }}>
             {dotRow(currentChordBeats, beatInChord, currentDotSize)}
           </span>
@@ -93,7 +96,7 @@ function ActiveChordLine({
           <span style={{
             position: 'absolute', bottom: nextDotBottom, left: '50%',
             transform: 'translateX(-50%)', whiteSpace: 'nowrap',
-            display: 'flex', gap: '3px', paddingBottom: '2px',
+            display: 'flex', gap: '3px', paddingBottom: '0',
           }}>
             {dotRow(nextChordBeats, 0, 6)}
           </span>
@@ -118,7 +121,7 @@ function ActiveChordLine({
 }
 
 function KaraokeSlot({
-  line, variant, expanded, boldIdx, pulsed, currentChordBeats, beatInChord, nextChordBeats,
+  line, variant, expanded, boldIdx, pulsed, currentChordBeats, beatInChord, nextChordBeats, leadingNextBeats,
 }: {
   line: ChordLyric | undefined;
   variant: 'active' | 'secondary' | 'dim';
@@ -128,6 +131,7 @@ function KaraokeSlot({
   currentChordBeats?: number;
   beatInChord?: number;
   nextChordBeats?: number;
+  leadingNextBeats?: number;
 }) {
   if (!line) return null;
   const isActive = variant === 'active';
@@ -168,6 +172,14 @@ function KaraokeSlot({
               </>
             );
           })()
+        ) : (leadingNextBeats ?? 0) > 0 ? (
+          <ActiveChordLine
+            chords={line.chords}
+            nextOnlyDotIdx={0}
+            nextChordBeats={leadingNextBeats!}
+            currentChordBeats={0}
+            beatInChord={0}
+          />
         ) : (
           line.chords.trimEnd() || ' '
         )}
@@ -183,7 +195,14 @@ export default function KaraokeDisplay({
 }: Props) {
   const exp = !!guitarKaraoke;
 
-  const activeSlot = (offset: number, variant: 'active' | 'secondary' | 'dim', boldIdx?: number) => (
+  const activeLineChordCount = parseChordMatches(lines[currentIdx]?.chords ?? '').length;
+  const nextIsOnNextLine =
+    intraChordIdx !== undefined &&
+    nextChordBeats > 0 &&
+    intraChordIdx >= activeLineChordCount - 1 &&
+    currentIdx + 1 < lines.length;
+
+  const activeSlot = (offset: number, variant: 'active' | 'secondary' | 'dim', boldIdx?: number, leadingNextBeats?: number) => (
     <KaraokeSlot
       line={lines[currentIdx + offset]}
       variant={variant}
@@ -193,6 +212,7 @@ export default function KaraokeDisplay({
       currentChordBeats={currentChordBeats}
       beatInChord={beatInChord}
       nextChordBeats={nextChordBeats}
+      leadingNextBeats={leadingNextBeats}
     />
   );
 
@@ -207,7 +227,7 @@ export default function KaraokeDisplay({
           {slot(-2, 'dim')}
           {slot(-1, 'secondary')}
           {activeSlot( 0, 'active', intraChordIdx)}
-          {activeSlot(+1, 'active')}
+          {activeSlot(+1, 'active', undefined, nextIsOnNextLine ? nextChordBeats : 0)}
           {slot(+2, 'secondary')}
           {slot(+3, 'dim')}
           {slot(+4, 'dim')}
@@ -217,7 +237,7 @@ export default function KaraokeDisplay({
           {slot(-2, 'dim')}
           {slot(-1, 'secondary')}
           {activeSlot( 0, 'active', intraChordIdx)}
-          {activeSlot(+1, 'active')}
+          {activeSlot(+1, 'active', undefined, nextIsOnNextLine ? nextChordBeats : 0)}
           {slot(+2, 'secondary')}
         </>
       )}
