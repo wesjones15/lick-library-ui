@@ -229,6 +229,17 @@ export async function getUserProfile(): Promise<UserProfileResponse> {
   return res.json();
 }
 
+export async function updateUsername(username: string): Promise<UserProfileResponse> {
+  const res = await fetch(`${BASE_URL}/user/me/username`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify({ username }),
+  });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error('Failed to update username');
+  return res.json();
+}
+
 export async function requestDeletion(): Promise<void> {
   const res = await fetch(`${BASE_URL}/user/request-deletion`, {
     method: 'POST',

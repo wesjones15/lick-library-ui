@@ -1,20 +1,23 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../core/auth/AuthContext';
 import {
   getUserProfile, requestDeletion, deleteOwnAccount,
   getAllLicks, getAllSongs, getAllPlaylists,
   getAdminQueue, getAdminUsers, approveUser, rejectUser, deleteAdminUser,
+  updateUsername,
 } from '../../core/api/client';
 import type { UserProfileResponse, AdminUserResponse, LickSummary, SongSummary, PlaylistSummary } from '../../core/api/client';
 
 export default function UserPage() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
-  const { key: locationKey } = useLocation();
   const [profile, setProfile] = useState<UserProfileResponse | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [managing, setManaging] = useState(false);
+  const [editingUsername, setEditingUsername] = useState<string | null>(null);
+  const [savingUsername, setSavingUsername] = useState(false);
 
   // Approved user uploads
   const [myLicks, setMyLicks] = useState<LickSummary[]>([]);
@@ -26,18 +29,23 @@ export default function UserPage() {
   const [allUsers, setAllUsers] = useState<AdminUserResponse[]>([]);
   const [confirmDeleteUserId, setConfirmDeleteUserId] = useState<number | null>(null);
 
-  useEffect(() => {
+  const loadData = useCallback(() => {
+    if (!currentUser) return;
     getUserProfile().then(setProfile).catch(() => {});
-    if (currentUser?.status === 'APPROVED' || currentUser?.role === 'ADMIN') {
+    if (currentUser.status === 'APPROVED' || currentUser.role === 'ADMIN') {
       getAllLicks(false, { mine: true }).then(setMyLicks).catch(() => {});
       getAllSongs(true).then(data => setMySongs(data.filter(s => s.ownedByCurrentUser))).catch(() => {});
       getAllPlaylists().then(data => setMyPlaylists(data.filter(p => p.ownedByCurrentUser))).catch(() => {});
     }
-    if (currentUser?.role === 'ADMIN') {
+    if (currentUser.role === 'ADMIN') {
       getAdminQueue().then(setQueue).catch(() => {});
       getAdminUsers().then(setAllUsers).catch(() => {});
     }
-  }, [currentUser, locationKey]);
+  }, [currentUser]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   async function handleApprove(userId: number) {
     await approveUser(userId);
@@ -68,12 +76,38 @@ export default function UserPage() {
     }
   }
 
+  async function handleSaveUsername() {
+    if (!editingUsername) return;
+    setSavingUsername(true);
+    try {
+      const updated = await updateUsername(editingUsername);
+      setProfile(updated);
+      setEditingUsername(null);
+    } catch {
+      // swallow; keep editing open
+    } finally {
+      setSavingUsername(false);
+    }
+  }
+
   if (!currentUser) return null;
 
   const isPending = currentUser.status === 'PENDING';
   const isRejected = currentUser.status === 'REJECTED';
   const isAdmin = currentUser.role === 'ADMIN';
   const isApproved = currentUser.status === 'APPROVED' || isAdmin;
+  const isSuperAdmin = isAdmin && profile?.id === 1;
+
+  const refreshButton = (
+    <button
+      onClick={loadData}
+      title="Refresh"
+      className="text-gray-300 hover:text-indigo-500 transition-colors text-base leading-none"
+      aria-label="Refresh"
+    >
+      ↺
+    </button>
+  );
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
@@ -87,8 +121,45 @@ export default function UserPage() {
       {/* Profile card */}
       <div className="border border-gray-200 rounded-xl p-5 mb-6 bg-white">
         <div className="flex items-start justify-between">
-          <div>
-            <div className="font-semibold text-gray-900">{profile?.username ?? '—'}</div>
+          <div className="flex-1">
+            {editingUsername !== null ? (
+              <div className="flex items-center gap-2 mb-0.5">
+                <input
+                  autoFocus
+                  value={editingUsername}
+                  onChange={e => setEditingUsername(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') handleSaveUsername(); if (e.key === 'Escape') setEditingUsername(null); }}
+                  className="text-sm border border-gray-300 rounded px-2 py-0.5 text-gray-900 focus:outline-none focus:border-indigo-400 w-40"
+                />
+                <button
+                  onClick={handleSaveUsername}
+                  disabled={savingUsername}
+                  className="text-xs px-2 py-0.5 rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                >
+                  {savingUsername ? '…' : 'Save'}
+                </button>
+                <button
+                  onClick={() => setEditingUsername(null)}
+                  className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  ×
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <span className="font-semibold text-gray-900">{profile?.username ?? '—'}</span>
+                {managing && (
+                  <button
+                    onClick={() => setEditingUsername(profile?.username ?? '')}
+                    title="Edit username"
+                    className="text-gray-300 hover:text-indigo-500 transition-colors text-sm leading-none"
+                    aria-label="Edit username"
+                  >
+                    ✎
+                  </button>
+                )}
+              </div>
+            )}
             <div className="text-sm text-gray-400">{profile?.email}</div>
             {profile?.creationTs && (
               <div className="text-xs text-gray-300 mt-1">
@@ -97,6 +168,15 @@ export default function UserPage() {
             )}
           </div>
           <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-2">
+              {!isAdmin && refreshButton}
+              <button
+                onClick={() => { setManaging(m => !m); setEditingUsername(null); setConfirmDelete(false); }}
+                className="text-xs text-gray-400 hover:text-indigo-600 transition-colors"
+              >
+                {managing ? 'Done' : 'Manage'}
+              </button>
+            </div>
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isAdmin ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500'}`}>
               {currentUser.role}
             </span>
@@ -149,7 +229,18 @@ export default function UserPage() {
       {/* Admin: Approval Queue */}
       {isAdmin && (
         <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">Approval Queue</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold text-gray-800">Approval Queue</h2>
+            <div className="flex items-center gap-2">
+              {refreshButton}
+              <button
+                onClick={() => { setManaging(m => !m); setEditingUsername(null); setConfirmDelete(false); }}
+                className="text-xs text-gray-400 hover:text-indigo-600 transition-colors"
+              >
+                {managing ? 'Done' : 'Manage'}
+              </button>
+            </div>
+          </div>
           {queue.length === 0 ? (
             <p className="text-sm text-gray-400">No pending users.</p>
           ) : (
@@ -262,34 +353,38 @@ export default function UserPage() {
         </div>
       )}
 
-      {/* Delete Account */}
-      <div className="mt-8 pt-6 border-t border-gray-100">
-        {confirmDelete ? (
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-red-600">Submit a deletion request for admin review?</span>
+      {/* Delete Account — only visible in manage mode */}
+      {managing && (
+        <div className="mt-8 pt-6 border-t border-gray-100">
+          {confirmDelete ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-red-600">Submit a deletion request for admin review?</span>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleting || isSuperAdmin}
+                className="text-xs px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {deleting ? 'Submitting…' : 'Submit request'}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
             <button
-              onClick={handleDeleteAccount}
-              disabled={deleting}
-              className="text-xs px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+              onClick={() => !isSuperAdmin && setConfirmDelete(true)}
+              disabled={isSuperAdmin}
+              title={isSuperAdmin ? 'Primary admin account cannot be deleted' : undefined}
+              className={`text-xs transition-colors ${isSuperAdmin ? 'text-gray-300 cursor-not-allowed' : 'text-red-400 hover:text-red-600'}`}
             >
-              {deleting ? 'Submitting…' : 'Submit request'}
+              Delete account
             </button>
-            <button
-              onClick={() => setConfirmDelete(false)}
-              className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setConfirmDelete(true)}
-            className="text-xs text-red-400 hover:text-red-600 transition-colors"
-          >
-            Delete account
-          </button>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

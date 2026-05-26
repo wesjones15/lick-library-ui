@@ -36,9 +36,11 @@ export default function Layout() {
   const [iconsOpen, setIconsOpen] = useState(false);
   const [playlistPanelOpen, setPlaylistPanelOpen] = useState(false);
   const [instrumentPanelOpen, setInstrumentPanelOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const playlistPanelRef = useRef<HTMLDivElement>(null);
   const instrumentPanelRef = useRef<HTMLDivElement>(null);
+  const accountRef = useRef<HTMLDivElement>(null);
 
   // Close hamburger on outside click
   useEffect(() => {
@@ -74,6 +76,18 @@ export default function Layout() {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [playlistPanelOpen]);
+
+  // Close account dropdown on outside click
+  useEffect(() => {
+    if (!accountOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
+        setAccountOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [accountOpen]);
 
   // Reset collapsed when leaving song detail
   useEffect(() => {
@@ -380,21 +394,32 @@ export default function Layout() {
                 </a>
               )}
               {currentUser && (
-                <>
+                <div className="relative" ref={accountRef}>
                   <button
-                    onClick={() => navigate('/user')}
-                    className={`text-sm transition-colors px-2 py-1 ${currentUser.role === 'ADMIN' ? 'text-indigo-600 font-medium hover:text-indigo-800' : 'text-gray-500 hover:text-gray-900'}`}
+                    onClick={() => setAccountOpen(o => !o)}
+                    className={`text-xl transition-colors px-2 py-1 leading-none ${currentUser.role === 'ADMIN' ? 'text-indigo-600 hover:text-indigo-800' : 'text-gray-500 hover:text-gray-900'}`}
                     title={`${currentUser.role} · ${currentUser.status}`}
+                    aria-label="Account menu"
                   >
-                    {currentUser.role === 'ADMIN' ? 'Admin' : 'Account'}
+                    {currentUser.role === 'ADMIN' ? '⚙' : '👤'}
                   </button>
-                  <button
-                    onClick={logout}
-                    className="text-sm text-gray-400 hover:text-gray-700 transition-colors px-2 py-1"
-                  >
-                    Sign out
-                  </button>
-                </>
+                  {accountOpen && (
+                    <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-md py-1 z-50 min-w-[120px]">
+                      <button
+                        onClick={() => { navigate('/user'); setAccountOpen(false); }}
+                        className="w-full text-left text-sm px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        Profile
+                      </button>
+                      <button
+                        onClick={() => { logout(); setAccountOpen(false); }}
+                        className="w-full text-left text-sm px-4 py-2 text-gray-500 hover:bg-gray-50 transition-colors"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
               {info && (
                 <button
