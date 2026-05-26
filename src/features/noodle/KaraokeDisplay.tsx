@@ -11,50 +11,123 @@ interface Props {
   pulsed?: boolean;
 }
 
-function renderChordLine(chords: string, boldIdx?: number, pulsed?: boolean): React.ReactNode {
-  const text = chords.trimEnd() || ' ';
-  if (boldIdx === undefined || boldIdx < 0) return text;
-  const matches = [...text.matchAll(/[A-G][A-Za-z#b/0-9]*/g)]
-    .filter(m => m[0] !== 'NC' && m[0] !== 'N.C.');
-  const target = matches[boldIdx];
-  if (!target || target.index === undefined) return text;
-  const s = target.index, e = s + target[0].length;
-  return (
-    <>
-      {text.slice(0, s)}
-      <strong className={`transition-colors duration-75 ${pulsed ? 'text-indigo-600' : 'text-indigo-400'}`}>
-        {text.slice(s, e)}
-      </strong>
-      {text.slice(e)}
-    </>
-  );
+const CHORD_RE = /[A-G][A-Za-z#b/0-9]*/g;
+
+function parseChordMatches(text: string): RegExpMatchArray[] {
+  return [...text.matchAll(CHORD_RE)].filter(m => m[0] !== 'NC' && m[0] !== 'N.C.');
 }
 
-function BeatDots({ count, filled, small }: { count: number; filled: number; small?: boolean }) {
-  const size = small ? 6 : count > 8 ? 8 : 10;
-  return (
-    <div className="flex gap-1 justify-center">
-      {Array.from({ length: count }).map((_, i) => (
-        <span
-          key={i}
-          className={`inline-block rounded-full transition-colors duration-75 ${
-            i < filled ? 'bg-indigo-500' : 'bg-gray-200'
-          }`}
-          style={{ width: size, height: size }}
-        />
-      ))}
-    </div>
-  );
+// Each dot+gap is roughly 1.5 monospace character widths (10px dot + 4px gap ÷ ~9px/char)
+const DOT_CHAR_WIDTH = 1.5;
+
+function dotRow(count: number, filled: number, size: number): React.ReactNode {
+  return Array.from({ length: count }).map((_, i) => (
+    <span
+      key={i}
+      className={`inline-block rounded-full flex-shrink-0 transition-colors duration-75 ${
+        i < filled ? 'bg-indigo-500' : 'bg-gray-200'
+      }`}
+      style={{ width: size, height: size }}
+    />
+  ));
+}
+
+function ActiveChordLine({
+  chords, boldIdx, pulsed, currentChordBeats, beatInChord, nextChordBeats,
+}: {
+  chords: string;
+  boldIdx: number;
+  pulsed?: boolean;
+  currentChordBeats: number;
+  beatInChord: number;
+  nextChordBeats: number;
+}) {
+  const text = chords.trimEnd() || ' ';
+  const matches = parseChordMatches(text);
+  const nextTokenIdx = boldIdx + 1 < matches.length ? boldIdx + 1 : null;
+
+  // Overlap check: would the two dot rows bleed into each other?
+  let wouldOverlap = false;
+  if (nextTokenIdx !== null && currentChordBeats > 0 && nextChordBeats > 0) {
+    const cur = matches[boldIdx];
+    const nxt = matches[nextTokenIdx];
+    const gap = (nxt.index ?? 0) - ((cur.index ?? 0) + cur[0].length);
+    const curHalf = (currentChordBeats * DOT_CHAR_WIDTH) / 2;
+    const nxtHalf = (nextChordBeats * DOT_CHAR_WIDTH) / 2;
+    wouldOverlap = curHalf + nxtHalf > gap + cur[0].length / 2 + nxt[0].length / 2;
+  }
+
+  const nodes: React.ReactNode[] = [];
+  let cursor = 0;
+
+  matches.forEach((match, i) => {
+    const start = match.index ?? 0;
+    const end = start + match[0].length;
+
+    // text before this chord
+    if (start > cursor) {
+      nodes.push(
+        <span key={`t${i}`} style={{ whiteSpace: 'pre' }}>{text.slice(cursor, start)}</span>
+      );
+    }
+
+    const isCurrent = i === boldIdx;
+    const isNext = i === nextTokenIdx;
+    const showCurrentDots = isCurrent && currentChordBeats > 0;
+    const showNextDots = isNext && nextChordBeats > 0;
+    const currentDotSize = currentChordBeats > 8 ? 7 : 9;
+    const nextDotBottom = wouldOverlap ? 'calc(100% + 13px)' : '100%';
+
+    nodes.push(
+      <span key={`c${i}`} style={{ display: 'inline-block', position: 'relative' }}>
+        {showCurrentDots && (
+          <span style={{
+            position: 'absolute', bottom: '100%', left: '50%',
+            transform: 'translateX(-50%)', whiteSpace: 'nowrap',
+            display: 'flex', gap: '3px', paddingBottom: '2px',
+          }}>
+            {dotRow(currentChordBeats, beatInChord, currentDotSize)}
+          </span>
+        )}
+        {showNextDots && (
+          <span style={{
+            position: 'absolute', bottom: nextDotBottom, left: '50%',
+            transform: 'translateX(-50%)', whiteSpace: 'nowrap',
+            display: 'flex', gap: '3px', paddingBottom: '2px',
+          }}>
+            {dotRow(nextChordBeats, 0, 6)}
+          </span>
+        )}
+        {isCurrent ? (
+          <strong className={`transition-colors duration-75 ${pulsed ? 'text-indigo-600' : 'text-indigo-400'}`}>
+            {match[0]}
+          </strong>
+        ) : match[0]}
+      </span>
+    );
+
+    cursor = end;
+  });
+
+  // trailing text
+  if (cursor < text.length) {
+    nodes.push(<span key="end" style={{ whiteSpace: 'pre' }}>{text.slice(cursor)}</span>);
+  }
+
+  return <>{nodes}</>;
 }
 
 function KaraokeSlot({
-  line, variant, expanded, boldIdx, pulsed,
+  line, variant, expanded, boldIdx, pulsed, currentChordBeats, beatInChord, nextChordBeats,
 }: {
   line: ChordLyric | undefined;
   variant: 'active' | 'secondary' | 'dim';
   expanded: boolean;
   boldIdx?: number;
   pulsed?: boolean;
+  currentChordBeats?: number;
+  beatInChord?: number;
+  nextChordBeats?: number;
 }) {
   if (!line) return null;
   const isActive = variant === 'active';
@@ -63,10 +136,41 @@ function KaraokeSlot({
     ? (isActive ? 'text-xl' : variant === 'secondary' ? 'text-base' : 'text-sm')
     : (isActive ? 'text-lg' : variant === 'secondary' ? 'text-sm' : 'text-xs');
 
+  const showActiveLine = isActive && boldIdx !== undefined && (currentChordBeats ?? 0) > 0;
+
   return (
     <div className={`font-mono transition-opacity ${sizeClass}`} style={{ opacity }}>
       <div style={{ color: '#4f46e5', whiteSpace: 'pre' }}>
-        {isActive ? renderChordLine(line.chords, boldIdx, pulsed) : (line.chords.trimEnd() || ' ')}
+        {showActiveLine ? (
+          <ActiveChordLine
+            chords={line.chords}
+            boldIdx={boldIdx!}
+            pulsed={pulsed}
+            currentChordBeats={currentChordBeats ?? 0}
+            beatInChord={beatInChord ?? 0}
+            nextChordBeats={nextChordBeats ?? 0}
+          />
+        ) : isActive && boldIdx !== undefined ? (
+          // playing but no beatmap yet — still show bold + pulse, no dots
+          (() => {
+            const text = line.chords.trimEnd() || ' ';
+            const matches = parseChordMatches(text);
+            const target = matches[boldIdx];
+            if (!target || target.index === undefined) return text;
+            const s = target.index, e = s + target[0].length;
+            return (
+              <>
+                {text.slice(0, s)}
+                <strong className={`transition-colors duration-75 ${pulsed ? 'text-indigo-600' : 'text-indigo-400'}`}>
+                  {text.slice(s, e)}
+                </strong>
+                {text.slice(e)}
+              </>
+            );
+          })()
+        ) : (
+          line.chords.trimEnd() || ' '
+        )}
       </div>
       <div style={{ color: '#111827', whiteSpace: 'pre' }}>{line.lyrics.trimEnd() || ' '}</div>
     </div>
@@ -78,8 +182,22 @@ export default function KaraokeDisplay({
   beatInChord = 0, currentChordBeats = 0, nextChordBeats = 0, pulsed,
 }: Props) {
   const exp = !!guitarKaraoke;
-  const slot = (offset: number, variant: 'active' | 'secondary' | 'dim', boldIdx?: number, slotPulsed?: boolean) => (
-    <KaraokeSlot line={lines[currentIdx + offset]} variant={variant} expanded={exp} boldIdx={boldIdx} pulsed={slotPulsed} />
+
+  const activeSlot = (offset: number, variant: 'active' | 'secondary' | 'dim', boldIdx?: number) => (
+    <KaraokeSlot
+      line={lines[currentIdx + offset]}
+      variant={variant}
+      expanded={exp}
+      boldIdx={boldIdx}
+      pulsed={pulsed}
+      currentChordBeats={currentChordBeats}
+      beatInChord={beatInChord}
+      nextChordBeats={nextChordBeats}
+    />
+  );
+
+  const slot = (offset: number, variant: 'active' | 'secondary' | 'dim') => (
+    <KaraokeSlot line={lines[currentIdx + offset]} variant={variant} expanded={exp} />
   );
 
   return (
@@ -88,10 +206,8 @@ export default function KaraokeDisplay({
         <>
           {slot(-2, 'dim')}
           {slot(-1, 'secondary')}
-          {currentChordBeats > 0 && <BeatDots count={currentChordBeats} filled={beatInChord} />}
-          {slot( 0, 'active', intraChordIdx, pulsed)}
-          {nextChordBeats > 0 && <BeatDots count={nextChordBeats} filled={0} small />}
-          {slot(+1, 'active')}
+          {activeSlot( 0, 'active', intraChordIdx)}
+          {activeSlot(+1, 'active')}
           {slot(+2, 'secondary')}
           {slot(+3, 'dim')}
           {slot(+4, 'dim')}
@@ -100,10 +216,8 @@ export default function KaraokeDisplay({
         <>
           {slot(-2, 'dim')}
           {slot(-1, 'secondary')}
-          {currentChordBeats > 0 && <BeatDots count={currentChordBeats} filled={beatInChord} />}
-          {slot( 0, 'active', intraChordIdx, pulsed)}
-          {nextChordBeats > 0 && <BeatDots count={nextChordBeats} filled={0} small />}
-          {slot(+1, 'active')}
+          {activeSlot( 0, 'active', intraChordIdx)}
+          {activeSlot(+1, 'active')}
           {slot(+2, 'secondary')}
         </>
       )}
