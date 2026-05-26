@@ -8,6 +8,7 @@ export interface NeckDot {
   ownNote?: boolean;             // same-degree candidate
   secondCandidate?: boolean;     // 2nd closest candidate from currentNote; renders at 2/3 brightness
   thirdCandidate?: boolean;      // 3rd closest candidate from currentNote; renders at 1/3 brightness
+  nextChord?: boolean;           // note is in the upcoming chord; subtle static hint, no animation
   highlighted?: boolean;         // toolbar-selected or pentatonic-active; degree pulse, no pale yellow ring
   note?: string;                 // display label, e.g. "C#", "Bb"
   pentatonicRings?: string[];    // ordered ring colors; index 0 = r=11.5, 1 = r=14.5, 2 = r=17.5
@@ -293,6 +294,21 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
                 </g>
               );
             }
+            if (dot.nextChord && !dot.active && !dot.highlighted) {
+              const fontSize = dot.note && dot.note.length > 1 ? 7 : 9;
+              return (
+                <g key={`d${di}-${fret}`}>
+                  <circle cx={cx} cy={cy} r={R_NORMAL} fill={OFF_SCALE_COLOR} />
+                  {dot.note && (
+                    <text x={cx} y={cy + fontSize * 0.38} textAnchor="middle"
+                      fontSize={fontSize} fill="#111827" fontFamily="sans-serif" fontWeight="600"
+                      style={{ pointerEvents: 'none', userSelect: 'none' }}>
+                      {dot.note}
+                    </text>
+                  )}
+                </g>
+              );
+            }
             if (dot.active || dot.highlighted) {
               const fontSize = dot.note && dot.note.length > 1 ? 7 : 9;
               return (
@@ -322,6 +338,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           const isSecondCandidate = !!dot.secondCandidate && !dot.active && !isCandidate;
           const isThirdCandidate = !!dot.thirdCandidate && !dot.active && !isCandidate && !isSecondCandidate;
           const isHighlighted = !!dot.highlighted && !dot.active;
+          const isNextChord = !!dot.nextChord && !dot.active && !isCandidate && !isHighlighted;
           const bright = dot.active || isCandidate || isHighlighted;
           const textFill = (bright || isSecondCandidate || isThirdCandidate) ? '#111827' : '#9ca3af';
           const fontSize = dot.active
@@ -340,11 +357,11 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
                 <circle cx={cx} cy={cy} r={R_RING} fill={ACTIVE_RING_COLOR} />
               )}
               {/* white backing for inactive dots — dim color stays opaque, not translucent */}
-              {!bright && !isSecondCandidate && !isThirdCandidate && <circle cx={cx} cy={cy} r={R_NORMAL} fill="#ffffff" />}
+              {!bright && !isSecondCandidate && !isThirdCandidate && !isNextChord && <circle cx={cx} cy={cy} r={R_NORMAL} fill="#ffffff" />}
               {/* colored circle — stroke pulses via CSS for active, candidate, and second candidate */}
               <circle
                 cx={cx} cy={cy} r={R_NORMAL}
-                fill={color} opacity={bright || isSecondCandidate || isThirdCandidate ? 1 : 0.4}
+                fill={color} opacity={isNextChord ? 0.65 : (bright || isSecondCandidate || isThirdCandidate ? 1 : 0.4)}
                 stroke={dot.active ? color : candidateStroke}
                 strokeWidth={dot.active || isCandidate || isSecondCandidate || isThirdCandidate || isHighlighted ? 1 : 0}
                 style={dot.active ? { stroke: color } : ((isCandidate || isSecondCandidate || isThirdCandidate) ? { stroke: candidateStroke } : (isHighlighted ? { stroke: color } : undefined))}

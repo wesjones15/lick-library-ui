@@ -142,7 +142,7 @@ export function useChordHighlight(
         return {
           ...dot,
           highlighted: isCurrentTone,
-          ...(isNextTone && !isCurrentTone ? { candidate: true, candidateColor: '#94a3b8' } : {}),
+          ...(isNextTone && !isCurrentTone ? { nextChord: true } : {}),
         };
       })
     );
