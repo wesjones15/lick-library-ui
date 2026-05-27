@@ -130,7 +130,7 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
         .active-dot { animation: active-stroke ${pulseDuration} ease-in-out infinite; }
         @keyframes next-chord-scale {
           0%, 100% { transform: scale(1); }
-          50%       { transform: scale(1.4); }
+          50%       { transform: scale(1.08); }
         }
         .next-chord-dot { animation: next-chord-scale ${pulseDuration} ease-in-out infinite; }
       `}</style>
