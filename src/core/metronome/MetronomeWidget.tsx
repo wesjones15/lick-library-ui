@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useMetronome } from './useMetronome';
 import { useMetronomeContext } from './MetronomeContext';
 
 const MIN_BPM = 40;
@@ -14,7 +13,7 @@ const TIME_SIG_OPTIONS = [
 ];
 
 export default function Metronome() {
-  const { bpm, setBpm, isPlaying, setIsPlaying, beatsPerBar, setBeatsPerBar } = useMetronomeContext();
+  const { bpm, setBpm, isPlaying, setIsPlaying, beatsPerBar, setBeatsPerBar, subscribeBeat, unsubscribeBeat } = useMetronomeContext();
   const [bpmInput, setBpmInput] = useState(String(bpm));
   const [activeBeat, setActiveBeat] = useState<number | null>(null);
   const [pulsed, setPulsed] = useState(false);
@@ -32,7 +31,10 @@ export default function Metronome() {
     setTimeout(() => setPulsed(false), 120);
   }, []);
 
-  useMetronome(bpm, isPlaying, onBeat, beatsPerBar);
+  useEffect(() => {
+    subscribeBeat(onBeat);
+    return () => unsubscribeBeat(onBeat);
+  }, [subscribeBeat, unsubscribeBeat, onBeat]);
 
   // Reset beat display when stopped
   useEffect(() => {

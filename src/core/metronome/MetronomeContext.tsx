@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useRef, useCallback } from 'react';
+import { useMetronome } from './useMetronome';
 
 interface MetronomeContextValue {
   bpm: number;
@@ -7,6 +8,8 @@ interface MetronomeContextValue {
   setIsPlaying: (v: boolean) => void;
   beatsPerBar: number;
   setBeatsPerBar: (v: number) => void;
+  subscribeBeat: (fn: (beat: number) => void) => void;
+  unsubscribeBeat: (fn: (beat: number) => void) => void;
 }
 
 const MetronomeContext = createContext<MetronomeContextValue | null>(null);
@@ -15,8 +18,25 @@ export function MetronomeProvider({ children }: { children: React.ReactNode }) {
   const [bpm, setBpm] = useState(120);
   const [isPlaying, setIsPlaying] = useState(false);
   const [beatsPerBar, setBeatsPerBar] = useState(4);
+
+  const beatListeners = useRef<Set<(beat: number) => void>>(new Set());
+
+  const subscribeBeat = useCallback((fn: (beat: number) => void) => {
+    beatListeners.current.add(fn);
+  }, []);
+
+  const unsubscribeBeat = useCallback((fn: (beat: number) => void) => {
+    beatListeners.current.delete(fn);
+  }, []);
+
+  const masterOnBeat = useCallback((beat: number) => {
+    beatListeners.current.forEach(fn => fn(beat));
+  }, []);
+
+  useMetronome(bpm, isPlaying, masterOnBeat, beatsPerBar);
+
   return (
-    <MetronomeContext.Provider value={{ bpm, setBpm, isPlaying, setIsPlaying, beatsPerBar, setBeatsPerBar }}>
+    <MetronomeContext.Provider value={{ bpm, setBpm, isPlaying, setIsPlaying, beatsPerBar, setBeatsPerBar, subscribeBeat, unsubscribeBeat }}>
       {children}
     </MetronomeContext.Provider>
   );

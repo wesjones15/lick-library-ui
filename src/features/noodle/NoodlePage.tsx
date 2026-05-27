@@ -4,7 +4,6 @@ import { getSong, getChordVoicings, getBeatmap, saveBeatmap, submitBeatmapUpdate
 import type { SongDetail, SongSummary, ChordLyric, GuitarTabLine, ChordVoicing } from '../../core/api/client';
 import { parseChordName } from '../songs/parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
-import { useMetronome } from '../../core/metronome/useMetronome';
 import { CHROMATIC_NOTES, getStringLabels } from '../../core/music';
 import type { InstrumentName } from '../../core/useInstrument';
 import InstrumentSelector from '../../components/InstrumentSelector';
@@ -150,7 +149,7 @@ export default function NoodlePage() {
   const [localSemitones, setLocalSemitones] = useState(urlSemitones);
   const [localCapo, setLocalCapo] = useState(urlCapo);
 
-  const { bpm, setBpm, isPlaying, setIsPlaying, beatsPerBar } = useMetronomeContext();
+  const { bpm, setBpm, isPlaying, setIsPlaying, setBeatsPerBar, subscribeBeat, unsubscribeBeat } = useMetronomeContext();
   const [bpmInput, setBpmInput] = useState(String(bpm));
 
   const [freeInput, setFreeInput] = useState('');
@@ -189,6 +188,7 @@ export default function NoodlePage() {
     getSong(activeSongId, localSemitones).then(s => {
       setSong(s);
       setCurrentIdx(0);
+      if (s.timeSignature) setBeatsPerBar(s.timeSignature);
       if (prevSongIdForPrefill.current !== activeSongId) {
         prevSongIdForPrefill.current = activeSongId;
         if (s.tempo) setBpmInput(String(s.tempo + urlBpmOffset));
@@ -389,7 +389,10 @@ export default function NoodlePage() {
     advanceRef.current();
   }, []);
 
-  useMetronome(bpm, isPlaying, onBeat, song?.timeSignature ?? beatsPerBar);
+  useEffect(() => {
+    subscribeBeat(onBeat);
+    return () => unsubscribeBeat(onBeat);
+  }, [subscribeBeat, unsubscribeBeat, onBeat]);
 
   const capoOffset = noodleMode === 'song' ? localCapo : 0;
   const activeVoicing = (activeChord ? cachedVoicings[activeChord]?.[0] : null) ?? null;
