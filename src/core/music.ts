@@ -80,6 +80,7 @@ export const INSTRUMENT_STRING_DISPLAY: Record<string, StringEntry[]> = {
   OPEN_G:   [{ label: 'D', fretsIdx: 5 }, { label: 'B', fretsIdx: 4 }, { label: 'G', fretsIdx: 3 }, { label: 'D', fretsIdx: 2 }, { label: 'G', fretsIdx: 1 }, { label: 'D', fretsIdx: 0 }],
   OPEN_D:   [{ label: 'D', fretsIdx: 5 }, { label: 'A', fretsIdx: 4 }, { label: 'F#', fretsIdx: 3 }, { label: 'D', fretsIdx: 2 }, { label: 'A', fretsIdx: 1 }, { label: 'D', fretsIdx: 0 }],
   DADGAD:   [{ label: 'D', fretsIdx: 5 }, { label: 'A', fretsIdx: 4 }, { label: 'G', fretsIdx: 3 }, { label: 'D', fretsIdx: 2 }, { label: 'A', fretsIdx: 1 }, { label: 'D', fretsIdx: 0 }],
+  EB:       [{ label: 'eb', fretsIdx: 5 }, { label: 'Bb', fretsIdx: 4 }, { label: 'Gb', fretsIdx: 3 }, { label: 'Db', fretsIdx: 2 }, { label: 'Ab', fretsIdx: 1 }, { label: 'Eb', fretsIdx: 0 }],
   BASS:     [{ label: 'G', fretsIdx: 3 }, { label: 'D', fretsIdx: 2 }, { label: 'A', fretsIdx: 1 }, { label: 'E', fretsIdx: 0 }],
   UKULELE:  [{ label: 'A', fretsIdx: 3 }, { label: 'E', fretsIdx: 2 }, { label: 'C', fretsIdx: 1 }, { label: 'G', fretsIdx: 0 }],
   MANDOLIN: [{ label: 'E', fretsIdx: 3 }, { label: 'A', fretsIdx: 2 }, { label: 'D', fretsIdx: 1 }, { label: 'G', fretsIdx: 0 }],
@@ -101,6 +102,7 @@ export const INSTRUMENT_OPEN_SEMITONES: Record<string, number[]> = {
   OPEN_G:   [2,  7,  2,  7, 11,  2],  // D G D G B D
   OPEN_D:   [2,  9,  2,  6,  9,  2],  // D A D F# A D
   DADGAD:   [2,  9,  2,  7,  9,  2],  // D A D G A D
+  EB:       [3,  8,  1,  6, 10,  3],  // Eb Ab Db Gb Bb eb
   BASS:     [4,  9,  2,  7],           // E A D G
   UKULELE:  [7,  0,  4,  9],           // G C E A (reentrant)
   MANDOLIN: [7,  2,  9,  4],           // G D A E

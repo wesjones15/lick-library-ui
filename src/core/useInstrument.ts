@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 export type InstrumentName =
-  | 'GUITAR' | 'DROP_D' | 'OPEN_G' | 'OPEN_D' | 'DADGAD'
+  | 'GUITAR' | 'DROP_D' | 'OPEN_G' | 'OPEN_D' | 'DADGAD' | 'EB'
   | 'BASS' | 'UKULELE' | 'MANDOLIN' | 'BANJO' | 'CUSTOM';
 
 const LS_INSTRUMENT    = 'lick_instrument';

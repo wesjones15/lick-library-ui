@@ -17,6 +17,7 @@ const INSTRUMENTS: { value: InstrumentName; label: string }[] = [
   { value: 'OPEN_G',   label: 'Open G' },
   { value: 'OPEN_D',   label: 'Open D' },
   { value: 'DADGAD',   label: 'DADGAD' },
+  { value: 'EB',       label: 'Eb Tuning' },
   { value: 'BASS',     label: 'Bass' },
   { value: 'UKULELE',  label: 'Ukulele' },
   { value: 'MANDOLIN', label: 'Mandolin' },
