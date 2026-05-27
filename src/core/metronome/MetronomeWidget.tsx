@@ -17,6 +17,7 @@ export default function Metronome() {
   const { bpm, setBpm, isPlaying, setIsPlaying, beatsPerBar, setBeatsPerBar } = useMetronomeContext();
   const [bpmInput, setBpmInput] = useState(String(bpm));
   const [activeBeat, setActiveBeat] = useState<number | null>(null);
+  const [pulsed, setPulsed] = useState(false);
   const [open, setOpen] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -27,6 +28,8 @@ export default function Metronome() {
 
   const onBeat = useCallback((beat: number) => {
     setActiveBeat(beat);
+    setPulsed(true);
+    setTimeout(() => setPulsed(false), 120);
   }, []);
 
   useMetronome(bpm, isPlaying, onBeat, beatsPerBar);
@@ -70,8 +73,8 @@ export default function Metronome() {
           open ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
         }`}
       >
-        <span className={`inline-block w-2 h-2 rounded-full bg-indigo-500 transition-opacity duration-75 ${
-          isPlaying ? (activeBeat === 0 ? 'opacity-100' : 'opacity-40') : 'opacity-0'
+        <span className={`inline-block w-2 h-2 rounded-full transition-all duration-75 ${
+          isPlaying ? (pulsed ? 'bg-white' : 'bg-indigo-500') : 'opacity-0'
         }`} />
         <span>♩ {bpm}</span>
       </button>
@@ -117,7 +120,7 @@ export default function Metronome() {
                     key={beat}
                     className={`rounded-full transition-all duration-75 ${
                       beat === 0 ? 'w-3.5 h-3.5' : 'w-2.5 h-2.5'
-                    } ${activeBeat === beat ? 'bg-indigo-500' : 'bg-gray-200'}`}
+                    } ${activeBeat === beat ? (pulsed ? 'bg-white' : 'bg-indigo-500') : 'bg-gray-200'}`}
                   />
                 ))}
               </div>
