@@ -1,3 +1,5 @@
+import { useRef, useEffect, useCallback, useState, forwardRef } from 'react';
+import type { ReactNode } from 'react';
 import type { ChordLyric } from '../../core/api/client';
 
 interface Props {
@@ -9,6 +11,8 @@ interface Props {
   currentChordBeats?: number;
   nextChordBeats?: number;
   pulsed?: boolean;
+  isPlaying?: boolean;
+  onLineClick?: (lineIdx: number) => void;
 }
 
 const CHORD_RE = /[A-G][A-Za-z#b/0-9]*/g;
@@ -20,7 +24,7 @@ function parseChordMatches(text: string): RegExpMatchArray[] {
 // Each dot+gap is roughly 1.5 monospace character widths (10px dot + 4px gap ÷ ~9px/char)
 const DOT_CHAR_WIDTH = 1.5;
 
-function dotRow(count: number, filled: number, size: number): React.ReactNode {
+function dotRow(count: number, filled: number, size: number): ReactNode {
   return Array.from({ length: count }).map((_, i) => (
     <span
       key={i}
@@ -58,7 +62,7 @@ function ActiveChordLine({
     wouldOverlap = curHalf + nxtHalf > gap + cur[0].length / 2 + nxt[0].length / 2;
   }
 
-  const nodes: React.ReactNode[] = [];
+  const nodes: ReactNode[] = [];
   let cursor = 0;
 
   matches.forEach((match, i) => {
@@ -120,9 +124,7 @@ function ActiveChordLine({
   return <>{nodes}</>;
 }
 
-function KaraokeSlot({
-  line, variant, expanded, boldIdx, pulsed, currentChordBeats, beatInChord, nextChordBeats, leadingNextBeats,
-}: {
+interface SlotProps {
   line: ChordLyric | undefined;
   variant: 'active' | 'secondary' | 'dim';
   expanded: boolean;
@@ -132,7 +134,13 @@ function KaraokeSlot({
   beatInChord?: number;
   nextChordBeats?: number;
   leadingNextBeats?: number;
-}) {
+  onClick?: () => void;
+}
+
+const KaraokeSlot = forwardRef<HTMLDivElement, SlotProps>(function KaraokeSlot(
+  { line, variant, expanded, boldIdx, pulsed, currentChordBeats, beatInChord, nextChordBeats, leadingNextBeats, onClick },
+  ref
+) {
   if (!line) return null;
   const isActive = variant === 'active';
   const opacity = isActive ? 1 : variant === 'secondary' ? 0.6 : 0.25;
@@ -143,7 +151,12 @@ function KaraokeSlot({
   const showActiveLine = isActive && boldIdx !== undefined && (currentChordBeats ?? 0) > 0;
 
   return (
-    <div className={`font-mono transition-opacity ${sizeClass}`} style={{ opacity }}>
+    <div
+      ref={ref}
+      className={`font-mono transition-opacity ${sizeClass}`}
+      style={{ opacity, cursor: onClick ? 'pointer' : undefined }}
+      onClick={onClick}
+    >
       <div style={{ color: '#4f46e5', whiteSpace: 'pre' }}>
         {showActiveLine ? (
           <ActiveChordLine
@@ -187,13 +200,37 @@ function KaraokeSlot({
       <div style={{ color: '#111827', whiteSpace: 'pre' }}>{line.lyrics.trimEnd() || ' '}</div>
     </div>
   );
-}
+});
 
 export default function KaraokeDisplay({
   lines, currentIdx, intraChordIdx, guitarKaraoke,
-  beatInChord = 0, currentChordBeats = 0, nextChordBeats = 0, pulsed,
+  beatInChord = 0, currentChordBeats = 0, nextChordBeats = 0, pulsed, isPlaying, onLineClick,
 }: Props) {
   const exp = !!guitarKaraoke;
+  const activeLineRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [displayCenterIdx, setDisplayCenterIdx] = useState(currentIdx);
+
+  // During playback, size gradient follows the song position
+  useEffect(() => {
+    if (isPlaying) setDisplayCenterIdx(currentIdx);
+  }, [currentIdx, isPlaying]);
+
+  // Auto-scroll active line into view during playback
+  useEffect(() => {
+    activeLineRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [currentIdx]);
+
+  // When paused, size gradient follows scroll position
+  const handleScroll = useCallback(() => {
+    if (isPlaying) return;
+    const el = innerRef.current;
+    if (!el || lines.length === 0) return;
+    const avgLineHeight = el.scrollHeight / lines.length;
+    const centerPx = el.scrollTop + el.clientHeight / 2;
+    const estimated = Math.max(0, Math.min(lines.length - 1, Math.round(centerPx / avgLineHeight)));
+    setDisplayCenterIdx(estimated);
+  }, [isPlaying, lines.length]);
 
   const activeLineChordCount = parseChordMatches(lines[currentIdx]?.chords ?? '').length;
   const nextIsOnNextLine =
@@ -202,45 +239,42 @@ export default function KaraokeDisplay({
     intraChordIdx >= activeLineChordCount - 1 &&
     currentIdx + 1 < lines.length;
 
-  const activeSlot = (offset: number, variant: 'active' | 'secondary' | 'dim', boldIdx?: number, leadingNextBeats?: number) => (
-    <KaraokeSlot
-      line={lines[currentIdx + offset]}
-      variant={variant}
-      expanded={exp}
-      boldIdx={boldIdx}
-      pulsed={pulsed}
-      currentChordBeats={currentChordBeats}
-      beatInChord={beatInChord}
-      nextChordBeats={nextChordBeats}
-      leadingNextBeats={leadingNextBeats}
-    />
-  );
-
-  const slot = (offset: number, variant: 'active' | 'secondary' | 'dim') => (
-    <KaraokeSlot line={lines[currentIdx + offset]} variant={variant} expanded={exp} />
-  );
-
   return (
-    <div className={`flex flex-col flex-1 items-center bg-gray-50 rounded-xl px-4 overflow-hidden ${exp ? 'justify-center py-3 gap-2' : 'justify-start pt-2 pb-3 gap-1'}`}>
-      {exp ? (
-        <>
-          {slot(-2, 'dim')}
-          {slot(-1, 'secondary')}
-          {activeSlot( 0, 'active', intraChordIdx)}
-          {activeSlot(+1, 'active', undefined, nextIsOnNextLine ? nextChordBeats : 0)}
-          {slot(+2, 'secondary')}
-          {slot(+3, 'dim')}
-          {slot(+4, 'dim')}
-        </>
-      ) : (
-        <>
-          {slot(-2, 'dim')}
-          {slot(-1, 'secondary')}
-          {activeSlot( 0, 'active', intraChordIdx)}
-          {activeSlot(+1, 'active', undefined, nextIsOnNextLine ? nextChordBeats : 0)}
-          {slot(+2, 'secondary')}
-        </>
-      )}
+    <div className={`flex flex-col flex-1 items-center bg-gray-50 rounded-xl px-4 overflow-hidden ${exp ? 'justify-center py-3' : 'justify-start pt-2 pb-3'}`}>
+      <div
+        ref={innerRef}
+        onScroll={handleScroll}
+        className={`w-full flex-1 min-h-0 flex flex-col items-center overflow-y-auto ${exp ? 'gap-2' : 'gap-1'}`}
+      >
+        {lines.map((line, i) => {
+          // Size/opacity follow displayCenterIdx (scroll position when paused, currentIdx when playing)
+          const variant: 'active' | 'secondary' | 'dim' =
+            (i === displayCenterIdx - 2 || i === displayCenterIdx - 1) ? 'active'
+            : (i === displayCenterIdx - 3 || i === displayCenterIdx) ? 'secondary'
+            : 'dim';
+
+          // Playback state stays anchored to currentIdx
+          const isCurrentLine = i === currentIdx;
+          const isNextSlot = i === currentIdx + 1;
+
+          return (
+            <KaraokeSlot
+              key={i}
+              ref={isCurrentLine ? activeLineRef : null}
+              line={line}
+              variant={variant}
+              expanded={exp}
+              boldIdx={isCurrentLine ? intraChordIdx : undefined}
+              pulsed={isCurrentLine ? pulsed : undefined}
+              currentChordBeats={isCurrentLine ? currentChordBeats : 0}
+              beatInChord={isCurrentLine ? beatInChord : 0}
+              nextChordBeats={isCurrentLine ? nextChordBeats : 0}
+              leadingNextBeats={isNextSlot && nextIsOnNextLine ? nextChordBeats : 0}
+              onClick={onLineClick ? () => onLineClick(i) : undefined}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

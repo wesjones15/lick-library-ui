@@ -399,6 +399,19 @@ export default function NoodlePage() {
     setShowBeatmapEditor(false);
   }
 
+  function handleLineClick(lineIdx: number) {
+    const line = contentLines[lineIdx];
+    if (!line) return;
+    // section headers are not seekable
+    if (isSectionHeader(line)) return;
+    setCurrentIdx(lineIdx);
+    setIntraChordIdx(0);
+    setBeatInChord(0);
+    halfBeatRef.current = 0;
+    warmupRef.current = 8; // 4 full beats lead-in
+    if (!isPlaying) setIsPlaying(true);
+  }
+
   function handlePlay() {
     if (!isPlaying) {
       const parsed = parseInt(bpmInput, 10);
@@ -449,7 +462,7 @@ export default function NoodlePage() {
   const showBackLink = !!(activeSongId && loadedViaUrl.current && urlSongId === activeSongId);
 
   return (
-    <div className={`max-w-6xl mx-auto px-6 py-4 flex flex-col gap-2 ${noodleMode === 'song' ? 'min-h-[calc(100vh-3.5rem)]' : ''}`}>
+    <div className={`max-w-6xl mx-auto px-6 py-4 flex flex-col gap-2 ${noodleMode === 'song' ? 'h-[calc(100vh-3.5rem)] overflow-hidden' : ''}`}>
 
       {/* Header row */}
       <div className="flex items-center">
@@ -787,6 +800,8 @@ export default function NoodlePage() {
           currentChordBeats={currentChordBeats}
           nextChordBeats={nextChordBeats}
           pulsed={pulsed}
+          isPlaying={isPlaying}
+          onLineClick={handleLineClick}
         />
       )}
 
