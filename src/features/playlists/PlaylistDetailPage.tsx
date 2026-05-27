@@ -28,11 +28,12 @@ function rootKeyLabel(originalKey: string | null, semitones: number, mode?: stri
 
 function VoicingModal({ entry, onSave, onClose }: {
   entry: PlaylistEntry;
-  onSave: (keyOffset: number, capoOffset: number, instrument: string) => void;
+  onSave: (keyOffset: number, capoOffset: number, instrument: string, bpmOffset: number) => void;
   onClose: () => void;
 }) {
   const [localSemitones, setLocalSemitones] = useState(entry.keyOffset);
   const [localCapo, setLocalCapo] = useState(entry.defaultCapo + entry.capoOffset);
+  const [localBpmOffset, setLocalBpmOffset] = useState(entry.bpmOffset);
   const defaultInstrument = (entry.defaultInstrument ?? 'GUITAR') as InstrumentName;
   const [localInstrument, setLocalInstrument] = useState<InstrumentName>(
     (entry.instrument ?? entry.defaultInstrument ?? 'GUITAR') as InstrumentName
@@ -89,6 +90,27 @@ function VoicingModal({ entry, onSave, onClose }: {
           </div>
         </div>
 
+          {/* BPM offset widget */}
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-xs text-gray-400">BPM offset</span>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setLocalBpmOffset(b => b - 1)} className={btnClass}>−</button>
+              <div className="flex items-center justify-center w-12">
+                <span className="text-base font-semibold text-gray-900">
+                  {localBpmOffset > 0 ? `+${localBpmOffset}` : localBpmOffset}
+                </span>
+              </div>
+              <button onClick={() => setLocalBpmOffset(b => b + 1)} className={btnClass}>+</button>
+            </div>
+            {entry.tempo != null && (
+              <span className="text-xs text-gray-400">{entry.tempo + localBpmOffset} BPM</span>
+            )}
+            <button
+              onClick={() => setLocalBpmOffset(0)}
+              className={`text-xs transition-colors ${localBpmOffset !== 0 ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+            >reset</button>
+          </div>
+
         {/* Instrument selector */}
         <div className="flex flex-col items-center gap-1 mb-6">
           <span className="text-xs text-gray-400">Instrument</span>
@@ -100,7 +122,7 @@ function VoicingModal({ entry, onSave, onClose }: {
         </div>
 
         <button
-          onClick={() => { onSave(localSemitones, localCapo - entry.defaultCapo, localInstrument); onClose(); }}
+          onClick={() => { onSave(localSemitones, localCapo - entry.defaultCapo, localInstrument, localBpmOffset); onClose(); }}
           className="w-full px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
         >Save</button>
       </div>
@@ -266,19 +288,19 @@ export default function PlaylistDetailPage() {
     setPlaylist(updated);
   }
 
-  async function handleSaveOverride(entryId: string, keyOffset: number, capoOffset: number, instrument: string) {
+  async function handleSaveOverride(entryId: string, keyOffset: number, capoOffset: number, instrument: string, bpmOffset: number) {
     const entry = entries.find(e => e.entryId === entryId);
     const defaultInstrument = entry?.defaultInstrument ?? 'GUITAR';
-    const clearing = keyOffset === 0 && capoOffset === 0 && instrument === defaultInstrument;
+    const clearing = keyOffset === 0 && capoOffset === 0 && bpmOffset === 0 && instrument === defaultInstrument;
     setPlaylist(p => p ? {
       ...p,
       entries: p.entries.map(e => e.entryId === entryId
-        ? { ...e, keyOffset: clearing ? 0 : keyOffset, capoOffset: clearing ? 0 : capoOffset, instrument: clearing ? null : instrument }
+        ? { ...e, keyOffset: clearing ? 0 : keyOffset, capoOffset: clearing ? 0 : capoOffset, bpmOffset: clearing ? 0 : bpmOffset, instrument: clearing ? null : instrument }
         : e),
     } : p);
     const updated = clearing
       ? await clearPlaylistEntryOverrides(playlist!.id, entryId)
-      : await updatePlaylistEntry(playlist!.id, entryId, { keyOffset, capoOffset, instrument });
+      : await updatePlaylistEntry(playlist!.id, entryId, { keyOffset, capoOffset, bpmOffset, instrument });
     setPlaylist(updated);
   }
 
@@ -294,6 +316,7 @@ export default function PlaylistDetailPage() {
           title: e.title,
           keyOffset: e.keyOffset,
           capoOffset: e.capoOffset,
+          bpmOffset: e.bpmOffset ?? 0,
           instrument: e.instrument,
         })),
         currentIndex: index,
@@ -419,7 +442,11 @@ export default function PlaylistDetailPage() {
                     <span className={entry.capoOffset !== 0 ? 'text-indigo-500' : 'text-gray-400'}>
                       {entry.defaultCapo + entry.capoOffset > 0 ? `Capo ${entry.defaultCapo + entry.capoOffset}` : 'No Capo'}
                     </span>
-                    {entry.tempo != null && <span className="text-gray-400">{entry.tempo} BPM</span>}
+                    {entry.tempo != null && (
+                      <span className={entry.bpmOffset !== 0 ? 'text-indigo-500' : 'text-gray-400'}>
+                        {entry.tempo + (entry.bpmOffset ?? 0)} BPM{entry.bpmOffset !== 0 ? ` (${entry.bpmOffset > 0 ? '+' : ''}${entry.bpmOffset})` : ''}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -463,7 +490,7 @@ export default function PlaylistDetailPage() {
         return entry ? (
           <VoicingModal
             entry={entry}
-            onSave={(k, c, instr) => handleSaveOverride(entry.entryId, k, c, instr)}
+            onSave={(k, c, instr, bpm) => handleSaveOverride(entry.entryId, k, c, instr, bpm)}
             onClose={() => setEditingEntry(null)}
           />
         ) : null;

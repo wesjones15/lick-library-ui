@@ -60,6 +60,7 @@ export default function SongManagePage() {
   const [instrument, setInstrument] = useState<InstrumentName>('GUITAR');
   const [capo, setCapo] = useState('');
   const [tempo, setTempo] = useState('');
+  const [timeSignature, setTimeSignature] = useState(4);
 
   // Chart field
   const [rawChordSheet, setRawChordSheet] = useState('');
@@ -92,6 +93,7 @@ export default function SongManagePage() {
       setInstrument((s.instrument ?? 'GUITAR') as InstrumentName);
       setCapo(s.capo != null ? String(s.capo) : '');
       setTempo(s.tempo != null ? String(s.tempo) : '');
+      setTimeSignature(s.timeSignature ?? 4);
       setRawChordSheet(s.rawChordSheet ?? '');
     });
   }, [id]);
@@ -129,7 +131,8 @@ export default function SongManagePage() {
     currentKey !== savedKey ||
     instrument !== (song.instrument ?? 'GUITAR') ||
     capo !== (song.capo != null ? String(song.capo) : '') ||
-    tempo !== (song.tempo != null ? String(song.tempo) : '')
+    tempo !== (song.tempo != null ? String(song.tempo) : '') ||
+    timeSignature !== (song.timeSignature ?? 4)
   );
 
   const chartIsDirty = song && rawChordSheet !== (song.rawChordSheet ?? '');
@@ -148,6 +151,7 @@ export default function SongManagePage() {
         instrument,
         capo: capo ? parseInt(capo, 10) : undefined,
         tempo: tempo ? parseInt(tempo, 10) : undefined,
+        timeSignature,
       });
       navigate(`/song/${id}`);
     } catch {
@@ -201,6 +205,7 @@ export default function SongManagePage() {
         instrument,
         capo: capo ? parseInt(capo, 10) : undefined,
         tempo: tempo ? parseInt(tempo, 10) : undefined,
+        timeSignature,
       });
       setSubmitSuccess(true);
     } catch {
@@ -300,6 +305,17 @@ export default function SongManagePage() {
               min={1}
               className={`${inputClass} w-24`}
             />
+            <select
+              value={timeSignature}
+              onChange={e => setTimeSignature(Number(e.target.value))}
+              className={`${inputClass} w-20 bg-white`}
+            >
+              <option value={1}>1/4</option>
+              <option value={2}>2/4</option>
+              <option value={3}>3/4</option>
+              <option value={4}>4/4</option>
+              <option value={6}>6/8</option>
+            </select>
           </div>
           <InstrumentSelector
             excludeCustom

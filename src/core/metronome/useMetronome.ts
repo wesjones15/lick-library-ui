@@ -19,6 +19,7 @@ export function useMetronome(
   bpm: number,
   isPlaying: boolean,
   onBeat: (beat: number) => void,
+  beatsPerBar = 4,
 ) {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const nextBeatTimeRef = useRef(0);
@@ -28,8 +29,10 @@ export function useMetronome(
   // Keep latest values in refs so the scheduler closure doesn't go stale
   const bpmRef = useRef(bpm);
   const onBeatRef = useRef(onBeat);
+  const beatsPerBarRef = useRef(beatsPerBar);
   useEffect(() => { bpmRef.current = bpm; }, [bpm]);
   useEffect(() => { onBeatRef.current = onBeat; }, [onBeat]);
+  useEffect(() => { beatsPerBarRef.current = beatsPerBar; }, [beatsPerBar]);
 
   const scheduler = useCallback(() => {
     const ctx = audioCtxRef.current;
@@ -40,7 +43,7 @@ export function useMetronome(
       scheduleClick(ctx, nextBeatTimeRef.current, beat === 0);
       const delay = Math.max(0, (nextBeatTimeRef.current - ctx.currentTime) * 1000);
       setTimeout(() => onBeatRef.current(beat), delay);
-      currentBeatRef.current = (beat + 1) % 4;
+      currentBeatRef.current = (beat + 1) % beatsPerBarRef.current;
       nextBeatTimeRef.current += secondsPerBeat;
     }
   }, []);

@@ -189,6 +189,7 @@ export interface SongDetail {
   rawChordSheet: string | null;
   songLicks: Record<number, SongLickInfo>;
   ownedByCurrentUser: boolean;
+  timeSignature: number | null;
 }
 
 export interface UpdateSongRequest {
@@ -200,6 +201,7 @@ export interface UpdateSongRequest {
   capo?: number;
   tempo?: number;
   rawChordSheet?: string;
+  timeSignature?: number;
 }
 
 export interface UploadSongRequest {
@@ -211,6 +213,7 @@ export interface UploadSongRequest {
   capo?: number;
   tempo?: number;
   rawChordSheet: string;
+  timeSignature?: number;
 }
 
 export async function getAllSongs(mine = false): Promise<SongSummary[]> {
@@ -458,6 +461,7 @@ export interface PlaylistEntry {
   mode: string | null;
   instrument: string | null;
   defaultInstrument: string | null;
+  bpmOffset: number;
 }
 
 export interface PlaylistDetail {
@@ -533,7 +537,7 @@ export async function addPlaylistEntry(
 export async function updatePlaylistEntry(
   playlistId: string,
   entryId: string,
-  req: { keyOffset?: number | null; capoOffset?: number | null; position?: number; instrument?: string | null },
+  req: { keyOffset?: number | null; capoOffset?: number | null; position?: number; instrument?: string | null; bpmOffset?: number | null },
 ): Promise<PlaylistDetail> {
   const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}`, {
     method: 'PUT',

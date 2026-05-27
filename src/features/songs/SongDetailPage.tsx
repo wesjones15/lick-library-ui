@@ -65,6 +65,7 @@ interface PlaylistNavEntry {
   title: string;
   keyOffset: number;
   capoOffset: number;
+  bpmOffset?: number;
   instrument?: string | null;
 }
 
@@ -203,7 +204,7 @@ export default function SongDetailPage() {
       setInstrument,
       customTuning,
       setCustomTuning,
-      navigateNoodle: () => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}`),
+      navigateNoodle: () => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}&bpmOffset=${currentPlaylistEntry?.bpmOffset ?? 0}`),
     });
     return () => setMiniActions(null);
   }, [song, viewMode, autoScrolling, showTabLicks, hasTabLines, playlistState, instrument, semitones, id, capo]);
@@ -344,7 +345,7 @@ export default function SongDetailPage() {
 
               {/* Desktop (md+): named text buttons */}
               <button
-                onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}`)}
+                onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}&bpmOffset=${currentPlaylistEntry?.bpmOffset ?? 0}`)}
                 className="hidden md:flex items-center text-yellow-400 hover:text-yellow-500 transition-colors text-5xl leading-none"
                 aria-label="Noodle"
                 title="Noodle"
@@ -395,7 +396,7 @@ export default function SongDetailPage() {
 
               {/* Landscape (sm–md): icon buttons */}
               <button
-                onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}`)}
+                onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}&bpmOffset=${currentPlaylistEntry?.bpmOffset ?? 0}`)}
                 className="hidden sm:flex md:hidden w-12 h-12 rounded-lg border border-yellow-200 items-center justify-center text-4xl leading-none transition-colors text-yellow-500 hover:text-yellow-600"
                 aria-label="Noodle"
                 title="Noodle"
@@ -485,7 +486,7 @@ export default function SongDetailPage() {
                       </button>
                     )}
                     <button
-                      onClick={() => { navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}`); setOverflowOpen(false); }}
+                      onClick={() => { navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}&bpmOffset=${currentPlaylistEntry?.bpmOffset ?? 0}`); setOverflowOpen(false); }}
                       className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
                     >
                       Noodle

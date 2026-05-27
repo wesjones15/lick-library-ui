@@ -401,7 +401,7 @@ export default function Layout() {
                     title={`${currentUser.role} · ${currentUser.status}`}
                     aria-label="Account menu"
                   >
-                    {currentUser.role === 'ADMIN' ? '⚙' : '👤'}
+                    {currentUser.role === 'ADMIN' ? '⚙︎' : '👤'}
                   </button>
                   {accountOpen && (
                     <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-md py-1 z-50 min-w-[120px]">

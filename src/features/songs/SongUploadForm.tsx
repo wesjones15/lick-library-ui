@@ -16,6 +16,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
   const [instrument, setInstrument] = useState<InstrumentName>('GUITAR');
   const [capo, setCapo] = useState('');
   const [tempo, setTempo] = useState('');
+  const [timeSignature, setTimeSignature] = useState(4);
   const [rawChordSheet, setRawChordSheet] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +36,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
         capo: capo ? parseInt(capo, 10) : undefined,
         tempo: tempo ? parseInt(tempo, 10) : undefined,
         rawChordSheet,
+        timeSignature,
       });
       setTitle('');
       setArtist('');
@@ -43,6 +45,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
       setInstrument('GUITAR');
       setCapo('');
       setTempo('');
+      setTimeSignature(4);
       setRawChordSheet('');
       onSuccess();
     } catch {
@@ -109,6 +112,17 @@ export default function SongUploadForm({ onSuccess }: Props) {
           onChange={e => setTempo(e.target.value)}
           className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
         />
+        <select
+          value={timeSignature}
+          onChange={e => setTimeSignature(Number(e.target.value))}
+          className="w-20 border border-gray-300 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400"
+        >
+          <option value={1}>1/4</option>
+          <option value={2}>2/4</option>
+          <option value={3}>3/4</option>
+          <option value={4}>4/4</option>
+          <option value={6}>6/8</option>
+        </select>
       </div>
       <InstrumentSelector excludeCustom compact instrument={instrument} onInstrumentChange={setInstrument} />
       <textarea
