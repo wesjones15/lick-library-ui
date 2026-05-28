@@ -289,7 +289,9 @@ export default function SongManagePage() {
               ))}
             </select>
             <input
-              type="tel"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={capo}
               onChange={e => setCapo(e.target.value)}
               placeholder="Capo"
@@ -298,7 +300,9 @@ export default function SongManagePage() {
               className={`${inputClass} w-20`}
             />
             <input
-              type="tel"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={tempo}
               onChange={e => setTempo(e.target.value)}
               placeholder="BPM"

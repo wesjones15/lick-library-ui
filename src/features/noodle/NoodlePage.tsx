@@ -576,7 +576,9 @@ export default function NoodlePage() {
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-gray-400">BPM</span>
           <input
-            type="tel"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             value={bpmInput}
             onChange={e => setBpmInput(e.target.value)}
             className="border border-gray-300 rounded-lg px-1.5 py-0.5 text-xs focus:outline-none focus:border-indigo-400 bg-white w-12 text-center"

@@ -96,7 +96,9 @@ export default function Metronome() {
               </button>
               <div className="flex flex-col items-center">
                 <input
-                  type="tel"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={bpmInput}
                   onChange={e => setBpmInput(e.target.value.replace(/\D/g, ''))}
                   onBlur={() => commitBpm(bpmInput)}
