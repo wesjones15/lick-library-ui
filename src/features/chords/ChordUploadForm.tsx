@@ -3,6 +3,7 @@ import { uploadChordVoicing } from '../../core/api/client';
 import { parseChordName } from '../songs/parseChordName';
 import ChordDiagram from './ChordDiagram';
 import InstrumentSelector from '../../components/InstrumentSelector';
+import NumpadInput from '../../components/NumpadInput';
 import { INSTRUMENT_STRING_DISPLAY } from '../../core/music';
 import type { InstrumentName } from '../../core/useInstrument';
 
@@ -120,12 +121,11 @@ export default function ChordUploadForm({
             {stringDisplay.map(({ label, fretsIdx }) => (
               <div key={label + fretsIdx} className="flex items-center gap-3">
                 <span className="w-4 text-right text-sm font-mono text-gray-600">{label}</span>
-                <input
-                  type="text"
-                  inputMode="text"
+                <NumpadInput
                   value={frets[fretsIdx] ?? ''}
-                  onChange={e => setFret(fretsIdx, e.target.value)}
+                  onChange={val => setFret(fretsIdx, val)}
                   placeholder="—"
+                  extraKeys={[{ label: 'x', value: 'x' }]}
                   className="w-16 border border-gray-300 rounded px-2 py-1 text-sm font-mono text-center focus:outline-none focus:border-indigo-400"
                 />
               </div>

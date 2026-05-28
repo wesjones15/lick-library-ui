@@ -1,5 +1,6 @@
 import { useState, useRef, useLayoutEffect } from 'react';
 import { NOTE_KEYS, MODES, EMPTY_TAB, VALID_INPUT } from '../../core/music';
+import NumpadInput, { isTouch } from '../../components/NumpadInput';
 
 function expandTab(tab: string): string {
   return tab.split('\n').map(line => {
@@ -16,6 +17,14 @@ function isProtected(str: string, pos: number): boolean {
   return false;
 }
 
+const TAB_EXTRA_KEYS = [
+  { label: 'h', value: 'h' },
+  { label: 'p', value: 'p' },
+  { label: '/', value: '/' },
+  { label: '\\', value: '\\' },
+  { label: '-', value: '-' },
+];
+
 interface Props {
   title: string;
   initialTab?: string;
@@ -27,6 +36,7 @@ export default function LickInputModal({ title, initialTab, onVisualize, onClose
   const [rawTab, setRawTab] = useState(initialTab ?? EMPTY_TAB);
   const [inputKey, setInputKey] = useState('');
   const [mode, setMode] = useState('');
+  const [tabFocused, setTabFocused] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const nextCursorRef = useRef<number | null>(null);
@@ -38,39 +48,48 @@ export default function LickInputModal({ title, initialTab, onVisualize, onClose
     }
   });
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+  function injectChar(char: string) {
     const ta = textareaRef.current;
     if (!ta) return;
     const pos = ta.selectionStart;
+    const atClosingPipe =
+      rawTab[pos] === '|' &&
+      (pos === rawTab.length - 1 || rawTab[pos + 1] === '\n');
 
+    if (VALID_INPUT.test(char) && atClosingPipe) {
+      const expanded = expandTab(rawTab);
+      const linesBefore = rawTab.slice(0, pos).split('\n').length - 1;
+      const newPos = pos + linesBefore;
+      nextCursorRef.current = newPos + 1;
+      setRawTab(expanded.slice(0, newPos) + char + expanded.slice(newPos + 1));
+    } else if (VALID_INPUT.test(char) && !isProtected(rawTab, pos)) {
+      nextCursorRef.current = pos + 1;
+      setRawTab(rawTab.slice(0, pos) + char + rawTab.slice(pos + 1));
+    }
+  }
+
+  function injectBackspace() {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    const pos = ta.selectionStart;
+    const target = pos - 1;
+    if (!isProtected(rawTab, target)) {
+      nextCursorRef.current = target;
+      setRawTab(rawTab.slice(0, target) + '-' + rawTab.slice(target + 1));
+    } else {
+      ta.setSelectionRange(Math.max(0, pos - 1), Math.max(0, pos - 1));
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Backspace') {
       e.preventDefault();
-      const target = pos - 1;
-      if (!isProtected(rawTab, target)) {
-        nextCursorRef.current = target;
-        setRawTab(rawTab.slice(0, target) + '-' + rawTab.slice(target + 1));
-      } else {
-        ta.setSelectionRange(Math.max(0, pos - 1), Math.max(0, pos - 1));
-      }
+      injectBackspace();
       return;
     }
-
     if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
-      const atClosingPipe =
-        rawTab[pos] === '|' &&
-        (pos === rawTab.length - 1 || rawTab[pos + 1] === '\n');
-
-      if (VALID_INPUT.test(e.key) && atClosingPipe) {
-        const expanded = expandTab(rawTab);
-        const linesBefore = rawTab.slice(0, pos).split('\n').length - 1;
-        const newPos = pos + linesBefore;
-        nextCursorRef.current = newPos + 1;
-        setRawTab(expanded.slice(0, newPos) + e.key + expanded.slice(newPos + 1));
-      } else if (VALID_INPUT.test(e.key) && !isProtected(rawTab, pos)) {
-        nextCursorRef.current = pos + 1;
-        setRawTab(rawTab.slice(0, pos) + e.key + rawTab.slice(pos + 1));
-      }
+      injectChar(e.key);
     }
   }
 
@@ -96,6 +115,8 @@ export default function LickInputModal({ title, initialTab, onVisualize, onClose
             value={rawTab}
             onChange={e => setRawTab(e.target.value)}
             onKeyDown={handleKeyDown}
+            onFocus={() => setTabFocused(true)}
+            onBlur={() => setTabFocused(false)}
             spellCheck={false}
             rows={7}
             className="w-full font-mono text-sm border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:border-indigo-400 bg-gray-50"
@@ -141,6 +162,17 @@ export default function LickInputModal({ title, initialTab, onVisualize, onClose
           </div>
         </div>
       </div>
+
+      {isTouch && tabFocused && (
+        <NumpadInput
+          insertMode
+          value=""
+          onChange={char => injectChar(char)}
+          onBackspace={injectBackspace}
+          onClose={() => setTabFocused(false)}
+          extraKeys={TAB_EXTRA_KEYS}
+        />
+      )}
     </div>
   );
 }
