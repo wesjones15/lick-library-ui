@@ -98,6 +98,7 @@ export default function Metronome() {
                 <input
                   type="text"
                   inputMode="numeric"
+                  pattern="[0-9]*"
                   value={bpmInput}
                   onChange={e => setBpmInput(e.target.value.replace(/\D/g, ''))}
                   onBlur={() => commitBpm(bpmInput)}
