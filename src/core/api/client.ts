@@ -461,7 +461,7 @@ export interface PlaylistEntry {
   mode: string | null;
   instrument: string | null;
   defaultInstrument: string | null;
-  bpmOffset: number;
+  tempoOverride: number | null;
 }
 
 export interface PlaylistDetail {
@@ -537,7 +537,7 @@ export async function addPlaylistEntry(
 export async function updatePlaylistEntry(
   playlistId: string,
   entryId: string,
-  req: { keyOffset?: number | null; capoOffset?: number | null; position?: number; instrument?: string | null; bpmOffset?: number | null },
+  req: { keyOffset?: number | null; capoOffset?: number | null; position?: number; instrument?: string | null; tempoOverride?: number | null },
 ): Promise<PlaylistDetail> {
   const res = await fetch(`${BASE_URL}/playlist/${playlistId}/entries/${entryId}`, {
     method: 'PUT',

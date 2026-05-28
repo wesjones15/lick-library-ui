@@ -139,7 +139,8 @@ export default function NoodlePage() {
   const urlSongId = searchParams.get('songId');
   const urlSemitones = parseInt(searchParams.get('semitones') ?? '0', 10);
   const urlCapo = parseInt(searchParams.get('capo') ?? '0', 10);
-  const urlBpmOffset = parseInt(searchParams.get('bpmOffset') ?? '0', 10);
+  const rawTempoOverride = searchParams.get('tempoOverride');
+  const urlTempoOverride = rawTempoOverride !== null && rawTempoOverride !== '' ? parseInt(rawTempoOverride, 10) : null;
 
   const [noodleMode, setNoodleMode] = useState<NoodleMode>(urlSongId ? 'song' : 'none');
   const [song, setSong] = useState<SongDetail | null>(null);
@@ -193,7 +194,7 @@ export default function NoodlePage() {
       if (s.timeSignature) setBeatsPerBar(s.timeSignature);
       if (prevSongIdForPrefill.current !== activeSongId) {
         prevSongIdForPrefill.current = activeSongId;
-        if (s.tempo) setBpmInput(String(s.tempo + urlBpmOffset));
+        setBpmInput(String(urlTempoOverride ?? s.tempo ?? 120));
         // For modal loads, initialize capo to the song's native capo so offset starts at zero
         if (!loadedViaUrl.current) setLocalCapo(s.capo ?? 0);
       }
@@ -420,7 +421,11 @@ export default function NoodlePage() {
   function handlePlay() {
     if (!isPlaying) {
       const parsed = parseInt(bpmInput, 10);
-      if (!isNaN(parsed) && parsed > 0) setBpm(parsed);
+      if (!isNaN(parsed)) {
+        const clamped = Math.min(240, Math.max(40, parsed));
+        setBpm(clamped);
+        setBpmInput(String(clamped));
+      }
       warmupRef.current = 4;
       halfBeatRef.current = 0;
       setFreeHasAdvanced(false);
@@ -580,9 +585,14 @@ export default function NoodlePage() {
           <NumpadInput
             value={bpmInput}
             onChange={val => setBpmInput(val)}
+            onCommit={val => {
+              const v = parseInt(val, 10);
+              const clamped = isNaN(v) ? bpm : Math.min(240, Math.max(40, v));
+              setBpmInput(String(clamped));
+            }}
             placeholder="120"
-            min={20}
-            max={300}
+            min={40}
+            max={240}
             className="border border-gray-300 rounded-lg px-1.5 py-0.5 text-xs focus:outline-none focus:border-indigo-400 bg-white w-12 text-center"
           />
         </div>

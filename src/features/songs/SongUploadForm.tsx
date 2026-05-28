@@ -106,9 +106,15 @@ export default function SongUploadForm({ onSuccess }: Props) {
         />
         <NumpadInput
           placeholder="BPM"
-          min={1}
+          min={40}
+          max={240}
           value={tempo}
           onChange={val => setTempo(val)}
+          onCommit={val => {
+            if (!val.trim()) return;
+            const v = parseInt(val, 10);
+            if (!isNaN(v)) setTempo(String(Math.min(240, Math.max(40, v))));
+          }}
           className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
         />
         <select
