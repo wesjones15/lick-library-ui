@@ -1,6 +1,6 @@
 # Lick Library — Frontend
 
-React UI for the Lick Library backend. Upload guitar tabs, browse your lick library, and view playable positions in any key on any instrument. Upload chord sheets, transpose them on the fly, hover over chords for fingering diagrams, and view songs in a scrolling single-column mode. Manage playlists with per-song key and capo overrides. Explore scales, pentatonic overlays, and chord progressions on a live guitar neck with real-time pitch detection.
+React UI for the Lick Library backend. Sign in with Google, upload guitar tabs, browse your lick library, and view playable positions in any key on any instrument. Upload chord sheets, transpose them on the fly, hover over chords for fingering diagrams, and view songs in a scrolling single-column mode. Manage playlists with per-song key and capo overrides. Explore scales, pentatonic overlays, and chord progressions on a live guitar neck with real-time pitch detection. Use Noodle mode for a beat-synchronized karaoke display while you play along.
 
 ---
 
@@ -13,6 +13,7 @@ React UI for the Lick Library backend. Upload guitar tabs, browse your lick libr
 | Router | React Router 7 |
 | Styling | Tailwind CSS v4 |
 | HTTP | Fetch API (no library) |
+| Chord diagrams | svguitar |
 
 ---
 
@@ -29,11 +30,40 @@ The app includes a PWA manifest (`public/manifest.json`) with `display: standalo
 
 ---
 
+## Authentication
+
+The app uses Google OAuth2 via the backend. JWTs are stored client-side.
+
+### Login flow
+
+1. Home page shows a "Sign in with Google" button for unauthenticated users.
+2. Clicking it redirects to `/api/oauth2/authorize?provider=google` on the backend.
+3. After Google authenticates, the backend issues a JWT and redirects to `/auth?token=<jwt>`.
+4. `AuthCallbackPage` extracts the token, stores it in `localStorage` as `lick_library_token`, and navigates to `/`.
+
+### Route protection
+
+All routes except `/` and `/auth` are wrapped in `ProtectedRoute`. Unauthenticated users are redirected to `/`. The `/live` route additionally requires `role = ADMIN`.
+
+Users with `status = PENDING` can access `/user` only — they see a waiting-for-approval message everywhere else until an admin approves their account.
+
+### Auth state
+
+`AuthContext` (via `useAuth()`) provides:
+
+```typescript
+{ currentUser: UserProfile | null, token: string | null, statusResolved: boolean, login, logout }
+```
+
+The JWT is decoded client-side on load for `{ userId, role, status }`. On mount the context also calls `GET /api/user/me` to hydrate the latest `status` and `requestType`. A `auth:unauthorized` window event (dispatched by the API client on any 401 response) triggers auto-logout.
+
+---
+
 ## Pages
 
 ### Home (`/`)
 
-Landing page. Shows feature cards for Licks, Songs, Chord Gallery, Playlists, Theory, and Live. Clicking a card navigates to that section.
+Landing page. Shows feature cards for Licks, Songs, Chord Gallery, Playlists, Theory, and Live. Unauthenticated users see a "Sign in with Google" button; `PENDING` users see a waiting message.
 
 ### Licks (`/licks`)
 
@@ -129,7 +159,7 @@ Song queue manager for a playlist.
 
 Redirects to `/live?mode=chords`.
 
-### Live (`/live`)
+### Live (`/live`) *(admin only)*
 
 Three-panel guitar neck experience. The view mode pill (Live / Lick / Chords) is right-aligned in the toolbar.
 
@@ -152,12 +182,34 @@ Three-panel guitar neck experience. The view mode pill (Live / Lick / Chords) is
   - Tab display below the neck: compact normalized format in All mode; spread format with technique decorators in Column mode.
   - Column mode controls: Column/All pill, 1/sec or Metronome speed, Pause/Resume. Edit Lick and Save Lick are right-aligned in the same row.
   - `LickSource` state machine (`none → new/library → modified`) controls Save Lick enablement.
-- **Build mode**:
+- **Build mode** (`LickBuilderPanel`):
   - Click any fret on the neck to append a note column.
   - A textarea shows the built tab in normalized format (editable).
   - Save Lick uploads and switches to Visualize mode; Clear resets the neck.
 
 **Chords mode** (`ChordsProgressionPanel`) — chord progression reference and visualization.
+
+### Noodle (`/noodle`)
+
+Beat-synchronized karaoke chord display with guitar neck visualization.
+
+- **Song picker** — `SongLibraryModal` to load any song from the library.
+- **`KaraokeDisplay`** — scrolling chord sheet that highlights the current chord in sync with the beat. Timing is driven by the song's saved beatmap; falls back to the global metronome BPM.
+- **`ChordInfoBox`** — the current chord's voicing diagram is overlaid on the guitar neck so you can see where to fret as the song progresses.
+- **Instrument + mode selectors** — drive the neck scale display independently of the highlighted chord.
+- **Modes**: `none` (neck only), `song` (loaded song with karaoke), `freeChords` (manual chord selection).
+
+### User (`/user`)
+
+Profile page and admin dashboard. Accessible to all authenticated users including `PENDING`.
+
+- **Profile** — email, username (editable inline), account status. Logout button.
+- **My content** — tabs for own licks, songs, and playlists (shown when `APPROVED` or `ADMIN`).
+- **Account deletion** — "Request deletion" queues an account-deletion request for admin review. Admins can also delete immediately.
+- **Admin panel** (ADMIN role only):
+  - **Pending queue** — users awaiting approval or deletion processing; approve/reject buttons.
+  - **All users** — full user table with per-user delete.
+  - **Song update queue** — pending chart/metadata/beatmap changes submitted by non-owners; clicking opens `SongUpdateReviewModal` to view a diff and approve or reject.
 
 ---
 
@@ -168,7 +220,8 @@ Three-panel guitar neck experience. The view mode pill (Live / Lick / Chords) is
 Fixed top navbar wrapping the whole app via `<Outlet />`.
 
 - Logo (`Lick Library`) links to `/` (home).
-- Nav links: Licks, Songs, Chord Gallery, Playlists, Theory, Live.
+- Nav links: Licks, Songs, Chord Gallery, Playlists, Theory, Live, Noodle.
+- User avatar / sign-in button on the right; avatar links to `/user`.
 - `Metronome` widget anchored to the right side of the navbar.
 
 ### `Metronome`
@@ -182,7 +235,7 @@ Collapsible popover in the navbar.
 
 ### `GuitarNeck`
 
-SVG guitar neck diagram used across Live and Lick visualizer.
+SVG guitar neck diagram used across Live, Lick visualizer, and Noodle.
 
 - `dots: NeckDot[][]` — indexed by `[stringIndex][fret]`; string 0 = low E.
 - `fretCount` — default 12.
@@ -194,13 +247,33 @@ SVG guitar neck diagram used across Live and Lick visualizer.
 
 ### `LickVisualizerPanel`
 
-Self-contained lick visualizer (Live → Lick mode). Parses ASCII tab locally with no backend call for the primary display flow. See [Live page](#live-live) for full feature description.
+Self-contained lick visualizer (Live → Lick mode). Parses ASCII tab locally with no backend call for the primary display flow. See [Live page](#live-live-admin-only) for full feature description.
 
 Key internals:
 - `parseTabString` — parses normalized ASCII tab into `TabColumn[]` (NoteCol | RestCol), capturing technique chars (`h`, `p`, `/`, `\`).
 - `buildNormalizedTab` — compact format: `label + '-' + col0sep + col1sep + ... + '|'` where separator is the technique char or `-`.
 - `buildSpreadTab` — SPREAD_SLOT=4 chars per column; technique placed at the second pad position (`5-h-`).
 - `LickSource` state: `'none' | 'new' | 'library' | 'modified'`.
+
+### `LickBuilderPanel`
+
+Dedicated build-mode panel in Live → Lick mode. Click-to-build neck interaction + textarea for editing the normalized tab output. Save Lick uploads and transitions to Visualize mode.
+
+### `KaraokeDisplay`
+
+Beat-synchronized scrolling chord sheet (Noodle feature). Highlights the currently playing chord token and auto-scrolls to keep it in view. Uses `useChordHighlight` for timing.
+
+### `ChordInfoBox`
+
+Noodle feature overlay showing the current chord's voicing diagram on the guitar neck. Updates as chords change during playback.
+
+### `SongLibraryModal`
+
+Song picker modal used by the Noodle page. Fetches all songs and renders each as a card; `onSelect(song)` called on click.
+
+### `SongUpdateReviewModal`
+
+Admin modal for reviewing a pending song update request. Shows a before/after diff of the chord chart or metadata; provides Approve and Reject buttons.
 
 ### `PentatonicWidget`
 
@@ -215,13 +288,14 @@ Chord progression panel (Live → Chords mode).
 
 ### `ChordSheet`
 
-Renders a `ChordLyric[]` list as a formatted chord sheet.
+Renders a `ChordSheetLine[]` list as a formatted chord sheet.
 
 - Column count and font sizes come from the backend.
 - Accepts a `fontScale` multiplier (scroll view uses `2`).
 - Chord tokens are bold and hoverable — popover shows a `ChordDiagram` with `‹ N/M ›` voicing navigation. Popover flips above the token when near the bottom of the viewport.
 - `NC` / `N.C.` tokens are not bolded and have no popover.
 - Module-level voicing cache — each `root+quality` pair is only fetched once per session.
+- `GuitarTabLine` rows are rendered as preformatted tab blocks inline with the chord sheet.
 
 ### `ChordDiagram`
 
@@ -242,6 +316,10 @@ Modal to browse and select a saved lick. Fetches `getAllLicks()` and renders eac
 ### `AddToPlaylistModal`
 
 Modal to add the current song to a playlist. Lists all playlists; highlights ones that already contain the song. Handles duplicate detection.
+
+### `SongLickCard`
+
+Card component on `SongManagePage` showing a lick associated with the song. Displays the interval string and mode chip.
 
 ### `LickUploadForm`
 
@@ -286,6 +364,10 @@ A `nextCursorRef` + `useLayoutEffect` pattern restores `selectionStart`/`selecti
 
 ## Hooks & context
 
+### `useAuth()`
+
+Returns `AuthContextValue` from `AuthContext`. Must be used within `AuthProvider`. Provides `{ currentUser, token, statusResolved, login, logout }`. Token stored in `localStorage` as `lick_library_token`; JWT decoded client-side for `userId`, `role`, and `status`. Profile is re-fetched from `/api/user/me` on mount to hydrate the latest status.
+
 ### `useMetronome(bpm, isPlaying, onBeat?)`
 
 Web Audio API metronome scheduler. Plays oscillator clicks on a lookahead schedule (25 ms tick, 0.1 s lookahead). Beat 1 uses 1000 Hz; beats 2–4 use 800 Hz.
@@ -293,6 +375,10 @@ Web Audio API metronome scheduler. Plays oscillator clicks on a lookahead schedu
 ### `usePitchDetection(listening)`
 
 Web Audio API pitch detector. Returns the current detected MIDI note number (or null). Used in Live mode to highlight the active neck dot.
+
+### `useChordHighlight(chordLines, beats, bpm, isPlaying)`
+
+Noodle feature hook. Maps beat timestamps (from beatmap) or metronome BPM to chord tokens in the chord sheet. Returns the currently active chord index and whether playback is running.
 
 ### `useInstrument()`
 
@@ -322,11 +408,38 @@ Computes CAGED zone boundaries from scale positions for fretboard overlay render
 
 Helpers for diatonic interval and mode calculations used in the Live page.
 
+### `lickUtils.ts`
+
+Client-side tab parsing utilities shared between `LickVisualizerPanel` and `LickBuilderPanel`.
+
 ---
 
 ## API client (`src/core/api/client.ts`)
 
-Base URL: `http://{hostname}:8080/api`
+Base URL: `http://{hostname}:8080/api`. All requests include `Authorization: Bearer <token>` from `localStorage`. A 401 response dispatches `auth:unauthorized` and triggers logout.
+
+### Auth endpoints
+
+```typescript
+getUserProfile(): Promise<UserProfileResponse>
+updateUsername(username: string): Promise<UserProfileResponse>
+requestDeletion(): Promise<void>
+deleteOwnAccount(): Promise<void>
+```
+
+### Admin endpoints
+
+```typescript
+getAdminQueue(): Promise<AdminUserResponse[]>
+getAdminUsers(): Promise<AdminUserResponse[]>
+approveUser(userId: number): Promise<AdminUserResponse | void>
+rejectUser(userId: number): Promise<AdminUserResponse>
+deleteAdminUser(userId: number): Promise<void>
+getAdminSongUpdateQueue(): Promise<SongUpdateRequestSummary[]>
+getAdminSongUpdate(id: string): Promise<SongUpdateReviewResponse>
+approveAdminSongUpdate(id: string): Promise<void>
+rejectAdminSongUpdate(id: string): Promise<void>
+```
 
 ### Lick endpoints
 
@@ -340,12 +453,16 @@ deleteLick(id: string): Promise<void>
 ### Song endpoints
 
 ```typescript
-getAllSongs(): Promise<SongSummary[]>
+getAllSongs(mine?: boolean): Promise<SongSummary[]>
 uploadSong(request: UploadSongRequest): Promise<SongSummary>
 getSong(id: string, semitones?: number): Promise<SongDetail>
 updateSong(id: string, request: UpdateSongRequest): Promise<SongDetail>
 reparseSong(id: string): Promise<SongDetail>
 deleteSong(id: string): Promise<void>
+submitSongUpdateRequest(id: string, request: UpdateSongRequest): Promise<SongUpdateRequestSummary>
+getBeatmap(songId: string): Promise<BeatmapData>
+saveBeatmap(songId: string, beats: number[]): Promise<BeatmapData>
+submitBeatmapUpdateRequest(songId: string, beats: number[]): Promise<SongUpdateRequestSummary>
 ```
 
 ### Chord endpoints
@@ -389,23 +506,31 @@ src/
 ├── core/
 │   ├── api/
 │   │   └── client.ts                  Typed fetch wrappers + response interfaces
+│   ├── auth/
+│   │   └── AuthContext.tsx            JWT decode, login/logout, status polling, AuthProvider
 │   ├── context/
 │   │   └── SongNavContext.tsx         Playlist nav state for song detail prev/next
 │   ├── metronome/
 │   │   ├── MetronomeContext.tsx
 │   │   ├── MetronomeWidget.tsx
 │   │   └── useMetronome.ts
+│   ├── music.ts                       CHROMATIC_NOTES, getStringLabels, music helpers
 │   └── useInstrument.ts
 ├── components/
 │   ├── Layout.tsx                     Fixed navbar + Outlet
 │   ├── InstrumentSelector.tsx
 │   └── KeySelector.tsx
 └── features/
+    ├── auth/
+    │   └── AuthCallbackPage.tsx       /auth  OAuth callback — extracts token, calls login()
     ├── home/
     │   └── HomePage.tsx               /
     ├── licks/
-    │   ├── LicksPage.tsx              /licks
+    │   ├── LickLibraryPage.tsx        /licks  and  /licks/library
+    │   ├── LickUploadPage.tsx         /licks/upload
     │   ├── LickDetailPage.tsx         /lick/:id
+    │   ├── LickVisualizerPage.tsx     /lick/visualizer
+    │   ├── LickSubNav.tsx
     │   ├── LickCard.tsx
     │   ├── LickList.tsx
     │   ├── LickPositionTab.tsx
@@ -417,12 +542,15 @@ src/
     │   ├── SongUploadPage.tsx         /songs/upload
     │   ├── SongCard.tsx
     │   ├── SongList.tsx
+    │   ├── SongLickCard.tsx           Lick association card on manage page
+    │   ├── SongUpdateReviewModal.tsx  Admin diff/review modal for pending updates
     │   ├── SongUploadForm.tsx
     │   ├── ChordSheet.tsx
     │   └── parseChordName.ts
     ├── chords/
     │   ├── ChordsGalleryPage.tsx      /chords
     │   ├── ChordUploadPage.tsx        /chords/upload
+    │   ├── ChordsTheoryPage.tsx       /chords/theory
     │   ├── ChordCard.tsx
     │   ├── ChordDiagram.tsx           SVG chord diagram
     │   ├── ChordManageModal.tsx       Per-chord voicing management
@@ -434,17 +562,28 @@ src/
     │   └── AddToPlaylistModal.tsx     Add-to-playlist from song detail
     ├── theory/
     │   └── TheoryPage.tsx             /theory  (redirects to /live?mode=chords)
-    └── live/
-        ├── LivePage.tsx               /live  (Live / Lick / Chords mode toggle)
-        ├── GuitarNeck.tsx             SVG neck diagram
-        ├── LickVisualizerPanel.tsx    Lick mode panel
-        ├── LickInputModal.tsx         New Lick / Edit Lick tab editor modal
-        ├── LickLibraryModal.tsx       Load from Library modal
-        ├── PentatonicWidget.tsx       Pentatonic scale overlay selector
-        ├── ChordsProgressionPanel.tsx Chords mode panel
-        ├── cagedUtils.ts              CAGED zone boundary helpers
-        ├── diatonicUtils.ts           Diatonic interval helpers
-        └── usePitchDetection.ts       Web Audio pitch detector hook
+    ├── live/
+    │   ├── LivePage.tsx               /live  (Live / Lick / Chords mode toggle)
+    │   ├── GuitarNeck.tsx             SVG neck diagram
+    │   ├── LickVisualizerPanel.tsx    Lick visualize mode panel
+    │   ├── LickBuilderPanel.tsx       Lick build mode panel
+    │   ├── LickInputModal.tsx         New Lick / Edit Lick tab editor modal
+    │   ├── LickLibraryModal.tsx       Load from Library modal
+    │   ├── PentatonicWidget.tsx       Pentatonic scale overlay selector
+    │   ├── ChordsProgressionPanel.tsx Chords mode panel
+    │   ├── ChordsWidget.tsx           Chord voicing display sub-component
+    │   ├── cagedUtils.ts              CAGED zone boundary helpers
+    │   ├── diatonicUtils.ts           Diatonic interval helpers
+    │   ├── lickUtils.ts               Client-side tab parsing utilities
+    │   └── usePitchDetection.ts       Web Audio pitch detector hook
+    ├── noodle/
+    │   ├── NoodlePage.tsx             /noodle
+    │   ├── KaraokeDisplay.tsx         Beat-synced scrolling chord sheet
+    │   ├── ChordInfoBox.tsx           Current chord voicing overlaid on neck
+    │   ├── SongLibraryModal.tsx       Song picker for noodle mode
+    │   └── useChordHighlight.ts       Chord timing hook (beatmap or metronome)
+    └── user/
+        └── UserPage.tsx               /user  Profile + admin dashboard
 ```
 
 ---
@@ -452,6 +591,35 @@ src/
 ## Type reference
 
 ```typescript
+interface UserProfile {
+  userId: number;
+  role: 'ADMIN' | 'USER';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  requestType?: string;
+}
+
+interface UserProfileResponse {
+  userId: number;
+  email: string;
+  username: string | null;
+  role: 'ADMIN' | 'USER';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  requestType: string | null;
+  creationTs: string;
+}
+
+interface AdminUserResponse extends UserProfileResponse {}
+
+interface SongUpdateRequestSummary {
+  id: string;
+  songId: string;
+  requestType: 'SONG_METADATA' | 'SONG_CHART' | 'SONG_BEATMAP';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+}
+
+interface BeatmapData { beats: number[]; }
+
 interface LickSummary {
   id: string;
   rawTab: string;
@@ -477,6 +645,7 @@ interface SongSummary {
   originalKey: string | null;
   tempo: number | null;
   canReparse: boolean;
+  ownedByCurrentUser: boolean;
 }
 
 interface SongDetail extends SongSummary {
@@ -484,6 +653,7 @@ interface SongDetail extends SongSummary {
   chordLines: ChordSheetLine[];
   numColumns: number;
   rawChordSheet: string | null;
+  timeSignature: string | null;
 }
 
 type ChordSheetLine = ChordLyric | GuitarTabLine;
@@ -496,7 +666,7 @@ interface ChordVoicing {
   frets: (number | null)[];  // null = muted (x), 0 = open, positive = fret number; index 0 = low E
 }
 
-interface PlaylistSummary { id: string; name: string; songCount: number; }
+interface PlaylistSummary { id: string; name: string; songCount: number; ownedByCurrentUser: boolean; }
 
 interface PlaylistEntry {
   entryId: string;
