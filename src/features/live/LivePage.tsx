@@ -1,16 +1,13 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
-import { getPentatonicDegree, getPentatonicNoteSet, ROOT_CHROMATIC } from './cagedUtils';
-import PentatonicWidget from './PentatonicWidget';
-import ChordsWidget from './ChordsWidget';
+import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../theory/GuitarNeck';
 import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
-import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum, getStringCount, getStringLabels } from '../../core/music';
+import { NOTE_KEYS, formatNoteEnum, getStringCount, getStringLabels } from '../../core/music';
 import InstrumentSelector from '../../components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 
 const FRET_COUNT = 12;
-const OPEN_MIDI = [40, 45, 50, 55, 59, 64]; // low E → high e (guitar standard; pitch detection is guitar-only)
+const OPEN_MIDI = [40, 45, 50, 55, 59, 64];
 
 const MODES = [
   { value: 'IONIAN',     label: 'Major (Ionian)'          },
@@ -21,16 +18,6 @@ const MODES = [
   { value: 'AEOLIAN',    label: 'Natural Minor (Aeolian)'  },
   { value: 'LOCRIAN',    label: 'Locrian'                 },
 ];
-
-const MODE_INTERVALS: Record<string, string[]> = {
-  IONIAN:     ['1', '2',  '3',  '4',  '5',  '6',  '7' ],
-  DORIAN:     ['1', '2',  'b3', '4',  '5',  '6',  'b7'],
-  PHRYGIAN:   ['1', 'b2', 'b3', '4',  '5',  'b6', 'b7'],
-  LYDIAN:     ['1', '2',  '3',  '#4', '5',  '6',  '7' ],
-  MIXOLYDIAN: ['1', '2',  '3',  '4',  '5',  '6',  'b7'],
-  AEOLIAN:    ['1', '2',  'b3', '4',  '5',  'b6', 'b7'],
-  LOCRIAN:    ['1', 'b2', 'b3', '4',  'b5', 'b6', 'b7'],
-};
 
 function blankScaleDots(n: number): NeckDot[][] {
   return Array.from({ length: n }, () =>
@@ -52,27 +39,16 @@ const btnClass = 'px-4 py-2 text-sm rounded-lg border transition-colors';
 
 interface CurrentNote { string: number; fret: number; degree: number; }
 
-interface LivePageProps {
-  pageMode?: 'live' | 'theory';
-}
-
-export default function LivePage({ pageMode = 'live' }: LivePageProps) {
+export default function LivePage() {
   const [root, setRoot] = useState('C');
   const [mode, setMode] = useState('IONIAN');
   const [instrument, setInstrument] = useState('GUITAR');
   const [scaleDots, setScaleDots] = useState<NeckDot[][]>(() => blankScaleDots(6));
   const [currentNote, setCurrentNote] = useState<CurrentNote | null>(null);
-  const [highlightedDegrees, setHighlightedDegrees] = useState<Set<number>>(new Set());
-  const [showPentatonicWidget, setShowPentatonicWidget] = useState(false);
-  const [showChordsWidget, setShowChordsWidget] = useState(false);
-  const [chordSelectedPositions, setChordSelectedPositions] = useState<Set<string>>(new Set());
-  const [activePentKeys, setActivePentKeys] = useState<string[]>([]);
-  const [pentWidgetMode, setPentWidgetMode] = useState(mode);
-  const [pentModeSynced, setPentModeSynced] = useState(true);
   const [listening, setListening] = useState(false);
   const noteHoldTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { midiNote, error: micError } = usePitchDetection(pageMode === 'live' && listening);
+  const { midiNote, error: micError } = usePitchDetection(listening);
 
   useEffect(() => {
     const sc = getStringCount(instrument);
@@ -93,17 +69,13 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
     }).catch(() => {});
   }, [root, mode, instrument]);
 
-  useEffect(() => {
-    if (pentModeSynced) setPentWidgetMode(mode);
-  }, [mode, pentModeSynced]);
-
   const allCandidates = useMemo<{
     best: Map<string, { candidateColor: string; ownNote: boolean }>;
     second: Map<string, { candidateColor: string }>;
     third: Map<string, { candidateColor: string }>;
   }>(() => {
     const empty = { best: new Map(), second: new Map(), third: new Map() };
-    if (!currentNote || highlightedDegrees.size > 0 || showChordsWidget) return empty;
+    if (!currentNote) return empty;
 
     const byDegree = new Map<number, Array<{ string: number; fret: number; dist: number }>>();
     scaleDots.forEach((row, s) => {
@@ -132,79 +104,16 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
     });
 
     return { best, second, third };
-  }, [scaleDots, currentNote, highlightedDegrees, showChordsWidget]);
+  }, [scaleDots, currentNote]);
 
   const bestCandidates = allCandidates.best;
   const secondCandidates = allCandidates.second;
   const thirdCandidates = allCandidates.third;
 
-  const recognizedPentKeys = useMemo<Map<string, 'partial' | 'full'>>(() => {
-    if (highlightedDegrees.size < 2 || !root) return new Map();
-    const rootIdx = ROOT_CHROMATIC[root] ?? 0;
-    const liveSemis = ((): number[] => {
-      const semMap: Record<string, number[]> = {
-        IONIAN:     [0,2,4,5,7,9,11],
-        DORIAN:     [0,2,3,5,7,9,10],
-        PHRYGIAN:   [0,1,3,5,7,8,10],
-        LYDIAN:     [0,2,4,6,7,9,11],
-        MIXOLYDIAN: [0,2,4,5,7,9,10],
-        AEOLIAN:    [0,2,3,5,7,8,10],
-        LOCRIAN:    [0,1,3,5,6,8,10],
-      };
-      return semMap[mode] ?? semMap.IONIAN;
-    })();
-    const selectedChromatic = new Set(
-      Array.from(highlightedDegrees).map(d => (rootIdx + liveSemis[d - 1]) % 12)
-    );
-    const result = new Map<string, 'partial' | 'full'>();
-    for (const key of Object.keys(ROOT_CHROMATIC)) {
-      const pentNotes = getPentatonicNoteSet(key, pentWidgetMode);
-      const notRuledOut = [...selectedChromatic].every(n => pentNotes.has(n));
-      if (!notRuledOut) continue;
-      const isFull = [...pentNotes].every(n => selectedChromatic.has(n));
-      result.set(key, isFull ? 'full' : 'partial');
-    }
-    return result;
-  }, [highlightedDegrees, root, mode, pentWidgetMode]);
-
   const dots = useMemo<NeckDot[][]>(() => {
     return scaleDots.map((row, s) =>
       row.map((dot, f) => {
-        let pentatonicRings: string[] | undefined;
-        let pentatonicOutOfScale: boolean | undefined;
-
-        if (activePentKeys.length > 0) {
-          const chromatic = (OPEN_MIDI[s] + f) % 12;
-          const rings: string[] = [];
-          for (const key of activePentKeys) {
-            const deg = getPentatonicDegree(chromatic, key, pentWidgetMode);
-            if (deg !== null) rings.push(DEGREE_COLORS[deg]);
-          }
-          if (rings.length > 0) {
-            pentatonicRings = rings;
-            if (dot.degree === null) pentatonicOutOfScale = true;
-          }
-        }
-
-        if (showChordsWidget) {
-          const posKey = `${s},${f}`;
-          const isSelected = chordSelectedPositions.has(posKey);
-          if (dot.degree === null) {
-            if (isSelected) {
-              return { ...dot, active: true, note: CHROMATIC_NOTES[(OPEN_MIDI[s] + f) % 12], pentatonicRings };
-            }
-            return { ...dot, pentatonicRings };
-          }
-          return { ...dot, active: false, highlighted: isSelected, candidate: false, pentatonicRings };
-        }
-
-        if (dot.degree === null) {
-          const note = pentatonicOutOfScale ? CHROMATIC_NOTES[(OPEN_MIDI[s] + f) % 12] : undefined;
-          return { ...dot, pentatonicRings, pentatonicOutOfScale, note };
-        }
-        if (highlightedDegrees.size > 0) {
-          return { ...dot, active: false, highlighted: highlightedDegrees.has(dot.degree!), candidate: false, pentatonicRings };
-        }
+        if (dot.degree === null) return dot;
         const isActive = currentNote?.string === s && currentNote?.fret === f;
         const candidateInfo = !isActive ? bestCandidates.get(`${s},${f}`) : undefined;
         const secondInfo = !isActive && !candidateInfo ? secondCandidates.get(`${s},${f}`) : undefined;
@@ -217,12 +126,10 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
           ownNote: candidateInfo?.ownNote,
           secondCandidate: !!secondInfo,
           thirdCandidate: !!thirdInfo,
-          highlighted: pentatonicRings && !isActive ? true : undefined,
-          pentatonicRings,
         };
       })
     );
-  }, [scaleDots, currentNote, allCandidates, highlightedDegrees, activePentKeys, pentWidgetMode, showChordsWidget, chordSelectedPositions]);
+  }, [scaleDots, currentNote, allCandidates]);
 
   function selectNote(s: number, f: number, degree: number) {
     if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
@@ -241,47 +148,10 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [midiNote]);
 
-  function handleDotClick(stringIndex: number, fret: number) {
-    if (showChordsWidget) {
-      const key = `${stringIndex},${fret}`;
-      setChordSelectedPositions(prev => {
-        const next = new Set(prev);
-        if (next.has(key)) {
-          next.delete(key);
-        } else {
-          for (const k of next) {
-            if (k.startsWith(`${stringIndex},`)) next.delete(k);
-          }
-          next.add(key);
-        }
-        return next;
-      });
-      return;
-    }
-    if (highlightedDegrees.size > 0) return;
-    const dot = scaleDots[stringIndex]?.[fret];
-    if (!dot || dot.degree === null) return;
-    if (currentNote?.string === stringIndex && currentNote?.fret === fret) {
-      if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
-      setCurrentNote(null);
-    } else {
-      selectNote(stringIndex, fret, dot.degree);
-    }
-  }
-
-  const intervalLabels = MODE_INTERVALS[mode] ?? [];
-
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
-      <style>{`
-
-      `}</style>
-
-      {/* Top toolbar */}
       <div className="flex items-center gap-4 mb-4 flex-wrap">
-        <h1 className="text-3xl font-bold text-gray-900">
-          {pageMode === 'theory' ? 'Theory' : 'Live'}
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900">Live</h1>
 
         <select className={selectClass} value={root} onChange={e => setRoot(e.target.value)}>
           <option value="">— Key —</option>
@@ -296,85 +166,31 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
         </select>
         <InstrumentSelector
           instrument={instrument as InstrumentName}
-          onInstrumentChange={name => { setInstrument(name); setCurrentNote(null); setHighlightedDegrees(new Set()); }}
+          onInstrumentChange={name => { setInstrument(name); setCurrentNote(null); }}
           excludeCustom
           compact
         />
 
-        {pageMode === 'live' && (
-          <>
-            <button
-              className={`${btnClass} ${listening
-                ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
-                : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-              onClick={() => setListening(l => !l)}
-            >
-              {listening ? '⏹ Stop' : '🎙 Listen'}
-            </button>
-            {listening && !micError && (
-              <span className="text-sm text-green-600 animate-pulse">● Listening</span>
-            )}
-          </>
+        <button
+          className={`${btnClass} ${listening
+            ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
+            : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+          onClick={() => setListening(l => !l)}
+        >
+          {listening ? '⏹ Stop' : '🎙 Listen'}
+        </button>
+        {listening && !micError && (
+          <span className="text-sm text-green-600 animate-pulse">● Listening</span>
         )}
       </div>
 
-      {/* Interval legend: theory mode only */}
-      {pageMode === 'theory' && (
-        <div className="flex gap-2 items-center flex-wrap mb-6">
-          {intervalLabels.map((label, idx) => {
-            const degree = idx + 1;
-            const isNoteActive = currentNote?.degree === degree;
-            const isDegreeHighlighted = highlightedDegrees.has(degree);
-            const lit = isNoteActive || isDegreeHighlighted;
-            return (
-              <div
-                key={degree}
-                onClick={() => {
-                  setCurrentNote(null);
-                  if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
-                  setHighlightedDegrees(prev => {
-                    const next = new Set(prev);
-                    if (next.has(degree)) next.delete(degree);
-                    else next.add(degree);
-                    return next;
-                  });
-                }}
-                style={{
-                  width: 32, height: 32, borderRadius: '50%',
-                  background: DEGREE_COLORS[degree],
-                  opacity: lit ? 1 : 0.35,
-                  border: isDegreeHighlighted ? '2px solid #ffffff' : isNoteActive ? '2px solid #fef08a' : 'none',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: label.length > 1 ? 9 : 11,
-                  fontWeight: 700,
-                  color: lit ? '#111827' : '#9ca3af',
-                  flexShrink: 0,
-                  cursor: 'pointer',
-                }}
-              >
-                {label}
-              </div>
-            );
-          })}
-          {highlightedDegrees.size > 0 && (
-            <button
-              onClick={() => setHighlightedDegrees(new Set())}
-              className="px-2 py-1 text-xs rounded border border-gray-300 text-gray-500 hover:bg-gray-50"
-            >
-              Clear
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Mic errors: live mode only */}
-      {pageMode === 'live' && micError === 'NotAllowedError' && (
+      {micError === 'NotAllowedError' && (
         <p className="text-sm text-red-500 mb-4">Mic access denied. Allow microphone permission and try again.</p>
       )}
-      {pageMode === 'live' && micError === 'NotFoundError' && (
+      {micError === 'NotFoundError' && (
         <p className="text-sm text-red-500 mb-4">No microphone found.</p>
       )}
-      {pageMode === 'live' && micError === 'NotSecureContext' && (
+      {micError === 'NotSecureContext' && (
         <p className="text-sm text-red-500 mb-4">Mic requires a secure connection (HTTPS). Try accessing the app via HTTPS, or on the same device as the server.</p>
       )}
 
@@ -382,36 +198,7 @@ export default function LivePage({ pageMode = 'live' }: LivePageProps) {
         dots={dots}
         fretCount={FRET_COUNT}
         stringLabels={getStringLabels(instrument)}
-        onDotClick={pageMode === 'theory' ? handleDotClick : undefined}
       />
-
-      {/* Pentatonic and Chords widgets: theory mode only */}
-      {pageMode === 'theory' && (
-        <div className="flex gap-3 flex-wrap items-start">
-          <PentatonicWidget
-            activePentKeys={activePentKeys}
-            pentWidgetMode={pentWidgetMode}
-            pentModeSynced={pentModeSynced}
-            recognizedPentKeys={recognizedPentKeys}
-            onKeyToggle={key => setActivePentKeys(prev =>
-              prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
-            )}
-            onModeChange={m => { setPentWidgetMode(m); setPentModeSynced(false); }}
-            show={showPentatonicWidget}
-            onToggle={() => setShowPentatonicWidget(v => !v)}
-          />
-          <ChordsWidget
-            show={showChordsWidget}
-            onToggle={() => {
-              setShowChordsWidget(v => !v);
-              setChordSelectedPositions(new Set());
-            }}
-            selectedPositions={chordSelectedPositions}
-            root={root}
-            onClear={() => setChordSelectedPositions(new Set())}
-          />
-        </div>
-      )}
     </div>
   );
 }

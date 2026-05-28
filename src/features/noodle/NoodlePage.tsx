@@ -7,7 +7,7 @@ import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { CHROMATIC_NOTES, getStringLabels } from '../../core/music';
 import type { InstrumentName } from '../../core/useInstrument';
 import InstrumentSelector from '../../components/InstrumentSelector';
-import GuitarNeck from '../live/GuitarNeck';
+import GuitarNeck from '../theory/GuitarNeck';
 import KaraokeDisplay from './KaraokeDisplay';
 import SongLibraryModal from './SongLibraryModal';
 import { useChordHighlight } from './useChordHighlight';

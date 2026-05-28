@@ -1,4 +1,4 @@
-import ChordsProgressionPanel from '../live/ChordsProgressionPanel';
+import ChordsProgressionPanel from '../theory/ChordsProgressionPanel';
 
 export default function ChordsTheoryPage() {
   return (

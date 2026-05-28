@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
-import LickVisualizerPanel from '../live/LickVisualizerPanel';
-import LickBuilderPanel from '../live/LickBuilderPanel';
+import LickVisualizerPanel from '../theory/LickVisualizerPanel';
+import LickBuilderPanel from '../theory/LickBuilderPanel';
 import LickSubNav from './LickSubNav';
 
 export default function LickVisualizerPage() {
