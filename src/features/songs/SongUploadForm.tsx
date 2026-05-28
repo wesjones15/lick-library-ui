@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { uploadSong } from '../../core/api/client';
 import { CHROMATIC_NOTES, SONG_MODES, SONG_MODE_TO_ENUM } from '../../core/music';
 import InstrumentSelector from '../../components/InstrumentSelector';
+import NumpadInput from '../../components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
 
 interface Props {
@@ -95,25 +96,19 @@ export default function SongUploadForm({ onSuccess }: Props) {
             <option key={m.value} value={m.value}>{m.label}</option>
           ))}
         </select>
-        <input
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
+        <NumpadInput
           placeholder="Capo"
           min={0}
           max={11}
           value={capo}
-          onChange={e => setCapo(e.target.value)}
+          onChange={val => setCapo(val)}
           className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
         />
-        <input
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
+        <NumpadInput
           placeholder="BPM"
           min={1}
           value={tempo}
-          onChange={e => setTempo(e.target.value)}
+          onChange={val => setTempo(val)}
           className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
         />
         <select

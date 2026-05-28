@@ -6,6 +6,7 @@ import LickList from './LickList';
 import InstrumentSelector from '../../components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 import { MODES } from '../../core/music';
+import NumpadInput from '../../components/NumpadInput';
 
 const TOGGLE_BASE = 'px-3 py-1.5 text-xs rounded-lg border transition-colors';
 const TOGGLE_ON = 'border-indigo-300 bg-indigo-50 text-indigo-600';
@@ -100,23 +101,17 @@ export default function LickLibraryPage() {
             <option key={m} value={m}>{m.charAt(0) + m.slice(1).toLowerCase()}</option>
           ))}
         </select>
-        <input
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
+        <NumpadInput
           min={0}
           value={minLength}
-          onChange={e => setMinLength(e.target.value)}
+          onChange={val => setMinLength(val)}
           placeholder="Min length"
           className={`${INPUT_CLASS} w-24`}
         />
-        <input
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
+        <NumpadInput
           min={0}
           value={maxLength}
-          onChange={e => setMaxLength(e.target.value)}
+          onChange={val => setMaxLength(val)}
           placeholder="Max length"
           className={`${INPUT_CLASS} w-24`}
         />

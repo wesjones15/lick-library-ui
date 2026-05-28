@@ -12,6 +12,7 @@ import KaraokeDisplay from './KaraokeDisplay';
 import SongLibraryModal from './SongLibraryModal';
 import { useChordHighlight } from './useChordHighlight';
 import ChordInfoBox from './ChordInfoBox';
+import NumpadInput from '../../components/NumpadInput';
 
 type NoodleMode = 'none' | 'song' | 'freeChords';
 
@@ -575,15 +576,13 @@ export default function NoodlePage() {
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-gray-400">BPM</span>
-          <input
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
+          <NumpadInput
             value={bpmInput}
-            onChange={e => setBpmInput(e.target.value)}
-            className="border border-gray-300 rounded-lg px-1.5 py-0.5 text-xs focus:outline-none focus:border-indigo-400 bg-white w-12 text-center"
+            onChange={val => setBpmInput(val)}
+            placeholder="120"
             min={20}
             max={300}
+            className="border border-gray-300 rounded-lg px-1.5 py-0.5 text-xs focus:outline-none focus:border-indigo-400 bg-white w-12 text-center"
           />
         </div>
 

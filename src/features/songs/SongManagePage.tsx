@@ -7,6 +7,7 @@ import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
 import { CHROMATIC_NOTES, SONG_MODES, SONG_MODE_TO_ENUM } from '../../core/music';
 import InstrumentSelector from '../../components/InstrumentSelector';
+import NumpadInput from '../../components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
 
 const LEGACY_KEY_MAP: Record<string, string> = {
@@ -288,23 +289,17 @@ export default function SongManagePage() {
                 <option key={m.value} value={m.value}>{m.label}</option>
               ))}
             </select>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
+            <NumpadInput
               value={capo}
-              onChange={e => setCapo(e.target.value)}
+              onChange={val => setCapo(val)}
               placeholder="Capo"
               min={0}
               max={11}
               className={`${inputClass} w-20`}
             />
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
+            <NumpadInput
               value={tempo}
-              onChange={e => setTempo(e.target.value)}
+              onChange={val => setTempo(val)}
               placeholder="BPM"
               min={1}
               className={`${inputClass} w-24`}

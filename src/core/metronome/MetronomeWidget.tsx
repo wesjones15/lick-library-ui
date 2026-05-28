@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useMetronomeContext } from './MetronomeContext';
+import NumpadInput from '../../components/NumpadInput';
 
 const MIN_BPM = 40;
 const MAX_BPM = 240;
@@ -95,13 +96,11 @@ export default function Metronome() {
                 −
               </button>
               <div className="flex flex-col items-center">
-                <input
-                  type="text"
-                  inputMode="numeric"
+                <NumpadInput
                   value={bpmInput}
-                  onChange={e => setBpmInput(e.target.value.replace(/\D/g, ''))}
-                  onBlur={() => commitBpm(bpmInput)}
-                  onKeyDown={e => e.key === 'Enter' && commitBpm(bpmInput)}
+                  onChange={val => setBpmInput(val)}
+                  onCommit={val => commitBpm(val)}
+                  placeholder="BPM"
                   className="w-14 text-center text-2xl font-bold text-gray-900 tabular-nums bg-transparent border-b border-gray-300 focus:border-indigo-500 focus:outline-none"
                 />
                 <span className="text-xs text-gray-400">BPM</span>
