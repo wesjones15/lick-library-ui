@@ -11,6 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
+.agents/
+skills-lock.json
+frontend_logs_*.txt
 
 # Editor directories and files
 .vscode/*
