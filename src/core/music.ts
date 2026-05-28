@@ -70,7 +70,7 @@ export const EMPTY_TAB =
   'A|----------------|\n' +
   'E|----------------|';
 
-export const VALID_INPUT = /^[0-9hp/\\-]$/;
+export const VALID_INPUT = /^[0-9hp/\\b~|*-]$/;
 
 export type StringEntry = { label: string; fretsIdx: number };
 

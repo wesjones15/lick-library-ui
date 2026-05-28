@@ -47,6 +47,7 @@ function totalHalfBeats(chords: string): number {
 
 const BEAT_CYCLES: Record<number, number[]> = {
   3: [0, 1, 2, 3, 6, 12, 15, 4, 5, 7, 8, 9, 10, 11, 13, 14, 16],
+  6: [0, 1, 2, 3, 6, 9, 12, 15, 4, 5, 7, 8, 10, 11, 13, 14, 16],
 };
 const BEAT_CYCLE_DEFAULT = [0, 1, 2, 4, 8, 16, 3, 6, 5, 7, 9, 10, 11, 12, 13, 14, 15];
 

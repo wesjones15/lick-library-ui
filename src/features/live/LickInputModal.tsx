@@ -20,9 +20,13 @@ function isProtected(str: string, pos: number): boolean {
 const TAB_EXTRA_KEYS = [
   { label: 'h', value: 'h' },
   { label: 'p', value: 'p' },
+  { label: 'b', value: 'b' },
   { label: '/', value: '/' },
   { label: '\\', value: '\\' },
+  { label: '~', value: '~' },
   { label: '-', value: '-' },
+  { label: '|', value: '|' },
+  { label: '*', value: '*' },
 ];
 
 interface Props {
