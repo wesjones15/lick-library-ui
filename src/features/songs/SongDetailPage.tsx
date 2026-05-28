@@ -81,7 +81,7 @@ export default function SongDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const playlistState = (location.state as PlaylistNavState | null) ?? null;
-  const { setBpm, setIsPlaying, bpm, isPlaying } = useMetronomeContext();
+  const { setBpm, setIsPlaying, bpm, isPlaying, setBeatsPerBar } = useMetronomeContext();
   const { setInfo, collapsed, showChords, setShowChords, setMiniActions } = useSongNavContext();
   const isPortrait = usePortrait();
   const [semitones, setSemitones] = useState(() => playlistState?.entries[playlistState.currentIndex]?.keyOffset ?? 0);
@@ -320,7 +320,7 @@ export default function SongDetailPage() {
                 </div>
                 {song.tempo != null && (
                   <button
-                    onClick={() => { if (isPlaying && bpm === song.tempo) { setIsPlaying(false); } else { setBpm(song.tempo!); setIsPlaying(true); } }}
+                    onClick={() => { if (isPlaying && bpm === song.tempo) { setIsPlaying(false); } else { setBpm(song.tempo!); if (song.timeSignature) setBeatsPerBar(song.timeSignature); setIsPlaying(true); } }}
                     className="text-left text-xs text-gray-400 hover:text-indigo-500 transition-colors"
                   >
                     {song.tempo} BPM
