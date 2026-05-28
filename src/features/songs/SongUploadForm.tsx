@@ -96,9 +96,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
           ))}
         </select>
         <input
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
+          type="tel"
           placeholder="Capo"
           min={0}
           max={11}
@@ -107,9 +105,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
           className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
         />
         <input
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
+          type="tel"
           placeholder="BPM"
           min={1}
           value={tempo}

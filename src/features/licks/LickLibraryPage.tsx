@@ -101,9 +101,7 @@ export default function LickLibraryPage() {
           ))}
         </select>
         <input
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
+          type="tel"
           min={0}
           value={minLength}
           onChange={e => setMinLength(e.target.value)}
@@ -111,9 +109,7 @@ export default function LickLibraryPage() {
           className={`${INPUT_CLASS} w-24`}
         />
         <input
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
+          type="tel"
           min={0}
           value={maxLength}
           onChange={e => setMaxLength(e.target.value)}
