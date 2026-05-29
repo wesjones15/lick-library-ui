@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getScalePositions } from '../../core/api/client';
 import type { ChordVoicing } from '../../core/api/client';
-import type { NeckDot } from '../theory/GuitarNeck';
+import type { NeckDot } from '../../core/components/GuitarNeck';
 import { parseChordName } from '../songs/parseChordName';
 import { CHROMATIC_NOTES, formatNoteEnum, getStringCount, INSTRUMENT_OPEN_SEMITONES } from '../../core/music';
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
+import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../../core/components/GuitarNeck';
 import { getPentatonicDegree, getPentatonicNoteSet } from './cagedUtils';
 import PentatonicWidget from './PentatonicWidget';
 import ChordsWidget from './ChordsWidget';

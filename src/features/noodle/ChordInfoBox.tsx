@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import type { ChordVoicing } from '../../core/api/client';
 import { parseChordName } from '../songs/parseChordName';
 import { INSTRUMENT_OPEN_SEMITONES, CHROMATIC_NOTES, MODE_SEMITONES, ROOT_CHROMATIC } from '../../core/music';
-import { DEGREE_COLORS } from '../theory/GuitarNeck';
+import { DEGREE_COLORS } from '../../core/components/GuitarNeck';
 
 const INTERVAL_NAMES: Record<number, string> = {
   0: '1', 1: 'b2', 2: '2', 3: 'b3', 4: '3', 5: '4',

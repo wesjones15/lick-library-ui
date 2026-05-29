@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
+import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../../core/components/GuitarNeck';
 import { getDiatonicChords, type DiatonicChord } from './diatonicUtils';
 import { getChordVoicings, type ChordFrets } from '../../core/api/client';
 import { NOTE_KEYS, getStringCount, getStringLabels } from '../../core/music';
