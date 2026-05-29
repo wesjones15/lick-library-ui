@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../../core/components/GuitarNeck';
+import LickSubNav from './LickSubNav';
 import { uploadLick, getScalePositions } from '../../core/api/client';
 import { NOTE_KEYS, MODES, MODE_LABELS, formatNoteEnum, getStringCount, getStringLabels } from '../../core/music';
 import { BTN } from '../../core/ui';
@@ -16,7 +17,7 @@ import {
 } from './lickUtils';
 
 
-export default function LickBuilderPanel() {
+export default function LickBuilderPage() {
   const navigate = useNavigate();
 
   const [builtCols, setBuiltCols] = useState<{ string: number; fret: number }[][]>([]);
@@ -198,100 +199,103 @@ export default function LickBuilderPanel() {
   }, [scaleDots, buildCurrentNote, buildCandidates, stringCount, instrument]);
 
   return (
-    <div className="py-3">
-      <GuitarNeck
-        dots={buildDots}
-        fretCount={FRET_COUNT}
-        onDotClick={handleNeckClick}
-        stringLabels={getStringLabels(instrument)}
-      />
-
-      <div className="mt-3">
-        <div className="flex gap-2 items-center mb-3 flex-wrap">
-          <select
-            value={buildRoot}
-            onChange={e => setBuildRoot(e.target.value)}
-            className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-indigo-400"
-          >
-            <option value="">— None —</option>
-            {NOTE_KEYS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
-          </select>
-          <select
-            value={buildMode}
-            onChange={e => setBuildMode(e.target.value)}
-            className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-indigo-400"
-          >
-            {MODES.map(m => <option key={m} value={m}>{MODE_LABELS[m]}</option>)}
-          </select>
-          <InstrumentSelector
-            instrument={instrument as InstrumentName}
-            onInstrumentChange={(name) => {
-              setInstrument(name);
-              setBuiltCols([]);
-              setBuiltTabText('');
-              setBuildCurrentNote(null);
-            }}
-            excludeCustom
-            compact
-          />
-          <button
-            onClick={() => setIsBuilding(b => !b)}
-            className={`${BTN} ${isBuilding
-              ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              : 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'}`}
-          >
-            {isBuilding ? 'Stop' : 'Start'}
-          </button>
-          <button
-            onClick={() => setChordDetect(c => !c)}
-            title="Chord detection: accumulate notes within 1.5s into one column"
-            className={`${BTN} ${chordDetect
-              ? 'bg-green-600 text-white border-green-600'
-              : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
-          >
-            ♭³
-          </button>
-        </div>
-        <textarea
-          value={builtTabText}
-          onChange={e => setBuiltTabText(e.target.value)}
-          spellCheck={false}
-          className="font-mono text-xs border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-400 resize-none w-full max-w-lg"
-          rows={6}
+    <div className="max-w-6xl mx-auto px-6 py-10">
+      <LickSubNav active="builder" />
+      <div className="py-3">
+        <GuitarNeck
+          dots={buildDots}
+          fretCount={FRET_COUNT}
+          onDotClick={handleNeckClick}
+          stringLabels={getStringLabels(instrument)}
         />
-        <div className="flex gap-2 mt-2">
-          <button
-            onClick={handleSaveBuiltLick}
-            disabled={!builtTabText.trim() || buildSaveLoading}
-            className={`${BTN} bg-green-600 text-white border-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            {buildSaveLoading ? 'Saving…' : 'Save Lick'}
-          </button>
-          <button
-            onClick={() => { setBuiltCols([]); setBuiltTabText(''); setBuildCurrentNote(null); }}
-            className={`${BTN} bg-white text-gray-600 border-gray-300 hover:bg-gray-50`}
-          >
-            Clear
-          </button>
-          <button
-            onClick={() => { navigator.clipboard.writeText(builtTabText); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
-            disabled={!builtTabText.trim()}
-            title="Copy tab to clipboard"
-            className={`${BTN} ${copied ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'} disabled:opacity-40 disabled:cursor-not-allowed`}
-          >
-            {copied ? (
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-              </svg>
-            )}
-          </button>
+
+        <div className="mt-3">
+          <div className="flex gap-2 items-center mb-3 flex-wrap">
+            <select
+              value={buildRoot}
+              onChange={e => setBuildRoot(e.target.value)}
+              className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-indigo-400"
+            >
+              <option value="">— None —</option>
+              {NOTE_KEYS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
+            </select>
+            <select
+              value={buildMode}
+              onChange={e => setBuildMode(e.target.value)}
+              className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-indigo-400"
+            >
+              {MODES.map(m => <option key={m} value={m}>{MODE_LABELS[m]}</option>)}
+            </select>
+            <InstrumentSelector
+              instrument={instrument as InstrumentName}
+              onInstrumentChange={(name) => {
+                setInstrument(name);
+                setBuiltCols([]);
+                setBuiltTabText('');
+                setBuildCurrentNote(null);
+              }}
+              excludeCustom
+              compact
+            />
+            <button
+              onClick={() => setIsBuilding(b => !b)}
+              className={`${BTN} ${isBuilding
+                ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                : 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'}`}
+            >
+              {isBuilding ? 'Stop' : 'Start'}
+            </button>
+            <button
+              onClick={() => setChordDetect(c => !c)}
+              title="Chord detection: accumulate notes within 1.5s into one column"
+              className={`${BTN} ${chordDetect
+                ? 'bg-green-600 text-white border-green-600'
+                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
+            >
+              ♭³
+            </button>
+          </div>
+          <textarea
+            value={builtTabText}
+            onChange={e => setBuiltTabText(e.target.value)}
+            spellCheck={false}
+            className="font-mono text-xs border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-400 resize-none w-full max-w-lg"
+            rows={6}
+          />
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={handleSaveBuiltLick}
+              disabled={!builtTabText.trim() || buildSaveLoading}
+              className={`${BTN} bg-green-600 text-white border-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {buildSaveLoading ? 'Saving…' : 'Save Lick'}
+            </button>
+            <button
+              onClick={() => { setBuiltCols([]); setBuiltTabText(''); setBuildCurrentNote(null); }}
+              className={`${BTN} bg-white text-gray-600 border-gray-300 hover:bg-gray-50`}
+            >
+              Clear
+            </button>
+            <button
+              onClick={() => { navigator.clipboard.writeText(builtTabText); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+              disabled={!builtTabText.trim()}
+              title="Copy tab to clipboard"
+              className={`${BTN} ${copied ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'} disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              {copied ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              )}
+            </button>
+          </div>
+          {buildSaveError && <p className="text-sm text-red-500 mt-1">{buildSaveError}</p>}
         </div>
-        {buildSaveError && <p className="text-sm text-red-500 mt-1">{buildSaveError}</p>}
       </div>
     </div>
   );

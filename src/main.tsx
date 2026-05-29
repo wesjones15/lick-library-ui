@@ -22,6 +22,7 @@ import PlaylistDetailPage from './features/playlists/PlaylistDetailPage'
 import TheoryPage from './features/theory/TheoryPage'
 import LivePage from './features/live/LivePage'
 import LickVisualizerPage from './features/licks/LickVisualizerPage'
+import LickBuilderPage from './features/licks/LickBuilderPage'
 import LickLibraryPage from './features/licks/LickLibraryPage'
 import ChordsTheoryPage from './features/chords/ChordsTheoryPage'
 import NoodlePage from './features/noodle/NoodlePage'
@@ -60,6 +61,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/theory" element={<ProtectedRoute><TheoryPage /></ProtectedRoute>} />
                 <Route path="/live" element={<ProtectedRoute adminOnly><LivePage /></ProtectedRoute>} />
                 <Route path="/lick/visualizer" element={<ProtectedRoute><LickVisualizerPage /></ProtectedRoute>} />
+                <Route path="/licks/builder" element={<ProtectedRoute><LickBuilderPage /></ProtectedRoute>} />
                 <Route path="/licks/library" element={<ProtectedRoute><LickLibraryPage /></ProtectedRoute>} />
                 <Route path="/chords/theory" element={<ProtectedRoute><ChordsTheoryPage /></ProtectedRoute>} />
                 <Route path="/noodle" element={<ProtectedRoute><NoodlePage /></ProtectedRoute>} />

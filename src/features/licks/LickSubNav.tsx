@@ -5,7 +5,7 @@ type ActiveTab = 'library' | 'visualizer' | 'builder' | 'legacy';
 const TABS: { key: ActiveTab; label: string; to: string }[] = [
   { key: 'library',    label: 'Lick Library',   to: '/licks/library' },
   { key: 'visualizer', label: 'Lick Visualizer', to: '/lick/visualizer' },
-  { key: 'builder',    label: 'Lick Builder',    to: '/lick/visualizer?mode=build' },
+  { key: 'builder',    label: 'Lick Builder',    to: '/licks/builder' },
   { key: 'legacy',     label: 'Legacy Upload',   to: '/licks/upload' },
 ];
 
