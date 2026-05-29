@@ -69,8 +69,8 @@ Landing page. Shows feature cards for Licks, Songs, Chord Gallery, Playlists, Th
 
 Shows the full lick library and the upload form.
 
-- **Upload form** — paste or type a tab, pick an optional root key and mode, submit. The tab editor enforces structure (see [Tab editor](#tab-editor) below).
-- **Instrument selector** — sets the default instrument for all lick views. Persists across sessions via `localStorage`.
+- **Upload form** — paste or type a tab, pick an optional root key, mode, and instrument, then submit. The tab editor enforces structure (see [Tab editor](#tab-editor) below).
+- **Instrument selector** — sets the instrument for the upload form. Persists across sessions via `localStorage`.
 - **Lick list** — each card shows the interval display string, detected mode, and the original raw tab. Clicking a card navigates to the detail page.
 - **Delete** — the `×` on each card deletes the lick and refreshes the list.
 
@@ -155,6 +155,29 @@ Song queue manager for a playlist.
 - **Navigate to song** — clicking an entry opens the song detail page with playlist nav context (prev/next arrows, playlist name).
 - **Add songs** — songs not yet in the playlist appear in an add panel below the queue; clicking adds them immediately.
 
+### Lick Visualizer (`/lick/visualizer`)
+
+Interactive lick viewer.
+
+- **Load from Library** — opens `LickLibraryModal` to select a saved lick.
+- **New Lick / Edit Lick** — open `LickInputModal`, a smart tab editor with overwrite-mode keyboard rules.
+- **Guitar neck** — shows all notes simultaneously (All mode) or one column at a time (Column mode).
+- **Tab display** — compact normalized format in All mode; spread format with technique decorators in Column mode.
+- **Column mode controls** — Column/All pill, 1/sec or Metronome speed, Pause/Resume. Edit Lick and Save Lick are right-aligned in the same row.
+- **`LickSource` state machine** (`none → new/library → modified`) controls Save Lick enablement.
+
+### Lick Builder (`/licks/builder`)
+
+Click-to-build neck interface for composing licks.
+
+- **Scale overlay** — select a root note and mode; scale degrees appear as colored dots on the neck.
+- **Instrument selector** — change the instrument; resets the built tab.
+- **Start / Stop** — toggles recording mode. While recording, clicking any fret appends a note column.
+- **Chord detection (♭³)** — notes tapped within 1.5 s are grouped into one column for chord input.
+- **Tab textarea** — the built lick rendered in normalized tab format; directly editable.
+- **Save Lick** — uploads the built tab and navigates to `/lick/visualizer` with the tab preloaded.
+- **Clear / Copy** — reset the neck or copy the tab to clipboard.
+
 ### Theory (`/theory`)
 
 Redirects to `/live?mode=chords`.
@@ -172,20 +195,7 @@ Three-panel guitar neck experience. The view mode pill (Live / Lick / Chords) is
 - **CAGED zones** — diatonic CAGED shape overlays are drawn as semi-transparent region bands on the fretboard.
 - **Dot click** — clicking a neck dot highlights it and shows its scale degree candidates.
 
-**Lick mode** (`LickVisualizerPanel`) — load, build, and step through licks.
-
-- **Panel mode toggle** — Visualize / Build.
-- **Visualize mode**:
-  - Load from Library opens `LickLibraryModal` to select a saved lick.
-  - New Lick / Edit Lick open `LickInputModal` — a smart tab editor with the same overwrite-mode keyboard rules as the upload form.
-  - The guitar neck shows all notes (All mode) or the current column (Column mode).
-  - Tab display below the neck: compact normalized format in All mode; spread format with technique decorators in Column mode.
-  - Column mode controls: Column/All pill, 1/sec or Metronome speed, Pause/Resume. Edit Lick and Save Lick are right-aligned in the same row.
-  - `LickSource` state machine (`none → new/library → modified`) controls Save Lick enablement.
-- **Build mode** (`LickBuilderPanel`):
-  - Click any fret on the neck to append a note column.
-  - A textarea shows the built tab in normalized format (editable).
-  - Save Lick uploads and switches to Visualize mode; Clear resets the neck.
+**Lick mode** — links to the dedicated Lick Visualizer (`/lick/visualizer`) and Lick Builder (`/licks/builder`) pages via the subnav.
 
 **Chords mode** (`ChordsProgressionPanel`) — chord progression reference and visualization.
 
@@ -244,20 +254,6 @@ SVG guitar neck diagram used across Live, Lick visualizer, and Noodle.
 - Degree colors: 1=red, 2=cyan, 3=green, 4=yellow, 5=purple, 6=blue, 7=orange.
 - Active notes pulse; candidate notes show animated stroke rings at decreasing opacity for 1st/2nd/3rd closest.
 - Pentatonic rings rendered as concentric colored circles outward from the dot.
-
-### `LickVisualizerPanel`
-
-Self-contained lick visualizer (Live → Lick mode). Parses ASCII tab locally with no backend call for the primary display flow. See [Live page](#live-live-admin-only) for full feature description.
-
-Key internals:
-- `parseTabString` — parses normalized ASCII tab into `TabColumn[]` (NoteCol | RestCol), capturing technique chars (`h`, `p`, `/`, `\`).
-- `buildNormalizedTab` — compact format: `label + '-' + col0sep + col1sep + ... + '|'` where separator is the technique char or `-`.
-- `buildSpreadTab` — SPREAD_SLOT=4 chars per column; technique placed at the second pad position (`5-h-`).
-- `LickSource` state: `'none' | 'new' | 'library' | 'modified'`.
-
-### `LickBuilderPanel`
-
-Dedicated build-mode panel in Live → Lick mode. Click-to-build neck interaction + textarea for editing the normalized tab output. Save Lick uploads and transitions to Visualize mode.
 
 ### `KaraokeDisplay`
 
@@ -333,7 +329,7 @@ Tab editor with structured input handling.
 
 ### `InstrumentSelector`
 
-Named preset dropdown + optional custom tuning input. Presets: GUITAR, DROP_D, OPEN_G, OPEN_D, DADGAD, BASS, UKULELE, MANDOLIN, BANJO, CUSTOM.
+Named preset dropdown + optional custom tuning input. Presets: GUITAR, DROP_D, OPEN_G, OPEN_D, DADGAD, EB, BASS, UKULELE, MANDOLIN, BANJO, CUSTOM.
 
 ### `KeySelector`
 
@@ -386,7 +382,7 @@ Manages selected instrument and custom tuning string. Persists to `localStorage`
 
 ### `MetronomeContext`
 
-Global state: `{ bpm, setBpm, isPlaying, setIsPlaying }`. Default BPM 120. Lets `SongDetailPage` start the metronome at a song's tempo and `LickVisualizerPanel` borrow the BPM for metronome-synced column stepping.
+Global state: `{ bpm, setBpm, isPlaying, setIsPlaying }`. Default BPM 120. Lets `SongDetailPage` start the metronome at a song's tempo and `LickVisualizerPage` borrow the BPM for metronome-synced column stepping.
 
 ### `SongNavContext`
 
@@ -410,7 +406,7 @@ Helpers for diatonic interval and mode calculations used in the Live page.
 
 ### `lickUtils.ts`
 
-Client-side tab parsing utilities shared between `LickVisualizerPanel` and `LickBuilderPanel`.
+Client-side tab parsing utilities shared between `LickVisualizerPage` and `LickBuilderPage`.
 
 ---
 
@@ -508,6 +504,12 @@ src/
 │   │   └── client.ts                  Typed fetch wrappers + response interfaces
 │   ├── auth/
 │   │   └── AuthContext.tsx            JWT decode, login/logout, status polling, AuthProvider
+│   ├── components/
+│   │   ├── Layout.tsx                 Fixed navbar + Outlet
+│   │   ├── GuitarNeck.tsx             SVG neck diagram
+│   │   ├── InstrumentSelector.tsx
+│   │   ├── KeySelector.tsx
+│   │   └── NumpadInput.tsx            Mobile numpad for tab entry
 │   ├── context/
 │   │   └── SongNavContext.tsx         Playlist nav state for song detail prev/next
 │   ├── metronome/
@@ -516,10 +518,6 @@ src/
 │   │   └── useMetronome.ts
 │   ├── music.ts                       CHROMATIC_NOTES, getStringLabels, music helpers
 │   └── useInstrument.ts
-├── components/
-│   ├── Layout.tsx                     Fixed navbar + Outlet
-│   ├── InstrumentSelector.tsx
-│   └── KeySelector.tsx
 └── features/
     ├── auth/
     │   └── AuthCallbackPage.tsx       /auth  OAuth callback — extracts token, calls login()
@@ -527,14 +525,18 @@ src/
     │   └── HomePage.tsx               /
     ├── licks/
     │   ├── LickLibraryPage.tsx        /licks  and  /licks/library
-    │   ├── LickUploadPage.tsx         /licks/upload
+    │   ├── LickUploadPage.tsx         /licks/upload  (legacy upload form)
+    │   ├── LickUploadForm.tsx
     │   ├── LickDetailPage.tsx         /lick/:id
     │   ├── LickVisualizerPage.tsx     /lick/visualizer
+    │   ├── LickBuilderPage.tsx        /licks/builder
+    │   ├── LickInputModal.tsx         New Lick / Edit Lick tab editor modal
+    │   ├── LickLibraryModal.tsx       Load from Library modal
     │   ├── LickSubNav.tsx
     │   ├── LickCard.tsx
     │   ├── LickList.tsx
     │   ├── LickPositionTab.tsx
-    │   └── LickUploadForm.tsx
+    │   └── lickUtils.ts               Client-side tab parsing utilities
     ├── songs/
     │   ├── SongsPage.tsx              /songs
     │   ├── SongDetailPage.tsx         /song/:id
@@ -564,17 +566,6 @@ src/
     │   └── TheoryPage.tsx             /theory  (redirects to /live?mode=chords)
     ├── live/
     │   ├── LivePage.tsx               /live  (Live / Lick / Chords mode toggle)
-    │   ├── GuitarNeck.tsx             SVG neck diagram
-    │   ├── LickVisualizerPanel.tsx    Lick visualize mode panel
-    │   ├── LickBuilderPanel.tsx       Lick build mode panel
-    │   ├── LickInputModal.tsx         New Lick / Edit Lick tab editor modal
-    │   ├── LickLibraryModal.tsx       Load from Library modal
-    │   ├── PentatonicWidget.tsx       Pentatonic scale overlay selector
-    │   ├── ChordsProgressionPanel.tsx Chords mode panel
-    │   ├── ChordsWidget.tsx           Chord voicing display sub-component
-    │   ├── cagedUtils.ts              CAGED zone boundary helpers
-    │   ├── diatonicUtils.ts           Diatonic interval helpers
-    │   ├── lickUtils.ts               Client-side tab parsing utilities
     │   └── usePitchDetection.ts       Web Audio pitch detector hook
     ├── noodle/
     │   ├── NoodlePage.tsx             /noodle
@@ -687,6 +678,6 @@ interface ScalePosition { string: number; fret: number; degree: number; note: st
 interface ScaleResponse { root: string; mode: string; positions: ScalePosition[]; }
 
 type InstrumentName =
-  | 'GUITAR' | 'DROP_D' | 'OPEN_G' | 'OPEN_D' | 'DADGAD'
+  | 'GUITAR' | 'DROP_D' | 'OPEN_G' | 'OPEN_D' | 'DADGAD' | 'EB'
   | 'BASS' | 'UKULELE' | 'MANDOLIN' | 'BANJO' | 'CUSTOM';
 ```
