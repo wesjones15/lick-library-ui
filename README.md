@@ -180,34 +180,39 @@ Click-to-build neck interface for composing licks.
 
 ### Theory (`/theory`)
 
-Redirects to `/live?mode=chords`.
+Scale and harmony reference tool.
+
+- **Key + Mode + Instrument selectors** — choose any root note, diatonic mode, and instrument; the neck updates immediately.
+- **Interval legend** — 7 clickable degree bubbles (colored 1–7). Clicking a bubble toggles per-degree highlighting across the entire neck; multiple degrees can be selected simultaneously. A "Clear" button appears when any are active.
+- **Guitar neck** — scale degrees rendered as colored dots. Clicking a dot lights it up as `active` and shows the 3 nearest scale candidates as ranked proximity rings (auto-clears after 3 s; click again to deselect early).
+- **`PentatonicWidget`** — expandable panel for pentatonic overlays. Select up to 3 root keys simultaneously; colored rings are overlaid on each neck dot for each selected pentatonic scale. Mode sync toggle keeps the widget's mode in step with the scale selector. When interval degrees are highlighted, the widget also indicates which pentatonic keys are subsets of those degrees.
+- **`ChordsWidget`** — expandable panel for chord voicing exploration. Click frets on the neck to select one position per string; the widget shows the resulting voicing.
 
 ### Live (`/live`) *(admin only)*
 
-Three-panel guitar neck experience. The view mode pill (Live / Lick / Chords) is right-aligned in the toolbar.
+Real-time pitch detection against a scale.
 
-**Live mode** — real-time pitch detection + scale visualization.
-
-- **Key + Mode selectors** — choose any root note and scale mode; the neck shows all scale degrees as colored dots.
-- **Interval legend** — clickable degree bubbles highlight all instances of that degree on the neck. Multiple degrees can be selected simultaneously.
-- **Mic button** — starts the Web Audio API pitch detector. The detected note lights up on the neck as `active`; the three nearest scale candidates pulse with candidate rings.
-- **Pentatonic overlay** — Pentatonic widget lets you select up to 3 keys simultaneously; colored rings are overlaid on each neck dot for the selected pentatonic scales.
-- **CAGED zones** — diatonic CAGED shape overlays are drawn as semi-transparent region bands on the fretboard.
-- **Dot click** — clicking a neck dot highlights it and shows its scale degree candidates.
-
-**Lick mode** — links to the dedicated Lick Visualizer (`/lick/visualizer`) and Lick Builder (`/licks/builder`) pages via the subnav.
-
-**Chords mode** (`ChordsProgressionPanel`) — chord progression reference and visualization.
+- **Key + Mode + Instrument selectors** — choose any root note, diatonic mode, and instrument; the neck shows all scale degrees as colored dots.
+- **Listen button** — starts the Web Audio API pitch detector. The detected MIDI note lights up on the neck as `active`; the 3 nearest scale candidates show animated candidate rings.
+- Mic error messages for `NotAllowedError` (permission denied), `NotFoundError` (no mic), and `NotSecureContext` (non-HTTPS).
+- No pentatonic widget, no interval legend, no chord panel.
 
 ### Noodle (`/noodle`)
 
 Beat-synchronized karaoke chord display with guitar neck visualization.
 
+- **Modes**: `none` (neck only), `song` (loaded song with karaoke), `freeChords` (manual chord entry).
+- **URL params on mount**: `?songId` auto-loads a song; `?semitones`, `?capo`, and `?tempoOverride` set the initial controls. Used by the Song Detail page's "Noodle" deep link.
 - **Song picker** — `SongLibraryModal` to load any song from the library.
-- **`KaraokeDisplay`** — scrolling chord sheet that highlights the current chord in sync with the beat. Timing is driven by the song's saved beatmap; falls back to the global metronome BPM.
-- **`ChordInfoBox`** — the current chord's voicing diagram is overlaid on the guitar neck so you can see where to fret as the song progresses.
-- **Instrument + mode selectors** — drive the neck scale display independently of the highlighted chord.
-- **Modes**: `none` (neck only), `song` (loaded song with karaoke), `freeChords` (manual chord selection).
+- **`KaraokeDisplay`** — scrolling chord sheet that highlights the current chord in sync with the beat. Timing is driven by the song's saved beatmap; auto-generates one as a fallback.
+- **`ChordInfoBox`** — the current (and next) chord's voicing diagram is shown in the header so you can see where to fret as the song progresses.
+- **Free Chords mode** — type chord names separated by `|` and newlines; press Apply (or Cmd/Ctrl+Enter). Beat cycles through the chords with a karaoke-style 3-line display (prev / current / next).
+- **Guitar Karaoke mode** — ◎ toggle button (song mode only). Hides the guitar neck and shows a large karaoke-only view; the title bar changes to "Guitar Karaoke".
+- **Beatmap editor modal** — "Beat Map" button when a song is loaded. Displays each chord with a step-cycled beat value (−/+) and the lyric line below it for reference. Song owners save directly; non-owners submit for admin review. Auto-generated beatmaps show a ⚠ auto badge.
+- **BPM input** — `NumpadInput` field (40–240); committed to `MetronomeContext` when Play is pressed.
+- **Capo control** — −/+ adjust the capo offset, shifting which voicings are displayed.
+- **Transpose control** (song mode only) — −/+ shift semitones; updates the neck scale key in real time.
+- **Instrument selector** — drives the neck scale and chord voicing display.
 
 ### User (`/user`)
 
@@ -245,7 +250,7 @@ Collapsible popover in the navbar.
 
 ### `GuitarNeck`
 
-SVG guitar neck diagram used across Live, Lick visualizer, and Noodle.
+SVG guitar neck diagram used across Theory, Live, Lick Visualizer, Lick Builder, and Noodle.
 
 - `dots: NeckDot[][]` — indexed by `[stringIndex][fret]`; string 0 = low E.
 - `fretCount` — default 12.
@@ -273,14 +278,14 @@ Admin modal for reviewing a pending song update request. Shows a before/after di
 
 ### `PentatonicWidget`
 
-Expandable panel (Live → Live mode) for selecting pentatonic scale overlays.
+Expandable panel (Theory page) for selecting pentatonic scale overlays.
 
 - Up to 3 root keys selectable simultaneously, each assigned a distinct ring color.
 - Toggling a key on/off updates the neck overlay in real time.
 
 ### `ChordsProgressionPanel`
 
-Chord progression panel (Live → Chords mode).
+Chord progression panel used by `ChordsWidget` on the Theory page.
 
 ### `ChordSheet`
 
@@ -398,11 +403,11 @@ Parses a chord symbol into backend-compatible components. Maps display names (`C
 
 ### `cagedUtils.ts`
 
-Computes CAGED zone boundaries from scale positions for fretboard overlay rendering.
+Pentatonic degree and note-set helpers (`getPentatonicDegree`, `getPentatonicNoteSet`) used by `PentatonicWidget` and `TheoryPage`.
 
 ### `diatonicUtils.ts`
 
-Helpers for diatonic interval and mode calculations used in the Live page.
+Helpers for diatonic interval and mode calculations used in the Theory page.
 
 ### `lickUtils.ts`
 
@@ -428,19 +433,21 @@ deleteOwnAccount(): Promise<void>
 ```typescript
 getAdminQueue(): Promise<AdminUserResponse[]>
 getAdminUsers(): Promise<AdminUserResponse[]>
-approveUser(userId: number): Promise<AdminUserResponse | void>
-rejectUser(userId: number): Promise<AdminUserResponse>
+approveUser(userId: number): Promise<void>
+rejectUser(userId: number): Promise<void>
 deleteAdminUser(userId: number): Promise<void>
 getAdminSongUpdateQueue(): Promise<SongUpdateRequestSummary[]>
-getAdminSongUpdate(id: string): Promise<SongUpdateReviewResponse>
-approveAdminSongUpdate(id: string): Promise<void>
-rejectAdminSongUpdate(id: string): Promise<void>
+getSongUpdateForReview(id: string): Promise<SongUpdateReviewResponse>
+approveSongUpdate(id: string): Promise<void>
+rejectSongUpdate(id: string): Promise<void>
 ```
 
 ### Lick endpoints
 
 ```typescript
-getAllLicks(): Promise<LickSummary[]>
+getAllLicks(includeSongLicks?, filters?): Promise<LickSummary[]>
+// filters: { instrument?, mode?, minLength?, maxLength?, intervals?, mine? }
+forkLick(id: string): Promise<LickSummary>
 uploadLick(request: UploadRequest): Promise<LickSummary>
 getLick(id, key, algo?, instrument?, customTuning?): Promise<LickDetail>
 deleteLick(id: string): Promise<void>
@@ -479,6 +486,7 @@ createPlaylist(name: string): Promise<PlaylistSummary>
 getPlaylist(id: string): Promise<PlaylistDetail>
 renamePlaylist(id: string, name: string): Promise<PlaylistSummary>
 deletePlaylist(id: string): Promise<void>
+setPlaylistVisibility(id: string, isPublic: boolean): Promise<void>
 addPlaylistEntry(playlistId, songId, keyOffset?, capoOffset?): Promise<PlaylistDetail>
 updatePlaylistEntry(playlistId, entryId, req): Promise<PlaylistDetail>
 removePlaylistEntry(playlistId: string, entryId: string): Promise<PlaylistDetail>
@@ -489,7 +497,7 @@ clearPlaylistEntryOverrides(playlistId, entryId): Promise<PlaylistDetail>
 ### Scale endpoint
 
 ```typescript
-getScalePositions(root: string, mode: string): Promise<ScaleResponse>
+getScalePositions(root: string, mode: string, instrument?: string): Promise<ScaleResponse>
 // ScaleResponse: { root, mode, positions: { string, fret, degree, note }[] }
 ```
 
@@ -563,9 +571,14 @@ src/
     │   ├── PlaylistDetailPage.tsx     /playlist/:id
     │   └── AddToPlaylistModal.tsx     Add-to-playlist from song detail
     ├── theory/
-    │   └── TheoryPage.tsx             /theory  (redirects to /live?mode=chords)
+    │   ├── TheoryPage.tsx             /theory
+    │   ├── PentatonicWidget.tsx       Expandable pentatonic overlay panel
+    │   ├── ChordsWidget.tsx           Fret-click chord voicing selector
+    │   ├── ChordsProgressionPanel.tsx Chord progression reference panel
+    │   ├── cagedUtils.ts              Pentatonic degree + note-set helpers
+    │   └── diatonicUtils.ts           Diatonic interval helpers
     ├── live/
-    │   ├── LivePage.tsx               /live  (Live / Lick / Chords mode toggle)
+    │   ├── LivePage.tsx               /live  (scale neck + pitch detection)
     │   └── usePitchDetection.ts       Web Audio pitch detector hook
     ├── noodle/
     │   ├── NoodlePage.tsx             /noodle
@@ -590,12 +603,12 @@ interface UserProfile {
 }
 
 interface UserProfileResponse {
-  userId: number;
+  id: number;
   email: string;
-  username: string | null;
+  username: string;
   role: 'ADMIN' | 'USER';
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  requestType: string | null;
+  requestType: string;
   creationTs: string;
 }
 
@@ -604,8 +617,10 @@ interface AdminUserResponse extends UserProfileResponse {}
 interface SongUpdateRequestSummary {
   id: string;
   songId: string;
+  songTitle: string;
+  songArtist: string | null;
+  submitterUsername: string;
   requestType: 'SONG_METADATA' | 'SONG_CHART' | 'SONG_BEATMAP';
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
   createdAt: string;
 }
 
@@ -617,6 +632,10 @@ interface LickSummary {
   intervalDisplayString: string;
   mode: string | null;
   positions: null;
+  autoImported: boolean;
+  instrument: string | null;
+  authorName: string;
+  ownedByCurrentUser: boolean;
 }
 
 interface LickDetail {
@@ -634,17 +653,34 @@ interface SongSummary {
   title: string;
   artist: string | null;
   originalKey: string | null;
+  mode: string | null;
   tempo: number | null;
   canReparse: boolean;
+  authorName: string;
   ownedByCurrentUser: boolean;
 }
 
-interface SongDetail extends SongSummary {
+interface SongLickInfo {
+  lickId: string | null;
+  rawTab: string;
+}
+
+interface SongDetail {
+  id: string;
+  title: string;
+  artist: string | null;
+  originalKey: string | null;
+  mode: string | null;
+  instrument: string | null;
   capo: number | null;
+  tempo: number | null;
+  canReparse: boolean;
   chordLines: ChordSheetLine[];
   numColumns: number;
   rawChordSheet: string | null;
-  timeSignature: string | null;
+  songLicks: Record<number, SongLickInfo>;
+  ownedByCurrentUser: boolean;
+  timeSignature: number | null;
 }
 
 type ChordSheetLine = ChordLyric | GuitarTabLine;
@@ -655,9 +691,11 @@ interface GuitarTabLine { type: 'tab'; header: string; tabLines: string[]; fontS
 interface ChordVoicing {
   id: string;
   frets: (number | null)[];  // null = muted (x), 0 = open, positive = fret number; index 0 = low E
+  authorName: string;
+  ownedByCurrentUser: boolean;
 }
 
-interface PlaylistSummary { id: string; name: string; songCount: number; ownedByCurrentUser: boolean; }
+interface PlaylistSummary { id: string; name: string; songCount: number; authorName: string; ownedByCurrentUser: boolean; isPublic: boolean; }
 
 interface PlaylistEntry {
   entryId: string;
@@ -670,9 +708,13 @@ interface PlaylistEntry {
   originalKey: string | null;
   defaultCapo: number;
   tempo: number | null;
+  mode: string | null;
+  instrument: string | null;
+  defaultInstrument: string | null;
+  tempoOverride: number | null;
 }
 
-interface PlaylistDetail { id: string; name: string; entries: PlaylistEntry[]; }
+interface PlaylistDetail { id: string; name: string; entries: PlaylistEntry[]; ownedByCurrentUser: boolean; isPublic: boolean; }
 
 interface ScalePosition { string: number; fret: number; degree: number; note: string; }
 interface ScaleResponse { root: string; mode: string; positions: ScalePosition[]; }
