@@ -5,6 +5,7 @@ import PentatonicWidget from './PentatonicWidget';
 import ChordsWidget from './ChordsWidget';
 import { getScalePositions } from '../../core/api/client';
 import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI, MODE_SEMITONES, ROOT_CHROMATIC } from '../../core/music';
+import { SELECT } from '../../core/ui';
 import InstrumentSelector from '../../components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 
@@ -36,7 +37,6 @@ function blankScaleDots(n: number): NeckDot[][] {
   );
 }
 
-const selectClass = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 bg-white';
 
 interface CurrentNote { string: number; fret: number; degree: number; }
 
@@ -235,13 +235,13 @@ export default function TheoryPage() {
       <div className="flex items-center gap-4 mb-4 flex-wrap">
         <h1 className="text-3xl font-bold text-gray-900">Theory</h1>
 
-        <select className={selectClass} value={root} onChange={e => setRoot(e.target.value)}>
+        <select className={SELECT} value={root} onChange={e => setRoot(e.target.value)}>
           <option value="">— Key —</option>
           {NOTE_KEYS.map(k => (
             <option key={k.value} value={k.value}>{k.label}</option>
           ))}
         </select>
-        <select className={selectClass} value={mode} onChange={e => setMode(e.target.value)}>
+        <select className={SELECT} value={mode} onChange={e => setMode(e.target.value)}>
           {MODES.map(m => (
             <option key={m.value} value={m.value}>{m.label}</option>
           ))}

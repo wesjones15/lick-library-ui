@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getSongUpdateForReview, approveSongUpdate, rejectSongUpdate } from '../../core/api/client';
+import { BTN_SUCCESS, BTN_SECONDARY } from '../../core/ui';
 import type { SongUpdateReviewResponse } from '../../core/api/client';
 
 interface Props {
@@ -155,7 +156,7 @@ export default function SongUpdateReviewModal({ updateId, onClose, onDone }: Pro
           <button
             onClick={handleApprove}
             disabled={acting || !data}
-            className="px-4 py-2 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+            className={BTN_SUCCESS}
           >
             Approve
           </button>
@@ -168,7 +169,7 @@ export default function SongUpdateReviewModal({ updateId, onClose, onDone }: Pro
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors ml-auto"
+            className={`${BTN_SECONDARY} ml-auto`}
           >
             Cancel
           </button>

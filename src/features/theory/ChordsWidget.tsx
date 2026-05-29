@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { ROOT_CHROMATIC, GUITAR_OPEN_MIDI } from '../../core/music';
+import { BTN_SM } from '../../core/ui';
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 const INTERVAL_NAMES = ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5', 'b6', '6', 'b7', '7'];
 
@@ -21,7 +22,6 @@ const CHORD_QUALITIES: Record<string, number[]> = {
   'm9':     [0, 3, 7, 10, 14],
 };
 
-const btnClass = 'px-3 py-1.5 text-xs rounded-lg border transition-colors';
 
 interface ChordsWidgetProps {
   show: boolean;
@@ -69,7 +69,7 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
   if (!show) {
     return (
       <div className="mt-4 p-3 inline-block">
-        <button onClick={onToggle} className={`${btnClass} border-gray-300 text-gray-600 hover:bg-gray-50`}>
+        <button onClick={onToggle} className={`${BTN_SM} border-gray-300 text-gray-600 hover:bg-gray-50`}>
           Chords
         </button>
       </div>
@@ -79,7 +79,7 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
   return (
     <div className="mt-4 p-3 border border-gray-200 rounded-lg bg-gray-50 inline-block min-w-48">
       <div className="flex items-center gap-2">
-        <button onClick={onToggle} className={`${btnClass} bg-gray-800 text-white border-gray-800`}>
+        <button onClick={onToggle} className={`${BTN_SM} bg-gray-800 text-white border-gray-800`}>
           Chords
         </button>
       </div>

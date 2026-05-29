@@ -3,6 +3,7 @@ import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
 import { getDiatonicChords, type DiatonicChord } from './diatonicUtils';
 import { getChordVoicings, type ChordFrets } from '../../core/api/client';
 import { NOTE_KEYS, getStringCount, getStringLabels } from '../../core/music';
+import { SELECT } from '../../core/ui';
 import InstrumentSelector from '../../components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 
@@ -18,7 +19,6 @@ const MODES = [
   { value: 'LOCRIAN',    label: 'Locrian'                },
 ];
 
-const selectClass = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 bg-white';
 
 function blankDots(n: number): NeckDot[][] {
   return Array.from({ length: n }, () =>
@@ -103,13 +103,13 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
     <div className="py-6">
       {/* Key + Mode selectors */}
       <div className="flex gap-3 items-center flex-wrap mb-6">
-        <select className={selectClass} value={root} onChange={e => setRoot(e.target.value)}>
+        <select className={SELECT} value={root} onChange={e => setRoot(e.target.value)}>
           <option value="">— Key —</option>
           {NOTE_KEYS.map(k => (
             <option key={k.value} value={k.value}>{k.label}</option>
           ))}
         </select>
-        <select className={selectClass} value={mode} onChange={e => setMode(e.target.value)}>
+        <select className={SELECT} value={mode} onChange={e => setMode(e.target.value)}>
           {MODES.map(m => (
             <option key={m.value} value={m.value}>{m.label}</option>
           ))}

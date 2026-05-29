@@ -3,6 +3,7 @@ import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../theory/GuitarNeck';
 import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
 import { NOTE_KEYS, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI } from '../../core/music';
+import { BTN, SELECT } from '../../core/ui';
 import InstrumentSelector from '../../components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 
@@ -33,8 +34,6 @@ function midiToPositions(midi: number): Array<{ string: number; fret: number }> 
   return result;
 }
 
-const selectClass = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 bg-white';
-const btnClass = 'px-4 py-2 text-sm rounded-lg border transition-colors';
 
 interface CurrentNote { string: number; fret: number; degree: number; }
 
@@ -152,13 +151,13 @@ export default function LivePage() {
       <div className="flex items-center gap-4 mb-4 flex-wrap">
         <h1 className="text-3xl font-bold text-gray-900">Live</h1>
 
-        <select className={selectClass} value={root} onChange={e => setRoot(e.target.value)}>
+        <select className={SELECT} value={root} onChange={e => setRoot(e.target.value)}>
           <option value="">— Key —</option>
           {NOTE_KEYS.map(k => (
             <option key={k.value} value={k.value}>{k.label}</option>
           ))}
         </select>
-        <select className={selectClass} value={mode} onChange={e => setMode(e.target.value)}>
+        <select className={SELECT} value={mode} onChange={e => setMode(e.target.value)}>
           {MODES.map(m => (
             <option key={m.value} value={m.value}>{m.label}</option>
           ))}
@@ -171,7 +170,7 @@ export default function LivePage() {
         />
 
         <button
-          className={`${btnClass} ${listening
+          className={`${BTN} ${listening
             ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
             : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
           onClick={() => setListening(l => !l)}

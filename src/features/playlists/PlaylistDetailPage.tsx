@@ -8,6 +8,7 @@ import {
 import type { PlaylistDetail, PlaylistEntry, SongSummary } from '../../core/api/client';
 
 import { KEY_LABEL, CHROMATIC_NOTES, MODE_SUFFIX } from '../../core/music';
+import { BTN_ICON } from '../../core/ui';
 import InstrumentSelector from '../../components/InstrumentSelector';
 import NumpadInput from '../../components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -39,7 +40,6 @@ function VoicingModal({ entry, onSave, onClose }: {
   const [localInstrument, setLocalInstrument] = useState<InstrumentName>(
     (entry.instrument ?? entry.defaultInstrument ?? 'GUITAR') as InstrumentName
   );
-  const btnClass = "w-8 h-8 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-lg font-medium";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
@@ -51,11 +51,11 @@ function VoicingModal({ entry, onSave, onClose }: {
           <div className="flex flex-col items-center gap-1">
             <span className="text-xs text-gray-400">Capo</span>
             <div className="flex items-center gap-2">
-              <button onClick={() => setLocalCapo(c => Math.max(0, c - 1))} className={btnClass}>−</button>
+              <button onClick={() => setLocalCapo(c => Math.max(0, c - 1))} className={BTN_ICON}>−</button>
               <div className="flex items-center justify-center w-8">
                 <span className="text-base font-semibold text-gray-900">{localCapo}</span>
               </div>
-              <button onClick={() => setLocalCapo(c => Math.min(12, c + 1))} className={btnClass}>+</button>
+              <button onClick={() => setLocalCapo(c => Math.min(12, c + 1))} className={BTN_ICON}>+</button>
             </div>
             <button
               onClick={() => setLocalCapo(entry.defaultCapo)}
@@ -67,7 +67,7 @@ function VoicingModal({ entry, onSave, onClose }: {
           <div className="flex flex-col items-center gap-1">
             <span className="text-xs text-gray-400">Transpose</span>
             <div className="flex items-center gap-2">
-              <button onClick={() => setLocalSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={btnClass}>−</button>
+              <button onClick={() => setLocalSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={BTN_ICON}>−</button>
               <div className="flex gap-2 items-center">
                 <div className="flex flex-col items-center w-8">
                   <span className="text-base font-semibold text-gray-900">
@@ -82,7 +82,7 @@ function VoicingModal({ entry, onSave, onClose }: {
                   <span className="text-xs text-gray-400">sound</span>
                 </div>
               </div>
-              <button onClick={() => setLocalSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={btnClass}>+</button>
+              <button onClick={() => setLocalSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={BTN_ICON}>+</button>
             </div>
             <button
               onClick={() => setLocalSemitones(0)}
@@ -97,7 +97,7 @@ function VoicingModal({ entry, onSave, onClose }: {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setLocalTempoOverride(t => Math.min(240, Math.max(40, (t ?? entry.tempo ?? 120) - 1)))}
-                className={btnClass}
+                className={BTN_ICON}
               >−</button>
               <div className="flex items-center justify-center w-12">
                 <NumpadInput
@@ -118,7 +118,7 @@ function VoicingModal({ entry, onSave, onClose }: {
               </div>
               <button
                 onClick={() => setLocalTempoOverride(t => Math.min(240, Math.max(40, (t ?? entry.tempo ?? 120) + 1)))}
-                className={btnClass}
+                className={BTN_ICON}
               >+</button>
             </div>
             <button

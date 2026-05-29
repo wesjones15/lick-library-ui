@@ -6,6 +6,7 @@ import ChordDiagram from '../chords/ChordDiagram';
 import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
 import { CHROMATIC_NOTES, SONG_MODES, SONG_MODE_TO_ENUM } from '../../core/music';
+import { BTN_SECONDARY } from '../../core/ui';
 import InstrumentSelector from '../../components/InstrumentSelector';
 import NumpadInput from '../../components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -24,7 +25,6 @@ function parseStoredKey(stored: string): { root: string; mode: string } {
 }
 
 const inputClass = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400';
-const btnSecondary = 'px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors';
 
 function extractChordNames(song: SongDetail): string[] {
   const seen = new Set<string>();
@@ -332,11 +332,11 @@ export default function SongManagePage() {
 
           {/* Mode switchers */}
           <div className="flex flex-col gap-2 mt-2 pt-4 border-t border-gray-100">
-            <button type="button" onClick={() => { setMode('chart'); setSubmitSuccess(false); }} className={btnSecondary}>
+            <button type="button" onClick={() => { setMode('chart'); setSubmitSuccess(false); }} className={BTN_SECONDARY}>
               Update Song Chart
             </button>
             {isOwner && (
-              <button type="button" onClick={() => setMode('chords')} className={btnSecondary}>
+              <button type="button" onClick={() => setMode('chords')} className={BTN_SECONDARY}>
                 Manage Chords
               </button>
             )}

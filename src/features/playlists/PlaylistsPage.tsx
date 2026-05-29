@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllPlaylists, createPlaylist, deletePlaylist, renamePlaylist } from '../../core/api/client';
+import { BTN_PRIMARY } from '../../core/ui';
 import type { PlaylistSummary } from '../../core/api/client';
 
 type PlaylistFilter = 'all' | 'mine' | 'public';
@@ -73,7 +74,7 @@ export default function PlaylistsPage() {
             <>
               <button
                 onClick={() => setCreateOpen(true)}
-                className="px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                className={BTN_PRIMARY}
               >
                 New Playlist
               </button>

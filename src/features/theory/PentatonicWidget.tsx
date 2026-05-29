@@ -1,4 +1,5 @@
 import { KEY_LABEL } from '../../core/music';
+import { BTN_SM, SELECT } from '../../core/ui';
 
 const MODES = [
   { value: 'IONIAN',     label: 'Ionian (Major)'     },
@@ -17,8 +18,6 @@ const GRID_NOTES = [
 ];
 
 
-const selectClass = 'border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-indigo-400 bg-white';
-const btnClass = 'px-3 py-1.5 text-xs rounded-lg border transition-colors';
 
 interface PentatonicWidgetProps {
   activePentKeys: string[];
@@ -46,7 +45,7 @@ export default function PentatonicWidget({
       <div className="mt-4 p-3 inline-block">
         <button
           onClick={onToggle}
-          className={`${btnClass} border-gray-300 text-gray-600 hover:bg-gray-50`}
+          className={`${BTN_SM} border-gray-300 text-gray-600 hover:bg-gray-50`}
         >
           Pentatonic
         </button>
@@ -60,12 +59,12 @@ export default function PentatonicWidget({
       <div className="flex items-center gap-2">
         <button
           onClick={onToggle}
-          className={`${btnClass} bg-gray-800 text-white border-gray-800`}
+          className={`${BTN_SM} bg-gray-800 text-white border-gray-800`}
         >
           Pentatonic
         </button>
         <select
-          className={selectClass}
+          className={SELECT}
           value={pentWidgetMode}
           onChange={e => onModeChange(e.target.value)}
         >

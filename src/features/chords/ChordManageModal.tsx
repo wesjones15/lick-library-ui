@@ -2,6 +2,7 @@ import { useState } from 'react';
 import ChordDiagram from './ChordDiagram';
 import ChordUploadModal from './ChordUploadModal';
 import { deleteChordVoicing } from '../../core/api/client';
+import { BTN_PRIMARY } from '../../core/ui';
 import type { ChordVoicing } from '../../core/api/client';
 import { getStringCount } from '../../core/music';
 
@@ -107,7 +108,7 @@ export default function ChordManageModal({ chordName, voicings: initialVoicings,
         <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
           <button
             onClick={() => setAddOpen(true)}
-            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+            className={BTN_PRIMARY}
           >
             Add Voicing
           </button>

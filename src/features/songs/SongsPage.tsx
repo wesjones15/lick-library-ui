@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllSongs } from '../../core/api/client';
+import { BTN_PRIMARY, BTN_XS } from '../../core/ui';
 import type { SongSummary } from '../../core/api/client';
 import SongList from './SongList';
 import AddToPlaylistModal from '../playlists/AddToPlaylistModal';
@@ -9,7 +10,7 @@ type SortKey = 'title' | 'artist' | 'key' | 'tempo';
 const PAGE_SIZE = 16;
 
 const sortBtnClass = (active: boolean) =>
-  `px-2 py-1 text-xs rounded border transition-colors ${active ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
+  `${BTN_XS} ${active ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
 
 export default function SongsPage() {
   const navigate = useNavigate();
@@ -73,7 +74,7 @@ export default function SongsPage() {
           </button>
           <button
             onClick={() => navigate('/songs/upload')}
-            className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+            className={BTN_PRIMARY}
           >
             Upload
           </button>

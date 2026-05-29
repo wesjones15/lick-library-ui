@@ -5,6 +5,7 @@ import type { SongDetail, SongSummary, ChordLyric, GuitarTabLine, ChordVoicing }
 import { parseChordName } from '../songs/parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { CHROMATIC_NOTES, getStringLabels } from '../../core/music';
+import { SELECT_COMPACT } from '../../core/ui';
 import type { InstrumentName } from '../../core/useInstrument';
 import InstrumentSelector from '../../components/InstrumentSelector';
 import GuitarNeck from '../theory/GuitarNeck';
@@ -26,7 +27,6 @@ const MODES_LIST = [
   { value: 'LOCRIAN',    label: 'Locrian' },
 ];
 
-const selectClass = 'border border-gray-300 rounded-lg px-1.5 py-0.5 text-xs focus:outline-none focus:border-indigo-400 bg-white';
 
 function parseChordsFromLine(chords: string): string[] {
   return chords.split(/[\s|]+/)
@@ -599,10 +599,10 @@ export default function NoodlePage() {
 
         {noodleMode === 'freeChords' ? (
           <>
-            <select value={freeRoot} onChange={e => setFreeRoot(e.target.value)} className={selectClass}>
+            <select value={freeRoot} onChange={e => setFreeRoot(e.target.value)} className={SELECT_COMPACT}>
               {CHROMATIC_NOTES.map(n => <option key={n} value={n}>{n}</option>)}
             </select>
-            <select value={freeMode} onChange={e => setFreeMode(e.target.value)} className={selectClass}>
+            <select value={freeMode} onChange={e => setFreeMode(e.target.value)} className={SELECT_COMPACT}>
               {MODES_LIST.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
             </select>
           </>

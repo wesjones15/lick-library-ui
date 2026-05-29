@@ -6,6 +6,7 @@ import LickInputModal from './LickInputModal';
 import { uploadLick } from '../../core/api/client';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { getStringCount, getStringLabels } from '../../core/music';
+import { BTN, TOGGLE, TOGGLE_ON, TOGGLE_OFF } from '../../core/ui';
 import {
   FRET_COUNT,
   SPREAD_SLOT,
@@ -18,10 +19,6 @@ import {
   buildSpreadTab,
 } from './lickUtils';
 
-const btnClass = 'px-4 py-2 text-sm rounded-lg border transition-colors';
-const toggleBtnBase = 'px-3 py-1.5 text-xs rounded-md border transition-colors';
-const toggleActive = 'bg-indigo-600 text-white border-indigo-600';
-const toggleInactive = 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50';
 
 export default function LickVisualizerPanel() {
   const { bpm } = useMetronomeContext();
@@ -112,13 +109,13 @@ export default function LickVisualizerPanel() {
       <div className="flex gap-3 items-center mb-2 flex-wrap">
         <button
           onClick={() => setShowLibrary(true)}
-          className={`${btnClass} bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
+          className={`${BTN} bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
         >
           Load from Library
         </button>
         <button
           onClick={() => setShowNewLick(true)}
-          className={`${btnClass} bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700`}
+          className={`${BTN} bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700`}
         >
           New Lick
         </button>
@@ -169,13 +166,13 @@ export default function LickVisualizerPanel() {
           <div className="flex gap-4 items-center flex-wrap mb-3 mt-4">
             <div className="flex rounded-md overflow-hidden border border-gray-300">
               <button
-                className={`${toggleBtnBase} rounded-none border-0 border-r border-gray-300 ${displayMode === 'column' ? toggleActive : toggleInactive}`}
+                className={`${TOGGLE} rounded-none border-0 border-r border-gray-300 ${displayMode === 'column' ? TOGGLE_ON : TOGGLE_OFF}`}
                 onClick={() => setDisplayMode('column')}
               >
                 Column
               </button>
               <button
-                className={`${toggleBtnBase} rounded-none border-0 ${displayMode === 'all' ? toggleActive : toggleInactive}`}
+                className={`${TOGGLE} rounded-none border-0 ${displayMode === 'all' ? TOGGLE_ON : TOGGLE_OFF}`}
                 onClick={() => setDisplayMode('all')}
               >
                 All
@@ -186,13 +183,13 @@ export default function LickVisualizerPanel() {
               <>
                 <div className="flex rounded-md overflow-hidden border border-gray-300">
                   <button
-                    className={`${toggleBtnBase} rounded-none border-0 border-r border-gray-300 ${speedMode === 'fixed' ? toggleActive : toggleInactive}`}
+                    className={`${TOGGLE} rounded-none border-0 border-r border-gray-300 ${speedMode === 'fixed' ? TOGGLE_ON : TOGGLE_OFF}`}
                     onClick={() => setSpeedMode('fixed')}
                   >
                     1/sec
                   </button>
                   <button
-                    className={`${toggleBtnBase} rounded-none border-0 ${speedMode === 'metronome' ? toggleActive : toggleInactive}`}
+                    className={`${TOGGLE} rounded-none border-0 ${speedMode === 'metronome' ? TOGGLE_ON : TOGGLE_OFF}`}
                     onClick={() => setSpeedMode('metronome')}
                   >
                     Metronome
@@ -200,7 +197,7 @@ export default function LickVisualizerPanel() {
                 </div>
                 <button
                   onClick={() => setIsRunning(r => !r)}
-                  className={`${btnClass} ${isRunning
+                  className={`${BTN} ${isRunning
                     ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                     : 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'}`}
                 >
@@ -213,7 +210,7 @@ export default function LickVisualizerPanel() {
               {lickSource === 'library' && (
                 <button
                   onClick={() => setShowEditLick(true)}
-                  className={`${btnClass} bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
+                  className={`${BTN} bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
                 >
                   Edit Lick
                 </button>
@@ -221,7 +218,7 @@ export default function LickVisualizerPanel() {
               <button
                 onClick={handleSaveLick}
                 disabled={!canSave || saveLoading}
-                className={`${btnClass} ${canSave
+                className={`${BTN} ${canSave
                   ? 'bg-green-600 text-white border-green-600 hover:bg-green-700'
                   : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'} disabled:opacity-60`}
               >

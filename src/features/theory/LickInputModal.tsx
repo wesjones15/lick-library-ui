@@ -1,5 +1,6 @@
 import { useState, useRef, useLayoutEffect } from 'react';
 import { NOTE_KEYS, MODES, EMPTY_TAB, VALID_INPUT } from '../../core/music';
+import { BTN_SECONDARY } from '../../core/ui';
 import NumpadInput, { isTouch } from '../../components/NumpadInput';
 
 function expandTab(tab: string): string {
@@ -152,7 +153,7 @@ export default function LickInputModal({ title, initialTab, onVisualize, onClose
           <div className="flex justify-end gap-2 mt-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
+              className={BTN_SECONDARY}
             >
               Cancel
             </button>

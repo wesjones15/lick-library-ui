@@ -13,6 +13,7 @@ import { parseChordName } from './parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { useSongNavContext } from '../../core/context/SongNavContext';
 import { KEY_LABEL, CHROMATIC_NOTES, MODE_SUFFIX, getStringCount } from '../../core/music';
+import { BTN_ICON } from '../../core/ui';
 
 function keyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
   if (!originalKey) return '';
@@ -256,7 +257,6 @@ export default function SongDetailPage() {
     return () => ro.disconnect();
   }, [viewMode, song, isPortrait]);
 
-  const btnClass = "w-8 h-8 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-lg font-medium";
 
   // Compute Note enum key for the lick positions API (e.g. "C_SHARP")
   const DISPLAY_TO_NOTE: Record<string, string> = {
@@ -522,11 +522,11 @@ export default function SongDetailPage() {
               <div className="hidden md:flex flex-col items-center gap-1">
                 <span className="text-xs text-gray-400">Capo</span>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => setCapo(c => Math.max(0, c - 1))} className={btnClass}>−</button>
+                  <button onClick={() => setCapo(c => Math.max(0, c - 1))} className={BTN_ICON}>−</button>
                   <div className="flex items-center justify-center w-8">
                     <span className="text-base font-semibold text-gray-900">{capo}</span>
                   </div>
-                  <button onClick={() => setCapo(c => Math.min(11, c + 1))} className={btnClass}>+</button>
+                  <button onClick={() => setCapo(c => Math.min(11, c + 1))} className={BTN_ICON}>+</button>
                 </div>
                 <button
                   onClick={() => setCapo(song.capo ?? 0)}
@@ -543,7 +543,7 @@ export default function SongDetailPage() {
               <div className="hidden md:flex flex-col items-center gap-1">
                 <span className="text-xs text-gray-400">Transpose</span>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => setSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={btnClass}>−</button>
+                  <button onClick={() => setSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={BTN_ICON}>−</button>
                   <div className="flex gap-3 items-center">
                     <div className="flex flex-col items-center w-10">
                       <span className="text-base font-semibold text-gray-900">
@@ -561,7 +561,7 @@ export default function SongDetailPage() {
                       <span className="text-xs text-gray-400">sound</span>
                     </div>
                   </div>
-                  <button onClick={() => setSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={btnClass}>+</button>
+                  <button onClick={() => setSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={BTN_ICON}>+</button>
                 </div>
                 <button
                   onClick={() => setSemitones(0)}
@@ -606,11 +606,11 @@ export default function SongDetailPage() {
                 <div className="flex flex-col items-center gap-1">
                   <span className="text-xs text-gray-400">Capo</span>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setCapo(c => Math.max(0, c - 1))} className={btnClass}>−</button>
+                    <button onClick={() => setCapo(c => Math.max(0, c - 1))} className={BTN_ICON}>−</button>
                     <div className="flex items-center justify-center w-8">
                       <span className="text-base font-semibold text-gray-900">{capo}</span>
                     </div>
-                    <button onClick={() => setCapo(c => Math.min(11, c + 1))} className={btnClass}>+</button>
+                    <button onClick={() => setCapo(c => Math.min(11, c + 1))} className={BTN_ICON}>+</button>
                   </div>
                   <button
                     onClick={() => setCapo(song?.capo ?? 0)}
@@ -624,7 +624,7 @@ export default function SongDetailPage() {
                 <div className="flex flex-col items-center gap-1">
                   <span className="text-xs text-gray-400">Transpose</span>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={btnClass}>−</button>
+                    <button onClick={() => setSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={BTN_ICON}>−</button>
                     <div className="flex gap-3 items-center">
                       <div className="flex flex-col items-center w-10">
                         <span className="text-base font-semibold text-gray-900">
@@ -642,7 +642,7 @@ export default function SongDetailPage() {
                         <span className="text-xs text-gray-400">sound</span>
                       </div>
                     </div>
-                    <button onClick={() => setSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={btnClass}>+</button>
+                    <button onClick={() => setSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={BTN_ICON}>+</button>
                   </div>
                   <button
                     onClick={() => setSemitones(0)}
