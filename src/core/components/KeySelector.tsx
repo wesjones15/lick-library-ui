@@ -1,4 +1,4 @@
-import { NOTE_KEYS } from '../core/music';
+import { NOTE_KEYS } from '../music';
 
 interface Props {
   value: string;

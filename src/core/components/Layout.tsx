@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
-import Metronome from '../core/metronome/MetronomeWidget';
-import { useSongNavContext } from '../core/context/SongNavContext';
-import { useMetronomeContext } from '../core/metronome/MetronomeContext';
-import { useAuth } from '../core/auth/AuthContext';
+import Metronome from '../metronome/MetronomeWidget';
+import { useSongNavContext } from '../context/SongNavContext';
+import { useMetronomeContext } from '../metronome/MetronomeContext';
+import { useAuth } from '../auth/AuthContext';
 import InstrumentSelector from './InstrumentSelector';
-import type { InstrumentName } from '../core/useInstrument';
+import type { InstrumentName } from '../useInstrument';
 
 const NAV_LINKS: { label: ReactNode; to: string }[] = [
   { label: 'Licks', to: '/licks' },

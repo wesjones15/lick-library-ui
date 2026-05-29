@@ -1,4 +1,4 @@
-import type { InstrumentName } from '../core/useInstrument';
+import type { InstrumentName } from '../useInstrument';
 
 interface Props {
   instrument: InstrumentName;
