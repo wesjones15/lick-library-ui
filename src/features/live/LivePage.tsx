@@ -2,12 +2,11 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../theory/GuitarNeck';
 import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
-import { NOTE_KEYS, formatNoteEnum, getStringCount, getStringLabels } from '../../core/music';
+import { NOTE_KEYS, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI } from '../../core/music';
 import InstrumentSelector from '../../components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 
 const FRET_COUNT = 12;
-const OPEN_MIDI = [40, 45, 50, 55, 59, 64];
 
 const MODES = [
   { value: 'IONIAN',     label: 'Major (Ionian)'          },
@@ -28,7 +27,7 @@ function blankScaleDots(n: number): NeckDot[][] {
 function midiToPositions(midi: number): Array<{ string: number; fret: number }> {
   const result: Array<{ string: number; fret: number }> = [];
   for (let s = 0; s < OPEN_MIDI.length; s++) {
-    const fret = midi - OPEN_MIDI[s];
+    const fret = midi - GUITAR_OPEN_MIDI[s];
     if (fret >= 0 && fret <= FRET_COUNT) result.push({ string: s, fret });
   }
   return result;

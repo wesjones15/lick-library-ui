@@ -1,13 +1,4 @@
-// Mode interval sequences (semitones from root)
-const MODE_SEMITONES: Record<string, number[]> = {
-  IONIAN:     [0, 2, 4, 5, 7, 9, 11],
-  DORIAN:     [0, 2, 3, 5, 7, 9, 10],
-  PHRYGIAN:   [0, 1, 3, 5, 7, 8, 10],
-  LYDIAN:     [0, 2, 4, 6, 7, 9, 11],
-  MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10],
-  AEOLIAN:    [0, 2, 3, 5, 7, 8, 10],
-  LOCRIAN:    [0, 1, 3, 5, 6, 8, 10],
-};
+import { MODE_SEMITONES, ROOT_CHROMATIC } from '../../core/music';
 
 // Chromatic index → backend-acceptable note name (passed to GET /api/chord?root=)
 const INDEX_TO_NOTE: Record<number, string> = {
@@ -18,11 +9,6 @@ const INDEX_TO_NOTE: Record<number, string> = {
 // Display label for each chromatic index (shown in chord card UI)
 const INDEX_TO_DISPLAY: Record<number, string> = { ...INDEX_TO_NOTE };
 
-// NOTE_KEYS value → chromatic index (mirrors LivePage + cagedUtils)
-const ROOT_INDEX: Record<string, number> = {
-  C: 0, C_SHARP: 1, D: 2, D_SHARP: 3, E: 4, F: 5,
-  F_SHARP: 6, G: 7, G_SHARP: 8, A: 9, B_FLAT: 10, B: 11,
-};
 
 export type ChordQuality = 'maj' | 'min' | 'dim' | 'aug';
 
@@ -62,7 +48,7 @@ const API_SUFFIX: Record<ChordQuality, string> = {
 
 export function getDiatonicChords(rootKey: string, mode: string): DiatonicChord[] {
   const semitones = MODE_SEMITONES[mode] ?? MODE_SEMITONES.IONIAN;
-  const rootIdx = ROOT_INDEX[rootKey] ?? 0;
+  const rootIdx = ROOT_CHROMATIC[rootKey] ?? 0;
 
   return semitones.map((offset, di) => {
     const noteIdx = (rootIdx + offset) % 12;

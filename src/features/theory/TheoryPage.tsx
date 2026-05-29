@@ -1,15 +1,14 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
-import { getPentatonicDegree, getPentatonicNoteSet, ROOT_CHROMATIC } from './cagedUtils';
+import { getPentatonicDegree, getPentatonicNoteSet } from './cagedUtils';
 import PentatonicWidget from './PentatonicWidget';
 import ChordsWidget from './ChordsWidget';
 import { getScalePositions } from '../../core/api/client';
-import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum, getStringCount, getStringLabels } from '../../core/music';
+import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI, MODE_SEMITONES, ROOT_CHROMATIC } from '../../core/music';
 import InstrumentSelector from '../../components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 
 const FRET_COUNT = 12;
-const OPEN_MIDI = [40, 45, 50, 55, 59, 64];
 
 const MODES = [
   { value: 'IONIAN',     label: 'Major (Ionian)'          },
@@ -123,18 +122,7 @@ export default function TheoryPage() {
   const recognizedPentKeys = useMemo<Map<string, 'partial' | 'full'>>(() => {
     if (highlightedDegrees.size < 2 || !root) return new Map();
     const rootIdx = ROOT_CHROMATIC[root] ?? 0;
-    const liveSemis = ((): number[] => {
-      const semMap: Record<string, number[]> = {
-        IONIAN:     [0,2,4,5,7,9,11],
-        DORIAN:     [0,2,3,5,7,9,10],
-        PHRYGIAN:   [0,1,3,5,7,8,10],
-        LYDIAN:     [0,2,4,6,7,9,11],
-        MIXOLYDIAN: [0,2,4,5,7,9,10],
-        AEOLIAN:    [0,2,3,5,7,8,10],
-        LOCRIAN:    [0,1,3,5,6,8,10],
-      };
-      return semMap[mode] ?? semMap.IONIAN;
-    })();
+    const liveSemis = MODE_SEMITONES[mode] ?? MODE_SEMITONES.IONIAN;
     const selectedChromatic = new Set(
       Array.from(highlightedDegrees).map(d => (rootIdx + liveSemis[d - 1]) % 12)
     );
@@ -156,7 +144,7 @@ export default function TheoryPage() {
         let pentatonicOutOfScale: boolean | undefined;
 
         if (activePentKeys.length > 0) {
-          const chromatic = (OPEN_MIDI[s] + f) % 12;
+          const chromatic = (GUITAR_OPEN_MIDI[s] + f) % 12;
           const rings: string[] = [];
           for (const key of activePentKeys) {
             const deg = getPentatonicDegree(chromatic, key, pentWidgetMode);
@@ -173,7 +161,7 @@ export default function TheoryPage() {
           const isSelected = chordSelectedPositions.has(posKey);
           if (dot.degree === null) {
             if (isSelected) {
-              return { ...dot, active: true, note: CHROMATIC_NOTES[(OPEN_MIDI[s] + f) % 12], pentatonicRings };
+              return { ...dot, active: true, note: CHROMATIC_NOTES[(GUITAR_OPEN_MIDI[s] + f) % 12], pentatonicRings };
             }
             return { ...dot, pentatonicRings };
           }
@@ -181,7 +169,7 @@ export default function TheoryPage() {
         }
 
         if (dot.degree === null) {
-          const note = pentatonicOutOfScale ? CHROMATIC_NOTES[(OPEN_MIDI[s] + f) % 12] : undefined;
+          const note = pentatonicOutOfScale ? CHROMATIC_NOTES[(GUITAR_OPEN_MIDI[s] + f) % 12] : undefined;
           return { ...dot, pentatonicRings, pentatonicOutOfScale, note };
         }
         if (highlightedDegrees.size > 0) {

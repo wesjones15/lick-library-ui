@@ -1,7 +1,5 @@
 import { useMemo } from 'react';
-import { ROOT_CHROMATIC } from './cagedUtils';
-
-const OPEN_MIDI_GUITAR = [40, 45, 50, 55, 59, 64];
+import { ROOT_CHROMATIC, GUITAR_OPEN_MIDI } from '../../core/music';
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 const INTERVAL_NAMES = ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5', 'b6', '6', 'b7', '7'];
 
@@ -42,7 +40,7 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
     const uniqueChromatic = new Set<number>();
     for (const key of selectedPositions) {
       const [s, f] = key.split(',').map(Number);
-      uniqueChromatic.add((OPEN_MIDI_GUITAR[s] + f) % 12);
+      uniqueChromatic.add((GUITAR_OPEN_MIDI[s] + f) % 12);
     }
 
     const chromatics = [...uniqueChromatic].sort((a, b) => a - b);

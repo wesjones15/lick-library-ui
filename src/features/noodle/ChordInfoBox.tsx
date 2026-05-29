@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import type { ChordVoicing } from '../../core/api/client';
 import { parseChordName } from '../songs/parseChordName';
-import { INSTRUMENT_OPEN_SEMITONES, CHROMATIC_NOTES } from '../../core/music';
+import { INSTRUMENT_OPEN_SEMITONES, CHROMATIC_NOTES, MODE_SEMITONES, ROOT_CHROMATIC } from '../../core/music';
 import { DEGREE_COLORS } from '../theory/GuitarNeck';
 
 const INTERVAL_NAMES: Record<number, string> = {
@@ -9,10 +9,6 @@ const INTERVAL_NAMES: Record<number, string> = {
   6: 'b5', 7: '5', 8: 'b6', 9: '6', 10: 'b7', 11: '7',
 };
 
-const ENUM_SEMITONES: Record<string, number> = {
-  C: 0, C_SHARP: 1, D: 2, D_SHARP: 3, E: 4, F: 5,
-  F_SHARP: 6, G: 7, G_SHARP: 8, A: 9, B_FLAT: 10, B: 11,
-};
 
 const QUALITY_INTERVALS: Record<string, number[]> = {
   '': [0, 4, 7], 'm': [0, 3, 7], '5': [0, 7],
@@ -24,15 +20,6 @@ const QUALITY_INTERVALS: Record<string, number[]> = {
   '9': [0, 4, 7, 10, 2], 'maj9': [0, 4, 7, 11, 2], 'm9': [0, 3, 7, 10, 2], 'add9': [0, 4, 7, 2],
 };
 
-const MODE_INTERVALS: Record<string, number[]> = {
-  IONIAN:     [0, 2, 4, 5, 7, 9, 11],
-  DORIAN:     [0, 2, 3, 5, 7, 9, 10],
-  PHRYGIAN:   [0, 1, 3, 5, 7, 8, 10],
-  LYDIAN:     [0, 2, 4, 6, 7, 9, 11],
-  MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10],
-  AEOLIAN:    [0, 2, 3, 5, 7, 8, 10],
-  LOCRIAN:    [0, 1, 3, 5, 6, 8, 10],
-};
 
 const OFF_SCALE_COLOR = '#6b7280';
 
@@ -48,12 +35,12 @@ function computeToneInfo(
 ): ToneInfo[] {
   const parsed = parseChordName(chordName);
   if (!parsed) return [];
-  const chordRootSemitone = ENUM_SEMITONES[parsed.root];
+  const chordRootSemitone = ROOT_CHROMATIC[parsed.root];
   if (chordRootSemitone === undefined) return [];
   const songRootSemitone = CHROMATIC_NOTES.indexOf(soundingRoot);
   if (songRootSemitone === -1) return [];
 
-  const modeScale = MODE_INTERVALS[soundingMode] ?? MODE_INTERVALS.IONIAN;
+  const modeScale = MODE_SEMITONES[soundingMode] ?? MODE_SEMITONES.IONIAN;
 
   let semitones: number[];
   if (voicing) {
@@ -92,7 +79,7 @@ function computePlainIntervals(
 ): string[] {
   const parsed = parseChordName(chordName);
   if (!parsed) return [];
-  const rootSemitone = ENUM_SEMITONES[parsed.root];
+  const rootSemitone = ROOT_CHROMATIC[parsed.root];
   if (rootSemitone === undefined) return [];
   if (voicing) {
     const openSemitones = INSTRUMENT_OPEN_SEMITONES[instrument];

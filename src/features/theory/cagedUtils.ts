@@ -13,14 +13,7 @@ const CAGED_COLORS: Record<string, string> = {
   G: 'rgba(234,179,8,0.18)',
 };
 
-// Chromatic index for each NOTE_KEYS value (internal; matches NOTE_KEYS enum values)
-const ROOT_INDEX: Record<string, number> = {
-  C: 0, C_SHARP: 1, D: 2, D_SHARP: 3, E: 4, F: 5,
-  F_SHARP: 6, G: 7, G_SHARP: 8, A: 9, B_FLAT: 10, B: 11,
-};
-
-// Exported version of ROOT_INDEX for consumers that need chromatic → note mapping
-export const ROOT_CHROMATIC = ROOT_INDEX;
+import { MODE_SEMITONES, ROOT_CHROMATIC } from '../../core/music';
 
 // CAGED shape positions defined by the fret where the root note falls on its
 // primary string, relative to the root's chromatic index R.
@@ -57,16 +50,6 @@ const SHAPE_ORDER: Array<{ shape: CagedZone['shape']; offset: number }> = [
 // For other modes, the interval layout shifts the I/IV/V positions.
 // We compute at runtime: find which scale degrees land on steps 1,4,5 of the mode.
 //
-// Mode interval sequences (semitones from root, 7 values):
-const MODE_SEMITONES: Record<string, number[]> = {
-  IONIAN:     [0, 2, 4, 5, 7, 9, 11],
-  DORIAN:     [0, 2, 3, 5, 7, 9, 10],
-  PHRYGIAN:   [0, 1, 3, 5, 7, 8, 10],
-  LYDIAN:     [0, 2, 4, 6, 7, 9, 11],
-  MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10],
-  AEOLIAN:    [0, 2, 3, 5, 7, 8, 10],
-  LOCRIAN:    [0, 1, 3, 5, 6, 8, 10],
-};
 
 // Major pentatonic intervals from a root (semitones): 0,2,4,7,9
 const PENT_INTERVALS = new Set([0, 2, 4, 7, 9]);
@@ -103,7 +86,7 @@ export function getPentatonicGroupMap(mode: string): Record<number, PentatonicGr
 // Uses scale degrees 1,2,3,5,6 (MODE_SEMITONES indices [0,1,2,4,5]).
 export function getPentatonicNoteSet(rootKey: string, mode: string): Set<number> {
   const semitones = MODE_SEMITONES[mode] ?? MODE_SEMITONES.IONIAN;
-  const root = ROOT_INDEX[rootKey] ?? 0;
+  const root = ROOT_CHROMATIC[rootKey] ?? 0;
   return new Set([0, 1, 2, 4, 5].map(i => (root + semitones[i]) % 12));
 }
 
@@ -111,7 +94,7 @@ export function getPentatonicNoteSet(rootKey: string, mode: string): Set<number>
 // Returns null if the note is not in that pentatonic.
 export function getPentatonicDegree(chromaticNote: number, rootKey: string, mode: string): number | null {
   const semitones = MODE_SEMITONES[mode] ?? MODE_SEMITONES.IONIAN;
-  const root = ROOT_INDEX[rootKey] ?? 0;
+  const root = ROOT_CHROMATIC[rootKey] ?? 0;
   const map: Array<[number, number]> = [
     [(root + semitones[0]) % 12, 1],
     [(root + semitones[1]) % 12, 2],
@@ -123,7 +106,7 @@ export function getPentatonicDegree(chromaticNote: number, rootKey: string, mode
 }
 
 export function getCagedZones(root: string): CagedZone[] {
-  const R = ROOT_INDEX[root] ?? 0;
+  const R = ROOT_CHROMATIC[root] ?? 0;
   const zones: CagedZone[] = [];
 
   for (const { shape, offset } of SHAPE_ORDER) {

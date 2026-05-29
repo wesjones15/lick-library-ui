@@ -95,6 +95,26 @@ export function getStringLabels(instrument: string): string[] {
   return (INSTRUMENT_STRING_DISPLAY[instrument] ?? INSTRUMENT_STRING_DISPLAY.GUITAR).map(e => e.label);
 }
 
+// Guitar standard tuning MIDI values, low string first (E A D G B e)
+export const GUITAR_OPEN_MIDI = [40, 45, 50, 55, 59, 64];
+
+// Semitone offsets from root for each scale degree, by mode
+export const MODE_SEMITONES: Record<string, number[]> = {
+  IONIAN:     [0, 2, 4, 5, 7, 9, 11],
+  DORIAN:     [0, 2, 3, 5, 7, 9, 10],
+  PHRYGIAN:   [0, 1, 3, 5, 7, 8, 10],
+  LYDIAN:     [0, 2, 4, 6, 7, 9, 11],
+  MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10],
+  AEOLIAN:    [0, 2, 3, 5, 7, 8, 10],
+  LOCRIAN:    [0, 1, 3, 5, 6, 8, 10],
+};
+
+// Chromatic index for each NOTE_KEYS enum value
+export const ROOT_CHROMATIC: Record<string, number> = {
+  C: 0, C_SHARP: 1, D: 2, D_SHARP: 3, E: 4,  F: 5,
+  F_SHARP: 6, G: 7, G_SHARP: 8, A: 9, B_FLAT: 10, B: 11,
+};
+
 // Open-string semitone values from C=0, low string first (index = backend string index)
 export const INSTRUMENT_OPEN_SEMITONES: Record<string, number[]> = {
   GUITAR:   [4,  9,  2,  7, 11,  4],  // E A D G B e
