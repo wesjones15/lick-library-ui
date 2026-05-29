@@ -56,6 +56,7 @@ export default function InstrumentSelector({
             className={SELECT_CLASS + ' w-36'}
           />
           <button
+            type="button"
             onClick={onSubmit}
             className="px-3 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
           >

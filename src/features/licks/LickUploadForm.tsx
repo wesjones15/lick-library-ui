@@ -12,6 +12,7 @@ const EMPTY_TAB_LINES: Record<InstrumentName, string[]> = {
   OPEN_G:   ['d', 'B', 'G', 'D', 'G', 'D'],
   OPEN_D:   ['d', 'A', 'F', 'D', 'A', 'D'],
   DADGAD:   ['d', 'A', 'G', 'D', 'A', 'D'],
+  EB:       ['eb', 'Bb', 'Gb', 'Db', 'Ab', 'Eb'],
   BASS:     ['g', 'D', 'A', 'E'],
   UKULELE:  ['a', 'E', 'C', 'G'],
   MANDOLIN: ['e', 'A', 'D', 'G'],
@@ -23,6 +24,12 @@ function getEmptyTab(name: InstrumentName): string {
   return EMPTY_TAB_LINES[name]
     .map(label => `${label}|----------------|`)
     .join('\n');
+}
+
+function getCustomTab(tuning: string): string {
+  const tokens = tuning.trim().split(/\s+/);
+  if (tokens.length < 2) return getEmptyTab('GUITAR');
+  return tokens.reverse().map(label => `${label}|----------------|`).join('\n');
 }
 
 function expandTab(tab: string): string {
@@ -64,7 +71,7 @@ export default function LickUploadForm({ onSuccess }: Props) {
 
   function handleInstrumentChange(name: InstrumentName) {
     setInstrument(name);
-    setRawTab(getEmptyTab(name));
+    setRawTab(name === 'CUSTOM' ? getCustomTab(customTuning) : getEmptyTab(name));
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -147,6 +154,7 @@ export default function LickUploadForm({ onSuccess }: Props) {
           customTuning={customTuning}
           onInstrumentChange={handleInstrumentChange}
           onCustomTuningChange={setCustomTuning}
+          onSubmit={() => setRawTab(getCustomTab(customTuning))}
         />
         <select
           value={inputKey}
