@@ -7,8 +7,8 @@ import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
 import { CHROMATIC_NOTES, SONG_MODES, SONG_MODE_TO_ENUM } from '../../core/music';
 import { BTN_SECONDARY } from '../../core/ui';
-import InstrumentSelector from '../../components/InstrumentSelector';
-import NumpadInput from '../../components/NumpadInput';
+import InstrumentSelector from '../../core/components/InstrumentSelector';
+import NumpadInput from '../../core/components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
 
 const LEGACY_KEY_MAP: Record<string, string> = {

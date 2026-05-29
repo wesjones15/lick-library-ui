@@ -1,7 +1,7 @@
 import { useState, useRef, useLayoutEffect } from 'react';
 import { NOTE_KEYS, MODES, EMPTY_TAB, VALID_INPUT } from '../../core/music';
 import { BTN_SECONDARY } from '../../core/ui';
-import NumpadInput, { isTouch } from '../../components/NumpadInput';
+import NumpadInput, { isTouch } from '../../core/components/NumpadInput';
 
 function expandTab(tab: string): string {
   return tab.split('\n').map(line => {

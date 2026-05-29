@@ -7,13 +7,13 @@ import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { CHROMATIC_NOTES, getStringLabels } from '../../core/music';
 import { SELECT_COMPACT } from '../../core/ui';
 import type { InstrumentName } from '../../core/useInstrument';
-import InstrumentSelector from '../../components/InstrumentSelector';
+import InstrumentSelector from '../../core/components/InstrumentSelector';
 import GuitarNeck from '../theory/GuitarNeck';
 import KaraokeDisplay from './KaraokeDisplay';
 import SongLibraryModal from './SongLibraryModal';
 import { useChordHighlight } from './useChordHighlight';
 import ChordInfoBox from './ChordInfoBox';
-import NumpadInput from '../../components/NumpadInput';
+import NumpadInput from '../../core/components/NumpadInput';
 
 type NoodleMode = 'none' | 'song' | 'freeChords';
 

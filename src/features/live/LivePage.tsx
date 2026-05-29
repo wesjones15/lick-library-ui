@@ -4,7 +4,7 @@ import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
 import { NOTE_KEYS, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI } from '../../core/music';
 import { BTN, SELECT } from '../../core/ui';
-import InstrumentSelector from '../../components/InstrumentSelector';
+import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 
 const FRET_COUNT = 12;

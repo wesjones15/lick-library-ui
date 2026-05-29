@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { uploadSong } from '../../core/api/client';
 import { CHROMATIC_NOTES, SONG_MODES, SONG_MODE_TO_ENUM } from '../../core/music';
-import InstrumentSelector from '../../components/InstrumentSelector';
-import NumpadInput from '../../components/NumpadInput';
+import InstrumentSelector from '../../core/components/InstrumentSelector';
+import NumpadInput from '../../core/components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
 
 interface Props {

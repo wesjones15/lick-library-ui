@@ -6,7 +6,7 @@ import ChordsWidget from './ChordsWidget';
 import { getScalePositions } from '../../core/api/client';
 import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI, MODE_SEMITONES, ROOT_CHROMATIC } from '../../core/music';
 import { SELECT } from '../../core/ui';
-import InstrumentSelector from '../../components/InstrumentSelector';
+import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 
 const FRET_COUNT = 12;

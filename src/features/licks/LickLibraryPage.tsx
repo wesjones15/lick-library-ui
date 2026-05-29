@@ -3,10 +3,10 @@ import LickSubNav from './LickSubNav';
 import { getAllLicks, deleteLick, forkLick } from '../../core/api/client';
 import type { LickSummary } from '../../core/api/client';
 import LickList from './LickList';
-import InstrumentSelector from '../../components/InstrumentSelector';
+import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 import { MODES } from '../../core/music';
-import NumpadInput from '../../components/NumpadInput';
+import NumpadInput from '../../core/components/NumpadInput';
 
 const TOGGLE_BASE = 'px-3 py-1.5 text-xs rounded-lg border transition-colors';
 const TOGGLE_ON = 'border-indigo-300 bg-indigo-50 text-indigo-600';

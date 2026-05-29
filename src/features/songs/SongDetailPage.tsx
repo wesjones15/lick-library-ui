@@ -6,7 +6,7 @@ import ChordUploadModal from '../chords/ChordUploadModal';
 import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/client';
 import ChordSheet from './ChordSheet';
 import ChordDiagram from '../chords/ChordDiagram';
-import InstrumentSelector from '../../components/InstrumentSelector';
+import InstrumentSelector from '../../core/components/InstrumentSelector';
 import { useInstrument } from '../../core/useInstrument';
 import type { InstrumentName } from '../../core/useInstrument';
 import { parseChordName } from './parseChordName';

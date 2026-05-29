@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getLick } from '../../core/api/client';
 import type { LickDetail } from '../../core/api/client';
-import KeySelector from '../../components/KeySelector';
-import InstrumentSelector from '../../components/InstrumentSelector';
+import KeySelector from '../../core/components/KeySelector';
+import InstrumentSelector from '../../core/components/InstrumentSelector';
 import LickPositionTab from './LickPositionTab';
 import { useInstrument } from '../../core/useInstrument';
 

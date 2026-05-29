@@ -2,7 +2,7 @@ import { useState, useRef, useLayoutEffect } from 'react';
 import { uploadLick } from '../../core/api/client';
 import type { UploadRequest } from '../../core/api/client';
 import { NOTE_KEYS, MODES, VALID_INPUT } from '../../core/music';
-import InstrumentSelector from '../../components/InstrumentSelector';
+import InstrumentSelector from '../../core/components/InstrumentSelector';
 import { useInstrument } from '../../core/useInstrument';
 import type { InstrumentName } from '../../core/useInstrument';
 

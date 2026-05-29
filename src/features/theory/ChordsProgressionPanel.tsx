@@ -4,7 +4,7 @@ import { getDiatonicChords, type DiatonicChord } from './diatonicUtils';
 import { getChordVoicings, type ChordFrets } from '../../core/api/client';
 import { NOTE_KEYS, getStringCount, getStringLabels } from '../../core/music';
 import { SELECT } from '../../core/ui';
-import InstrumentSelector from '../../components/InstrumentSelector';
+import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 
 const FRET_COUNT = 12;

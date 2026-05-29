@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import KeySelector from '../../components/KeySelector';
+import KeySelector from '../../core/components/KeySelector';
 import ChordCard from './ChordCard';
-import InstrumentSelector from '../../components/InstrumentSelector';
+import InstrumentSelector from '../../core/components/InstrumentSelector';
 import { getAllChordVoicings, reseedChordDefaults } from '../../core/api/client';
 import type { ChordVoicing } from '../../core/api/client';
 import type { InstrumentName } from '../../core/useInstrument';

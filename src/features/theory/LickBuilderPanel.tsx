@@ -4,7 +4,7 @@ import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
 import { uploadLick, getScalePositions } from '../../core/api/client';
 import { NOTE_KEYS, MODES, MODE_LABELS, formatNoteEnum, getStringCount, getStringLabels } from '../../core/music';
 import { BTN } from '../../core/ui';
-import InstrumentSelector from '../../components/InstrumentSelector';
+import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 import {
   FRET_COUNT,

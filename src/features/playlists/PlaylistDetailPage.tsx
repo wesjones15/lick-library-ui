@@ -9,8 +9,8 @@ import type { PlaylistDetail, PlaylistEntry, SongSummary } from '../../core/api/
 
 import { KEY_LABEL, CHROMATIC_NOTES, MODE_SUFFIX } from '../../core/music';
 import { BTN_ICON } from '../../core/ui';
-import InstrumentSelector from '../../components/InstrumentSelector';
-import NumpadInput from '../../components/NumpadInput';
+import InstrumentSelector from '../../core/components/InstrumentSelector';
+import NumpadInput from '../../core/components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
 
 function keyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {

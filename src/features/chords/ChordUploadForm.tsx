@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { uploadChordVoicing } from '../../core/api/client';
 import { parseChordName } from '../songs/parseChordName';
 import ChordDiagram from './ChordDiagram';
-import InstrumentSelector from '../../components/InstrumentSelector';
-import NumpadInput from '../../components/NumpadInput';
+import InstrumentSelector from '../../core/components/InstrumentSelector';
+import NumpadInput from '../../core/components/NumpadInput';
 import { INSTRUMENT_STRING_DISPLAY } from '../../core/music';
 import type { InstrumentName } from '../../core/useInstrument';
 

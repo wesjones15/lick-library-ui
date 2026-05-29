@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useMetronomeContext } from './MetronomeContext';
-import NumpadInput from '../../components/NumpadInput';
+import NumpadInput from '../components/NumpadInput';
 
 const MIN_BPM = 40;
 const MAX_BPM = 240;
