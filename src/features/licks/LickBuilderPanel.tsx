@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import GuitarNeck, { type NeckDot, DEGREE_COLORS } from './GuitarNeck';
+import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../theory/GuitarNeck';
 import { uploadLick, getScalePositions } from '../../core/api/client';
 import { NOTE_KEYS, MODES, MODE_LABELS, formatNoteEnum, getStringCount, getStringLabels } from '../../core/music';
 import { BTN } from '../../core/ui';

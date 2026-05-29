@@ -1,5 +1,5 @@
 import { CHROMATIC_NOTES, INSTRUMENT_OPEN_SEMITONES } from '../../core/music';
-import type { NeckDot } from './GuitarNeck';
+import type { NeckDot } from '../theory/GuitarNeck';
 
 export const FRET_COUNT = 12;
 export const SPREAD_SLOT = 4;

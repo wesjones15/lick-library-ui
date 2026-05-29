@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import GuitarNeck from './GuitarNeck';
+import GuitarNeck from '../theory/GuitarNeck';
 import LickLibraryModal from './LickLibraryModal';
 import LickInputModal from './LickInputModal';
 import { uploadLick } from '../../core/api/client';
