@@ -118,7 +118,7 @@ export default function NumpadInput({
           {insertMode ? (
             <button
               type="button"
-              onPointerDown={e => { e.preventDefault(); onClose?.(); }}
+              onClick={onClose}
               className={`${specialCls} ${sizeCls} text-sm`}
             >
               Done
@@ -126,7 +126,7 @@ export default function NumpadInput({
           ) : (
             <button
               type="button"
-              onPointerDown={e => { e.preventDefault(); handleConfirm(); }}
+              onClick={handleConfirm}
               className={`${confirmCls} ${sizeCls}`}
             >
               ✓
