@@ -2,19 +2,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reparseSong } from '../../core/api/client';
 import type { SongSummary } from '../../core/api/client';
-import { formatNoteEnum, MODE_SUFFIX } from '../../core/music';
+import { formatNoteEnum, formatKeyWithMode } from '../../core/music';
 
 interface Props {
   song: SongSummary;
   managing?: boolean;
   onReparse?: () => void;
   onAddToPlaylist?: () => void;
-}
-
-function keyDisplay(key: string | null, mode?: string | null): string {
-  if (!key) return '';
-  const root = formatNoteEnum(key);
-  return root + (mode ? (MODE_SUFFIX[mode] ?? '') : '');
 }
 
 export default function SongCard({ song, managing = false, onReparse, onAddToPlaylist }: Props) {
@@ -87,7 +81,7 @@ export default function SongCard({ song, managing = false, onReparse, onAddToPla
       ) : (
         <div className="flex items-center mt-auto pt-1 portrait:mt-0 portrait:pt-0 portrait:flex-col portrait:items-end portrait:gap-0.5">
           <div className="flex items-center gap-2 text-xs text-gray-400 font-mono portrait:flex-col portrait:items-end portrait:gap-0">
-            {song.originalKey && <span>{keyDisplay(song.originalKey, song.mode)}</span>}
+            {song.originalKey && <span>{formatKeyWithMode(formatNoteEnum(song.originalKey), song.mode ?? '')}</span>}
             {song.tempo != null && <span>{song.tempo} BPM</span>}
           </div>
         </div>

@@ -7,7 +7,7 @@ import { getAllChordVoicings, reseedChordDefaults } from '../../core/api/client'
 import type { ChordVoicing } from '../../core/api/client';
 import type { InstrumentName } from '../../core/useInstrument';
 
-import { formatNoteEnum } from '../../core/music';
+import { formatNoteEnum, NOTE_KEYS, ROOT_CHROMATIC } from '../../core/music';
 
 const QUALITIES = [
   { quality: '',     label: 'Major'    },
@@ -28,16 +28,14 @@ const QUALITIES = [
 
 const KNOWN_QUALITIES = new Set(QUALITIES.map(q => q.quality));
 
-const NOTE_KEYS = ['C','C_SHARP','D','D_SHARP','E','F','F_SHARP','G','G_SHARP','A','B_FLAT','B'];
-
 function resolveSlashQuality(root: string, quality: string): string {
   const m = quality.match(/^([^/]*)\/(\d+)$/);
   if (!m) return quality;
   const base = m[1];
   const semitones = parseInt(m[2], 10);
-  const rootIdx = NOTE_KEYS.indexOf(root);
+  const rootIdx = ROOT_CHROMATIC[root] ?? -1;
   if (rootIdx === -1) return quality;
-  const bassKey = NOTE_KEYS[(rootIdx + semitones) % 12];
+  const bassKey = NOTE_KEYS[(rootIdx + semitones) % 12].value;
   return `${base}/${formatNoteEnum(bassKey)}`;
 }
 

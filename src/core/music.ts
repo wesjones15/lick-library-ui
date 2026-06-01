@@ -56,6 +56,9 @@ export const MODE_INTERVALS: Record<string, string[]> =
 export const MODE_SEMITONES: Record<string, number[]> =
   Object.fromEntries(MODE_DATA.map(m => [m.value, [...m.semitones]]));
 
+export const INTERVAL_NAMES: string[] =
+  ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5', 'b6', '6', 'b7', '7'];
+
 export function formatNoteEnum(enumName: string): string {
   if (enumName === 'B_FLAT') return 'Bb';
   return enumName.replace('_SHARP', '#');

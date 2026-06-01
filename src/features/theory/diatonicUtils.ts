@@ -1,8 +1,5 @@
 import { MODE_SEMITONES, ROOT_CHROMATIC, CHROMATIC_NOTES } from '../../core/music';
 
-const INDEX_TO_NOTE: Record<number, string> =
-  Object.fromEntries(CHROMATIC_NOTES.map((n, i) => [i, n]));
-
 
 export type ChordQuality = 'maj' | 'min' | 'dim' | 'aug';
 
@@ -53,8 +50,8 @@ export function getDiatonicChords(rootKey: string, mode: string): DiatonicChord[
     return {
       degree,
       roman: romanNumeral(degree, quality),
-      rootDisplay: INDEX_TO_NOTE[noteIdx],
-      rootApi: INDEX_TO_NOTE[noteIdx],
+      rootDisplay: CHROMATIC_NOTES[noteIdx],
+      rootApi: CHROMATIC_NOTES[noteIdx],
       quality,
       apiSuffix: API_SUFFIX[quality],
     };

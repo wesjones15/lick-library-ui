@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
-import { ROOT_CHROMATIC, GUITAR_OPEN_MIDI, CHROMATIC_NOTES } from '../../core/music';
+import { ROOT_CHROMATIC, GUITAR_OPEN_MIDI, CHROMATIC_NOTES, INTERVAL_NAMES } from '../../core/music';
 import { BTN_SM } from '../../core/ui';
-const INTERVAL_NAMES = ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5', 'b6', '6', 'b7', '7'];
 
 const CHORD_QUALITIES: Record<string, number[]> = {
   'major':  [0, 4, 7],
