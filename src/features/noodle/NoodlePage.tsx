@@ -4,7 +4,7 @@ import { getSong, getChordVoicings, getBeatmap, saveBeatmap, submitBeatmapUpdate
 import type { SongDetail, SongSummary, ChordLyric, GuitarTabLine, ChordVoicing } from '../../core/api/client';
 import { parseChordName } from '../songs/parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
-import { CHROMATIC_NOTES, getStringLabels, MODES_WITH_LABELS } from '../../core/music';
+import { CHROMATIC_NOTES, getStringLabels, MODE_DATA, formatKeyWithMode } from '../../core/music';
 import { SELECT_COMPACT } from '../../core/ui';
 import type { InstrumentName } from '../../core/useInstrument';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
@@ -272,18 +272,9 @@ export default function NoodlePage() {
   console.log('[NoodlePage] soundingRoot:', soundingRoot, 'soundingMode:', soundingMode, 'noodleMode:', noodleMode, 'song.originalKey:', song?.originalKey ?? null, 'song.mode:', song?.mode ?? null);
 
   const keyDisplay = useMemo(() => {
-    if (noodleMode === 'freeChords') {
-      const modeLabel = MODES_WITH_LABELS.find(m => m.value === freeMode)?.label ?? '';
-      if (freeMode === 'IONIAN') return freeRoot;
-      if (freeMode === 'AEOLIAN') return `${freeRoot}m`;
-      return `${freeRoot} ${modeLabel}`;
-    }
+    if (noodleMode === 'freeChords') return formatKeyWithMode(freeRoot, freeMode);
     if (noodleMode !== 'song' || !song?.originalKey) return '';
-    const mode = song.mode ?? 'IONIAN';
-    const modeLabel = MODES_WITH_LABELS.find(m => m.value === mode)?.label ?? '';
-    if (mode === 'IONIAN') return soundingRoot;
-    if (mode === 'AEOLIAN') return `${soundingRoot}m`;
-    return `${soundingRoot} ${modeLabel}`;
+    return formatKeyWithMode(soundingRoot, song.mode ?? 'IONIAN');
   }, [noodleMode, song, soundingRoot, freeRoot, freeMode]);
 
   const activeChord = useMemo(() => {
@@ -594,7 +585,7 @@ export default function NoodlePage() {
               {CHROMATIC_NOTES.map(n => <option key={n} value={n}>{n}</option>)}
             </select>
             <select value={freeMode} onChange={e => setFreeMode(e.target.value)} className={SELECT_COMPACT}>
-              {MODES_WITH_LABELS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+              {MODE_DATA.map(m => <option key={m.value} value={m.value}>{m.longLabel}</option>)}
             </select>
           </>
         ) : keyDisplay ? (

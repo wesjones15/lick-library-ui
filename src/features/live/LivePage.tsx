@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../../core/components/GuitarNeck';
 import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
-import { NOTE_KEYS, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI, MODES_WITH_LABELS } from '../../core/music';
+import { NOTE_KEYS, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI, MODE_DATA } from '../../core/music';
 import { BTN, SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -148,8 +148,8 @@ export default function LivePage() {
           ))}
         </select>
         <select className={SELECT} value={mode} onChange={e => setMode(e.target.value)}>
-          {MODES_WITH_LABELS.map(m => (
-            <option key={m.value} value={m.value}>{m.label}</option>
+          {MODE_DATA.map(m => (
+            <option key={m.value} value={m.value}>{m.longLabel}</option>
           ))}
         </select>
         <InstrumentSelector

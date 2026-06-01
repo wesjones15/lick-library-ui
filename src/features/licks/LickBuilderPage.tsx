@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../../core/components/GuitarNeck';
 import LickSubNav from './LickSubNav';
 import { uploadLick, getScalePositions } from '../../core/api/client';
-import { NOTE_KEYS, MODES, MODE_LABELS, formatNoteEnum, getStringCount, getStringLabels } from '../../core/music';
+import { NOTE_KEYS, MODE_DATA, formatNoteEnum, getStringCount, getStringLabels } from '../../core/music';
 import { BTN } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -224,7 +224,7 @@ export default function LickBuilderPage() {
               onChange={e => setBuildMode(e.target.value)}
               className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-indigo-400"
             >
-              {MODES.map(m => <option key={m} value={m}>{MODE_LABELS[m]}</option>)}
+              {MODE_DATA.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
             </select>
             <InstrumentSelector
               instrument={instrument as InstrumentName}

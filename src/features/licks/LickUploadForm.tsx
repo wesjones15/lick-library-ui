@@ -1,7 +1,7 @@
 import { useState, useRef, useLayoutEffect } from 'react';
 import { uploadLick } from '../../core/api/client';
 import type { UploadRequest } from '../../core/api/client';
-import { NOTE_KEYS, MODES, VALID_INPUT } from '../../core/music';
+import { NOTE_KEYS, MODE_DATA, VALID_INPUT } from '../../core/music';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import { useInstrument } from '../../core/useInstrument';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -172,10 +172,8 @@ export default function LickUploadForm({ onSuccess }: Props) {
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400 flex-1"
         >
           <option value="">Auto-detect mode</option>
-          {MODES.map(m => (
-            <option key={m} value={m}>
-              {m.charAt(0) + m.slice(1).toLowerCase()}
-            </option>
+          {MODE_DATA.map(m => (
+            <option key={m.value} value={m.value}>{m.label}</option>
           ))}
         </select>
         <button

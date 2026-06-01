@@ -5,7 +5,7 @@ import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/cli
 import ChordDiagram from '../chords/ChordDiagram';
 import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
-import { CHROMATIC_NOTES, SONG_MODES, SONG_MODE_TO_ENUM } from '../../core/music';
+import { CHROMATIC_NOTES, MODE_DATA, MODE_SUFFIX, SONG_MODE_TO_ENUM } from '../../core/music';
 import { BTN_SECONDARY } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import NumpadInput from '../../core/components/NumpadInput';
@@ -86,8 +86,7 @@ export default function SongManagePage() {
       const { root, mode: parsedMode } = parseStoredKey(s.originalKey ?? '');
       setKeyRoot(root);
       if (s.mode) {
-        const modeEntry = Object.entries(SONG_MODE_TO_ENUM).find(([, v]) => v === s.mode);
-        setKeyMode(modeEntry ? modeEntry[0] : '');
+        setKeyMode(MODE_SUFFIX[s.mode] ?? '');
       } else {
         setKeyMode(parsedMode);
       }
@@ -119,8 +118,7 @@ export default function SongManagePage() {
   const savedKey = song
     ? (() => {
         if (song.mode) {
-          const modeEntry = Object.entries(SONG_MODE_TO_ENUM).find(([, v]) => v === song.mode);
-          return (song.originalKey ?? '') + (modeEntry ? modeEntry[0] : '');
+          return (song.originalKey ?? '') + (MODE_SUFFIX[song.mode] ?? '');
         }
         const { root, mode } = parseStoredKey(song.originalKey ?? '');
         return root ? root + mode : '';
@@ -285,8 +283,8 @@ export default function SongManagePage() {
               disabled={!keyRoot}
               className={`${inputClass} w-24 bg-white disabled:opacity-40`}
             >
-              {SONG_MODES.map(m => (
-                <option key={m.value} value={m.value}>{m.label}</option>
+              {MODE_DATA.map(m => (
+                <option key={m.suffix} value={m.suffix}>{m.label}</option>
               ))}
             </select>
             <NumpadInput

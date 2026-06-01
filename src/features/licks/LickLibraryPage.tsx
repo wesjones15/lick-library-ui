@@ -5,7 +5,7 @@ import type { LickSummary } from '../../core/api/client';
 import LickList from './LickList';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
-import { MODES } from '../../core/music';
+import { MODE_DATA } from '../../core/music';
 import NumpadInput from '../../core/components/NumpadInput';
 
 const TOGGLE_BASE = 'px-3 py-1.5 text-xs rounded-lg border transition-colors';
@@ -97,8 +97,8 @@ export default function LickLibraryPage() {
           className={INPUT_CLASS}
         >
           <option value="">All modes</option>
-          {MODES.map(m => (
-            <option key={m} value={m}>{m.charAt(0) + m.slice(1).toLowerCase()}</option>
+          {MODE_DATA.map(m => (
+            <option key={m.value} value={m.value}>{m.label}</option>
           ))}
         </select>
         <NumpadInput

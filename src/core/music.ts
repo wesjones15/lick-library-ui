@@ -42,17 +42,25 @@ export const KEY_LABEL: Record<string, string> = {
   G_SHARP: 'G#', A: 'A', B_FLAT: 'Bb', B: 'B',
 };
 
-export const MODES = ['IONIAN', 'DORIAN', 'PHRYGIAN', 'LYDIAN', 'MIXOLYDIAN', 'AEOLIAN', 'LOCRIAN'];
+export const MODE_DATA = [
+  { value: 'IONIAN',     suffix: '',            label: 'Major',      longLabel: 'Major (Ionian)'          },
+  { value: 'DORIAN',     suffix: ' Dorian',     label: 'Dorian',     longLabel: 'Dorian'                  },
+  { value: 'PHRYGIAN',   suffix: ' Phrygian',   label: 'Phrygian',   longLabel: 'Phrygian'                },
+  { value: 'LYDIAN',     suffix: ' Lydian',     label: 'Lydian',     longLabel: 'Lydian'                  },
+  { value: 'MIXOLYDIAN', suffix: ' Mixolydian', label: 'Mixolydian', longLabel: 'Mixolydian'              },
+  { value: 'AEOLIAN',    suffix: 'm',           label: 'Minor',      longLabel: 'Natural Minor (Aeolian)' },
+  { value: 'LOCRIAN',    suffix: ' Locrian',    label: 'Locrian',    longLabel: 'Locrian'                 },
+] as const;
 
-export const MODES_WITH_LABELS: { value: string; label: string }[] = [
-  { value: 'IONIAN',     label: 'Major (Ionian)'          },
-  { value: 'DORIAN',     label: 'Dorian'                  },
-  { value: 'PHRYGIAN',   label: 'Phrygian'                },
-  { value: 'LYDIAN',     label: 'Lydian'                  },
-  { value: 'MIXOLYDIAN', label: 'Mixolydian'              },
-  { value: 'AEOLIAN',    label: 'Natural Minor (Aeolian)'  },
-  { value: 'LOCRIAN',    label: 'Locrian'                 },
-];
+export const MODE_SUFFIX: Record<string, string> =
+  Object.fromEntries(MODE_DATA.filter(m => m.suffix).map(m => [m.value, m.suffix]));
+
+export const SONG_MODE_TO_ENUM: Record<string, string> =
+  Object.fromEntries(MODE_DATA.map(m => [m.suffix, m.value]));
+
+export function formatKeyWithMode(root: string, mode: string): string {
+  return root + (MODE_SUFFIX[mode] ?? '');
+}
 
 export const MODE_INTERVALS: Record<string, string[]> = {
   IONIAN:     ['1', '2',  '3',  '4',  '5',  '6',  '7' ],
@@ -62,40 +70,6 @@ export const MODE_INTERVALS: Record<string, string[]> = {
   MIXOLYDIAN: ['1', '2',  '3',  '4',  '5',  '6',  'b7'],
   AEOLIAN:    ['1', '2',  'b3', '4',  '5',  'b6', 'b7'],
   LOCRIAN:    ['1', 'b2', 'b3', '4',  'b5', 'b6', 'b7'],
-};
-
-export const SONG_MODES: { value: string; label: string }[] = [
-  { value: '',            label: 'Major' },
-  { value: 'm',           label: 'Minor' },
-  { value: ' Dorian',     label: 'Dorian' },
-  { value: ' Phrygian',   label: 'Phrygian' },
-  { value: ' Lydian',     label: 'Lydian' },
-  { value: ' Mixolydian', label: 'Mixolydian' },
-  { value: ' Locrian',    label: 'Locrian' },
-];
-
-export const SONG_MODE_TO_ENUM: Record<string, string> = {
-  '':            'IONIAN',
-  'm':           'AEOLIAN',
-  ' Dorian':     'DORIAN',
-  ' Phrygian':   'PHRYGIAN',
-  ' Lydian':     'LYDIAN',
-  ' Mixolydian': 'MIXOLYDIAN',
-  ' Locrian':    'LOCRIAN',
-};
-
-export const MODE_LABELS: Record<string, string> = {
-  IONIAN: 'Major', DORIAN: 'Dorian', PHRYGIAN: 'Phrygian', LYDIAN: 'Lydian',
-  MIXOLYDIAN: 'Mixolydian', AEOLIAN: 'Minor', LOCRIAN: 'Locrian',
-};
-
-export const MODE_SUFFIX: Record<string, string> = {
-  AEOLIAN:    'm',
-  DORIAN:     ' Dorian',
-  PHRYGIAN:   ' Phrygian',
-  LYDIAN:     ' Lydian',
-  MIXOLYDIAN: ' Mixolydian',
-  LOCRIAN:    ' Locrian',
 };
 
 export function formatNoteEnum(enumName: string): string {

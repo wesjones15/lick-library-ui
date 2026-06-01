@@ -4,7 +4,7 @@ import { getPentatonicDegree, getPentatonicNoteSet } from './cagedUtils';
 import PentatonicWidget from './PentatonicWidget';
 import ChordsWidget from './ChordsWidget';
 import { getScalePositions } from '../../core/api/client';
-import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI, MODE_SEMITONES, ROOT_CHROMATIC, MODES_WITH_LABELS, MODE_INTERVALS } from '../../core/music';
+import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI, MODE_SEMITONES, ROOT_CHROMATIC, MODE_DATA, MODE_INTERVALS } from '../../core/music';
 import { SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -223,8 +223,8 @@ export default function TheoryPage() {
           ))}
         </select>
         <select className={SELECT} value={mode} onChange={e => setMode(e.target.value)}>
-          {MODES_WITH_LABELS.map(m => (
-            <option key={m.value} value={m.value}>{m.label}</option>
+          {MODE_DATA.map(m => (
+            <option key={m.value} value={m.value}>{m.longLabel}</option>
           ))}
         </select>
         <InstrumentSelector

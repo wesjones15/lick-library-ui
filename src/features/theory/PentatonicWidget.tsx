@@ -1,4 +1,4 @@
-import { KEY_LABEL, MODES_WITH_LABELS } from '../../core/music';
+import { KEY_LABEL, MODE_DATA } from '../../core/music';
 import { BTN_SM, SELECT } from '../../core/ui';
 
 const GRID_NOTES = [
@@ -58,8 +58,8 @@ export default function PentatonicWidget({
           value={pentWidgetMode}
           onChange={e => onModeChange(e.target.value)}
         >
-          {MODES_WITH_LABELS.map(m => (
-            <option key={m.value} value={m.value}>{m.label}</option>
+          {MODE_DATA.map(m => (
+            <option key={m.value} value={m.value}>{m.longLabel}</option>
           ))}
         </select>
       </div>

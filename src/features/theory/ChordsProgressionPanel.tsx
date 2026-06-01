@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../../core/components/GuitarNeck';
 import { getDiatonicChords, type DiatonicChord } from './diatonicUtils';
 import { getChordVoicings, type ChordFrets } from '../../core/api/client';
-import { NOTE_KEYS, getStringCount, getStringLabels, MODES_WITH_LABELS } from '../../core/music';
+import { NOTE_KEYS, getStringCount, getStringLabels, MODE_DATA } from '../../core/music';
 import { SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -100,8 +100,8 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
           ))}
         </select>
         <select className={SELECT} value={mode} onChange={e => setMode(e.target.value)}>
-          {MODES_WITH_LABELS.map(m => (
-            <option key={m.value} value={m.value}>{m.label}</option>
+          {MODE_DATA.map(m => (
+            <option key={m.value} value={m.value}>{m.longLabel}</option>
           ))}
         </select>
         <InstrumentSelector

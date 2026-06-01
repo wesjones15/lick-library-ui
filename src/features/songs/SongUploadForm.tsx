@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { uploadSong } from '../../core/api/client';
-import { CHROMATIC_NOTES, SONG_MODES, SONG_MODE_TO_ENUM } from '../../core/music';
+import { CHROMATIC_NOTES, MODE_DATA, SONG_MODE_TO_ENUM } from '../../core/music';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import NumpadInput from '../../core/components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -92,8 +92,8 @@ export default function SongUploadForm({ onSuccess }: Props) {
           disabled={!keyRoot}
           className="w-24 border border-gray-300 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400 disabled:opacity-40"
         >
-          {SONG_MODES.map(m => (
-            <option key={m.value} value={m.value}>{m.label}</option>
+          {MODE_DATA.map(m => (
+            <option key={m.suffix} value={m.suffix}>{m.label}</option>
           ))}
         </select>
         <NumpadInput
