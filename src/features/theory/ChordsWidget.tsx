@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
-import { ROOT_CHROMATIC, GUITAR_OPEN_MIDI } from '../../core/music';
+import { ROOT_CHROMATIC, GUITAR_OPEN_MIDI, CHROMATIC_NOTES } from '../../core/music';
 import { BTN_SM } from '../../core/ui';
-const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 const INTERVAL_NAMES = ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5', 'b6', '6', 'b7', '7'];
 
 const CHORD_QUALITIES: Record<string, number[]> = {
@@ -58,7 +57,7 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
           shapeMod12.length === semitones.length &&
           shapeMod12.every((v, i) => v === semitones[i])
         ) {
-          chords.push({ root: NOTE_NAMES[candidateRoot], quality });
+          chords.push({ root: CHROMATIC_NOTES[candidateRoot], quality });
         }
       }
     }

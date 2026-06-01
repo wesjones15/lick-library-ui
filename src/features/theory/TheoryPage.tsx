@@ -4,32 +4,13 @@ import { getPentatonicDegree, getPentatonicNoteSet } from './cagedUtils';
 import PentatonicWidget from './PentatonicWidget';
 import ChordsWidget from './ChordsWidget';
 import { getScalePositions } from '../../core/api/client';
-import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI, MODE_SEMITONES, ROOT_CHROMATIC } from '../../core/music';
+import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI, MODE_SEMITONES, ROOT_CHROMATIC, MODES_WITH_LABELS, MODE_INTERVALS } from '../../core/music';
 import { SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 
 const FRET_COUNT = 12;
 
-const MODES = [
-  { value: 'IONIAN',     label: 'Major (Ionian)'          },
-  { value: 'DORIAN',     label: 'Dorian'                  },
-  { value: 'PHRYGIAN',   label: 'Phrygian'                },
-  { value: 'LYDIAN',     label: 'Lydian'                  },
-  { value: 'MIXOLYDIAN', label: 'Mixolydian'              },
-  { value: 'AEOLIAN',    label: 'Natural Minor (Aeolian)'  },
-  { value: 'LOCRIAN',    label: 'Locrian'                 },
-];
-
-const MODE_INTERVALS: Record<string, string[]> = {
-  IONIAN:     ['1', '2',  '3',  '4',  '5',  '6',  '7' ],
-  DORIAN:     ['1', '2',  'b3', '4',  '5',  '6',  'b7'],
-  PHRYGIAN:   ['1', 'b2', 'b3', '4',  '5',  'b6', 'b7'],
-  LYDIAN:     ['1', '2',  '3',  '#4', '5',  '6',  '7' ],
-  MIXOLYDIAN: ['1', '2',  '3',  '4',  '5',  '6',  'b7'],
-  AEOLIAN:    ['1', '2',  'b3', '4',  '5',  'b6', 'b7'],
-  LOCRIAN:    ['1', 'b2', 'b3', '4',  'b5', 'b6', 'b7'],
-};
 
 function blankScaleDots(n: number): NeckDot[][] {
   return Array.from({ length: n }, () =>
@@ -242,7 +223,7 @@ export default function TheoryPage() {
           ))}
         </select>
         <select className={SELECT} value={mode} onChange={e => setMode(e.target.value)}>
-          {MODES.map(m => (
+          {MODES_WITH_LABELS.map(m => (
             <option key={m.value} value={m.value}>{m.label}</option>
           ))}
         </select>

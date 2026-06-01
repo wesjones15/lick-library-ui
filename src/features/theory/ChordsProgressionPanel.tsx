@@ -2,22 +2,12 @@ import { useState, useEffect } from 'react';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../../core/components/GuitarNeck';
 import { getDiatonicChords, type DiatonicChord } from './diatonicUtils';
 import { getChordVoicings, type ChordFrets } from '../../core/api/client';
-import { NOTE_KEYS, getStringCount, getStringLabels } from '../../core/music';
+import { NOTE_KEYS, getStringCount, getStringLabels, MODES_WITH_LABELS } from '../../core/music';
 import { SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 
 const FRET_COUNT = 12;
-
-const MODES = [
-  { value: 'IONIAN',     label: 'Major (Ionian)'         },
-  { value: 'DORIAN',     label: 'Dorian'                 },
-  { value: 'PHRYGIAN',   label: 'Phrygian'               },
-  { value: 'LYDIAN',     label: 'Lydian'                 },
-  { value: 'MIXOLYDIAN', label: 'Mixolydian'             },
-  { value: 'AEOLIAN',    label: 'Natural Minor (Aeolian)' },
-  { value: 'LOCRIAN',    label: 'Locrian'                },
-];
 
 
 function blankDots(n: number): NeckDot[][] {
@@ -110,7 +100,7 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
           ))}
         </select>
         <select className={SELECT} value={mode} onChange={e => setMode(e.target.value)}>
-          {MODES.map(m => (
+          {MODES_WITH_LABELS.map(m => (
             <option key={m.value} value={m.value}>{m.label}</option>
           ))}
         </select>

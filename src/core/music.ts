@@ -1,3 +1,21 @@
+export type InstrumentName =
+  | 'GUITAR' | 'DROP_D' | 'OPEN_G' | 'OPEN_D' | 'DADGAD' | 'EB'
+  | 'BASS' | 'UKULELE' | 'MANDOLIN' | 'BANJO' | 'CUSTOM';
+
+export const INSTRUMENT_LIST: { value: InstrumentName; label: string }[] = [
+  { value: 'GUITAR',   label: 'Standard Guitar' },
+  { value: 'DROP_D',   label: 'Drop D'          },
+  { value: 'OPEN_G',   label: 'Open G'          },
+  { value: 'OPEN_D',   label: 'Open D'          },
+  { value: 'DADGAD',   label: 'DADGAD'          },
+  { value: 'EB',       label: 'Eb Tuning'       },
+  { value: 'BASS',     label: 'Bass'            },
+  { value: 'UKULELE',  label: 'Ukulele'         },
+  { value: 'MANDOLIN', label: 'Mandolin'        },
+  { value: 'BANJO',    label: 'Banjo'           },
+  { value: 'CUSTOM',   label: 'Custom…'         },
+];
+
 export const NOTE_KEYS: { value: string; label: string }[] = [
   { value: 'C',       label: 'C'  },
   { value: 'C_SHARP', label: 'C#' },
@@ -15,6 +33,9 @@ export const NOTE_KEYS: { value: string; label: string }[] = [
 
 export const CHROMATIC_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 
+export const NOTE_LABEL_TO_KEY: Record<string, string> =
+  Object.fromEntries(NOTE_KEYS.map(({ value, label }) => [label, value]));
+
 export const KEY_LABEL: Record<string, string> = {
   C: 'C', C_SHARP: 'C#', D: 'D', D_SHARP: 'D#',
   E: 'E', F: 'F', F_SHARP: 'F#', G: 'G',
@@ -22,6 +43,26 @@ export const KEY_LABEL: Record<string, string> = {
 };
 
 export const MODES = ['IONIAN', 'DORIAN', 'PHRYGIAN', 'LYDIAN', 'MIXOLYDIAN', 'AEOLIAN', 'LOCRIAN'];
+
+export const MODES_WITH_LABELS: { value: string; label: string }[] = [
+  { value: 'IONIAN',     label: 'Major (Ionian)'          },
+  { value: 'DORIAN',     label: 'Dorian'                  },
+  { value: 'PHRYGIAN',   label: 'Phrygian'                },
+  { value: 'LYDIAN',     label: 'Lydian'                  },
+  { value: 'MIXOLYDIAN', label: 'Mixolydian'              },
+  { value: 'AEOLIAN',    label: 'Natural Minor (Aeolian)'  },
+  { value: 'LOCRIAN',    label: 'Locrian'                 },
+];
+
+export const MODE_INTERVALS: Record<string, string[]> = {
+  IONIAN:     ['1', '2',  '3',  '4',  '5',  '6',  '7' ],
+  DORIAN:     ['1', '2',  'b3', '4',  '5',  '6',  'b7'],
+  PHRYGIAN:   ['1', 'b2', 'b3', '4',  '5',  'b6', 'b7'],
+  LYDIAN:     ['1', '2',  '3',  '#4', '5',  '6',  '7' ],
+  MIXOLYDIAN: ['1', '2',  '3',  '4',  '5',  '6',  'b7'],
+  AEOLIAN:    ['1', '2',  'b3', '4',  '5',  'b6', 'b7'],
+  LOCRIAN:    ['1', 'b2', 'b3', '4',  'b5', 'b6', 'b7'],
+};
 
 export const SONG_MODES: { value: string; label: string }[] = [
   { value: '',            label: 'Major' },

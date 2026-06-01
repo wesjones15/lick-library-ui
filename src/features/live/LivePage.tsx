@@ -2,22 +2,12 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../../core/components/GuitarNeck';
 import { getScalePositions } from '../../core/api/client';
 import { usePitchDetection } from './usePitchDetection';
-import { NOTE_KEYS, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI } from '../../core/music';
+import { NOTE_KEYS, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI, MODES_WITH_LABELS } from '../../core/music';
 import { BTN, SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 
 const FRET_COUNT = 12;
-
-const MODES = [
-  { value: 'IONIAN',     label: 'Major (Ionian)'          },
-  { value: 'DORIAN',     label: 'Dorian'                  },
-  { value: 'PHRYGIAN',   label: 'Phrygian'                },
-  { value: 'LYDIAN',     label: 'Lydian'                  },
-  { value: 'MIXOLYDIAN', label: 'Mixolydian'              },
-  { value: 'AEOLIAN',    label: 'Natural Minor (Aeolian)'  },
-  { value: 'LOCRIAN',    label: 'Locrian'                 },
-];
 
 function blankScaleDots(n: number): NeckDot[][] {
   return Array.from({ length: n }, () =>
@@ -158,7 +148,7 @@ export default function LivePage() {
           ))}
         </select>
         <select className={SELECT} value={mode} onChange={e => setMode(e.target.value)}>
-          {MODES.map(m => (
+          {MODES_WITH_LABELS.map(m => (
             <option key={m.value} value={m.value}>{m.label}</option>
           ))}
         </select>

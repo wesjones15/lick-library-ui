@@ -11,30 +11,7 @@ function modeLabel(mode: string) {
   return mode.charAt(0) + mode.slice(1).toLowerCase();
 }
 
-import { KEY_LABEL } from '../../core/music';
-
-const INSTRUMENT_LABELS: Record<string, string> = {
-  GUITAR:   'Standard Guitar',
-  DROP_D:   'Drop D',
-  OPEN_G:   'Open G',
-  OPEN_D:   'Open D',
-  DADGAD:   'DADGAD',
-  BASS:     'Bass',
-  UKULELE:  'Ukulele',
-  MANDOLIN: 'Mandolin',
-  BANJO:    'Banjo',
-  CUSTOM:   'Custom',
-};
-
-const MODE_INTERVALS: Record<string, string> = {
-  IONIAN:     '1  2  3  4  5  6  7',
-  DORIAN:     '1  2  b3  4  5  6  b7',
-  PHRYGIAN:   '1  b2  b3  4  5  b6  b7',
-  LYDIAN:     '1  2  3  #4  5  6  7',
-  MIXOLYDIAN: '1  2  3  4  5  6  b7',
-  AEOLIAN:    '1  2  b3  4  5  b6  b7',
-  LOCRIAN:    '1  b2  b3  4  b5  b6  b7',
-};
+import { KEY_LABEL, INSTRUMENT_LIST, MODE_INTERVALS } from '../../core/music';
 
 export default function LickDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -83,7 +60,7 @@ export default function LickDetailPage() {
                       {modeLabel(lick.mode)}
                     </span>
                     <span className="absolute left-0 top-full mt-1 px-2 py-1 text-xs font-mono bg-gray-800 text-white rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                      {MODE_INTERVALS[lick.mode]}
+                      {(MODE_INTERVALS[lick.mode] ?? []).join('  ')}
                     </span>
                   </span>
                 )}
@@ -130,7 +107,7 @@ export default function LickDetailPage() {
           <span className="normal-case font-medium text-gray-500">
             {instrument === 'CUSTOM'
               ? (appliedTuning.trim() || 'Custom')
-              : (INSTRUMENT_LABELS[instrument] ?? instrument)}
+              : (INSTRUMENT_LIST.find(i => i.value === instrument)?.label ?? instrument)}
           </span>
         </p>
         {loading && <p className="text-gray-400 text-sm">Loading…</p>}

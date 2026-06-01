@@ -12,7 +12,7 @@ import type { InstrumentName } from '../../core/useInstrument';
 import { parseChordName } from './parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { useSongNavContext } from '../../core/context/SongNavContext';
-import { KEY_LABEL, CHROMATIC_NOTES, MODE_SUFFIX, getStringCount } from '../../core/music';
+import { KEY_LABEL, CHROMATIC_NOTES, MODE_SUFFIX, getStringCount, NOTE_LABEL_TO_KEY } from '../../core/music';
 import { BTN_ICON } from '../../core/ui';
 
 function keyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
@@ -258,18 +258,12 @@ export default function SongDetailPage() {
   }, [viewMode, song, isPortrait]);
 
 
-  // Compute Note enum key for the lick positions API (e.g. "C_SHARP")
-  const DISPLAY_TO_NOTE: Record<string, string> = {
-    'C': 'C', 'C#': 'C_SHARP', 'D': 'D', 'D#': 'D_SHARP', 'E': 'E',
-    'F': 'F', 'F#': 'F_SHARP', 'G': 'G', 'G#': 'G_SHARP', 'A': 'A',
-    'Bb': 'B_FLAT', 'B': 'B',
-  };
   const currentNoteKey = (() => {
     if (!song?.originalKey) return null;
     const label = keyLabel(song.originalKey, semitones - (song.capo ?? 0));
     const rootMatch = label.match(/^([A-G][#b]?)/);
     if (!rootMatch) return null;
-    return DISPLAY_TO_NOTE[rootMatch[1]] ?? null;
+    return NOTE_LABEL_TO_KEY[rootMatch[1]] ?? null;
   })();
 
   async function handleTabLicksToggle() {

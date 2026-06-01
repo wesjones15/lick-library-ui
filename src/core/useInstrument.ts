@@ -1,8 +1,6 @@
 import { useState } from 'react';
-
-export type InstrumentName =
-  | 'GUITAR' | 'DROP_D' | 'OPEN_G' | 'OPEN_D' | 'DADGAD' | 'EB'
-  | 'BASS' | 'UKULELE' | 'MANDOLIN' | 'BANJO' | 'CUSTOM';
+import type { InstrumentName } from './music';
+export type { InstrumentName } from './music';
 
 const LS_INSTRUMENT    = 'lick_instrument';
 const LS_CUSTOM_TUNING = 'lick_custom_tuning';

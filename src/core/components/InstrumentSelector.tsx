@@ -1,4 +1,5 @@
-import type { InstrumentName } from '../useInstrument';
+import { INSTRUMENT_LIST } from '../music';
+import type { InstrumentName } from '../music';
 
 interface Props {
   instrument: InstrumentName;
@@ -11,19 +12,6 @@ interface Props {
   compact?: boolean;
 }
 
-const INSTRUMENTS: { value: InstrumentName; label: string }[] = [
-  { value: 'GUITAR',   label: 'Standard Guitar' },
-  { value: 'DROP_D',   label: 'Drop D' },
-  { value: 'OPEN_G',   label: 'Open G' },
-  { value: 'OPEN_D',   label: 'Open D' },
-  { value: 'DADGAD',   label: 'DADGAD' },
-  { value: 'EB',       label: 'Eb Tuning' },
-  { value: 'BASS',     label: 'Bass' },
-  { value: 'UKULELE',  label: 'Ukulele' },
-  { value: 'MANDOLIN', label: 'Mandolin' },
-  { value: 'BANJO',    label: 'Banjo' },
-  { value: 'CUSTOM',   label: 'Custom…' },
-];
 
 const SELECT_CLASS =
   'border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-indigo-400';
@@ -31,7 +19,7 @@ const SELECT_CLASS =
 export default function InstrumentSelector({
   instrument, customTuning = '', onInstrumentChange, onCustomTuningChange, onSubmit, error, excludeCustom = false, compact = false,
 }: Props) {
-  const options = excludeCustom ? INSTRUMENTS.filter(i => i.value !== 'CUSTOM') : INSTRUMENTS;
+  const options = excludeCustom ? INSTRUMENT_LIST.filter(i => i.value !== 'CUSTOM') : INSTRUMENT_LIST;
   const sizeClass = compact ? 'px-1.5 py-0.5 text-xs' : 'px-3 py-2 text-sm';
   return (
     <div className="flex flex-col gap-1">

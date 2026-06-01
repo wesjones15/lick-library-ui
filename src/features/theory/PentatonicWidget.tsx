@@ -1,15 +1,5 @@
-import { KEY_LABEL } from '../../core/music';
+import { KEY_LABEL, MODES_WITH_LABELS } from '../../core/music';
 import { BTN_SM, SELECT } from '../../core/ui';
-
-const MODES = [
-  { value: 'IONIAN',     label: 'Ionian (Major)'     },
-  { value: 'DORIAN',     label: 'Dorian'              },
-  { value: 'PHRYGIAN',   label: 'Phrygian'            },
-  { value: 'LYDIAN',     label: 'Lydian'              },
-  { value: 'MIXOLYDIAN', label: 'Mixolydian'          },
-  { value: 'AEOLIAN',    label: 'Aeolian (N. Minor)'  },
-  { value: 'LOCRIAN',    label: 'Locrian'             },
-];
 
 const GRID_NOTES = [
   ['C', 'C_SHARP', 'D', 'D_SHARP'],
@@ -68,7 +58,7 @@ export default function PentatonicWidget({
           value={pentWidgetMode}
           onChange={e => onModeChange(e.target.value)}
         >
-          {MODES.map(m => (
+          {MODES_WITH_LABELS.map(m => (
             <option key={m.value} value={m.value}>{m.label}</option>
           ))}
         </select>

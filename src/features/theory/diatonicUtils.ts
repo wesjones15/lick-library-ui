@@ -1,13 +1,7 @@
-import { MODE_SEMITONES, ROOT_CHROMATIC } from '../../core/music';
+import { MODE_SEMITONES, ROOT_CHROMATIC, CHROMATIC_NOTES } from '../../core/music';
 
-// Chromatic index → backend-acceptable note name (passed to GET /api/chord?root=)
-const INDEX_TO_NOTE: Record<number, string> = {
-  0: 'C', 1: 'C#', 2: 'D', 3: 'D#', 4: 'E', 5: 'F',
-  6: 'F#', 7: 'G', 8: 'G#', 9: 'A', 10: 'Bb', 11: 'B',
-};
-
-// Display label for each chromatic index (shown in chord card UI)
-const INDEX_TO_DISPLAY: Record<number, string> = { ...INDEX_TO_NOTE };
+const INDEX_TO_NOTE: Record<number, string> =
+  Object.fromEntries(CHROMATIC_NOTES.map((n, i) => [i, n]));
 
 
 export type ChordQuality = 'maj' | 'min' | 'dim' | 'aug';
@@ -59,7 +53,7 @@ export function getDiatonicChords(rootKey: string, mode: string): DiatonicChord[
     return {
       degree,
       roman: romanNumeral(degree, quality),
-      rootDisplay: INDEX_TO_DISPLAY[noteIdx],
+      rootDisplay: INDEX_TO_NOTE[noteIdx],
       rootApi: INDEX_TO_NOTE[noteIdx],
       quality,
       apiSuffix: API_SUFFIX[quality],
