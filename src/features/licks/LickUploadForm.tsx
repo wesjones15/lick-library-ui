@@ -2,6 +2,7 @@ import { useState, useRef, useLayoutEffect } from 'react';
 import { uploadLick } from '../../core/api/client';
 import type { UploadRequest } from '../../core/api/client';
 import { NOTE_KEYS, MODE_DATA, VALID_INPUT } from '../../core/music';
+import { TEXTAREA_MONO, SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import { useInstrument } from '../../core/useInstrument';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -146,7 +147,7 @@ export default function LickUploadForm({ onSuccess }: Props) {
         onChange={e => setRawTab(e.target.value)}
         onKeyDown={handleKeyDown}
         rows={stringCount + 1}
-        className="font-mono text-sm border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:border-indigo-400 bg-gray-50"
+        className={TEXTAREA_MONO}
       />
       <div className="flex gap-2 flex-wrap items-start">
         <InstrumentSelector
@@ -159,7 +160,7 @@ export default function LickUploadForm({ onSuccess }: Props) {
         <select
           value={inputKey}
           onChange={e => setInputKey(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400 flex-1"
+          className={`${SELECT} flex-1`}
         >
           <option value="">Root: first note</option>
           {NOTE_KEYS.map(k => (
@@ -169,7 +170,7 @@ export default function LickUploadForm({ onSuccess }: Props) {
         <select
           value={mode}
           onChange={e => setMode(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400 flex-1"
+          className={`${SELECT} flex-1`}
         >
           <option value="">Auto-detect mode</option>
           {MODE_DATA.map(m => (

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { uploadSong } from '../../core/api/client';
 import { CHROMATIC_NOTES, MODE_DATA, SONG_MODE_TO_ENUM } from '../../core/music';
+import { TEXTAREA_MONO, SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import NumpadInput from '../../core/components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -65,21 +66,21 @@ export default function SongUploadForm({ onSuccess }: Props) {
           value={title}
           onChange={e => setTitle(e.target.value)}
           required
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
+          className={`${SELECT} flex-1`}
         />
         <input
           type="text"
           placeholder="Artist"
           value={artist}
           onChange={e => setArtist(e.target.value)}
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
+          className={`${SELECT} flex-1`}
         />
       </div>
       <div className="flex gap-2">
         <select
           value={keyRoot}
           onChange={e => setKeyRoot(e.target.value)}
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-indigo-400"
+          className={`${SELECT} flex-1`}
         >
           <option value="">Key (optional)</option>
           {CHROMATIC_NOTES.map(r => (
@@ -102,7 +103,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
           max={11}
           value={capo}
           onChange={val => setCapo(val)}
-          className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
+          className={`${SELECT} w-20`}
         />
         <NumpadInput
           placeholder="BPM"
@@ -115,7 +116,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
             const v = parseInt(val, 10);
             if (!isNaN(v)) setTempo(String(Math.min(240, Math.max(40, v))));
           }}
-          className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
+          className={`${SELECT} w-20`}
         />
         <select
           value={timeSignature}
@@ -135,7 +136,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
         value={rawChordSheet}
         onChange={e => setRawChordSheet(e.target.value)}
         rows={10}
-        className="font-mono text-sm border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:border-indigo-400 bg-gray-50"
+        className={TEXTAREA_MONO}
       />
       <button
         type="submit"

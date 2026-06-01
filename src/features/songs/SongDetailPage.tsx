@@ -15,6 +15,8 @@ import { useSongNavContext } from '../../core/context/SongNavContext';
 import { formatNoteEnum, NOTE_KEYS, CHROMATIC_NOTES, MODE_SUFFIX, getStringCount } from '../../core/music';
 import { BTN_ICON } from '../../core/ui';
 
+const MENU_ITEM = 'px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50';
+
 function keyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
   if (!originalKey) return '';
   const display = formatNoteEnum(originalKey);
@@ -455,13 +457,13 @@ export default function SongDetailPage() {
                   <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-50 flex flex-col py-1">
                     <button
                       onClick={() => { setViewMode(m => m === 'columns' ? 'scroll' : 'columns'); setOverflowOpen(false); }}
-                      className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
+                      className={MENU_ITEM}
                     >
                       View: {viewMode === 'scroll' ? 'columns' : 'scroll'}
                     </button>
                     <button
                       onClick={() => { setShowChords(v => !v); setOverflowOpen(false); }}
-                      className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
+                      className={MENU_ITEM}
                     >
                       {showChords ? 'Hide Chords' : 'Show Chords'}
                     </button>
@@ -474,14 +476,14 @@ export default function SongDetailPage() {
                     {song?.ownedByCurrentUser && (
                       <button
                         onClick={() => { navigate(`/song/${id}/manage?semitones=${semitones}`); setOverflowOpen(false); }}
-                        className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
+                        className={MENU_ITEM}
                       >
                         Manage
                       </button>
                     )}
                     <button
                       onClick={() => { navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}&tempoOverride=${currentPlaylistEntry?.tempoOverride ?? ''}`); setOverflowOpen(false); }}
-                      className="px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50"
+                      className={MENU_ITEM}
                     >
                       Noodle
                     </button>

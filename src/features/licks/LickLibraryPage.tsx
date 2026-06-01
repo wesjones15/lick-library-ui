@@ -7,11 +7,7 @@ import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
 import { MODE_DATA } from '../../core/music';
 import NumpadInput from '../../core/components/NumpadInput';
-
-const TOGGLE_BASE = 'px-3 py-1.5 text-xs rounded-lg border transition-colors';
-const TOGGLE_ON = 'border-indigo-300 bg-indigo-50 text-indigo-600';
-const TOGGLE_OFF = 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300';
-const INPUT_CLASS = 'border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:outline-none focus:border-indigo-400';
+import { TOGGLE_SOFT, TOGGLE_SOFT_ON, TOGGLE_SOFT_OFF, INPUT_SM } from '../../core/ui';
 
 export default function LickLibraryPage() {
   const [licks, setLicks] = useState<LickSummary[]>([]);
@@ -78,13 +74,13 @@ export default function LickLibraryPage() {
         />
         <button
           onClick={() => setIncludeSongLicks(v => !v)}
-          className={`ml-auto ${TOGGLE_BASE} ${includeSongLicks ? TOGGLE_ON : TOGGLE_OFF}`}
+          className={`ml-auto ${TOGGLE_SOFT} ${includeSongLicks ? TOGGLE_SOFT_ON : TOGGLE_SOFT_OFF}`}
         >
           {includeSongLicks ? 'Song Licks: on' : 'Song Licks'}
         </button>
         <button
           onClick={() => setIsManaging(v => !v)}
-          className={`${TOGGLE_BASE} ${isManaging ? TOGGLE_ON : TOGGLE_OFF}`}
+          className={`${TOGGLE_SOFT} ${isManaging ? TOGGLE_SOFT_ON : TOGGLE_SOFT_OFF}`}
         >
           {isManaging ? 'Managing' : 'Manage'}
         </button>
@@ -94,7 +90,7 @@ export default function LickLibraryPage() {
         <select
           value={modeFilter}
           onChange={e => setModeFilter(e.target.value)}
-          className={INPUT_CLASS}
+          className={INPUT_SM}
         >
           <option value="">All modes</option>
           {MODE_DATA.map(m => (
@@ -106,21 +102,21 @@ export default function LickLibraryPage() {
           value={minLength}
           onChange={val => setMinLength(val)}
           placeholder="Min length"
-          className={`${INPUT_CLASS} w-24`}
+          className={`${INPUT_SM} w-24`}
         />
         <NumpadInput
           min={0}
           value={maxLength}
           onChange={val => setMaxLength(val)}
           placeholder="Max length"
-          className={`${INPUT_CLASS} w-24`}
+          className={`${INPUT_SM} w-24`}
         />
         <input
           type="text"
           value={intervalSearch}
           onChange={e => setIntervalSearch(e.target.value)}
           placeholder="Intervals e.g. 1,b3,4"
-          className={`${INPUT_CLASS} flex-1 min-w-32`}
+          className={`${INPUT_SM} flex-1 min-w-32`}
         />
       </div>
 

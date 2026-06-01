@@ -8,7 +8,7 @@ import {
 import type { PlaylistDetail, PlaylistEntry, SongSummary } from '../../core/api/client';
 
 import { formatNoteEnum, CHROMATIC_NOTES, MODE_SUFFIX } from '../../core/music';
-import { BTN_ICON } from '../../core/ui';
+import { BTN_ICON, SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import NumpadInput from '../../core/components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -200,7 +200,7 @@ function AddSongsModal({
           value={filter}
           onChange={e => setFilter(e.target.value)}
           placeholder="Search songs…"
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 mb-3"
+          className={`${SELECT} mb-3`}
         />
         <div className="overflow-y-auto flex-1">
           {visible.length === 0 ? (

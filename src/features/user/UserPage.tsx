@@ -9,6 +9,7 @@ import {
 } from '../../core/api/client';
 import type { UserProfileResponse, AdminUserResponse, LickSummary, SongSummary, PlaylistSummary, SongUpdateRequestSummary } from '../../core/api/client';
 import SongUpdateReviewModal from '../songs/SongUpdateReviewModal';
+import { ALERT_AMBER, ALERT_RED } from '../../core/ui';
 
 export default function UserPage() {
   const { currentUser, logout } = useAuth();
@@ -198,14 +199,14 @@ export default function UserPage() {
 
       {/* Status banners for non-approved non-admin */}
       {isPending && !isAdmin && (
-        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+        <div className={`mb-6 ${ALERT_AMBER}`}>
           {currentUser.requestType === 'ACCOUNT_DELETION'
             ? 'Your deletion request is pending admin review.'
             : "Your account is pending approval. You'll have full access once an admin approves your request."}
         </div>
       )}
       {isRejected && !isAdmin && (
-        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className={`mb-6 ${ALERT_RED}`}>
           Your account request was not approved.
         </div>
       )}

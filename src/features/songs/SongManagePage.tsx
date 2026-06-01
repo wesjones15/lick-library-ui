@@ -6,7 +6,7 @@ import ChordDiagram from '../chords/ChordDiagram';
 import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
 import { CHROMATIC_NOTES, MODE_DATA, MODE_SUFFIX, SONG_MODE_TO_ENUM } from '../../core/music';
-import { BTN_SECONDARY } from '../../core/ui';
+import { BTN_SECONDARY, SELECT, TEXTAREA_MONO, ALERT_AMBER, ALERT_GREEN } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import NumpadInput from '../../core/components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -24,7 +24,7 @@ function parseStoredKey(stored: string): { root: string; mode: string } {
   return { root, mode: modeName ? ` ${modeName}` : minorSuffix };
 }
 
-const inputClass = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400';
+const BTN_SUBMIT = 'px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end';
 
 function extractChordNames(song: SongDetail): string[] {
   const seen = new Set<string>();
@@ -238,13 +238,13 @@ export default function SongManagePage() {
       </Link>
 
       {!isOwner && (
-        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+        <div className={`mb-4 ${ALERT_AMBER}`}>
           You are not the owner of this song. Changes will be submitted for admin review.
         </div>
       )}
 
       {submitSuccess && (
-        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+        <div className={`mb-4 ${ALERT_GREEN}`}>
           Update submitted — an admin will review your changes.
         </div>
       )}
@@ -257,20 +257,20 @@ export default function SongManagePage() {
             onChange={e => setTitle(e.target.value)}
             placeholder="Title *"
             required
-            className={`${inputClass} w-full`}
+            className={`${SELECT} w-full`}
           />
           <input
             type="text"
             value={artist}
             onChange={e => setArtist(e.target.value)}
             placeholder="Artist"
-            className={`${inputClass} w-full`}
+            className={`${SELECT} w-full`}
           />
           <div className="flex gap-2">
             <select
               value={keyRoot}
               onChange={e => setKeyRoot(e.target.value)}
-              className={`${inputClass} flex-1 bg-white`}
+              className={`${SELECT} flex-1`}
             >
               <option value="">— Key —</option>
               {CHROMATIC_NOTES.map(r => (
@@ -281,7 +281,7 @@ export default function SongManagePage() {
               value={keyMode}
               onChange={e => setKeyMode(e.target.value)}
               disabled={!keyRoot}
-              className={`${inputClass} w-24 bg-white disabled:opacity-40`}
+              className={`${SELECT} w-24 disabled:opacity-40`}
             >
               {MODE_DATA.map(m => (
                 <option key={m.suffix} value={m.suffix}>{m.label}</option>
@@ -293,19 +293,19 @@ export default function SongManagePage() {
               placeholder="Capo"
               min={0}
               max={11}
-              className={`${inputClass} w-20`}
+              className={`${SELECT} w-20`}
             />
             <NumpadInput
               value={tempo}
               onChange={val => setTempo(val)}
               placeholder="BPM"
               min={1}
-              className={`${inputClass} w-24`}
+              className={`${SELECT} w-24`}
             />
             <select
               value={timeSignature}
               onChange={e => setTimeSignature(Number(e.target.value))}
-              className={`${inputClass} w-20 bg-white`}
+              className={`${SELECT} w-20`}
             >
               <option value={1}>1/4</option>
               <option value={2}>2/4</option>
@@ -323,7 +323,7 @@ export default function SongManagePage() {
           <button
             type="submit"
             disabled={loading || !metadataIsDirty || !title.trim()}
-            className="px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end"
+            className={BTN_SUBMIT}
           >
             {loading ? 'Saving…' : isOwner ? 'Save' : 'Submit for review'}
           </button>
@@ -382,12 +382,12 @@ export default function SongManagePage() {
             value={rawChordSheet}
             onChange={e => setRawChordSheet(e.target.value)}
             rows={14}
-            className="font-mono text-sm border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:border-indigo-400 bg-gray-50"
+            className={TEXTAREA_MONO}
           />
           <button
             type="submit"
             disabled={loading || !chartIsDirty}
-            className="px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end"
+            className={BTN_SUBMIT}
           >
             {loading ? 'Saving…' : isOwner ? 'Save & Re-parse' : 'Submit for review'}
           </button>

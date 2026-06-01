@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllPlaylists, addPlaylistEntry, removePlaylistEntry, updatePlaylistEntry, getPlaylistsContainingSong } from '../../core/api/client';
 import type { PlaylistSummary } from '../../core/api/client';
+import { SELECT } from '../../core/ui';
 
 interface Props {
   songId: string;
@@ -95,7 +96,7 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
           value={filter}
           onChange={e => setFilter(e.target.value)}
           placeholder="Filter playlists…"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 mb-3"
+          className={`w-full ${SELECT} mb-3`}
         />
 
         {visible.length === 0 ? (

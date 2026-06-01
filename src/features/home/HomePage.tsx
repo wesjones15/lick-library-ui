@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../core/auth/AuthContext';
+import { ALERT_AMBER } from '../../core/ui';
 
 const FEATURES = [
   {
@@ -54,7 +55,7 @@ export default function HomePage() {
       </div>
       <p className="text-gray-400 text-sm mb-6">A guitar practice tool.</p>
       {currentUser && currentUser.status !== 'APPROVED' && currentUser.role !== 'ADMIN' && (
-        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+        <div className={`mb-6 ${ALERT_AMBER}`}>
           {currentUser.status === 'REJECTED'
             ? 'Your account request was not approved.'
             : currentUser.requestType === 'ACCOUNT_DELETION'

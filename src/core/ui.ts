@@ -18,3 +18,15 @@ export const BTN_SUCCESS   = 'px-4 py-2 text-sm rounded-lg bg-green-600 text-whi
 // Form controls
 export const SELECT         = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 bg-white';
 export const SELECT_COMPACT = 'border border-gray-300 rounded-lg px-1.5 py-0.5 text-xs focus:outline-none focus:border-indigo-400 bg-white';
+export const INPUT_SM       = 'border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:outline-none focus:border-indigo-400';
+export const TEXTAREA_MONO  = 'font-mono text-sm border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:border-indigo-400 bg-gray-50';
+
+// Soft/outlined toggle (distinct visual from filled TOGGLE/TOGGLE_ON/TOGGLE_OFF)
+export const TOGGLE_SOFT     = 'px-3 py-1.5 text-xs rounded-lg border transition-colors';
+export const TOGGLE_SOFT_ON  = 'border-indigo-300 bg-indigo-50 text-indigo-600';
+export const TOGGLE_SOFT_OFF = 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300';
+
+// Alert banners — callers prepend margin (e.g. `mb-4 ${ALERT_AMBER}`)
+export const ALERT_AMBER = 'rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700';
+export const ALERT_GREEN = 'rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700';
+export const ALERT_RED   = 'rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700';

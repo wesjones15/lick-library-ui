@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllPlaylists, createPlaylist, deletePlaylist, renamePlaylist } from '../../core/api/client';
-import { BTN_PRIMARY } from '../../core/ui';
+import { BTN_PRIMARY, SELECT } from '../../core/ui';
 import type { PlaylistSummary } from '../../core/api/client';
 
 type PlaylistFilter = 'all' | 'mine' | 'public';
@@ -186,7 +186,7 @@ export default function PlaylistsPage() {
                 value={newName}
                 onChange={e => setNewName(e.target.value)}
                 placeholder="Playlist name…"
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
+                className={SELECT}
               />
               <button
                 type="submit"
