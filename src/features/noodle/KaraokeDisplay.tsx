@@ -1,4 +1,5 @@
 import type { ChordLyric } from '../../core/api/client';
+import { C_GRAY_BG_50 } from '../../core/colors';
 
 interface Props {
   lines: ChordLyric[];
@@ -25,7 +26,7 @@ function dotRow(count: number, filled: number, size: number): React.ReactNode {
     <span
       key={i}
       className={`inline-block rounded-full flex-shrink-0 transition-colors duration-75 ${
-        i < filled ? 'bg-indigo-500' : 'bg-gray-200'
+        i < filled ? 'bg-indigo-500' : '${C_GRAY_BG_200}'
       }`}
       style={{ width: size, height: size }}
     />
@@ -102,7 +103,7 @@ function ActiveChordLine({
           </span>
         )}
         {isCurrent ? (
-          <strong className={`transition-colors duration-75 ${pulsed ? 'text-indigo-600' : 'text-indigo-400'}`}>
+          <strong className={`transition-colors duration-75 ${pulsed ? '${C_PRIMARY_TEXT}' : '${C_PRIMARY_TEXT_SOFT}'}`}>
             {match[0]}
           </strong>
         ) : match[0]}
@@ -165,7 +166,7 @@ function KaraokeSlot({
             return (
               <>
                 {text.slice(0, s)}
-                <strong className={`transition-colors duration-75 ${pulsed ? 'text-indigo-600' : 'text-indigo-400'}`}>
+                <strong className={`transition-colors duration-75 ${pulsed ? '${C_PRIMARY_TEXT}' : '${C_PRIMARY_TEXT_SOFT}'}`}>
                   {text.slice(s, e)}
                 </strong>
                 {text.slice(e)}
@@ -221,7 +222,7 @@ export default function KaraokeDisplay({
   );
 
   return (
-    <div className={`flex flex-col flex-1 items-center bg-gray-50 rounded-xl px-4 overflow-hidden ${exp ? 'justify-center py-3 gap-2' : 'justify-start pt-2 pb-3 gap-1'}`}>
+    <div className={`flex flex-col flex-1 items-center ${C_GRAY_BG_50} rounded-xl px-4 overflow-hidden ${exp ? 'justify-center py-3 gap-2' : 'justify-start pt-2 pb-3 gap-1'}`}>
       {exp ? (
         <>
           {slot(-2, 'dim')}

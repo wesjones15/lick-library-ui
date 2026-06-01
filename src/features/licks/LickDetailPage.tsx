@@ -12,6 +12,7 @@ function modeLabel(mode: string) {
 }
 
 import { formatNoteEnum, INSTRUMENT_LIST, MODE_INTERVALS } from '../../core/music';
+import { C_DANGER_TEXT_SOFT, C_GRAY_BG_50, C_GRAY_BG_800, C_GRAY_BORDER_200, C_GRAY_BORDER_300, C_GRAY_TEXT_400, C_GRAY_TEXT_500, C_GRAY_TEXT_600, C_PRIMARY_BG_SUBTLE, C_PRIMARY_TEXT_DARK, C_WHITE_TEXT } from '../../core/colors';
 
 export default function LickDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -53,13 +54,13 @@ export default function LickDetailPage() {
           <>
             <div className="flex items-start justify-between mb-6">
               <div className="flex flex-col gap-1">
-                <span className="font-mono text-sm text-gray-500">{lick.intervalDisplayString}</span>
+                <span className={`font-mono text-sm ${C_GRAY_TEXT_500}`}>{lick.intervalDisplayString}</span>
                 {lick.mode && (
                   <span className="relative group w-fit">
-                    <span className="text-xs px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full font-medium cursor-default">
+                    <span className={`text-xs px-2 py-0.5 ${C_PRIMARY_BG_SUBTLE} ${C_PRIMARY_TEXT_DARK} rounded-full font-medium cursor-default`}>
                       {modeLabel(lick.mode)}
                     </span>
-                    <span className="absolute left-0 top-full mt-1 px-2 py-1 text-xs font-mono bg-gray-800 text-white rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    <span className={`absolute left-0 top-full mt-1 px-2 py-1 text-xs font-mono ${C_GRAY_BG_800} ${C_WHITE_TEXT} rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10`}>
                       {(MODE_INTERVALS[lick.mode] ?? []).join('  ')}
                     </span>
                   </span>
@@ -74,24 +75,24 @@ export default function LickDetailPage() {
                   onSubmit={applyTuning}
                   error={instrumentError}
                 />
-                <div className="flex rounded-lg overflow-hidden border border-gray-300 text-sm self-start">
+                <div className={`flex rounded-lg overflow-hidden border ${C_GRAY_BORDER_300} text-sm self-start`}>
                   {(['greedy', 'chord', 'dfs'] as const).map(a => (
                     <button key={a} onClick={() => setAlgo(a)}
-                      className={`px-3 py-1.5 ${algo === a ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}>
+                      className={`px-3 py-1.5 ${algo === a ? '${C_PRIMARY_BG} ${C_WHITE_TEXT}' : '${C_WHITE_BG} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50}'}`}>
                       {{ greedy: 'Greedy', chord: 'Chord', dfs: 'DFS' }[a]}
                     </button>
                   ))}
                 </div>
-                <span className="text-sm text-gray-500 self-start pt-2">Key:</span>
+                <span className={`text-sm ${C_GRAY_TEXT_500} self-start pt-2`}>Key:</span>
                 <div className="self-start"><KeySelector value={key} onChange={setKey} /></div>
               </div>
             </div>
 
             <div className="mb-8">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
+              <p className={`text-xs font-semibold ${C_GRAY_TEXT_400} uppercase tracking-widest mb-2`}>
                 Original tab
               </p>
-              <pre className="text-xs font-mono text-gray-600 bg-gray-50 border border-gray-200 rounded-lg p-4 overflow-x-auto whitespace-pre leading-tight">
+              <pre className={`text-xs font-mono ${C_GRAY_TEXT_600} ${C_GRAY_BG_50} border ${C_GRAY_BORDER_200} rounded-lg p-4 overflow-x-auto whitespace-pre leading-tight`}>
                 {lick.rawTab}
               </pre>
             </div>
@@ -100,20 +101,20 @@ export default function LickDetailPage() {
       </div>
 
       <div>
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
+        <p className={`text-xs font-semibold ${C_GRAY_TEXT_400} uppercase tracking-widest mb-4`}>
           Positions in{' '}
           <span className="normal-case">{formatNoteEnum(key)}</span>
           {' — '}
-          <span className="normal-case font-medium text-gray-500">
+          <span className={`normal-case font-medium ${C_GRAY_TEXT_500}`}>
             {instrument === 'CUSTOM'
               ? (appliedTuning.trim() || 'Custom')
               : (INSTRUMENT_LIST.find(i => i.value === instrument)?.label ?? instrument)}
           </span>
         </p>
-        {loading && <p className="text-gray-400 text-sm">Loading…</p>}
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {loading && <p className={`${C_GRAY_TEXT_400} text-sm`}>Loading…</p>}
+        {error && <p className={`${C_DANGER_TEXT_SOFT} text-sm`}>{error}</p>}
         {!loading && lick && lick.positions.length === 0 && (
-          <p className="text-gray-400 text-sm">No positions found for this key.</p>
+          <p className={`${C_GRAY_TEXT_400} text-sm`}>No positions found for this key.</p>
         )}
         <div
           className="grid gap-3"

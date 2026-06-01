@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getSongUpdateForReview, approveSongUpdate, rejectSongUpdate } from '../../core/api/client';
 import { BTN_SUCCESS, BTN_SECONDARY } from '../../core/ui';
 import type { SongUpdateReviewResponse } from '../../core/api/client';
+import { C_BLACK_BG, C_DANGER_BG_SOFT, C_DANGER_BORDER_MID, C_DANGER_TEXT_MID, C_GRAY_BG_50, C_GRAY_BORDER_100, C_GRAY_BORDER_200, C_GRAY_TEXT_300, C_GRAY_TEXT_400, C_GRAY_TEXT_500, C_GRAY_TEXT_600, C_GRAY_TEXT_900, C_WARN_BG_SOFT, C_WARN_BORDER_SOFT, C_WARN_TEXT, C_WARN_TEXT_MID, C_WHITE_BG } from '../../core/colors';
 
 interface Props {
   updateId: string;
@@ -10,9 +11,9 @@ interface Props {
 }
 
 const TYPE_BADGE: Record<string, string> = {
-  SONG_METADATA: 'bg-blue-100 text-blue-700',
-  SONG_CHART: 'bg-purple-100 text-purple-700',
-  SONG_BEATMAP: 'bg-teal-100 text-teal-700',
+  SONG_METADATA: '${C_INFO_BG_SUBTLE} ${C_INFO_TEXT}',
+  SONG_CHART: '${C_CHART_BG} ${C_CHART_TEXT}',
+  SONG_BEATMAP: '${C_BEATMAP_BG} ${C_BEATMAP_TEXT}',
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -28,7 +29,7 @@ function MetadataDiff({ current, proposed }: { current: string; proposed: string
   return (
     <table className="w-full text-xs border-collapse">
       <thead>
-        <tr className="border-b border-gray-200 text-gray-400 text-left">
+        <tr className={`border-b ${C_GRAY_BORDER_200} ${C_GRAY_TEXT_400} text-left`}>
           <th className="pb-2 pr-4">Field</th>
           <th className="pb-2 pr-4">Current</th>
           <th className="pb-2">Proposed</th>
@@ -40,10 +41,10 @@ function MetadataDiff({ current, proposed }: { current: string; proposed: string
           const propVal = String(prop[f] ?? '');
           const changed = curVal !== propVal && propVal !== '' && propVal !== '0';
           return (
-            <tr key={f} className={`border-b border-gray-100 ${changed ? 'bg-amber-50' : ''}`}>
-              <td className="py-1.5 pr-4 text-gray-500 font-medium">{f}</td>
-              <td className="py-1.5 pr-4 text-gray-500">{curVal || '—'}</td>
-              <td className={`py-1.5 ${changed ? 'text-amber-700 font-medium' : 'text-gray-400'}`}>
+            <tr key={f} className={`border-b ${C_GRAY_BORDER_100} ${changed ? '${C_WARN_BG_SOFT}' : ''}`}>
+              <td className={`py-1.5 pr-4 ${C_GRAY_TEXT_500} font-medium`}>{f}</td>
+              <td className={`py-1.5 pr-4 ${C_GRAY_TEXT_500}`}>{curVal || '—'}</td>
+              <td className={`py-1.5 ${changed ? '${C_WARN_TEXT} font-medium' : '${C_GRAY_TEXT_400}'}`}>
                 {propVal || '—'}
               </td>
             </tr>
@@ -60,12 +61,12 @@ function ChartDiff({ current, proposed }: { current: string; proposed: string })
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <div className="text-xs font-medium text-gray-400 mb-1">Current</div>
-        <pre className="font-mono text-xs bg-gray-50 border border-gray-200 rounded p-3 overflow-auto max-h-56 whitespace-pre-wrap">{curSheet || '(empty)'}</pre>
+        <div className={`text-xs font-medium ${C_GRAY_TEXT_400} mb-1`}>Current</div>
+        <pre className={`font-mono text-xs ${C_GRAY_BG_50} border ${C_GRAY_BORDER_200} rounded p-3 overflow-auto max-h-56 whitespace-pre-wrap`}>{curSheet || '(empty)'}</pre>
       </div>
       <div>
-        <div className="text-xs font-medium text-amber-600 mb-1">Proposed</div>
-        <pre className="font-mono text-xs bg-amber-50 border border-amber-200 rounded p-3 overflow-auto max-h-56 whitespace-pre-wrap">{propSheet || '(empty)'}</pre>
+        <div className={`text-xs font-medium ${C_WARN_TEXT_MID} mb-1`}>Proposed</div>
+        <pre className={`font-mono text-xs ${C_WARN_BG_SOFT} border ${C_WARN_BORDER_SOFT} rounded p-3 overflow-auto max-h-56 whitespace-pre-wrap`}>{propSheet || '(empty)'}</pre>
       </div>
     </div>
   );
@@ -76,8 +77,8 @@ function BeatmapDiff({ current, proposed }: { current: string; proposed: string 
   const propBeats: number[] = JSON.parse(proposed).beats ?? [];
   return (
     <div className="flex flex-col gap-2 text-xs">
-      <div><span className="text-gray-400 font-medium mr-2">Current beats:</span><span className="font-mono text-gray-600">[{curBeats.join(', ') || 'none'}]</span></div>
-      <div><span className="text-amber-600 font-medium mr-2">Proposed beats:</span><span className="font-mono text-amber-700">[{propBeats.join(', ') || 'none'}]</span></div>
+      <div><span className={`${C_GRAY_TEXT_400} font-medium mr-2`}>Current beats:</span><span className={`font-mono ${C_GRAY_TEXT_600}`}>[{curBeats.join(', ') || 'none'}]</span></div>
+      <div><span className={`${C_WARN_TEXT_MID} font-medium mr-2`}>Proposed beats:</span><span className={`font-mono ${C_WARN_TEXT}`}>[{propBeats.join(', ') || 'none'}]</span></div>
     </div>
   );
 }
@@ -113,16 +114,16 @@ export default function SongUpdateReviewModal({ updateId, onClose, onDone }: Pro
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center ${C_BLACK_BG}/40`} onClick={onClose}>
       <div
-        className="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 flex flex-col max-h-[85vh]"
+        className={`${C_WHITE_BG} rounded-xl shadow-xl w-full max-w-2xl mx-4 flex flex-col max-h-[85vh]`}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-4 border-b border-gray-100">
+        <div className={`flex items-start justify-between px-6 py-4 border-b ${C_GRAY_BORDER_100}`}>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-gray-900">{data?.songTitle ?? '…'}</span>
+              <span className={`font-semibold ${C_GRAY_TEXT_900}`}>{data?.songTitle ?? '…'}</span>
               {data && (
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${TYPE_BADGE[data.requestType]}`}>
                   {TYPE_LABEL[data.requestType]}
@@ -130,18 +131,18 @@ export default function SongUpdateReviewModal({ updateId, onClose, onDone }: Pro
               )}
             </div>
             {data && (
-              <div className="text-xs text-gray-400 mt-0.5">
+              <div className={`text-xs ${C_GRAY_TEXT_400} mt-0.5`}>
                 submitted by {data.submitterUsername}
               </div>
             )}
           </div>
-          <button onClick={onClose} className="text-gray-300 hover:text-gray-600 text-xl leading-none ml-4">×</button>
+          <button onClick={onClose} className={`${C_GRAY_TEXT_300} hover:${C_GRAY_TEXT_600} text-xl leading-none ml-4`}>×</button>
         </div>
 
         {/* Body */}
         <div className="px-6 py-4 overflow-auto flex-1">
           {!data ? (
-            <p className="text-sm text-gray-400">Loading…</p>
+            <p className={`text-sm ${C_GRAY_TEXT_400}`}>Loading…</p>
           ) : data.requestType === 'SONG_METADATA' ? (
             <MetadataDiff current={data.currentValue} proposed={data.proposedValue} />
           ) : data.requestType === 'SONG_CHART' ? (
@@ -152,7 +153,7 @@ export default function SongUpdateReviewModal({ updateId, onClose, onDone }: Pro
         </div>
 
         {/* Footer */}
-        <div className="flex gap-2 px-6 py-4 border-t border-gray-100">
+        <div className={`flex gap-2 px-6 py-4 border-t ${C_GRAY_BORDER_100}`}>
           <button
             onClick={handleApprove}
             disabled={acting || !data}
@@ -163,7 +164,7 @@ export default function SongUpdateReviewModal({ updateId, onClose, onDone }: Pro
           <button
             onClick={handleReject}
             disabled={acting || !data}
-            className="px-4 py-2 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+            className={`px-4 py-2 text-sm rounded-lg border ${C_DANGER_BORDER_MID} ${C_DANGER_TEXT_MID} hover:${C_DANGER_BG_SOFT} disabled:opacity-50 transition-colors`}
           >
             Reject
           </button>

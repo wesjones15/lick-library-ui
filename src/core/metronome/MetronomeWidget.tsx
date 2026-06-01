@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useMetronomeContext } from './MetronomeContext';
 import NumpadInput from '../components/NumpadInput';
+import { C_GRAY_BG_50, C_GRAY_BORDER_200, C_GRAY_BORDER_300, C_GRAY_TEXT_400, C_GRAY_TEXT_600, C_GRAY_TEXT_900, C_WHITE_BG, C_WHITE_TEXT } from '../colors';
 
 const MIN_BPM = 40;
 const MAX_BPM = 240;
@@ -73,25 +74,25 @@ export default function Metronome() {
       <button
         onClick={() => setOpen(o => !o)}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-          open ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+          open ? '${C_GRAY_BG_100} ${C_GRAY_TEXT_900}' : '${C_GRAY_TEXT_500} hover:${C_GRAY_TEXT_900} hover:${C_GRAY_BG_50}'
         }`}
       >
         <span className={`inline-block w-2 h-2 rounded-full transition-all duration-75 ${
-          isPlaying ? (pulsed ? 'bg-white' : 'bg-indigo-500') : 'opacity-0'
+          isPlaying ? (pulsed ? '${C_WHITE_BG}' : 'bg-indigo-500') : 'opacity-0'
         }`} />
         <span>♩ {bpm}</span>
       </button>
 
       {/* Popover */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-52 bg-white border border-gray-200 rounded-xl shadow-lg p-4 z-50">
+        <div className={`absolute right-0 top-full mt-2 w-52 ${C_WHITE_BG} border ${C_GRAY_BORDER_200} rounded-xl shadow-lg p-4 z-50`}>
           <div className="flex flex-col gap-4">
 
             {/* BPM control */}
             <div className="flex items-center justify-between gap-2">
               <button
                 onClick={() => adjustBpm(-1)}
-                className="w-8 h-8 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-lg font-medium leading-none"
+                className={`w-8 h-8 rounded-lg border ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50} flex items-center justify-center text-lg font-medium leading-none`}
               >
                 −
               </button>
@@ -101,13 +102,13 @@ export default function Metronome() {
                   onChange={val => setBpmInput(val)}
                   onCommit={val => commitBpm(val)}
                   placeholder="BPM"
-                  className="w-14 text-center text-2xl font-bold text-gray-900 tabular-nums bg-transparent border-b border-gray-300 focus:border-indigo-500 focus:outline-none"
+                  className={`w-14 text-center text-2xl font-bold ${C_GRAY_TEXT_900} tabular-nums bg-transparent border-b ${C_GRAY_BORDER_300} focus:border-indigo-500 focus:outline-none`}
                 />
-                <span className="text-xs text-gray-400">BPM</span>
+                <span className={`text-xs ${C_GRAY_TEXT_400}`}>BPM</span>
               </div>
               <button
                 onClick={() => adjustBpm(1)}
-                className="w-8 h-8 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-lg font-medium leading-none"
+                className={`w-8 h-8 rounded-lg border ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50} flex items-center justify-center text-lg font-medium leading-none`}
               >
                 +
               </button>
@@ -121,14 +122,14 @@ export default function Metronome() {
                     key={beat}
                     className={`rounded-full transition-all duration-75 ${
                       beat === 0 ? 'w-3.5 h-3.5' : 'w-2.5 h-2.5'
-                    } ${activeBeat === beat ? (pulsed ? 'bg-white' : 'bg-indigo-500') : 'bg-gray-200'}`}
+                    } ${activeBeat === beat ? (pulsed ? '${C_WHITE_BG}' : 'bg-indigo-500') : '${C_GRAY_BG_200}'}`}
                   />
                 ))}
               </div>
               <button
                 onClick={() => setShowAdvanced(a => !a)}
                 className={`text-sm leading-none transition-colors ${
-                  showAdvanced ? 'text-indigo-500' : 'text-gray-400 hover:text-gray-700'
+                  showAdvanced ? '${C_PRIMARY_TEXT_MID}' : '${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_700}'
                 }`}
                 title="Time signature"
               >⚙︎</button>
@@ -143,8 +144,8 @@ export default function Metronome() {
                     onClick={() => setBeatsPerBar(opt.value)}
                     className={`px-2 py-0.5 rounded text-xs font-medium border transition-colors ${
                       beatsPerBar === opt.value
-                        ? 'bg-indigo-600 text-white border-indigo-600'
-                        : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+                        ? '${C_PRIMARY_BG} ${C_WHITE_TEXT} ${C_PRIMARY_BORDER}'
+                        : '${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50}'
                     }`}
                   >{opt.label}</button>
                 ))}
@@ -154,10 +155,10 @@ export default function Metronome() {
             {/* Start / Stop */}
             <button
               onClick={() => setIsPlaying(p => !p)}
-              className={`w-full py-2 rounded-lg text-sm font-semibold text-white transition-colors ${
+              className={`w-full py-2 rounded-lg text-sm font-semibold ${C_WHITE_TEXT} transition-colors ${
                 isPlaying
-                  ? 'bg-red-500 hover:bg-red-600'
-                  : 'bg-green-500 hover:bg-green-600'
+                  ? '${C_DANGER_BG_MID} hover:${C_DANGER_BG}'
+                  : '${C_SUCCESS_BG_MID} hover:${C_SUCCESS_BG}'
               }`}
             >
               {isPlaying ? 'Stop' : 'Start'}

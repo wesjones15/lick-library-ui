@@ -6,6 +6,7 @@ import InstrumentSelector from '../../core/components/InstrumentSelector';
 import NumpadInput from '../../core/components/NumpadInput';
 import { getStringEntries } from '../../core/music';
 import type { InstrumentName } from '../../core/useInstrument';
+import { C_DANGER_TEXT_SOFT, C_GRAY_BG_100, C_GRAY_BG_50, C_GRAY_BORDER_200, C_GRAY_BORDER_300, C_GRAY_TEXT_500, C_GRAY_TEXT_600, C_PRIMARY_BG, C_PRIMARY_BG_DARK, C_PRIMARY_BORDER_MID, C_WHITE_TEXT } from '../../core/colors';
 
 interface Props {
   initialChordName?: string;
@@ -96,13 +97,13 @@ export default function ChordUploadForm({
           value={chordName}
           onChange={e => handleChordNameChange(e.target.value)}
           disabled={lockChordName}
-          className={`border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 ${lockChordName ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
+          className={`border ${C_GRAY_BORDER_300} rounded-lg px-3 py-2 text-sm focus:outline-none focus:${C_PRIMARY_BORDER_MID} ${lockChordName ? '${C_GRAY_BG_100} cursor-not-allowed ${C_GRAY_TEXT_500}' : ''}`}
         />
-        {parseError && <p className="text-red-500 text-xs">{parseError}</p>}
+        {parseError && <p className={`${C_DANGER_TEXT_SOFT} text-xs`}>{parseError}</p>}
       </div>
 
       {lockInstrument ? (
-        <div className="text-sm text-gray-500 bg-gray-100 rounded-lg px-3 py-2 border border-gray-200">
+        <div className={`text-sm ${C_GRAY_TEXT_500} ${C_GRAY_BG_100} rounded-lg px-3 py-2 border ${C_GRAY_BORDER_200}`}>
           {instrument.charAt(0) + instrument.slice(1).toLowerCase()}
         </div>
       ) : (
@@ -113,19 +114,19 @@ export default function ChordUploadForm({
         />
       )}
 
-      <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-        <p className="text-xs text-gray-500 mb-3">Frets — enter a number (0–24) or <code>x</code> for muted</p>
+      <div className={`border ${C_GRAY_BORDER_200} rounded-lg p-4 ${C_GRAY_BG_50}`}>
+        <p className={`text-xs ${C_GRAY_TEXT_500} mb-3`}>Frets — enter a number (0–24) or <code>x</code> for muted</p>
         <div className="flex items-start gap-6">
           <div className="flex flex-col gap-2">
             {stringDisplay.map(({ label, fretsIdx }) => (
               <div key={label + fretsIdx} className="flex items-center gap-3">
-                <span className="w-4 text-right text-sm font-mono text-gray-600">{label}</span>
+                <span className={`w-4 text-right text-sm font-mono ${C_GRAY_TEXT_600}`}>{label}</span>
                 <NumpadInput
                   value={frets[fretsIdx] ?? ''}
                   onChange={val => setFret(fretsIdx, val)}
                   placeholder="—"
                   extraKeys={[{ label: 'x', value: 'x' }]}
-                  className="w-16 border border-gray-300 rounded px-2 py-1 text-sm font-mono text-center focus:outline-none focus:border-indigo-400"
+                  className={`w-16 border ${C_GRAY_BORDER_300} rounded px-2 py-1 text-sm font-mono text-center focus:outline-none focus:${C_PRIMARY_BORDER_MID}`}
                 />
               </div>
             ))}
@@ -137,11 +138,11 @@ export default function ChordUploadForm({
       <button
         type="submit"
         disabled={!canSubmit}
-        className="px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end"
+        className={`px-5 py-2 ${C_PRIMARY_BG} ${C_WHITE_TEXT} text-sm font-medium rounded-lg hover:${C_PRIMARY_BG_DARK} disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end`}
       >
         {loading ? 'Uploading…' : 'Upload Voicing'}
       </button>
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <p className={`${C_DANGER_TEXT_SOFT} text-sm`}>{error}</p>}
     </form>
   );
 }

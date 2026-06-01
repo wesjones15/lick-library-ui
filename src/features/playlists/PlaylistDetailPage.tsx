@@ -12,6 +12,7 @@ import { BTN_ICON, SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import NumpadInput from '../../core/components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
+import { C_BLACK_BG, C_DANGER_BG, C_DANGER_BG_MID, C_DANGER_BG_SOFT, C_DANGER_BORDER_SOFT, C_DANGER_TEXT_MID, C_DANGER_TEXT_MUTED, C_DANGER_TEXT_SOFT, C_GRAY_BG_50, C_GRAY_BORDER_200, C_GRAY_BORDER_300, C_GRAY_TEXT_300, C_GRAY_TEXT_400, C_GRAY_TEXT_600, C_GRAY_TEXT_900, C_PRIMARY_BG, C_PRIMARY_BG_DARK, C_PRIMARY_BG_SOFT, C_PRIMARY_BORDER_MID, C_PRIMARY_BORDER_SOFT, C_PRIMARY_TEXT, C_PRIMARY_TEXT_DARK, C_PRIMARY_TEXT_MID, C_PRIMARY_TEXT_SOFT, C_WHITE_BG, C_WHITE_TEXT } from '../../core/colors';
 
 function keyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
   if (!originalKey) return '?';
@@ -42,58 +43,58 @@ function VoicingModal({ entry, onSave, onClose }: {
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-xs mx-4" onClick={e => e.stopPropagation()}>
-        <div className="font-semibold text-gray-900 text-sm mb-5 text-center">{entry.title}</div>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center ${C_BLACK_BG}/30`} onClick={onClose}>
+      <div className={`${C_WHITE_BG} rounded-xl shadow-xl p-6 w-full max-w-xs mx-4`} onClick={e => e.stopPropagation()}>
+        <div className={`font-semibold ${C_GRAY_TEXT_900} text-sm mb-5 text-center`}>{entry.title}</div>
         <div className="flex gap-8 justify-center mb-6">
 
           {/* Capo widget */}
           <div className="flex flex-col items-center gap-1">
-            <span className="text-xs text-gray-400">Capo</span>
+            <span className={`text-xs ${C_GRAY_TEXT_400}`}>Capo</span>
             <div className="flex items-center gap-2">
               <button onClick={() => setLocalCapo(c => Math.max(0, c - 1))} className={BTN_ICON}>−</button>
               <div className="flex items-center justify-center w-8">
-                <span className="text-base font-semibold text-gray-900">{localCapo}</span>
+                <span className={`text-base font-semibold ${C_GRAY_TEXT_900}`}>{localCapo}</span>
               </div>
               <button onClick={() => setLocalCapo(c => Math.min(12, c + 1))} className={BTN_ICON}>+</button>
             </div>
             <button
               onClick={() => setLocalCapo(entry.defaultCapo)}
-              className={`text-xs transition-colors ${localCapo !== entry.defaultCapo ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+              className={`text-xs transition-colors ${localCapo !== entry.defaultCapo ? '${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}' : 'invisible'}`}
             >reset</button>
           </div>
 
           {/* Transpose widget */}
           <div className="flex flex-col items-center gap-1">
-            <span className="text-xs text-gray-400">Transpose</span>
+            <span className={`text-xs ${C_GRAY_TEXT_400}`}>Transpose</span>
             <div className="flex items-center gap-2">
               <button onClick={() => setLocalSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={BTN_ICON}>−</button>
               <div className="flex gap-2 items-center">
                 <div className="flex flex-col items-center w-8">
-                  <span className="text-base font-semibold text-gray-900">
+                  <span className={`text-base font-semibold ${C_GRAY_TEXT_900}`}>
                     {rootKeyLabel(entry.originalKey, localSemitones - entry.defaultCapo, entry.mode)}
                   </span>
-                  <span className="text-xs text-gray-400">shape</span>
+                  <span className={`text-xs ${C_GRAY_TEXT_400}`}>shape</span>
                 </div>
                 <div className="flex flex-col items-center w-8">
-                  <span className="text-base font-semibold text-gray-900">
+                  <span className={`text-base font-semibold ${C_GRAY_TEXT_900}`}>
                     {rootKeyLabel(entry.originalKey, localSemitones + localCapo - entry.defaultCapo, entry.mode)}
                   </span>
-                  <span className="text-xs text-gray-400">sound</span>
+                  <span className={`text-xs ${C_GRAY_TEXT_400}`}>sound</span>
                 </div>
               </div>
               <button onClick={() => setLocalSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={BTN_ICON}>+</button>
             </div>
             <button
               onClick={() => setLocalSemitones(0)}
-              className={`text-xs transition-colors ${localSemitones !== 0 ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+              className={`text-xs transition-colors ${localSemitones !== 0 ? '${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}' : 'invisible'}`}
             >reset</button>
           </div>
         </div>
 
           {/* BPM override widget */}
           <div className="flex flex-col items-center gap-1">
-            <span className="text-xs text-gray-400">BPM</span>
+            <span className={`text-xs ${C_GRAY_TEXT_400}`}>BPM</span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setLocalTempoOverride(t => Math.min(240, Math.max(40, (t ?? entry.tempo ?? 120) - 1)))}
@@ -113,7 +114,7 @@ function VoicingModal({ entry, onSave, onClose }: {
                     if (!isNaN(v)) setLocalTempoOverride(Math.min(240, Math.max(40, v)));
                   }}
                   placeholder={entry.tempo != null ? String(entry.tempo) : '—'}
-                  className="w-12 text-center text-base font-semibold text-gray-900 bg-transparent border-b border-gray-300 focus:border-indigo-500 focus:outline-none"
+                  className={`w-12 text-center text-base font-semibold ${C_GRAY_TEXT_900} bg-transparent border-b ${C_GRAY_BORDER_300} focus:border-indigo-500 focus:outline-none`}
                 />
               </div>
               <button
@@ -123,23 +124,23 @@ function VoicingModal({ entry, onSave, onClose }: {
             </div>
             <button
               onClick={() => setLocalTempoOverride(null)}
-              className={`text-xs transition-colors ${localTempoOverride !== null ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+              className={`text-xs transition-colors ${localTempoOverride !== null ? '${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}' : 'invisible'}`}
             >reset</button>
           </div>
 
         {/* Instrument selector */}
         <div className="flex flex-col items-center gap-1 mb-6">
-          <span className="text-xs text-gray-400">Instrument</span>
+          <span className={`text-xs ${C_GRAY_TEXT_400}`}>Instrument</span>
           <InstrumentSelector excludeCustom compact instrument={localInstrument} onInstrumentChange={setLocalInstrument} />
           <button
             onClick={() => setLocalInstrument(defaultInstrument)}
-            className={`text-xs transition-colors ${localInstrument !== defaultInstrument ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+            className={`text-xs transition-colors ${localInstrument !== defaultInstrument ? '${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}' : 'invisible'}`}
           >reset</button>
         </div>
 
         <button
           onClick={() => { onSave(localSemitones, localCapo - entry.defaultCapo, localInstrument, localTempoOverride); onClose(); }}
-          className="w-full px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+          className={`w-full px-4 py-2 text-sm rounded-lg ${C_PRIMARY_BG} ${C_WHITE_TEXT} hover:${C_PRIMARY_BG_DARK}`}
         >Save</button>
       </div>
     </div>
@@ -188,11 +189,11 @@ function AddSongsModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-xl p-5 w-full max-w-lg mx-4 flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center ${C_BLACK_BG}/30`} onClick={onClose}>
+      <div className={`${C_WHITE_BG} rounded-xl shadow-xl p-5 w-full max-w-lg mx-4 flex flex-col max-h-[80vh]`} onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-3">
-          <span className="font-semibold text-gray-900">Add Songs</span>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+          <span className={`font-semibold ${C_GRAY_TEXT_900}`}>Add Songs</span>
+          <button onClick={onClose} className={`${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600} text-xl leading-none`}>×</button>
         </div>
         <input
           autoFocus
@@ -204,7 +205,7 @@ function AddSongsModal({
         />
         <div className="overflow-y-auto flex-1">
           {visible.length === 0 ? (
-            <p className="text-xs text-gray-400 text-center py-6">No songs found</p>
+            <p className={`text-xs ${C_GRAY_TEXT_400} text-center py-6`}>No songs found</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {visible.map(s => {
@@ -214,16 +215,16 @@ function AddSongsModal({
                 return (
                   <div
                     key={s.id}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-colors ${isIn ? 'border-indigo-200 bg-indigo-50' : 'border-gray-100 hover:bg-gray-50'}`}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-colors ${isIn ? 'border-indigo-200 ${C_PRIMARY_BG_SOFT}' : '${C_GRAY_BORDER_100} hover:${C_GRAY_BG_50}'}`}
                   >
                     <div className="min-w-0 mr-2">
-                      <div className="text-sm font-medium text-gray-900 truncate">{s.title}</div>
-                      {s.artist && <div className="text-xs text-gray-400 truncate">{s.artist}</div>}
+                      <div className={`text-sm font-medium ${C_GRAY_TEXT_900} truncate`}>{s.title}</div>
+                      {s.artist && <div className={`text-xs ${C_GRAY_TEXT_400} truncate`}>{s.artist}</div>}
                     </div>
                     <button
                       onClick={() => handleToggle(s)}
                       disabled={busy || justAdded}
-                      className={`text-xl leading-none shrink-0 transition-colors ${busy ? 'opacity-40' : justAdded ? 'text-green-500 cursor-default' : isIn ? 'text-red-400 hover:text-red-600' : 'text-gray-300 hover:text-green-500'}`}
+                      className={`text-xl leading-none shrink-0 transition-colors ${busy ? 'opacity-40' : justAdded ? 'text-green-500 cursor-default' : isIn ? '${C_DANGER_TEXT_MUTED} hover:${C_DANGER_TEXT_MID}' : '${C_GRAY_TEXT_300} hover:text-green-500'}`}
                     >
                       {justAdded ? '✓' : isIn ? '×' : '+'}
                     </button>
@@ -257,7 +258,7 @@ export default function PlaylistDetailPage() {
     getAllSongs().then(setAllSongs).catch(() => {});
   }, [id]);
 
-  if (!playlist) return <div className="max-w-3xl mx-auto px-6 py-10 text-gray-400 text-sm">Loading…</div>;
+  if (!playlist) return <div className={`max-w-3xl mx-auto px-6 py-10 ${C_GRAY_TEXT_400} text-sm`}>Loading…</div>;
 
   const entries = playlist.entries;
 
@@ -345,7 +346,7 @@ export default function PlaylistDetailPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6 gap-3">
         <div className="min-w-0 flex-1">
-          <Link to="/playlists" className="text-sm text-gray-400 hover:text-indigo-500 transition-colors">← Playlists</Link>
+          <Link to="/playlists" className={`text-sm ${C_GRAY_TEXT_400} hover:${C_PRIMARY_TEXT_MID} transition-colors`}>← Playlists</Link>
           {editingName ? (
             <div className="flex items-center gap-2 mt-1">
               <input
@@ -354,25 +355,25 @@ export default function PlaylistDetailPage() {
                 value={nameInput}
                 onChange={e => setNameInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') setEditingName(false); }}
-                className="text-2xl font-bold text-gray-900 border-b-2 border-indigo-400 focus:outline-none bg-transparent"
+                className={`text-2xl font-bold ${C_GRAY_TEXT_900} border-b-2 ${C_PRIMARY_BORDER_MID} focus:outline-none bg-transparent`}
               />
-              <button onClick={handleSaveName} className="text-indigo-500 hover:text-indigo-700 text-lg" title="Save name">💾</button>
+              <button onClick={handleSaveName} className={`${C_PRIMARY_TEXT_MID} hover:${C_PRIMARY_TEXT_DARK} text-lg`} title="Save name">💾</button>
             </div>
           ) : (
             <div className="flex items-center gap-2 mt-1">
-              <h1 className="text-3xl font-bold text-gray-900">{playlist.name}</h1>
+              <h1 className={`text-3xl font-bold ${C_GRAY_TEXT_900}`}>{playlist.name}</h1>
               {managing && playlist.ownedByCurrentUser && (
                 <button
                   onClick={() => { setNameInput(playlist.name); setEditingName(true); }}
-                  className="text-gray-400 hover:text-indigo-500 transition-colors text-3xl leading-none"
+                  className={`${C_GRAY_TEXT_400} hover:${C_PRIMARY_TEXT_MID} transition-colors text-3xl leading-none`}
                   title="Rename playlist"
                 >✎</button>
               )}
             </div>
           )}
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-xs text-gray-400">{entries.length} {entries.length === 1 ? 'song' : 'songs'}</span>
-            <span className={`text-xs px-1.5 py-0.5 rounded-full ${playlist.isPublic ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+            <span className={`text-xs ${C_GRAY_TEXT_400}`}>{entries.length} {entries.length === 1 ? 'song' : 'songs'}</span>
+            <span className={`text-xs px-1.5 py-0.5 rounded-full ${playlist.isPublic ? '${C_SUCCESS_BG_SOFT} text-green-600' : '${C_GRAY_BG_100} ${C_GRAY_TEXT_400}'}`}>
               {playlist.isPublic ? 'Public' : 'Private'}
             </span>
           </div>
@@ -381,21 +382,21 @@ export default function PlaylistDetailPage() {
         <div className="flex items-center gap-2 shrink-0">
           {managing && playlist.ownedByCurrentUser && confirmDelete && (
             <div className="flex gap-2">
-              <button onClick={handleDeletePlaylist} className="text-xs px-3 py-1.5 rounded bg-red-500 text-white hover:bg-red-600">Delete playlist</button>
-              <button onClick={() => setConfirmDelete(false)} className="text-xs px-3 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">Cancel</button>
+              <button onClick={handleDeletePlaylist} className={`text-xs px-3 py-1.5 rounded ${C_DANGER_BG_MID} ${C_WHITE_TEXT} hover:${C_DANGER_BG}`}>Delete playlist</button>
+              <button onClick={() => setConfirmDelete(false)} className={`text-xs px-3 py-1.5 rounded border ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50}`}>Cancel</button>
             </div>
           )}
           {managing && playlist.ownedByCurrentUser && !confirmDelete && (
             <>
               <button
                 onClick={handleToggleVisibility}
-                className="px-3 py-2 text-sm rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
+                className={`px-3 py-2 text-sm rounded-lg border ${C_GRAY_BORDER_200} ${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600} hover:${C_GRAY_BORDER_300} transition-colors`}
                 title={playlist.isPublic ? 'Make private' : 'Make public'}
               >
                 {playlist.isPublic ? 'Make Private' : 'Make Public'}
               </button>
               <button onClick={() => setConfirmDelete(true)}
-                className="px-3 py-2 text-sm rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors"
+                className={`px-3 py-2 text-sm rounded-lg border ${C_DANGER_BORDER_SOFT} ${C_DANGER_TEXT_SOFT} hover:${C_DANGER_BG_SOFT} transition-colors`}
                 title="Delete playlist">Delete</button>
             </>
           )}
@@ -403,8 +404,8 @@ export default function PlaylistDetailPage() {
             <button
               onClick={toggleManage}
               className={managing
-                ? 'px-4 py-2 text-sm rounded-lg border border-indigo-300 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors'
-                : 'px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors'}
+                ? 'px-4 py-2 text-sm rounded-lg border ${C_PRIMARY_BORDER_SOFT} ${C_PRIMARY_TEXT} ${C_PRIMARY_BG_SOFT} hover:${C_PRIMARY_BG_SUBTLE} transition-colors'
+                : 'px-4 py-2 text-sm rounded-lg border ${C_GRAY_BORDER_200} ${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600} hover:${C_GRAY_BORDER_300} transition-colors'}
             >
               {managing ? 'Done' : 'Manage'}
             </button>
@@ -416,7 +417,7 @@ export default function PlaylistDetailPage() {
       {playlist.ownedByCurrentUser && (managing || entries.length === 0) && (
         <button
           onClick={() => setShowAddSongs(true)}
-          className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 border border-dashed border-indigo-300 rounded-xl px-4 py-3 w-full hover:bg-indigo-50 transition-colors mb-4"
+          className={`flex items-center gap-2 text-sm ${C_PRIMARY_TEXT} hover:${C_PRIMARY_TEXT_DARK} border border-dashed ${C_PRIMARY_BORDER_SOFT} rounded-xl px-4 py-3 w-full hover:${C_PRIMARY_BG_SOFT} transition-colors mb-4`}
         >
           <span className="text-lg leading-none">+</span> Add Songs
         </button>
@@ -424,42 +425,42 @@ export default function PlaylistDetailPage() {
 
       {/* Song list */}
       {entries.length === 0 ? (
-        <p className="text-gray-400 text-sm">{managing ? 'Use Add Songs to add songs to this playlist.' : 'No songs yet.'}</p>
+        <p className={`${C_GRAY_TEXT_400} text-sm`}>{managing ? 'Use Add Songs to add songs to this playlist.' : 'No songs yet.'}</p>
       ) : (
         <div className="flex flex-col gap-2">
           {entries.map((entry, idx) => (
-            <div key={entry.entryId} className="border border-gray-200 rounded-xl p-3">
+            <div key={entry.entryId} className={`border ${C_GRAY_BORDER_200} rounded-xl p-3`}>
               <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-300 w-5 text-right shrink-0">{idx + 1}</span>
+                <span className={`text-xs ${C_GRAY_TEXT_300} w-5 text-right shrink-0`}>{idx + 1}</span>
 
                 {/* Reorder (owner + manage only) */}
                 {managing && playlist.ownedByCurrentUser && (
                   <div className="flex flex-col gap-0.5 shrink-0">
                     <button onClick={() => handleReorder(entry.entryId, -1)} disabled={idx === 0}
-                      className="text-gray-300 hover:text-gray-600 disabled:opacity-20 text-xs leading-none">▲</button>
+                      className={`${C_GRAY_TEXT_300} hover:${C_GRAY_TEXT_600} disabled:opacity-20 text-xs leading-none`}>▲</button>
                     <button onClick={() => handleReorder(entry.entryId, 1)} disabled={idx === entries.length - 1}
-                      className="text-gray-300 hover:text-gray-600 disabled:opacity-20 text-xs leading-none">▼</button>
+                      className={`${C_GRAY_TEXT_300} hover:${C_GRAY_TEXT_600} disabled:opacity-20 text-xs leading-none`}>▼</button>
                   </div>
                 )}
 
                 {/* Song info */}
                 <div
-                  className="flex-1 cursor-pointer hover:text-indigo-700 transition-colors min-w-0"
+                  className={`flex-1 cursor-pointer hover:${C_PRIMARY_TEXT_DARK} transition-colors min-w-0`}
                   onClick={() => !managing && handleOpenSong(idx)}
                 >
-                  <div className="font-medium text-gray-900 truncate">{entry.title}</div>
-                  {entry.artist && <div className="text-xs text-gray-400 truncate">{entry.artist}</div>}
+                  <div className={`font-medium ${C_GRAY_TEXT_900} truncate`}>{entry.title}</div>
+                  {entry.artist && <div className={`text-xs ${C_GRAY_TEXT_400} truncate`}>{entry.artist}</div>}
                   <div className="flex items-center gap-2 text-xs font-mono mt-0.5">
                     {entry.originalKey && (
-                      <span className={entry.keyOffset !== 0 || entry.capoOffset !== 0 ? 'text-indigo-500' : 'text-gray-400'}>
+                      <span className={entry.keyOffset !== 0 || entry.capoOffset !== 0 ? '${C_PRIMARY_TEXT_MID}' : '${C_GRAY_TEXT_400}'}>
                         {keyLabel(entry.originalKey, entry.keyOffset + entry.capoOffset, entry.mode)}
                       </span>
                     )}
-                    <span className={entry.capoOffset !== 0 ? 'text-indigo-500' : 'text-gray-400'}>
+                    <span className={entry.capoOffset !== 0 ? '${C_PRIMARY_TEXT_MID}' : '${C_GRAY_TEXT_400}'}>
                       {entry.defaultCapo + entry.capoOffset > 0 ? `Capo ${entry.defaultCapo + entry.capoOffset}` : 'No Capo'}
                     </span>
                     {(entry.tempoOverride != null || entry.tempo != null) && (
-                      <span className={entry.tempoOverride != null ? 'text-indigo-500' : 'text-gray-400'}>
+                      <span className={entry.tempoOverride != null ? '${C_PRIMARY_TEXT_MID}' : '${C_GRAY_TEXT_400}'}>
                         {entry.tempoOverride ?? entry.tempo} BPM{entry.tempoOverride != null ? ' (override)' : ''}
                       </span>
                     )}
@@ -470,7 +471,7 @@ export default function PlaylistDetailPage() {
                 {!managing && (
                   <button
                     onClick={() => handleOpenSong(idx)}
-                    className="text-gray-300 hover:text-indigo-400 transition-colors text-lg leading-none shrink-0"
+                    className={`${C_GRAY_TEXT_300} hover:${C_PRIMARY_TEXT_SOFT} transition-colors text-lg leading-none shrink-0`}
                     title="Open song"
                   >›</button>
                 )}
@@ -480,18 +481,18 @@ export default function PlaylistDetailPage() {
                   <div className="flex items-center gap-4 shrink-0 ml-2 mr-2">
                     <button
                       onClick={() => setEditingEntry(entry.entryId)}
-                      className="text-gray-400 hover:text-indigo-500 transition-colors leading-none"
+                      className={`${C_GRAY_TEXT_400} hover:${C_PRIMARY_TEXT_MID} transition-colors leading-none`}
                       style={{ fontSize: '2.1875rem' }}
                       title="Edit voicing offset"
                     >✎</button>
                     {confirmRemove === entry.entryId ? (
                       <div className="flex gap-1">
-                        <button onClick={() => handleRemoveEntry(entry.entryId)} className="text-xs px-2 py-0.5 rounded bg-red-500 text-white hover:bg-red-600">Remove</button>
-                        <button onClick={() => setConfirmRemove(null)} className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-600">Cancel</button>
+                        <button onClick={() => handleRemoveEntry(entry.entryId)} className={`text-xs px-2 py-0.5 rounded ${C_DANGER_BG_MID} ${C_WHITE_TEXT} hover:${C_DANGER_BG}`}>Remove</button>
+                        <button onClick={() => setConfirmRemove(null)} className={`text-xs px-2 py-0.5 rounded border ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600}`}>Cancel</button>
                       </div>
                     ) : (
                       <button onClick={() => setConfirmRemove(entry.entryId)}
-                        className="text-red-400 hover:text-red-600 transition-colors text-2xl leading-none">×</button>
+                        className={`${C_DANGER_TEXT_MUTED} hover:${C_DANGER_TEXT_MID} transition-colors text-2xl leading-none`}>×</button>
                     )}
                   </div>
                 )}

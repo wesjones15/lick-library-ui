@@ -5,12 +5,13 @@ import { BTN_PRIMARY, BTN_XS } from '../../core/ui';
 import type { SongSummary } from '../../core/api/client';
 import SongList from './SongList';
 import AddToPlaylistModal from '../playlists/AddToPlaylistModal';
+import { C_DANGER_TEXT_SOFT, C_GRAY_BG_50, C_GRAY_BORDER_200, C_GRAY_TEXT_400, C_GRAY_TEXT_500, C_GRAY_TEXT_900, C_PRIMARY_BORDER_MID, C_PRIMARY_BORDER_SOFT, C_PRIMARY_TEXT_MID, C_WHITE_BG } from '../../core/colors';
 
 type SortKey = 'title' | 'artist' | 'key' | 'tempo';
 const PAGE_SIZE = 16;
 
 const sortBtnClass = (active: boolean) =>
-  `${BTN_XS} ${active ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
+  `${BTN_XS} ${active ? '${C_PRIMARY_BORDER_SOFT} ${C_PRIMARY_BG_SOFT} ${C_PRIMARY_TEXT}' : '${C_GRAY_BORDER_200} ${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600} hover:${C_GRAY_BORDER_300}'}`;
 
 export default function SongsPage() {
   const navigate = useNavigate();
@@ -64,11 +65,11 @@ export default function SongsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Songs</h1>
+        <h1 className={`text-3xl font-bold ${C_GRAY_TEXT_900}`}>Songs</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setManaging(m => !m)}
-            className={`px-3 py-2 text-sm rounded-lg border transition-colors ${managing ? 'border-indigo-300 text-indigo-600 bg-indigo-50' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+            className={`px-3 py-2 text-sm rounded-lg border transition-colors ${managing ? '${C_PRIMARY_BORDER_SOFT} ${C_PRIMARY_TEXT} ${C_PRIMARY_BG_SOFT}' : '${C_GRAY_BORDER_200} ${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}'}`}
           >
             Manage
           </button>
@@ -94,7 +95,7 @@ export default function SongsPage() {
           <select
             value={filterArtist}
             onChange={e => setFilterArtist(e.target.value)}
-            className="text-xs border border-gray-200 rounded px-2 py-1 text-gray-500 focus:outline-none focus:border-indigo-400 bg-white"
+            className={`text-xs border ${C_GRAY_BORDER_200} rounded px-2 py-1 ${C_GRAY_TEXT_500} focus:outline-none focus:${C_PRIMARY_BORDER_MID} ${C_WHITE_BG}`}
           >
             <option value="">All artists</option>
             {artists.map(a => <option key={a} value={a}>{a}</option>)}
@@ -102,27 +103,27 @@ export default function SongsPage() {
         )}
       </div>
 
-      {loading && <p className="text-gray-400 text-sm">Loading…</p>}
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {loading && <p className={`${C_GRAY_TEXT_400} text-sm`}>Loading…</p>}
+      {error && <p className={`${C_DANGER_TEXT_SOFT} text-sm`}>{error}</p>}
       {!loading && !error && (
         <>
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-4 mb-4 text-sm text-gray-500">
+            <div className={`flex items-center justify-center gap-4 mb-4 text-sm ${C_GRAY_TEXT_500}`}>
               {!showAll && (
                 <>
                   <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                    className="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                    className={`px-3 py-1 border ${C_GRAY_BORDER_200} rounded-lg hover:${C_GRAY_BG_50} disabled:opacity-40 disabled:cursor-not-allowed transition-colors`}>
                     ← Prev
                   </button>
                   <span>{page} / {totalPages}</span>
                   <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                    className="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                    className={`px-3 py-1 border ${C_GRAY_BORDER_200} rounded-lg hover:${C_GRAY_BG_50} disabled:opacity-40 disabled:cursor-not-allowed transition-colors`}>
                     Next →
                   </button>
                 </>
               )}
               <button onClick={() => setShowAll(v => !v)}
-                className="px-3 py-1 border border-gray-200 rounded-lg text-gray-400 hover:text-indigo-500 hover:border-indigo-300 transition-colors">
+                className={`px-3 py-1 border ${C_GRAY_BORDER_200} rounded-lg ${C_GRAY_TEXT_400} hover:${C_PRIMARY_TEXT_MID} hover:${C_PRIMARY_BORDER_SOFT} transition-colors`}>
                 {showAll ? 'Show Less' : 'Show All'}
               </button>
             </div>

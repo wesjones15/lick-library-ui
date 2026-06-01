@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { ROOT_CHROMATIC, GUITAR_OPEN_MIDI, CHROMATIC_NOTES, INTERVAL_NAMES } from '../../core/music';
 import { BTN_SM } from '../../core/ui';
+import { C_GRAY_BG_50, C_GRAY_BG_800, C_GRAY_BORDER_200, C_GRAY_BORDER_300, C_GRAY_BORDER_800, C_GRAY_TEXT_400, C_GRAY_TEXT_600, C_GRAY_TEXT_700, C_GRAY_TEXT_800, C_WHITE_BG, C_WHITE_TEXT } from '../../core/colors';
 
 const CHORD_QUALITIES: Record<string, number[]> = {
   'major':  [0, 4, 7],
@@ -67,7 +68,7 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
   if (!show) {
     return (
       <div className="mt-4 p-3 inline-block">
-        <button onClick={onToggle} className={`${BTN_SM} border-gray-300 text-gray-600 hover:bg-gray-50`}>
+        <button onClick={onToggle} className={`${BTN_SM} ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50}`}>
           Chords
         </button>
       </div>
@@ -75,9 +76,9 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
   }
 
   return (
-    <div className="mt-4 p-3 border border-gray-200 rounded-lg bg-gray-50 inline-block min-w-48">
+    <div className={`mt-4 p-3 border ${C_GRAY_BORDER_200} rounded-lg ${C_GRAY_BG_50} inline-block min-w-48`}>
       <div className="flex items-center gap-2">
-        <button onClick={onToggle} className={`${BTN_SM} bg-gray-800 text-white border-gray-800`}>
+        <button onClick={onToggle} className={`${BTN_SM} ${C_GRAY_BG_800} ${C_WHITE_TEXT} ${C_GRAY_BORDER_800}`}>
           Chords
         </button>
       </div>
@@ -88,7 +89,7 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
             {analysis.intervals.map((label, i) => (
               <span
                 key={i}
-                className="px-1.5 py-0.5 text-xs rounded border border-gray-300 bg-white text-gray-700 font-mono"
+                className={`px-1.5 py-0.5 text-xs rounded border ${C_GRAY_BORDER_300} ${C_WHITE_BG} ${C_GRAY_TEXT_700} font-mono`}
               >
                 {label}
               </span>
@@ -98,12 +99,12 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
           <div className="mt-2 flex flex-col gap-0.5">
             {analysis.chords.length > 0 ? (
               analysis.chords.map((c, i) => (
-                <span key={i} className="text-xs text-gray-800 font-medium">
+                <span key={i} className={`text-xs ${C_GRAY_TEXT_800} font-medium`}>
                   {c.root} {c.quality}
                 </span>
               ))
             ) : (
-              <span className="text-xs text-gray-400 italic">No matching chord</span>
+              <span className={`text-xs ${C_GRAY_TEXT_400} italic`}>No matching chord</span>
             )}
           </div>
         </>
@@ -113,7 +114,7 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
         <button
           style={{ visibility: selectedPositions.size > 0 ? 'visible' : 'hidden' }}
           onClick={onClear}
-          className="text-xs text-gray-400 hover:text-gray-600 underline"
+          className={`text-xs ${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600} underline`}
         >
           Clear
         </button>

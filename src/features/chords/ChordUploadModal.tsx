@@ -1,4 +1,5 @@
 import ChordUploadForm from './ChordUploadForm';
+import { C_BLACK_BG, C_GRAY_TEXT_400, C_GRAY_TEXT_600, C_GRAY_TEXT_900, C_WHITE_BG } from '../../core/colors';
 
 interface Props {
   chordName: string;
@@ -11,18 +12,18 @@ interface Props {
 export default function ChordUploadModal({ chordName, instrument, lockInstrument, onClose, onSuccess }: Props) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      className={`fixed inset-0 z-50 flex items-center justify-center ${C_BLACK_BG}/40`}
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm mx-4"
+        className={`${C_WHITE_BG} rounded-lg shadow-lg p-6 w-full max-w-sm mx-4`}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <span className="text-sm font-semibold text-gray-900">Add voicing for {chordName}</span>
+          <span className={`text-sm font-semibold ${C_GRAY_TEXT_900}`}>Add voicing for {chordName}</span>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+            className={`${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600} text-lg leading-none`}
           >
             ✕
           </button>

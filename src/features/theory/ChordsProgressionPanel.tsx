@@ -6,6 +6,7 @@ import { NOTE_KEYS, getStringCount, getStringLabels, MODE_DATA } from '../../cor
 import { SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
+import { C_GRAY_BG_50, C_GRAY_BORDER_300, C_GRAY_TEXT_400, C_GRAY_TEXT_500, C_GRAY_TEXT_600 } from '../../core/colors';
 
 const FRET_COUNT = 12;
 
@@ -83,10 +84,10 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
   }
 
   const qualityBadgeColor: Record<string, string> = {
-    maj: 'bg-blue-100 text-blue-700',
-    min: 'bg-purple-100 text-purple-700',
-    dim: 'bg-red-100 text-red-700',
-    aug: 'bg-orange-100 text-orange-700',
+    maj: '${C_INFO_BG_SUBTLE} ${C_INFO_TEXT}',
+    min: '${C_CHART_BG} ${C_CHART_TEXT}',
+    dim: '${C_DANGER_BG_SUBTLE} ${C_DANGER_TEXT}',
+    aug: '${C_THEORY_BG_SUBTLE} ${C_THEORY_TEXT}',
   };
 
   return (
@@ -121,7 +122,7 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
               key={chord.degree}
               onClick={() => selectChord(chord)}
               className={`flex flex-col items-center px-3 py-2 rounded-xl border-2 transition-colors min-w-[64px] ${
-                isSelected ? 'border-gray-800 bg-gray-50' : 'border-gray-200 bg-white hover:border-gray-400'
+                isSelected ? '${C_GRAY_BORDER_800} ${C_GRAY_BG_50}' : '${C_GRAY_BORDER_200} ${C_WHITE_BG} hover:${C_GRAY_BORDER_400}'
               }`}
             >
               {/* Degree color dot */}
@@ -129,11 +130,11 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
                 style={{ width: 10, height: 10, borderRadius: '50%', background: degreeColor, marginBottom: 4 }}
               />
               {/* Roman numeral */}
-              <span className={`text-base font-bold ${isSelected ? 'text-gray-900' : 'text-gray-700'}`}>
+              <span className={`text-base font-bold ${isSelected ? '${C_GRAY_TEXT_900}' : '${C_GRAY_TEXT_700}'}`}>
                 {chord.roman}
               </span>
               {/* Chord name */}
-              <span className="text-sm text-gray-500 mt-0.5">
+              <span className={`text-sm ${C_GRAY_TEXT_500} mt-0.5`}>
                 {chord.rootDisplay}{chord.quality !== 'maj' ? chord.apiSuffix || '' : ''}
               </span>
               {/* Quality badge */}
@@ -148,7 +149,7 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
       {/* Voicing display */}
       {selectedDegree !== null && (
         <div>
-          {loadingVoicing && <p className="text-sm text-gray-400 mb-2">Loading voicing…</p>}
+          {loadingVoicing && <p className={`text-sm ${C_GRAY_TEXT_400} mb-2`}>Loading voicing…</p>}
           {!loadingVoicing && voicingDots && (
             <>
               <GuitarNeck dots={voicingDots} fretCount={FRET_COUNT} stringLabels={getStringLabels(instrument)} />
@@ -157,28 +158,28 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
                   <button
                     disabled={voicingIdx === 0}
                     onClick={() => changeVoicing(-1)}
-                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+                    className={`px-3 py-1.5 text-sm rounded-lg border ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50} disabled:opacity-40`}
                   >‹</button>
-                  <span className="text-sm text-gray-500">
+                  <span className={`text-sm ${C_GRAY_TEXT_500}`}>
                     Voicing {voicingIdx + 1} / {allVoicings.length}
                   </span>
                   <button
                     disabled={voicingIdx === allVoicings.length - 1}
                     onClick={() => changeVoicing(1)}
-                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+                    className={`px-3 py-1.5 text-sm rounded-lg border ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50} disabled:opacity-40`}
                   >›</button>
                 </div>
               )}
             </>
           )}
           {!loadingVoicing && !voicingDots && (
-            <p className="text-sm text-gray-400">No voicing found for this chord.</p>
+            <p className={`text-sm ${C_GRAY_TEXT_400}`}>No voicing found for this chord.</p>
           )}
         </div>
       )}
 
       {selectedDegree === null && (
-        <p className="text-sm text-gray-400">Click a chord to see its voicing on the neck.</p>
+        <p className={`text-sm ${C_GRAY_TEXT_400}`}>Click a chord to see its voicing on the neck.</p>
       )}
     </div>
   );

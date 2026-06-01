@@ -6,6 +6,7 @@ import { TEXTAREA_MONO, SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import { useInstrument } from '../../core/useInstrument';
 import type { InstrumentName } from '../../core/useInstrument';
+import { C_DANGER_TEXT_SOFT, C_PRIMARY_BG, C_PRIMARY_BG_DARK, C_WHITE_TEXT } from '../../core/colors';
 
 const EMPTY_TAB_LINES: Record<InstrumentName, string[]> = {
   GUITAR:   ['e', 'B', 'G', 'D', 'A', 'E'],
@@ -180,12 +181,12 @@ export default function LickUploadForm({ onSuccess }: Props) {
         <button
           type="submit"
           disabled={loading || !/[0-9]/.test(rawTab)}
-          className="px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className={`px-5 py-2 ${C_PRIMARY_BG} ${C_WHITE_TEXT} text-sm font-medium rounded-lg hover:${C_PRIMARY_BG_DARK} disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
         >
           {loading ? 'Uploading…' : 'Upload'}
         </button>
       </div>
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <p className={`${C_DANGER_TEXT_SOFT} text-sm`}>{error}</p>}
     </form>
   );
 }

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { C_GRAY_BG_50, C_GRAY_BORDER_300, C_GRAY_TEXT_600, C_GRAY_TEXT_900 } from '../../core/colors';
 
 type ActiveTab = 'library' | 'visualizer' | 'builder' | 'legacy';
 
@@ -14,13 +15,13 @@ export default function LickSubNav({ active }: { active: ActiveTab }) {
   const inactiveTabs = TABS.filter(t => t.key !== active);
   return (
     <div className="flex items-baseline gap-4 mb-6">
-      <h1 className="text-3xl font-bold text-gray-900 shrink-0">{activeTab.label}</h1>
-      <div className="flex rounded-md overflow-hidden border border-gray-300">
+      <h1 className={`text-3xl font-bold ${C_GRAY_TEXT_900} shrink-0`}>{activeTab.label}</h1>
+      <div className={`flex rounded-md overflow-hidden border ${C_GRAY_BORDER_300}`}>
         {inactiveTabs.map((tab, i) => (
           <Link
             key={tab.key}
             to={tab.to}
-            className={`px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors${i < inactiveTabs.length - 1 ? ' border-r border-gray-300' : ''}`}
+            className={`px-3 py-1.5 text-sm font-medium ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50} transition-colors${i < inactiveTabs.length - 1 ? ' border-r ${C_GRAY_BORDER_300}' : ''}`}
           >
             {tab.label}
           </Link>

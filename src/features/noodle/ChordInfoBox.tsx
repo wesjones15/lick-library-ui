@@ -3,6 +3,7 @@ import type { ChordVoicing } from '../../core/api/client';
 import { parseChordName } from '../songs/parseChordName';
 import { INSTRUMENT_OPEN_SEMITONES, CHROMATIC_NOTES, MODE_SEMITONES, ROOT_CHROMATIC, INTERVAL_NAMES } from '../../core/music';
 import { DEGREE_COLORS } from '../../core/components/GuitarNeck';
+import { C_GRAY_BG_50, C_GRAY_BORDER_100, C_GRAY_TEXT_300, C_GRAY_TEXT_500, C_PRIMARY_TEXT } from '../../core/colors';
 
 
 const QUALITY_INTERVALS: Record<string, number[]> = {
@@ -118,18 +119,18 @@ export default function ChordInfoBox({ chordName, voicing, instrument, capoOffse
   const hasScale = tones.length > 0;
 
   return (
-    <div className="flex flex-col px-3 py-1 bg-gray-50 rounded-lg border border-gray-100 shrink-0">
+    <div className={`flex flex-col px-3 py-1 ${C_GRAY_BG_50} rounded-lg border ${C_GRAY_BORDER_100} shrink-0`}>
       <div className="flex items-center gap-2">
-        <span className="font-bold text-base text-indigo-600 leading-tight">{chordName}</span>
+        <span className={`font-bold text-base ${C_PRIMARY_TEXT} leading-tight`}>{chordName}</span>
         <span
           className={`w-2 h-2 rounded-full transition-colors duration-150 shrink-0 ${
-            isPlaying && pulsed ? 'bg-indigo-500' : 'bg-gray-200'
+            isPlaying && pulsed ? 'bg-indigo-500' : '${C_GRAY_BG_200}'
           }`}
         />
         {hasScale && (
           <button
             onClick={() => setShowScale(v => !v)}
-            className={`ml-auto text-[10px] leading-none transition-colors ${showScale ? 'text-indigo-400' : 'text-gray-300 hover:text-gray-500'}`}
+            className={`ml-auto text-[10px] leading-none transition-colors ${showScale ? '${C_PRIMARY_TEXT_SOFT}' : '${C_GRAY_TEXT_300} hover:${C_GRAY_TEXT_500}'}`}
             title={showScale ? 'Show chord intervals' : 'Show scale degrees'}
           >
             ⇄
@@ -140,13 +141,13 @@ export default function ChordInfoBox({ chordName, voicing, instrument, capoOffse
         <span className="text-xs font-mono leading-tight">
           {tones.map((t, i) => (
             <span key={i}>
-              {i > 0 && <span className="text-gray-300"> · </span>}
+              {i > 0 && <span className={`${C_GRAY_TEXT_300}`}> · </span>}
               <span style={{ color: t.color }}>{showScale ? t.scaleLabel : t.chordLabel}</span>
             </span>
           ))}
         </span>
       ) : plainIntervals.length > 0 ? (
-        <span className="text-xs text-gray-500 font-mono leading-tight">{plainIntervals.join(' · ')}</span>
+        <span className={`text-xs ${C_GRAY_TEXT_500} font-mono leading-tight`}>{plainIntervals.join(' · ')}</span>
       ) : null}
     </div>
   );

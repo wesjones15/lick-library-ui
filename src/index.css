@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+/* hover:/focus: variants used via hover:${TOKEN} template composition aren't
+   detected by Tailwind's text scanner — listed here so they're always generated. */
+@source inline("hover:bg-indigo-700 hover:bg-red-700 hover:bg-green-700 hover:bg-red-50 hover:bg-red-100 hover:bg-green-600 hover:border-blue-300 hover:text-blue-600 hover:text-yellow-500 hover:text-yellow-600 hover:bg-gray-50 hover:bg-gray-100 hover:border-gray-300 hover:border-gray-400 hover:text-gray-500 hover:text-gray-600 hover:text-gray-700 hover:text-gray-900 focus:border-indigo-400");

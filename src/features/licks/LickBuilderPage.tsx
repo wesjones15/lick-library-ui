@@ -7,6 +7,7 @@ import { NOTE_KEYS, MODE_DATA, formatNoteEnum, getStringCount, getStringLabels }
 import { BTN } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
+import { C_DANGER_TEXT_SOFT, C_GRAY_BG_50, C_GRAY_BORDER_300, C_GRAY_TEXT_600, C_PRIMARY_BORDER_MID, C_SUCCESS_BG, C_SUCCESS_BG_DARK, C_WHITE_BG, C_WHITE_TEXT } from '../../core/colors';
 import {
   FRET_COUNT,
   type TabColumn,
@@ -214,7 +215,7 @@ export default function LickBuilderPage() {
             <select
               value={buildRoot}
               onChange={e => setBuildRoot(e.target.value)}
-              className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-indigo-400"
+              className={`border ${C_GRAY_BORDER_300} rounded-md px-2 py-1 text-sm ${C_WHITE_BG} focus:outline-none focus:${C_PRIMARY_BORDER_MID}`}
             >
               <option value="">— None —</option>
               {NOTE_KEYS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
@@ -222,7 +223,7 @@ export default function LickBuilderPage() {
             <select
               value={buildMode}
               onChange={e => setBuildMode(e.target.value)}
-              className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-indigo-400"
+              className={`border ${C_GRAY_BORDER_300} rounded-md px-2 py-1 text-sm ${C_WHITE_BG} focus:outline-none focus:${C_PRIMARY_BORDER_MID}`}
             >
               {MODE_DATA.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
             </select>
@@ -240,8 +241,8 @@ export default function LickBuilderPage() {
             <button
               onClick={() => setIsBuilding(b => !b)}
               className={`${BTN} ${isBuilding
-                ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                : 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'}`}
+                ? '${C_WHITE_BG} ${C_GRAY_TEXT_700} ${C_GRAY_BORDER_300} hover:${C_GRAY_BG_50}'
+                : '${C_PRIMARY_BG} ${C_WHITE_TEXT} ${C_PRIMARY_BORDER} hover:${C_PRIMARY_BG_DARK}'}`}
             >
               {isBuilding ? 'Stop' : 'Start'}
             </button>
@@ -249,8 +250,8 @@ export default function LickBuilderPage() {
               onClick={() => setChordDetect(c => !c)}
               title="Chord detection: accumulate notes within 1.5s into one column"
               className={`${BTN} ${chordDetect
-                ? 'bg-green-600 text-white border-green-600'
-                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
+                ? '${C_SUCCESS_BG} ${C_WHITE_TEXT} border-green-600'
+                : '${C_WHITE_BG} ${C_GRAY_TEXT_600} ${C_GRAY_BORDER_300} hover:${C_GRAY_BG_50}'}`}
             >
               ♭³
             </button>
@@ -259,20 +260,20 @@ export default function LickBuilderPage() {
             value={builtTabText}
             onChange={e => setBuiltTabText(e.target.value)}
             spellCheck={false}
-            className="font-mono text-xs border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-400 resize-none w-full max-w-lg"
+            className={`font-mono text-xs border ${C_GRAY_BORDER_300} rounded-lg px-3 py-2 focus:outline-none focus:${C_PRIMARY_BORDER_MID} resize-none w-full max-w-lg`}
             rows={6}
           />
           <div className="flex gap-2 mt-2">
             <button
               onClick={handleSaveBuiltLick}
               disabled={!builtTabText.trim() || buildSaveLoading}
-              className={`${BTN} bg-green-600 text-white border-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`${BTN} ${C_SUCCESS_BG} ${C_WHITE_TEXT} border-green-600 hover:${C_SUCCESS_BG_DARK} disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {buildSaveLoading ? 'Saving…' : 'Save Lick'}
             </button>
             <button
               onClick={() => { setBuiltCols([]); setBuiltTabText(''); setBuildCurrentNote(null); }}
-              className={`${BTN} bg-white text-gray-600 border-gray-300 hover:bg-gray-50`}
+              className={`${BTN} ${C_WHITE_BG} ${C_GRAY_TEXT_600} ${C_GRAY_BORDER_300} hover:${C_GRAY_BG_50}`}
             >
               Clear
             </button>
@@ -280,7 +281,7 @@ export default function LickBuilderPage() {
               onClick={() => { navigator.clipboard.writeText(builtTabText); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
               disabled={!builtTabText.trim()}
               title="Copy tab to clipboard"
-              className={`${BTN} ${copied ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'} disabled:opacity-40 disabled:cursor-not-allowed`}
+              className={`${BTN} ${copied ? '${C_SUCCESS_BG} ${C_WHITE_TEXT} border-green-600' : '${C_WHITE_BG} ${C_GRAY_TEXT_600} ${C_GRAY_BORDER_300} hover:${C_GRAY_BG_50}'} disabled:opacity-40 disabled:cursor-not-allowed`}
             >
               {copied ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -294,7 +295,7 @@ export default function LickBuilderPage() {
               )}
             </button>
           </div>
-          {buildSaveError && <p className="text-sm text-red-500 mt-1">{buildSaveError}</p>}
+          {buildSaveError && <p className={`text-sm ${C_DANGER_TEXT_SOFT} mt-1`}>{buildSaveError}</p>}
         </div>
       </div>
     </div>

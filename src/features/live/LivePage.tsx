@@ -6,6 +6,7 @@ import { NOTE_KEYS, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN
 import { BTN, SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
+import { C_DANGER_TEXT_SOFT, C_GRAY_TEXT_900 } from '../../core/colors';
 
 const FRET_COUNT = 12;
 
@@ -139,7 +140,7 @@ export default function LivePage() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       <div className="flex items-center gap-4 mb-4 flex-wrap">
-        <h1 className="text-3xl font-bold text-gray-900">Live</h1>
+        <h1 className={`text-3xl font-bold ${C_GRAY_TEXT_900}`}>Live</h1>
 
         <select className={SELECT} value={root} onChange={e => setRoot(e.target.value)}>
           <option value="">— Key —</option>
@@ -161,8 +162,8 @@ export default function LivePage() {
 
         <button
           className={`${BTN} ${listening
-            ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
-            : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+            ? '${C_DANGER_BG_SOFT} ${C_DANGER_BORDER_MID} ${C_DANGER_TEXT} hover:${C_DANGER_BG_SUBTLE}'
+            : '${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50}'}`}
           onClick={() => setListening(l => !l)}
         >
           {listening ? '⏹ Stop' : '🎙 Listen'}
@@ -173,13 +174,13 @@ export default function LivePage() {
       </div>
 
       {micError === 'NotAllowedError' && (
-        <p className="text-sm text-red-500 mb-4">Mic access denied. Allow microphone permission and try again.</p>
+        <p className={`text-sm ${C_DANGER_TEXT_SOFT} mb-4`}>Mic access denied. Allow microphone permission and try again.</p>
       )}
       {micError === 'NotFoundError' && (
-        <p className="text-sm text-red-500 mb-4">No microphone found.</p>
+        <p className={`text-sm ${C_DANGER_TEXT_SOFT} mb-4`}>No microphone found.</p>
       )}
       {micError === 'NotSecureContext' && (
-        <p className="text-sm text-red-500 mb-4">Mic requires a secure connection (HTTPS). Try accessing the app via HTTPS, or on the same device as the server.</p>
+        <p className={`text-sm ${C_DANGER_TEXT_SOFT} mb-4`}>Mic requires a secure connection (HTTPS). Try accessing the app via HTTPS, or on the same device as the server.</p>
       )}
 
       <GuitarNeck
