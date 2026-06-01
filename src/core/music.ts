@@ -24,13 +24,20 @@ export const ROOT_CHROMATIC: Record<string, number> =
   Object.fromEntries(NOTE_KEYS.map((n, i) => [n.value, i]));
 
 export const MODE_DATA = [
-  { value: 'IONIAN',     suffix: '',            label: 'Major',      longLabel: 'Major (Ionian)'          },
-  { value: 'DORIAN',     suffix: ' Dorian',     label: 'Dorian',     longLabel: 'Dorian'                  },
-  { value: 'PHRYGIAN',   suffix: ' Phrygian',   label: 'Phrygian',   longLabel: 'Phrygian'                },
-  { value: 'LYDIAN',     suffix: ' Lydian',     label: 'Lydian',     longLabel: 'Lydian'                  },
-  { value: 'MIXOLYDIAN', suffix: ' Mixolydian', label: 'Mixolydian', longLabel: 'Mixolydian'              },
-  { value: 'AEOLIAN',    suffix: 'm',           label: 'Minor',      longLabel: 'Minor (Aeolian)'         },
-  { value: 'LOCRIAN',    suffix: ' Locrian',    label: 'Locrian',    longLabel: 'Locrian'                 },
+  { value: 'IONIAN',     suffix: '',            label: 'Major',      longLabel: 'Major (Ionian)',
+    intervals: ['1', '2',  '3',  '4',  '5',  '6',  '7' ],  semitones: [0, 2, 4, 5, 7, 9, 11] },
+  { value: 'DORIAN',     suffix: ' Dorian',     label: 'Dorian',     longLabel: 'Dorian',
+    intervals: ['1', '2',  'b3', '4',  '5',  '6',  'b7'],  semitones: [0, 2, 3, 5, 7, 9, 10] },
+  { value: 'PHRYGIAN',   suffix: ' Phrygian',   label: 'Phrygian',   longLabel: 'Phrygian',
+    intervals: ['1', 'b2', 'b3', '4',  '5',  'b6', 'b7'],  semitones: [0, 1, 3, 5, 7, 8, 10] },
+  { value: 'LYDIAN',     suffix: ' Lydian',     label: 'Lydian',     longLabel: 'Lydian',
+    intervals: ['1', '2',  '3',  '#4', '5',  '6',  '7' ],  semitones: [0, 2, 4, 6, 7, 9, 11] },
+  { value: 'MIXOLYDIAN', suffix: ' Mixolydian', label: 'Mixolydian', longLabel: 'Mixolydian',
+    intervals: ['1', '2',  '3',  '4',  '5',  '6',  'b7'],  semitones: [0, 2, 4, 5, 7, 9, 10] },
+  { value: 'AEOLIAN',    suffix: 'm',           label: 'Minor',      longLabel: 'Minor (Aeolian)',
+    intervals: ['1', '2',  'b3', '4',  '5',  'b6', 'b7'],  semitones: [0, 2, 3, 5, 7, 8, 10] },
+  { value: 'LOCRIAN',    suffix: ' Locrian',    label: 'Locrian',    longLabel: 'Locrian',
+    intervals: ['1', 'b2', 'b3', '4',  'b5', 'b6', 'b7'],  semitones: [0, 1, 3, 5, 6, 8, 10] },
 ] as const;
 
 export const MODE_SUFFIX: Record<string, string> =
@@ -43,15 +50,11 @@ export function formatKeyWithMode(root: string, mode: string): string {
   return root + (MODE_SUFFIX[mode] ?? '');
 }
 
-export const MODE_INTERVALS: Record<string, string[]> = {
-  IONIAN:     ['1', '2',  '3',  '4',  '5',  '6',  '7' ],
-  DORIAN:     ['1', '2',  'b3', '4',  '5',  '6',  'b7'],
-  PHRYGIAN:   ['1', 'b2', 'b3', '4',  '5',  'b6', 'b7'],
-  LYDIAN:     ['1', '2',  '3',  '#4', '5',  '6',  '7' ],
-  MIXOLYDIAN: ['1', '2',  '3',  '4',  '5',  '6',  'b7'],
-  AEOLIAN:    ['1', '2',  'b3', '4',  '5',  'b6', 'b7'],
-  LOCRIAN:    ['1', 'b2', 'b3', '4',  'b5', 'b6', 'b7'],
-};
+export const MODE_INTERVALS: Record<string, string[]> =
+  Object.fromEntries(MODE_DATA.map(m => [m.value, [...m.intervals]]));
+
+export const MODE_SEMITONES: Record<string, number[]> =
+  Object.fromEntries(MODE_DATA.map(m => [m.value, [...m.semitones]]));
 
 export function formatNoteEnum(enumName: string): string {
   if (enumName === 'B_FLAT') return 'Bb';
@@ -107,17 +110,6 @@ export function getStringLabels(instrument: string): string[] {
 
 // Guitar standard tuning MIDI values, low string first (E A D G B e)
 export const GUITAR_OPEN_MIDI = [40, 45, 50, 55, 59, 64];
-
-// Semitone offsets from root for each scale degree, by mode
-export const MODE_SEMITONES: Record<string, number[]> = {
-  IONIAN:     [0, 2, 4, 5, 7, 9, 11],
-  DORIAN:     [0, 2, 3, 5, 7, 9, 10],
-  PHRYGIAN:   [0, 1, 3, 5, 7, 8, 10],
-  LYDIAN:     [0, 2, 4, 6, 7, 9, 11],
-  MIXOLYDIAN: [0, 2, 4, 5, 7, 9, 10],
-  AEOLIAN:    [0, 2, 3, 5, 7, 8, 10],
-  LOCRIAN:    [0, 1, 3, 5, 6, 8, 10],
-};
 
 // Open-string semitone values from C=0, low string first (index = backend string index)
 export const INSTRUMENT_OPEN_SEMITONES: Record<string, number[]> =
