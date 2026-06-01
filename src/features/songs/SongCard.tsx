@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reparseSong } from '../../core/api/client';
 import type { SongSummary } from '../../core/api/client';
-import { KEY_LABEL, MODE_SUFFIX } from '../../core/music';
+import { formatNoteEnum, MODE_SUFFIX } from '../../core/music';
 
 interface Props {
   song: SongSummary;
@@ -13,7 +13,7 @@ interface Props {
 
 function keyDisplay(key: string | null, mode?: string | null): string {
   if (!key) return '';
-  const root = KEY_LABEL[key] ?? key.replace('_SHARP', '#').replace('B_FLAT', 'Bb');
+  const root = formatNoteEnum(key);
   return root + (mode ? (MODE_SUFFIX[mode] ?? '') : '');
 }
 

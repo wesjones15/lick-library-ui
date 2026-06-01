@@ -4,7 +4,7 @@ import { parseChordName } from '../songs/parseChordName';
 import ChordDiagram from './ChordDiagram';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import NumpadInput from '../../core/components/NumpadInput';
-import { INSTRUMENT_STRING_DISPLAY } from '../../core/music';
+import { getStringEntries } from '../../core/music';
 import type { InstrumentName } from '../../core/useInstrument';
 
 interface Props {
@@ -26,12 +26,12 @@ export default function ChordUploadForm({
   const [parseError, setParseError] = useState<string | null>(null);
   const [instrument, setInstrument] = useState<string>(initialInstrument ?? 'GUITAR');
   const [frets, setFrets] = useState<string[]>(() =>
-    Array((INSTRUMENT_STRING_DISPLAY[initialInstrument ?? 'GUITAR'] ?? INSTRUMENT_STRING_DISPLAY.GUITAR).length).fill('')
+    Array(getStringEntries(initialInstrument ?? 'GUITAR').length).fill('')
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const stringDisplay = INSTRUMENT_STRING_DISPLAY[instrument] ?? INSTRUMENT_STRING_DISPLAY.GUITAR;
+  const stringDisplay = getStringEntries(instrument);
 
   const handleChordNameChange = (val: string) => {
     setChordName(val);
@@ -45,8 +45,7 @@ export default function ChordUploadForm({
 
   const handleInstrumentChange = (name: InstrumentName) => {
     setInstrument(name);
-    const display = INSTRUMENT_STRING_DISPLAY[name] ?? INSTRUMENT_STRING_DISPLAY.GUITAR;
-    setFrets(Array(display.length).fill(''));
+    setFrets(Array(getStringEntries(name).length).fill(''));
   };
 
   const setFret = (idx: number, val: string) => {

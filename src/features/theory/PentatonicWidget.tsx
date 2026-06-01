@@ -1,4 +1,4 @@
-import { KEY_LABEL, MODE_DATA } from '../../core/music';
+import { formatNoteEnum, MODE_DATA } from '../../core/music';
 import { BTN_SM, SELECT } from '../../core/ui';
 
 const GRID_NOTES = [
@@ -101,7 +101,7 @@ export default function PentatonicWidget({
                           : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
                   }`}
                 >
-                  {KEY_LABEL[key]}
+                  {formatNoteEnum(key)}
                 </button>
               );
             })}

@@ -7,7 +7,7 @@ import { getAllChordVoicings, reseedChordDefaults } from '../../core/api/client'
 import type { ChordVoicing } from '../../core/api/client';
 import type { InstrumentName } from '../../core/useInstrument';
 
-import { KEY_LABEL } from '../../core/music';
+import { formatNoteEnum } from '../../core/music';
 
 const QUALITIES = [
   { quality: '',     label: 'Major'    },
@@ -38,7 +38,7 @@ function resolveSlashQuality(root: string, quality: string): string {
   const rootIdx = NOTE_KEYS.indexOf(root);
   if (rootIdx === -1) return quality;
   const bassKey = NOTE_KEYS[(rootIdx + semitones) % 12];
-  return `${base}/${KEY_LABEL[bassKey]}`;
+  return `${base}/${formatNoteEnum(bassKey)}`;
 }
 
 export default function ChordsGalleryPage() {
@@ -54,7 +54,7 @@ export default function ChordsGalleryPage() {
 
   useEffect(() => { fetchVoicings(); }, [root, instrument]);
 
-  const rootDisplay = KEY_LABEL[root] ?? root;
+  const rootDisplay = formatNoteEnum(root);
 
   const extraQualities = Object.keys(allVoicings)
     .filter(q => !KNOWN_QUALITIES.has(q))

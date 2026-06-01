@@ -12,12 +12,12 @@ import type { InstrumentName } from '../../core/useInstrument';
 import { parseChordName } from './parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { useSongNavContext } from '../../core/context/SongNavContext';
-import { KEY_LABEL, CHROMATIC_NOTES, MODE_SUFFIX, getStringCount, NOTE_LABEL_TO_KEY } from '../../core/music';
+import { formatNoteEnum, NOTE_KEYS, CHROMATIC_NOTES, MODE_SUFFIX, getStringCount } from '../../core/music';
 import { BTN_ICON } from '../../core/ui';
 
 function keyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
   if (!originalKey) return '';
-  const display = KEY_LABEL[originalKey] ?? originalKey;
+  const display = formatNoteEnum(originalKey);
   const match = display.match(/^([A-G][#b]?)/);
   if (!match) return display;
   const idx = CHROMATIC_NOTES.indexOf(match[1]);
@@ -263,7 +263,7 @@ export default function SongDetailPage() {
     const label = keyLabel(song.originalKey, semitones - (song.capo ?? 0));
     const rootMatch = label.match(/^([A-G][#b]?)/);
     if (!rootMatch) return null;
-    return NOTE_LABEL_TO_KEY[rootMatch[1]] ?? null;
+    return NOTE_KEYS.find(n => n.label === rootMatch[1])?.value ?? null;
   })();
 
   async function handleTabLicksToggle() {

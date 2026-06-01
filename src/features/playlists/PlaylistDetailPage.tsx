@@ -7,7 +7,7 @@ import {
 } from '../../core/api/client';
 import type { PlaylistDetail, PlaylistEntry, SongSummary } from '../../core/api/client';
 
-import { KEY_LABEL, CHROMATIC_NOTES, MODE_SUFFIX } from '../../core/music';
+import { formatNoteEnum, CHROMATIC_NOTES, MODE_SUFFIX } from '../../core/music';
 import { BTN_ICON } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import NumpadInput from '../../core/components/NumpadInput';
@@ -15,7 +15,7 @@ import type { InstrumentName } from '../../core/useInstrument';
 
 function keyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
   if (!originalKey) return '?';
-  const display = KEY_LABEL[originalKey] ?? originalKey;
+  const display = formatNoteEnum(originalKey);
   const match = display.match(/^([A-G][#b]?)/);
   if (!match) return display;
   const idx = CHROMATIC_NOTES.indexOf(match[1]);

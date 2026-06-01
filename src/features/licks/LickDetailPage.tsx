@@ -11,7 +11,7 @@ function modeLabel(mode: string) {
   return mode.charAt(0) + mode.slice(1).toLowerCase();
 }
 
-import { KEY_LABEL, INSTRUMENT_LIST, MODE_INTERVALS } from '../../core/music';
+import { formatNoteEnum, INSTRUMENT_LIST, MODE_INTERVALS } from '../../core/music';
 
 export default function LickDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -102,7 +102,7 @@ export default function LickDetailPage() {
       <div>
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
           Positions in{' '}
-          <span className="normal-case">{KEY_LABEL[key] ?? key}</span>
+          <span className="normal-case">{formatNoteEnum(key)}</span>
           {' — '}
           <span className="normal-case font-medium text-gray-500">
             {instrument === 'CUSTOM'
