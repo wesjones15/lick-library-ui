@@ -13,8 +13,24 @@ interface Props {
 
 const CHORD_RE = /[A-G][A-Za-z#b/0-9]*/g;
 
-function parseChordMatches(text: string): RegExpMatchArray[] {
-  return [...text.matchAll(CHORD_RE)].filter(m => m[0] !== 'NC' && m[0] !== 'N.C.');
+interface TokenMatch {
+  text: string;
+  index: number;
+  isNc: boolean;
+}
+
+function parseTokenMatches(raw: string): TokenMatch[] {
+  const results: TokenMatch[] = [];
+  for (const m of raw.matchAll(CHORD_RE)) {
+    const idx = m.index ?? 0;
+    if (idx > 0 && raw[idx - 1] === '.') continue; // phantom C inside "N.C."
+    if (m[0] === 'NC' || m[0] === 'N.C.') continue;
+    results.push({ text: m[0], index: idx, isNc: false });
+  }
+  for (const m of raw.matchAll(/N\.C\.|NC/g)) {
+    results.push({ text: m[0], index: m.index ?? 0, isNc: true });
+  }
+  return results.sort((a, b) => a.index - b.index);
 }
 
 // Each dot+gap is roughly 1.5 monospace character widths (10px dot + 4px gap ÷ ~9px/char)
@@ -44,7 +60,7 @@ function ActiveChordLine({
   nextOnlyDotIdx?: number;
 }) {
   const text = chords.trimEnd() || ' ';
-  const matches = parseChordMatches(text);
+  const matches = parseTokenMatches(text);
   const nextTokenIdx = boldIdx !== undefined && boldIdx + 1 < matches.length ? boldIdx + 1 : null;
 
   // Overlap check: would the two dot rows bleed into each other?
@@ -52,20 +68,20 @@ function ActiveChordLine({
   if (nextTokenIdx !== null && currentChordBeats > 0 && nextChordBeats > 0) {
     const cur = matches[boldIdx];
     const nxt = matches[nextTokenIdx];
-    const gap = (nxt.index ?? 0) - ((cur.index ?? 0) + cur[0].length);
+    const gap = nxt.index - (cur.index + cur.text.length);
     const curHalf = (currentChordBeats * DOT_CHAR_WIDTH) / 2;
     const nxtHalf = (nextChordBeats * DOT_CHAR_WIDTH) / 2;
-    wouldOverlap = curHalf + nxtHalf > gap + cur[0].length / 2 + nxt[0].length / 2;
+    wouldOverlap = curHalf + nxtHalf > gap + cur.text.length / 2 + nxt.text.length / 2;
   }
 
   const nodes: React.ReactNode[] = [];
   let cursor = 0;
 
   matches.forEach((match, i) => {
-    const start = match.index ?? 0;
-    const end = start + match[0].length;
+    const start = match.index;
+    const end = start + match.text.length;
 
-    // text before this chord
+    // text before this token
     if (start > cursor) {
       nodes.push(
         <span key={`t${i}`} style={{ whiteSpace: 'pre' }}>{text.slice(cursor, start)}</span>
@@ -101,11 +117,11 @@ function ActiveChordLine({
             {dotRow(nextChordBeats, 0, 6)}
           </span>
         )}
-        {isCurrent ? (
+        {isCurrent && !match.isNc ? (
           <strong className={`transition-colors duration-75 ${pulsed ? 'text-brand-6' : 'text-brand-4'}`}>
-            {match[0]}
+            {match.text}
           </strong>
-        ) : match[0]}
+        ) : match.text}
       </span>
     );
 
@@ -163,10 +179,11 @@ function KaraokeSlot({
           // playing but no beatmap yet — still show bold + pulse, no dots
           (() => {
             const text = line.chords.trimEnd() || ' ';
-            const matches = parseChordMatches(text);
+            const matches = parseTokenMatches(text);
             const target = matches[boldIdx];
-            if (!target || target.index === undefined) return text;
-            const s = target.index, e = s + target[0].length;
+            if (!target) return text;
+            if (target.isNc) return <>{text}</>;
+            const s = target.index, e = s + target.text.length;
             return (
               <>
                 {text.slice(0, s)}
@@ -202,7 +219,7 @@ export default function KaraokeDisplay({
 }: Props) {
   const exp = !!guitarKaraoke;
 
-  const activeLineChordCount = parseChordMatches(lines[currentIdx]?.chords ?? '').length;
+  const activeLineChordCount = parseTokenMatches(lines[currentIdx]?.chords ?? '').length;
   const nextIsOnNextLine =
     intraChordIdx !== undefined &&
     nextChordBeats > 0 &&
