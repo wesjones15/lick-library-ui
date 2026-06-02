@@ -29,12 +29,12 @@ interface GuitarNeckProps {
 
 export const DEGREE_COLORS: Record<number, string> = {
   1: '#ef4444',  // red
-  2: '#06b6d4',  // cyan
-  3: '#22c55e',  // green
+  2: '#06d4d4',  // cyan
+  3: '#019136',  // green
   4: '#eab308',  // yellow
   5: '#8b5cf6',  // purple
   6: '#3b82f6',  // blue
-  7: '#ea580c',  // orange
+  7: '#ea7b0c',  // orange
 };
 const OFF_SCALE_COLOR = '#d1d5db';
 const ACTIVE_RING_COLOR = '#fef08a';

@@ -260,14 +260,16 @@ export default function NoodlePage() {
      .catch(() => {});
   }, [contentLines, instrument]);
 
-  const { soundingRoot, soundingMode } = useMemo(() => {
-    if (noodleMode === 'freeChords') return { soundingRoot: freeRoot, soundingMode: freeMode };
-    if (noodleMode !== 'song' || !song) return { soundingRoot: '', soundingMode: 'IONIAN' };
+  const { soundingRoot, shapeRoot, soundingMode } = useMemo(() => {
+    if (noodleMode === 'freeChords') return { soundingRoot: freeRoot, shapeRoot: freeRoot, soundingMode: freeMode };
+    if (noodleMode !== 'song' || !song) return { soundingRoot: '', shapeRoot: '', soundingMode: 'IONIAN' };
     const root = song.originalKey ?? 'C';
     const mode = song.mode ?? 'IONIAN';
     const idx = CHROMATIC_NOTES.indexOf(root);
-    const transposedRoot = idx !== -1 ? CHROMATIC_NOTES[((idx + localSemitones + localCapo - (song.capo ?? 0)) % 12 + 12) % 12] : root;
-    return { soundingRoot: transposedRoot, soundingMode: mode };
+    if (idx === -1) return { soundingRoot: root, shapeRoot: root, soundingMode: mode };
+    const soundingIdx = ((idx + localSemitones + localCapo - (song.capo ?? 0)) % 12 + 12) % 12;
+    const shapeIdx    = ((idx + localSemitones            - (song.capo ?? 0)) % 12 + 12) % 12;
+    return { soundingRoot: CHROMATIC_NOTES[soundingIdx], shapeRoot: CHROMATIC_NOTES[shapeIdx], soundingMode: mode };
   }, [noodleMode, song, localSemitones, localCapo, freeRoot, freeMode]);
   console.log('[NoodlePage] soundingRoot:', soundingRoot, 'soundingMode:', soundingMode, 'noodleMode:', noodleMode, 'song.originalKey:', song?.originalKey ?? null, 'song.mode:', song?.mode ?? null);
 
@@ -500,11 +502,11 @@ export default function NoodlePage() {
               chordName={activeChord}
               voicing={activeVoicing}
               instrument={instrument}
-              capoOffset={capoOffset}
+              effectiveCapo={localCapo}
               pulsed={pulsed}
               isPlaying={isPlaying}
-              soundingRoot={soundingRoot}
-              soundingMode={soundingMode}
+              shapeRoot={shapeRoot}
+              shapeMode={soundingMode}
             />
           )}
         </div>
@@ -516,11 +518,11 @@ export default function NoodlePage() {
               chordName={activeChord}
               voicing={activeVoicing}
               instrument={instrument}
-              capoOffset={0}
+              effectiveCapo={0}
               pulsed={pulsed}
               isPlaying={isPlaying}
-              soundingRoot={soundingRoot}
-              soundingMode={soundingMode}
+              shapeRoot={shapeRoot}
+              shapeMode={soundingMode}
             />
           )}
         </div>

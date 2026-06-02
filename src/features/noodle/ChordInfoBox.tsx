@@ -24,18 +24,17 @@ function computeToneInfo(
   chordName: string,
   voicing: ChordVoicing | null,
   instrument: string,
-  capoOffset: number,
-  soundingRoot: string,
-  soundingMode: string,
+  shapeRoot: string,
+  shapeMode: string,
 ): ToneInfo[] {
   const parsed = parseChordName(chordName);
   if (!parsed) return [];
   const chordRootSemitone = ROOT_CHROMATIC[parsed.root];
   if (chordRootSemitone === undefined) return [];
-  const songRootSemitone = CHROMATIC_NOTES.indexOf(soundingRoot);
+  const songRootSemitone = CHROMATIC_NOTES.indexOf(shapeRoot);
   if (songRootSemitone === -1) return [];
 
-  const modeScale = MODE_SEMITONES[soundingMode] ?? MODE_SEMITONES.IONIAN;
+  const modeScale = MODE_SEMITONES[shapeMode] ?? MODE_SEMITONES.IONIAN;
 
   let semitones: number[];
   if (voicing) {
@@ -45,12 +44,15 @@ function computeToneInfo(
       if (fret === null) return;
       const open = openSemitones?.[i];
       if (open === undefined) return;
-      seen.add((open + fret + capoOffset) % 12);
+      seen.add((open + fret) % 12);
     });
-    semitones = [...seen].sort((a, b) => a - b);
+    semitones = [...seen].sort((a, b) =>
+      ((a - songRootSemitone + 12) % 12) - ((b - songRootSemitone + 12) % 12)
+    );
   } else {
     const quality = parsed.quality.replace(/\/\d+$/, '');
-    semitones = (QUALITY_INTERVALS[quality] ?? QUALITY_INTERVALS['']).map(i => (chordRootSemitone + i + capoOffset) % 12);
+    semitones = (QUALITY_INTERVALS[quality] ?? QUALITY_INTERVALS['']).map(i => (chordRootSemitone + i) % 12)
+      .sort((a, b) => ((a - songRootSemitone + 12) % 12) - ((b - songRootSemitone + 12) % 12));
   }
 
   return semitones.map(s => {
@@ -70,7 +72,6 @@ function computePlainIntervals(
   chordName: string,
   voicing: ChordVoicing | null,
   instrument: string,
-  capoOffset: number,
 ): string[] {
   const parsed = parseChordName(chordName);
   if (!parsed) return [];
@@ -83,7 +84,7 @@ function computePlainIntervals(
       if (fret === null) return;
       const open = openSemitones?.[i];
       if (open === undefined) return;
-      offsets.add(((open + fret + capoOffset) % 12 - rootSemitone + 12) % 12);
+      offsets.add(((open + fret) % 12 - rootSemitone + 12) % 12);
     });
     return [...offsets].sort((a, b) => a - b).map(o => INTERVAL_NAMES[o] ?? String(o));
   }
@@ -91,28 +92,43 @@ function computePlainIntervals(
   return (QUALITY_INTERVALS[quality] ?? QUALITY_INTERVALS['']).map(i => INTERVAL_NAMES[i] ?? String(i));
 }
 
+function getSoundChordName(chordName: string, effectiveCapo: number): string | null {
+  if (effectiveCapo === 0) return null;
+  const parsed = parseChordName(chordName);
+  if (!parsed) return null;
+  const rootIdx = ROOT_CHROMATIC[parsed.root];
+  if (rootIdx === undefined) return null;
+  const soundRoot = CHROMATIC_NOTES[(rootIdx + effectiveCapo) % 12];
+  return soundRoot + parsed.quality;
+}
+
 interface Props {
   chordName: string;
   voicing: ChordVoicing | null;
   instrument: string;
-  capoOffset: number;
+  effectiveCapo: number;
   pulsed: boolean;
   isPlaying: boolean;
-  soundingRoot?: string;
-  soundingMode?: string;
+  shapeRoot?: string;
+  shapeMode?: string;
 }
 
-export default function ChordInfoBox({ chordName, voicing, instrument, capoOffset, pulsed, isPlaying, soundingRoot = '', soundingMode = 'IONIAN' }: Props) {
-  const [showScale, setShowScale] = useState(false);
+export default function ChordInfoBox({ chordName, voicing, instrument, effectiveCapo, pulsed, isPlaying, shapeRoot = '', shapeMode = 'IONIAN' }: Props) {
+  const [showScale, setShowScale] = useState(true);
 
   const tones = useMemo(
-    () => soundingRoot ? computeToneInfo(chordName, voicing, instrument, capoOffset, soundingRoot, soundingMode) : [],
-    [chordName, voicing, instrument, capoOffset, soundingRoot, soundingMode],
+    () => shapeRoot ? computeToneInfo(chordName, voicing, instrument, shapeRoot, shapeMode) : [],
+    [chordName, voicing, instrument, shapeRoot, shapeMode],
   );
 
   const plainIntervals = useMemo(
-    () => tones.length === 0 ? computePlainIntervals(chordName, voicing, instrument, capoOffset) : [],
-    [chordName, voicing, instrument, capoOffset, tones.length],
+    () => tones.length === 0 ? computePlainIntervals(chordName, voicing, instrument) : [],
+    [chordName, voicing, instrument, tones.length],
+  );
+
+  const soundName = useMemo(
+    () => getSoundChordName(chordName, effectiveCapo),
+    [chordName, effectiveCapo],
   );
 
   const hasScale = tones.length > 0;
@@ -120,7 +136,10 @@ export default function ChordInfoBox({ chordName, voicing, instrument, capoOffse
   return (
     <div className="flex flex-col px-3 py-1 bg-gray-50 rounded-lg border border-gray-100 shrink-0">
       <div className="flex items-center gap-2">
-        <span className="font-bold text-base text-brand-6 leading-tight">{chordName}</span>
+        <span className="font-bold text-base text-brand-6 leading-tight">
+          {chordName}
+          {soundName && <span className="text-gray-400 font-normal text-sm ml-0.5">({soundName})</span>}
+        </span>
         <span
           className={`w-2 h-2 rounded-full transition-colors duration-150 shrink-0 ${
             isPlaying && pulsed ? 'bg-brand-5' : 'bg-gray-200'
