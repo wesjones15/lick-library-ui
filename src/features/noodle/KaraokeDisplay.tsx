@@ -140,12 +140,17 @@ function KaraokeSlot({
     ? (isActive ? 'text-xl' : variant === 'secondary' ? 'text-base' : 'text-sm')
     : (isActive ? 'text-lg' : variant === 'secondary' ? 'text-sm' : 'text-xs');
 
-  const showActiveLine = isActive && boldIdx !== undefined && (currentChordBeats ?? 0) > 0;
+  const isLickPlaying = isActive && line.chords === '' && (currentChordBeats ?? 0) > 0;
+  const showActiveLine = isActive && !isLickPlaying && boldIdx !== undefined && (currentChordBeats ?? 0) > 0;
 
   return (
     <div className={`font-mono transition-opacity ${sizeClass}`} style={{ opacity }}>
       <div style={{ color: '#4f46e5', whiteSpace: 'pre' }}>
-        {showActiveLine ? (
+        {isLickPlaying ? (
+          <span style={{ display: 'flex', gap: '3px' }}>
+            {dotRow(currentChordBeats!, beatInChord ?? 0, (currentChordBeats!) > 8 ? 7 : 9)}
+          </span>
+        ) : showActiveLine ? (
           <ActiveChordLine
             chords={line.chords}
             boldIdx={boldIdx!}
@@ -184,7 +189,9 @@ function KaraokeSlot({
           line.chords.trimEnd() || ' '
         )}
       </div>
-      <div style={{ color: '#111827', whiteSpace: 'pre' }}>{line.lyrics.trimEnd() || ' '}</div>
+      <div style={{ color: isLickPlaying ? '#6b7280' : '#111827', whiteSpace: 'pre', fontStyle: isLickPlaying ? 'italic' : undefined }}>
+        {line.lyrics.trimEnd() || ' '}
+      </div>
     </div>
   );
 }

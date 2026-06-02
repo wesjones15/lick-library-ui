@@ -25,6 +25,7 @@ interface GuitarNeckProps {
   // Labels displayed left of each string, high string first. Defaults to standard guitar.
   stringLabels?: string[];
   bpm?: number;
+  capoFret?: number;
 }
 
 export const DEGREE_COLORS: Record<number, string> = {
@@ -57,7 +58,7 @@ const R_RING = 13;
 
 const STRING_WEIGHTS = [0.5, 0.75, 1.0, 1.35, 1.75, 2.2]; // high e → low E
 
-export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDotClick, cagedZones, stringLabels, bpm }: GuitarNeckProps) {
+export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDotClick, cagedZones, stringLabels, bpm, capoFret }: GuitarNeckProps) {
   const pulseDuration = bpm ? `${Math.round(60000 / bpm)}ms` : '800ms';
   const n = Math.min(dots.length, 6);
   if (dots.length > 6) console.error(`GuitarNeck: max 6 strings supported, got ${dots.length}`);
@@ -219,6 +220,19 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
           strokeWidth={0.5}
         />
       ))}
+
+      {/* Capo bar */}
+      {capoFret != null && capoFret > 0 && capoFret <= fretCount && (
+        <rect
+          x={xFret(capoFret) - 4}
+          y={strLineY0}
+          width={8}
+          height={TOTAL_STR_H}
+          rx={4}
+          fill="#7B3F00"
+          opacity={0.75}
+        />
+      )}
 
       {/* Inlay dots */}
       {INLAY_SINGLE.filter(f => f <= fretCount).map(f => (
