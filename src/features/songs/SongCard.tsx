@@ -50,7 +50,7 @@ export default function SongCard({ song, managing = false, onReparse, onAddToPla
               onClick={reparsed ? undefined : handleReparse}
               title={reparsed ? 'done' : 'reparse'}
               className={`flex-1 flex items-center justify-center py-0.5 rounded-lg text-2xl leading-none transition-colors ${
-                reparsed ? 'text-success-400 cursor-default' : 'text-gray-300 hover:text-primary-500 hover:bg-primary-50'
+                reparsed ? 'text-success-4 cursor-default' : 'text-gray-300 hover:text-brand-5 hover:bg-brand-1'
               }`}
               aria-label="Re-parse song"
             >
@@ -61,7 +61,7 @@ export default function SongCard({ song, managing = false, onReparse, onAddToPla
             <button
               onClick={e => { e.stopPropagation(); navigate(`/song/${song.id}/manage`); }}
               title="manage"
-              className="flex-1 flex items-center justify-center py-0.5 rounded-lg text-4xl leading-none text-gray-300 hover:text-primary-500 hover:bg-primary-50 transition-colors"
+              className="flex-1 flex items-center justify-center py-0.5 rounded-lg text-4xl leading-none text-gray-300 hover:text-brand-5 hover:bg-brand-1 transition-colors"
               aria-label="Manage song"
             >
               ✎
@@ -71,7 +71,7 @@ export default function SongCard({ song, managing = false, onReparse, onAddToPla
             <button
               onClick={e => { e.stopPropagation(); onAddToPlaylist(); }}
               title="add to playlist"
-              className="flex-1 flex items-center justify-center py-0.5 rounded-lg text-2xl leading-none text-gray-300 hover:text-primary-500 hover:bg-primary-50 transition-colors"
+              className="flex-1 flex items-center justify-center py-0.5 rounded-lg text-2xl leading-none text-gray-300 hover:text-brand-5 hover:bg-brand-1 transition-colors"
               aria-label="Add to playlist"
             >
               ♪+

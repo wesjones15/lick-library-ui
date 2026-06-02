@@ -158,7 +158,7 @@ export default function LickInputModal({ title, initialTab, onVisualize, onClose
             <button
               onClick={() => onVisualize(rawTab, inputKey || undefined, mode || undefined)}
               disabled={!hasNotes}
-              className="px-5 py-2 text-sm rounded-lg bg-primary-600 text-white border border-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-5 py-2 text-sm rounded-lg bg-brand-6 text-white border border-brand-6 hover:bg-brand-7 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Visualize
             </button>

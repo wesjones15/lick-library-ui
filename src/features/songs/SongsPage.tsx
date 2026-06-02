@@ -10,7 +10,7 @@ type SortKey = 'title' | 'artist' | 'key' | 'tempo';
 const PAGE_SIZE = 16;
 
 const sortBtnClass = (active: boolean) =>
-  `${BTN_XS} ${active ? 'border-primary-300 bg-primary-50 text-primary-600' : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
+  `${BTN_XS} ${active ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
 
 export default function SongsPage() {
   const navigate = useNavigate();
@@ -68,7 +68,7 @@ export default function SongsPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setManaging(m => !m)}
-            className={`px-3 py-2 text-sm rounded-lg border transition-colors ${managing ? 'border-primary-300 text-primary-600 bg-primary-50' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+            className={`px-3 py-2 text-sm rounded-lg border transition-colors ${managing ? 'border-brand-3 text-brand-6 bg-brand-1' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
           >
             Manage
           </button>
@@ -94,7 +94,7 @@ export default function SongsPage() {
           <select
             value={filterArtist}
             onChange={e => setFilterArtist(e.target.value)}
-            className="text-xs border border-gray-200 rounded px-2 py-1 text-gray-500 focus:outline-none focus:border-primary-400 bg-white"
+            className="text-xs border border-gray-200 rounded px-2 py-1 text-gray-500 focus:outline-none focus:border-brand-4 bg-white"
           >
             <option value="">All artists</option>
             {artists.map(a => <option key={a} value={a}>{a}</option>)}
@@ -103,7 +103,7 @@ export default function SongsPage() {
       </div>
 
       {loading && <p className="text-gray-400 text-sm">Loading…</p>}
-      {error && <p className="text-danger-500 text-sm">{error}</p>}
+      {error && <p className="text-danger-6 text-sm">{error}</p>}
       {!loading && !error && (
         <>
           {totalPages > 1 && (
@@ -122,7 +122,7 @@ export default function SongsPage() {
                 </>
               )}
               <button onClick={() => setShowAll(v => !v)}
-                className="px-3 py-1 border border-gray-200 rounded-lg text-gray-400 hover:text-primary-500 hover:border-primary-300 transition-colors">
+                className="px-3 py-1 border border-gray-200 rounded-lg text-gray-400 hover:text-brand-5 hover:border-brand-3 transition-colors">
                 {showAll ? 'Show Less' : 'Show All'}
               </button>
             </div>

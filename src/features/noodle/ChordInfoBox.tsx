@@ -120,16 +120,16 @@ export default function ChordInfoBox({ chordName, voicing, instrument, capoOffse
   return (
     <div className="flex flex-col px-3 py-1 bg-gray-50 rounded-lg border border-gray-100 shrink-0">
       <div className="flex items-center gap-2">
-        <span className="font-bold text-base text-primary-600 leading-tight">{chordName}</span>
+        <span className="font-bold text-base text-brand-6 leading-tight">{chordName}</span>
         <span
           className={`w-2 h-2 rounded-full transition-colors duration-150 shrink-0 ${
-            isPlaying && pulsed ? 'bg-primary-500' : 'bg-gray-200'
+            isPlaying && pulsed ? 'bg-brand-5' : 'bg-gray-200'
           }`}
         />
         {hasScale && (
           <button
             onClick={() => setShowScale(v => !v)}
-            className={`ml-auto text-[10px] leading-none transition-colors ${showScale ? 'text-primary-400' : 'text-gray-300 hover:text-gray-500'}`}
+            className={`ml-auto text-[10px] leading-none transition-colors ${showScale ? 'text-brand-4' : 'text-gray-300 hover:text-gray-500'}`}
             title={showScale ? 'Show chord intervals' : 'Show scale degrees'}
           >
             ⇄

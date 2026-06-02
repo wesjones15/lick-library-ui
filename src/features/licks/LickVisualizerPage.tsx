@@ -118,7 +118,7 @@ export default function LickVisualizerPage() {
           </button>
           <button
             onClick={() => setShowNewLick(true)}
-            className={`${BTN} bg-primary-600 text-white border-primary-600 hover:bg-primary-700`}
+            className={`${BTN} bg-brand-6 text-white border-brand-6 hover:bg-brand-7`}
           >
             New Lick
           </button>
@@ -149,7 +149,7 @@ export default function LickVisualizerPage() {
                     step={1}
                     value={currentCol}
                     onChange={e => setCurrentCol(+e.target.value)}
-                    className="w-full accent-primary-600"
+                    className="w-full accent-brand-6"
                   />
                   {columns.length > 1 && columns.map((col, i) =>
                     col.isRest ? (
@@ -202,7 +202,7 @@ export default function LickVisualizerPage() {
                     onClick={() => setIsRunning(r => !r)}
                     className={`${BTN} ${isRunning
                       ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                      : 'bg-primary-600 text-white border-primary-600 hover:bg-primary-700'}`}
+                      : 'bg-brand-6 text-white border-brand-6 hover:bg-brand-7'}`}
                   >
                     {isRunning ? 'Pause' : 'Resume'}
                   </button>
@@ -222,14 +222,14 @@ export default function LickVisualizerPage() {
                   onClick={handleSaveLick}
                   disabled={!canSave || saveLoading}
                   className={`${BTN} ${canSave
-                    ? 'bg-success-600 text-white border-success-600 hover:bg-success-700'
+                    ? 'bg-success-6 text-white border-success-6 hover:bg-success-7'
                     : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'} disabled:opacity-60`}
                 >
                   {saveLoading ? 'Saving…' : 'Save Lick'}
                 </button>
               </div>
             </div>
-            {saveError && <p className="text-sm text-danger-500 mt-1">{saveError}</p>}
+            {saveError && <p className="text-sm text-danger-6 mt-1">{saveError}</p>}
           </div>
         )}
 

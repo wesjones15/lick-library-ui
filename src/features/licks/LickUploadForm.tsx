@@ -180,12 +180,12 @@ export default function LickUploadForm({ onSuccess }: Props) {
         <button
           type="submit"
           disabled={loading || !/[0-9]/.test(rawTab)}
-          className="px-5 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-5 py-2 bg-brand-6 text-white text-sm font-medium rounded-lg hover:bg-brand-7 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? 'Uploading…' : 'Upload'}
         </button>
       </div>
-      {error && <p className="text-danger-500 text-sm">{error}</p>}
+      {error && <p className="text-danger-6 text-sm">{error}</p>}
     </form>
   );
 }

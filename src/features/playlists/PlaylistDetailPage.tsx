@@ -113,7 +113,7 @@ function VoicingModal({ entry, onSave, onClose }: {
                     if (!isNaN(v)) setLocalTempoOverride(Math.min(240, Math.max(40, v)));
                   }}
                   placeholder={entry.tempo != null ? String(entry.tempo) : '—'}
-                  className="w-12 text-center text-base font-semibold text-gray-900 bg-transparent border-b border-gray-300 focus:border-primary-500 focus:outline-none"
+                  className="w-12 text-center text-base font-semibold text-gray-900 bg-transparent border-b border-gray-300 focus:border-brand-5 focus:outline-none"
                 />
               </div>
               <button
@@ -139,7 +139,7 @@ function VoicingModal({ entry, onSave, onClose }: {
 
         <button
           onClick={() => { onSave(localSemitones, localCapo - entry.defaultCapo, localInstrument, localTempoOverride); onClose(); }}
-          className="w-full px-4 py-2 text-sm rounded-lg bg-primary-600 text-white hover:bg-primary-700"
+          className="w-full px-4 py-2 text-sm rounded-lg bg-brand-6 text-white hover:bg-brand-7"
         >Save</button>
       </div>
     </div>
@@ -214,7 +214,7 @@ function AddSongsModal({
                 return (
                   <div
                     key={s.id}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-colors ${isIn ? 'border-primary-200 bg-primary-50' : 'border-gray-100 hover:bg-gray-50'}`}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-colors ${isIn ? 'border-primary-200 bg-brand-1' : 'border-gray-100 hover:bg-gray-50'}`}
                   >
                     <div className="min-w-0 mr-2">
                       <div className="text-sm font-medium text-gray-900 truncate">{s.title}</div>
@@ -223,7 +223,7 @@ function AddSongsModal({
                     <button
                       onClick={() => handleToggle(s)}
                       disabled={busy || justAdded}
-                      className={`text-xl leading-none shrink-0 transition-colors ${busy ? 'opacity-40' : justAdded ? 'text-success-500 cursor-default' : isIn ? 'text-danger-400 hover:text-danger-600' : 'text-gray-300 hover:text-success-500'}`}
+                      className={`text-xl leading-none shrink-0 transition-colors ${busy ? 'opacity-40' : justAdded ? 'text-success-5 cursor-default' : isIn ? 'text-danger-5 hover:text-danger-7' : 'text-gray-300 hover:text-success-5'}`}
                     >
                       {justAdded ? '✓' : isIn ? '×' : '+'}
                     </button>
@@ -345,7 +345,7 @@ export default function PlaylistDetailPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6 gap-3">
         <div className="min-w-0 flex-1">
-          <Link to="/playlists" className="text-sm text-gray-400 hover:text-primary-500 transition-colors">← Playlists</Link>
+          <Link to="/playlists" className="text-sm text-gray-400 hover:text-brand-5 transition-colors">← Playlists</Link>
           {editingName ? (
             <div className="flex items-center gap-2 mt-1">
               <input
@@ -354,9 +354,9 @@ export default function PlaylistDetailPage() {
                 value={nameInput}
                 onChange={e => setNameInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') setEditingName(false); }}
-                className="text-2xl font-bold text-gray-900 border-b-2 border-primary-400 focus:outline-none bg-transparent"
+                className="text-2xl font-bold text-gray-900 border-b-2 border-brand-4 focus:outline-none bg-transparent"
               />
-              <button onClick={handleSaveName} className="text-primary-500 hover:text-primary-700 text-lg" title="Save name">💾</button>
+              <button onClick={handleSaveName} className="text-brand-5 hover:text-brand-7 text-lg" title="Save name">💾</button>
             </div>
           ) : (
             <div className="flex items-center gap-2 mt-1">
@@ -364,7 +364,7 @@ export default function PlaylistDetailPage() {
               {managing && playlist.ownedByCurrentUser && (
                 <button
                   onClick={() => { setNameInput(playlist.name); setEditingName(true); }}
-                  className="text-gray-400 hover:text-primary-500 transition-colors text-3xl leading-none"
+                  className="text-gray-400 hover:text-brand-5 transition-colors text-3xl leading-none"
                   title="Rename playlist"
                 >✎</button>
               )}
@@ -372,7 +372,7 @@ export default function PlaylistDetailPage() {
           )}
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-xs text-gray-400">{entries.length} {entries.length === 1 ? 'song' : 'songs'}</span>
-            <span className={`text-xs px-1.5 py-0.5 rounded-full ${playlist.isPublic ? 'bg-success-50 text-success-600' : 'bg-gray-100 text-gray-400'}`}>
+            <span className={`text-xs px-1.5 py-0.5 rounded-full ${playlist.isPublic ? 'bg-success-1 text-success-6' : 'bg-gray-100 text-gray-400'}`}>
               {playlist.isPublic ? 'Public' : 'Private'}
             </span>
           </div>
@@ -381,7 +381,7 @@ export default function PlaylistDetailPage() {
         <div className="flex items-center gap-2 shrink-0">
           {managing && playlist.ownedByCurrentUser && confirmDelete && (
             <div className="flex gap-2">
-              <button onClick={handleDeletePlaylist} className="text-xs px-3 py-1.5 rounded bg-danger-500 text-white hover:bg-danger-600">Delete playlist</button>
+              <button onClick={handleDeletePlaylist} className="text-xs px-3 py-1.5 rounded bg-danger-6 text-white hover:bg-danger-7">Delete playlist</button>
               <button onClick={() => setConfirmDelete(false)} className="text-xs px-3 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">Cancel</button>
             </div>
           )}
@@ -395,7 +395,7 @@ export default function PlaylistDetailPage() {
                 {playlist.isPublic ? 'Make Private' : 'Make Public'}
               </button>
               <button onClick={() => setConfirmDelete(true)}
-                className="px-3 py-2 text-sm rounded-lg border border-danger-200 text-danger-500 hover:bg-danger-50 transition-colors"
+                className="px-3 py-2 text-sm rounded-lg border border-danger-3 text-danger-6 hover:bg-danger-1 transition-colors"
                 title="Delete playlist">Delete</button>
             </>
           )}
@@ -403,7 +403,7 @@ export default function PlaylistDetailPage() {
             <button
               onClick={toggleManage}
               className={managing
-                ? 'px-4 py-2 text-sm rounded-lg border border-primary-300 text-primary-600 bg-primary-50 hover:bg-primary-100 transition-colors'
+                ? 'px-4 py-2 text-sm rounded-lg border border-brand-3 text-brand-6 bg-brand-1 hover:bg-brand-2 transition-colors'
                 : 'px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors'}
             >
               {managing ? 'Done' : 'Manage'}
@@ -416,7 +416,7 @@ export default function PlaylistDetailPage() {
       {playlist.ownedByCurrentUser && (managing || entries.length === 0) && (
         <button
           onClick={() => setShowAddSongs(true)}
-          className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 border border-dashed border-primary-300 rounded-xl px-4 py-3 w-full hover:bg-primary-50 transition-colors mb-4"
+          className="flex items-center gap-2 text-sm text-brand-6 hover:text-brand-7 border border-dashed border-brand-3 rounded-xl px-4 py-3 w-full hover:bg-brand-1 transition-colors mb-4"
         >
           <span className="text-lg leading-none">+</span> Add Songs
         </button>
@@ -444,22 +444,22 @@ export default function PlaylistDetailPage() {
 
                 {/* Song info */}
                 <div
-                  className="flex-1 cursor-pointer hover:text-primary-700 transition-colors min-w-0"
+                  className="flex-1 cursor-pointer hover:text-brand-7 transition-colors min-w-0"
                   onClick={() => !managing && handleOpenSong(idx)}
                 >
                   <div className="font-medium text-gray-900 truncate">{entry.title}</div>
                   {entry.artist && <div className="text-xs text-gray-400 truncate">{entry.artist}</div>}
                   <div className="flex items-center gap-2 text-xs font-mono mt-0.5">
                     {entry.originalKey && (
-                      <span className={entry.keyOffset !== 0 || entry.capoOffset !== 0 ? 'text-primary-500' : 'text-gray-400'}>
+                      <span className={entry.keyOffset !== 0 || entry.capoOffset !== 0 ? 'text-brand-5' : 'text-gray-400'}>
                         {keyLabel(entry.originalKey, entry.keyOffset + entry.capoOffset, entry.mode)}
                       </span>
                     )}
-                    <span className={entry.capoOffset !== 0 ? 'text-primary-500' : 'text-gray-400'}>
+                    <span className={entry.capoOffset !== 0 ? 'text-brand-5' : 'text-gray-400'}>
                       {entry.defaultCapo + entry.capoOffset > 0 ? `Capo ${entry.defaultCapo + entry.capoOffset}` : 'No Capo'}
                     </span>
                     {(entry.tempoOverride != null || entry.tempo != null) && (
-                      <span className={entry.tempoOverride != null ? 'text-primary-500' : 'text-gray-400'}>
+                      <span className={entry.tempoOverride != null ? 'text-brand-5' : 'text-gray-400'}>
                         {entry.tempoOverride ?? entry.tempo} BPM{entry.tempoOverride != null ? ' (override)' : ''}
                       </span>
                     )}
@@ -470,7 +470,7 @@ export default function PlaylistDetailPage() {
                 {!managing && (
                   <button
                     onClick={() => handleOpenSong(idx)}
-                    className="text-gray-300 hover:text-primary-400 transition-colors text-lg leading-none shrink-0"
+                    className="text-gray-300 hover:text-brand-4 transition-colors text-lg leading-none shrink-0"
                     title="Open song"
                   >›</button>
                 )}
@@ -480,18 +480,18 @@ export default function PlaylistDetailPage() {
                   <div className="flex items-center gap-4 shrink-0 ml-2 mr-2">
                     <button
                       onClick={() => setEditingEntry(entry.entryId)}
-                      className="text-gray-400 hover:text-primary-500 transition-colors leading-none"
+                      className="text-gray-400 hover:text-brand-5 transition-colors leading-none"
                       style={{ fontSize: '2.1875rem' }}
                       title="Edit voicing offset"
                     >✎</button>
                     {confirmRemove === entry.entryId ? (
                       <div className="flex gap-1">
-                        <button onClick={() => handleRemoveEntry(entry.entryId)} className="text-xs px-2 py-0.5 rounded bg-danger-500 text-white hover:bg-danger-600">Remove</button>
+                        <button onClick={() => handleRemoveEntry(entry.entryId)} className="text-xs px-2 py-0.5 rounded bg-danger-6 text-white hover:bg-danger-7">Remove</button>
                         <button onClick={() => setConfirmRemove(null)} className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-600">Cancel</button>
                       </div>
                     ) : (
                       <button onClick={() => setConfirmRemove(entry.entryId)}
-                        className="text-danger-400 hover:text-danger-600 transition-colors text-2xl leading-none">×</button>
+                        className="text-danger-5 hover:text-danger-7 transition-colors text-2xl leading-none">×</button>
                     )}
                   </div>
                 )}

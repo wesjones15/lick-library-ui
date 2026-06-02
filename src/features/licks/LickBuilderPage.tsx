@@ -214,7 +214,7 @@ export default function LickBuilderPage() {
             <select
               value={buildRoot}
               onChange={e => setBuildRoot(e.target.value)}
-              className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-primary-400"
+              className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-brand-4"
             >
               <option value="">— None —</option>
               {NOTE_KEYS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
@@ -222,7 +222,7 @@ export default function LickBuilderPage() {
             <select
               value={buildMode}
               onChange={e => setBuildMode(e.target.value)}
-              className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-primary-400"
+              className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-brand-4"
             >
               {MODE_DATA.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
             </select>
@@ -241,7 +241,7 @@ export default function LickBuilderPage() {
               onClick={() => setIsBuilding(b => !b)}
               className={`${BTN} ${isBuilding
                 ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                : 'bg-primary-600 text-white border-primary-600 hover:bg-primary-700'}`}
+                : 'bg-brand-6 text-white border-brand-6 hover:bg-brand-7'}`}
             >
               {isBuilding ? 'Stop' : 'Start'}
             </button>
@@ -249,7 +249,7 @@ export default function LickBuilderPage() {
               onClick={() => setChordDetect(c => !c)}
               title="Chord detection: accumulate notes within 1.5s into one column"
               className={`${BTN} ${chordDetect
-                ? 'bg-success-600 text-white border-success-600'
+                ? 'bg-success-6 text-white border-success-6'
                 : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
             >
               ♭³
@@ -259,14 +259,14 @@ export default function LickBuilderPage() {
             value={builtTabText}
             onChange={e => setBuiltTabText(e.target.value)}
             spellCheck={false}
-            className="font-mono text-xs border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-primary-400 resize-none w-full max-w-lg"
+            className="font-mono text-xs border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-brand-4 resize-none w-full max-w-lg"
             rows={6}
           />
           <div className="flex gap-2 mt-2">
             <button
               onClick={handleSaveBuiltLick}
               disabled={!builtTabText.trim() || buildSaveLoading}
-              className={`${BTN} bg-success-600 text-white border-success-600 hover:bg-success-700 disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`${BTN} bg-success-6 text-white border-success-6 hover:bg-success-7 disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {buildSaveLoading ? 'Saving…' : 'Save Lick'}
             </button>
@@ -280,7 +280,7 @@ export default function LickBuilderPage() {
               onClick={() => { navigator.clipboard.writeText(builtTabText); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
               disabled={!builtTabText.trim()}
               title="Copy tab to clipboard"
-              className={`${BTN} ${copied ? 'bg-success-600 text-white border-success-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'} disabled:opacity-40 disabled:cursor-not-allowed`}
+              className={`${BTN} ${copied ? 'bg-success-6 text-white border-success-6' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'} disabled:opacity-40 disabled:cursor-not-allowed`}
             >
               {copied ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -294,7 +294,7 @@ export default function LickBuilderPage() {
               )}
             </button>
           </div>
-          {buildSaveError && <p className="text-sm text-danger-500 mt-1">{buildSaveError}</p>}
+          {buildSaveError && <p className="text-sm text-danger-6 mt-1">{buildSaveError}</p>}
         </div>
       </div>
     </div>

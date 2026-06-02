@@ -70,7 +70,7 @@ export default function NumpadInput({
   const btnBase = 'rounded-xl font-semibold select-none transition-colors';
   const digitCls = `${btnBase} bg-gray-100 text-gray-900 active:bg-gray-200`;
   const specialCls = `${btnBase} bg-gray-200 text-gray-600 active:bg-gray-300`;
-  const confirmCls = `${btnBase} bg-primary-600 text-white active:bg-primary-700`;
+  const confirmCls = `${btnBase} bg-brand-6 text-white active:bg-brand-7`;
   const sizeCls = wide ? 'w-11 h-11 text-base' : 'h-12 text-lg';
 
   function Grid() {

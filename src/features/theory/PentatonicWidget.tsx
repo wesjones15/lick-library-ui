@@ -95,9 +95,9 @@ export default function PentatonicWidget({
                     isActive
                       ? 'bg-gray-800 text-white border-gray-800'
                       : isFull
-                        ? 'bg-theory-50 border-theory-400 text-theory-700'
+                        ? 'bg-pent-full-1 border-pent-full-2 text-pent-full-3'
                         : isPartial
-                          ? 'bg-tempo-50 border-tempo-300 text-tempo-600'
+                          ? 'bg-pent-part-1 border-pent-part-2 text-pent-part-3'
                           : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
                   }`}
                 >

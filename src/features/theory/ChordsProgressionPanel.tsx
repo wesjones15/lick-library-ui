@@ -83,10 +83,10 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
   }
 
   const qualityBadgeColor: Record<string, string> = {
-    maj: 'bg-info-100 text-info-700',
-    min: 'bg-chart-100 text-chart-700',
-    dim: 'bg-danger-100 text-danger-700',
-    aug: 'bg-theory-100 text-theory-700',
+    maj: 'bg-info-1 text-info-7',
+    min: 'bg-chart-1 text-chart-2',
+    dim: 'bg-danger-2 text-danger-8',
+    aug: 'bg-theory-1 text-theory-2',
   };
 
   return (

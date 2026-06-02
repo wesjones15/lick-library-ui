@@ -127,7 +127,7 @@ export default function Layout() {
                 {info.bpm != null && (
                   <button
                     onClick={() => { if (isPlaying && bpm === info.bpm) { setIsPlaying(false); } else { setBpm(info.bpm!); setIsPlaying(true); } }}
-                    className="text-xs text-gray-400 hover:text-primary-500 transition-colors"
+                    className="text-xs text-gray-400 hover:text-brand-5 transition-colors"
                   >
                     {info.bpm} BPM
                   </button>
@@ -147,7 +147,7 @@ export default function Layout() {
                   {miniActions?.viewMode === 'scroll' && (
                     <button
                       onClick={() => miniActions?.toggleAutoScroll()}
-                      className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.autoScrolling ? 'text-primary-500' : 'text-gray-400 hover:text-primary-500'}`}
+                      className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.autoScrolling ? 'text-brand-5' : 'text-gray-400 hover:text-brand-5'}`}
                       aria-label={miniActions?.autoScrolling ? 'Pause autoscroll' : 'Start autoscroll'}
                     >
                       {miniActions?.autoScrolling ? '⏸' : '▶'}
@@ -158,7 +158,7 @@ export default function Layout() {
                     <div className="relative w-8 h-8 flex items-center justify-center" ref={playlistPanelRef}>
                       <button
                         onClick={() => setPlaylistPanelOpen(o => !o)}
-                        className={`w-8 h-8 flex items-center justify-center text-sm leading-none transition-colors ${playlistPanelOpen ? 'text-primary-500' : 'text-gray-400 hover:text-primary-500'}`}
+                        className={`w-8 h-8 flex items-center justify-center text-sm leading-none transition-colors ${playlistPanelOpen ? 'text-brand-5' : 'text-gray-400 hover:text-brand-5'}`}
                         aria-label="Playlist controls"
                       >
                         🎵
@@ -167,7 +167,7 @@ export default function Layout() {
                         <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-3 flex flex-col gap-2">
                           <button
                             onClick={() => { miniActions?.onPlaylistBack(); setPlaylistPanelOpen(false); setIconsOpen(false); }}
-                            className="text-xs text-left text-gray-500 hover:text-primary-500 transition-colors"
+                            className="text-xs text-left text-gray-500 hover:text-brand-5 transition-colors"
                           >
                             ← {miniActions?.playlistName}
                           </button>
@@ -196,7 +196,7 @@ export default function Layout() {
                   {miniActions && (
                     <button
                       onClick={() => { miniActions.navigateNoodle(); setIconsOpen(false); }}
-                      className="w-12 h-12 flex items-center justify-center text-4xl leading-none text-tempo-500 hover:text-tempo-600 transition-colors"
+                      className="w-12 h-12 flex items-center justify-center text-4xl leading-none text-noodle-1 hover:text-noodle-2 transition-colors"
                       aria-label="Noodle"
                       title="Noodle"
                     >
@@ -207,7 +207,7 @@ export default function Layout() {
                   {miniActions?.hasTabLines && (
                     <button
                       onClick={() => miniActions?.toggleTabLicks()}
-                      className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.showTabLicks ? 'text-danger-500' : 'text-gray-400 hover:text-gray-600'}`}
+                      className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.showTabLicks ? 'text-danger-6' : 'text-gray-400 hover:text-gray-600'}`}
                       aria-label="Tab positions"
                     >
                       ≡
@@ -216,7 +216,7 @@ export default function Layout() {
 
                   <button
                     onClick={() => miniActions?.toggleViewMode()}
-                    className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.viewMode === 'scroll' ? 'text-primary-500' : 'text-gray-400 hover:text-primary-500'}`}
+                    className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.viewMode === 'scroll' ? 'text-brand-5' : 'text-gray-400 hover:text-brand-5'}`}
                     aria-label="Toggle view"
                   >
                     {miniActions?.viewMode === 'scroll' ? '↕' : '⊞'}
@@ -224,7 +224,7 @@ export default function Layout() {
 
                   <button
                     onClick={() => miniActions?.openTranspose()}
-                    className="w-8 h-8 flex items-center justify-center text-xl leading-none text-gray-400 hover:text-primary-500 transition-colors"
+                    className="w-8 h-8 flex items-center justify-center text-xl leading-none text-gray-400 hover:text-brand-5 transition-colors"
                     aria-label="Capo / Transpose"
                   >
                     Δ
@@ -234,7 +234,7 @@ export default function Layout() {
                     <div className="relative w-8 h-8 flex items-center justify-center" ref={instrumentPanelRef}>
                       <button
                         onClick={() => setInstrumentPanelOpen(o => !o)}
-                        className={`w-8 h-8 flex items-center justify-center text-sm leading-none transition-colors ${instrumentPanelOpen ? 'text-primary-500' : 'text-gray-400 hover:text-primary-500'}`}
+                        className={`w-8 h-8 flex items-center justify-center text-sm leading-none transition-colors ${instrumentPanelOpen ? 'text-brand-5' : 'text-gray-400 hover:text-brand-5'}`}
                         aria-label="Instrument"
                       >
                         🎸
@@ -256,7 +256,7 @@ export default function Layout() {
 
                   <button
                     onClick={() => { miniActions?.navigateManage(); setIconsOpen(false); }}
-                    className="w-8 h-8 flex items-center justify-center text-2xl leading-none text-gray-400 hover:text-primary-500 transition-colors"
+                    className="w-8 h-8 flex items-center justify-center text-2xl leading-none text-gray-400 hover:text-brand-5 transition-colors"
                     aria-label="Manage"
                   >
                     ✎
@@ -267,7 +267,7 @@ export default function Layout() {
               {/* Toggle button: ⋮ when closed, ✕ when open — leftmost of right section */}
               <button
                 onClick={() => { setIconsOpen(o => !o); setPlaylistPanelOpen(false); setInstrumentPanelOpen(false); }}
-                className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${iconsOpen ? 'text-primary-500 hover:text-primary-700' : 'text-gray-400 hover:text-primary-500'}`}
+                className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${iconsOpen ? 'text-brand-5 hover:text-brand-7' : 'text-gray-400 hover:text-brand-5'}`}
                 aria-label={iconsOpen ? 'Less options' : 'More options'}
               >
                 {iconsOpen ? '>' : '<'}
@@ -276,7 +276,7 @@ export default function Layout() {
               {/* Add to playlist — always visible */}
               <button
                 onClick={() => miniActions?.addToPlaylist()}
-                className="w-8 h-8 flex items-center justify-center text-xl leading-none text-info-400 hover:text-info-600 transition-colors"
+                className="w-8 h-8 flex items-center justify-center text-xl leading-none text-info-4 hover:text-info-6 transition-colors"
                 aria-label="Add to playlist"
               >
                 ♪+
@@ -285,7 +285,7 @@ export default function Layout() {
               {/* Show chords — always visible */}
               <button
                 onClick={() => setShowChords(v => !v)}
-                className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${showChords ? 'text-primary-500' : 'text-gray-400 hover:text-primary-500'}`}
+                className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${showChords ? 'text-brand-5' : 'text-gray-400 hover:text-brand-5'}`}
                 aria-label="Show chords"
                 title="Show chords"
               >
@@ -295,7 +295,7 @@ export default function Layout() {
               {/* Restore — always rightmost */}
               <button
                 onClick={() => setCollapsed(false)}
-                className="w-8 h-8 flex items-center justify-center text-xl leading-none text-gray-400 hover:text-primary-500 transition-colors"
+                className="w-8 h-8 flex items-center justify-center text-xl leading-none text-gray-400 hover:text-brand-5 transition-colors"
                 aria-label="Restore full view"
                 title="Restore full view"
               >
@@ -308,7 +308,7 @@ export default function Layout() {
           <>
             <Link
               to="/"
-              className="text-gray-900 font-semibold text-base mr-2 sm:mr-8 hover:text-primary-600 transition-colors shrink-0"
+              className="text-gray-900 font-semibold text-base mr-2 sm:mr-8 hover:text-brand-6 transition-colors shrink-0"
             >
               Lick Library
             </Link>
@@ -331,7 +331,7 @@ export default function Layout() {
                       onClick={() => setMenuOpen(false)}
                       className={`px-4 py-2 text-sm font-medium transition-colors ${
                         pathname === to
-                          ? 'bg-primary-50 text-primary-600'
+                          ? 'bg-brand-1 text-brand-6'
                           : 'text-gray-600 hover:bg-gray-50'
                       }`}
                     >
@@ -352,7 +352,7 @@ export default function Layout() {
                     to={to}
                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                       active
-                        ? 'bg-primary-50 text-primary-600'
+                        ? 'bg-brand-1 text-brand-6'
                         : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                     }`}
                   >
@@ -367,12 +367,12 @@ export default function Layout() {
                 <>
                   <button
                     onClick={() => miniActions?.onPlaylistBack()}
-                    className="w-6 h-6 flex items-center justify-center text-base text-gray-400 hover:text-primary-500 transition-colors"
+                    className="w-6 h-6 flex items-center justify-center text-base text-gray-400 hover:text-brand-5 transition-colors"
                     aria-label="Back to playlist"
                   >↩</button>
                   <button
                     onClick={() => miniActions?.onPlaylistPrev()}
-                    className="w-6 h-6 flex items-center justify-center text-base text-gray-400 hover:text-primary-500 transition-colors"
+                    className="w-6 h-6 flex items-center justify-center text-base text-gray-400 hover:text-brand-5 transition-colors"
                     aria-label="Previous song"
                   >←</button>
                   <span className="text-xs text-gray-400 tabular-nums">
@@ -380,7 +380,7 @@ export default function Layout() {
                   </span>
                   <button
                     onClick={() => miniActions?.onPlaylistNext()}
-                    className="w-6 h-6 flex items-center justify-center text-base text-gray-400 hover:text-primary-500 transition-colors"
+                    className="w-6 h-6 flex items-center justify-center text-base text-gray-400 hover:text-brand-5 transition-colors"
                     aria-label="Next song"
                   >→</button>
                 </>
@@ -388,7 +388,7 @@ export default function Layout() {
               {!currentUser && (
                 <a
                   href={`${BACKEND}/api/oauth2/authorize/google`}
-                  className="text-sm text-gray-500 hover:text-primary-600 transition-colors px-2 py-1"
+                  className="text-sm text-gray-500 hover:text-brand-6 transition-colors px-2 py-1"
                 >
                   Sign in
                 </a>
@@ -397,7 +397,7 @@ export default function Layout() {
                 <div className="relative" ref={accountRef}>
                   <button
                     onClick={() => setAccountOpen(o => !o)}
-                    className={`text-xl transition-colors px-2 py-1 leading-none ${currentUser.role === 'ADMIN' ? 'text-primary-600 hover:text-primary-800' : 'text-gray-500 hover:text-gray-900'}`}
+                    className={`text-xl transition-colors px-2 py-1 leading-none ${currentUser.role === 'ADMIN' ? 'text-brand-6 hover:text-brand-8' : 'text-gray-500 hover:text-gray-900'}`}
                     title={`${currentUser.role} · ${currentUser.status}`}
                     aria-label="Account menu"
                   >
@@ -424,7 +424,7 @@ export default function Layout() {
               {info && (
                 <button
                   onClick={() => setCollapsed(true)}
-                  className="text-gray-400 hover:text-primary-500 transition-colors text-2xl leading-none ml-4"
+                  className="text-gray-400 hover:text-brand-5 transition-colors text-2xl leading-none ml-4"
                   aria-label="Collapse song view"
                   title="Collapse navbar"
                 >

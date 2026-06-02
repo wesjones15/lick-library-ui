@@ -107,7 +107,7 @@ export default function UserPage() {
     <button
       onClick={loadData}
       title="Refresh"
-      className="text-gray-300 hover:text-primary-500 transition-colors text-base leading-none"
+      className="text-gray-300 hover:text-brand-5 transition-colors text-base leading-none"
       aria-label="Refresh"
     >
       ↺
@@ -118,7 +118,7 @@ export default function UserPage() {
     <>
     <div className="max-w-3xl mx-auto px-6 py-10">
       {isAdmin && (
-        <h1 className="text-3xl font-bold text-primary-700 mb-1">Welcome aboard, captain.</h1>
+        <h1 className="text-3xl font-bold text-brand-7 mb-1">Welcome aboard, captain.</h1>
       )}
       {!isAdmin && (
         <h1 className="text-3xl font-bold text-gray-900 mb-1">Account</h1>
@@ -135,12 +135,12 @@ export default function UserPage() {
                   value={editingUsername}
                   onChange={e => setEditingUsername(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') handleSaveUsername(); if (e.key === 'Escape') setEditingUsername(null); }}
-                  className="text-sm border border-gray-300 rounded px-2 py-0.5 text-gray-900 focus:outline-none focus:border-primary-400 w-40"
+                  className="text-sm border border-gray-300 rounded px-2 py-0.5 text-gray-900 focus:outline-none focus:border-brand-4 w-40"
                 />
                 <button
                   onClick={handleSaveUsername}
                   disabled={savingUsername}
-                  className="text-xs px-2 py-0.5 rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
+                  className="text-xs px-2 py-0.5 rounded bg-brand-6 text-white hover:bg-brand-7 disabled:opacity-50 transition-colors"
                 >
                   {savingUsername ? '…' : 'Save'}
                 </button>
@@ -158,7 +158,7 @@ export default function UserPage() {
                   <button
                     onClick={() => setEditingUsername(profile?.username ?? '')}
                     title="Edit username"
-                    className="text-gray-300 hover:text-primary-500 transition-colors text-sm leading-none"
+                    className="text-gray-300 hover:text-brand-5 transition-colors text-sm leading-none"
                     aria-label="Edit username"
                   >
                     ✎
@@ -178,18 +178,18 @@ export default function UserPage() {
               {!isAdmin && refreshButton}
               <button
                 onClick={() => { setManaging(m => !m); setEditingUsername(null); setConfirmDelete(false); }}
-                className="text-xs text-gray-400 hover:text-primary-600 transition-colors"
+                className="text-xs text-gray-400 hover:text-brand-6 transition-colors"
               >
                 {managing ? 'Done' : 'Manage'}
               </button>
             </div>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isAdmin ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-500'}`}>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isAdmin ? 'bg-brand-2 text-brand-7' : 'bg-gray-100 text-gray-500'}`}>
               {currentUser.role}
             </span>
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-              currentUser.status === 'APPROVED' ? 'bg-success-100 text-success-700' :
-              currentUser.status === 'REJECTED' ? 'bg-danger-100 text-danger-700' :
-              'bg-warn-100 text-warn-700'
+              currentUser.status === 'APPROVED' ? 'bg-success-2 text-success-7' :
+              currentUser.status === 'REJECTED' ? 'bg-danger-2 text-danger-8' :
+              'bg-warn-2 text-warn-6'
             }`}>
               {currentUser.status}
             </span>
@@ -217,15 +217,15 @@ export default function UserPage() {
           <h2 className="text-lg font-semibold text-gray-800 mb-3">My Uploads</h2>
           <div className="grid grid-cols-3 gap-4">
             <div className="border border-gray-200 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-primary-600">{myLicks.length}</div>
+              <div className="text-2xl font-bold text-brand-6">{myLicks.length}</div>
               <div className="text-xs text-gray-400 mt-1">Licks</div>
             </div>
             <div className="border border-gray-200 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-primary-600">{mySongs.length}</div>
+              <div className="text-2xl font-bold text-brand-6">{mySongs.length}</div>
               <div className="text-xs text-gray-400 mt-1">Songs</div>
             </div>
             <div className="border border-gray-200 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-primary-600">{myPlaylists.length}</div>
+              <div className="text-2xl font-bold text-brand-6">{myPlaylists.length}</div>
               <div className="text-xs text-gray-400 mt-1">Playlists</div>
             </div>
           </div>
@@ -241,7 +241,7 @@ export default function UserPage() {
               {refreshButton}
               <button
                 onClick={() => { setManaging(m => !m); setEditingUsername(null); setConfirmDelete(false); }}
-                className="text-xs text-gray-400 hover:text-primary-600 transition-colors"
+                className="text-xs text-gray-400 hover:text-brand-6 transition-colors"
               >
                 {managing ? 'Done' : 'Manage'}
               </button>
@@ -258,8 +258,8 @@ export default function UserPage() {
                       <div className="text-sm font-medium text-gray-800">{u.username}</div>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                         u.requestType === 'ACCOUNT_DELETION'
-                          ? 'bg-danger-100 text-danger-700'
-                          : 'bg-info-100 text-info-700'
+                          ? 'bg-danger-2 text-danger-8'
+                          : 'bg-info-1 text-info-7'
                       }`}>
                         {u.requestType === 'ACCOUNT_DELETION' ? 'Deletion' : 'Account Creation'}
                       </span>
@@ -269,13 +269,13 @@ export default function UserPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleApprove(u.id)}
-                      className="text-xs px-3 py-1 rounded-lg bg-success-600 text-white hover:bg-success-700 transition-colors"
+                      className="text-xs px-3 py-1 rounded-lg bg-success-6 text-white hover:bg-success-7 transition-colors"
                     >
                       Approve
                     </button>
                     <button
                       onClick={() => handleReject(u.id)}
-                      className="text-xs px-3 py-1 rounded-lg border border-danger-300 text-danger-600 hover:bg-danger-50 transition-colors"
+                      className="text-xs px-3 py-1 rounded-lg border border-danger-4 text-danger-7 hover:bg-danger-1 transition-colors"
                     >
                       Reject
                     </button>
@@ -310,15 +310,15 @@ export default function UserPage() {
                     <td className="py-1.5 pr-4 text-gray-700">{u.username}</td>
                     <td className="py-1.5 pr-4 text-gray-500">{u.email}</td>
                     <td className="py-1.5 pr-4">
-                      <span className={`px-1.5 py-0.5 rounded text-xs ${u.role === 'ADMIN' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-500'}`}>
+                      <span className={`px-1.5 py-0.5 rounded text-xs ${u.role === 'ADMIN' ? 'bg-brand-2 text-brand-7' : 'bg-gray-100 text-gray-500'}`}>
                         {u.role}
                       </span>
                     </td>
                     <td className="py-1.5 pr-4">
                       <span className={`px-1.5 py-0.5 rounded text-xs ${
-                        u.status === 'APPROVED' ? 'bg-success-100 text-success-700' :
-                        u.status === 'REJECTED' ? 'bg-danger-100 text-danger-700' :
-                        'bg-warn-100 text-warn-700'
+                        u.status === 'APPROVED' ? 'bg-success-2 text-success-7' :
+                        u.status === 'REJECTED' ? 'bg-danger-2 text-danger-8' :
+                        'bg-warn-2 text-warn-6'
                       }`}>
                         {u.status}
                       </span>
@@ -327,10 +327,10 @@ export default function UserPage() {
                       {u.id !== profile?.id && (
                         confirmDeleteUserId === u.id ? (
                           <div className="flex items-center gap-1">
-                            <span className="text-xs text-danger-500">Sure?</span>
+                            <span className="text-xs text-danger-6">Sure?</span>
                             <button
                               onClick={() => handleDeleteUser(u.id)}
-                              className="text-xs px-2 py-0.5 rounded bg-danger-500 text-white hover:bg-danger-600 transition-colors"
+                              className="text-xs px-2 py-0.5 rounded bg-danger-6 text-white hover:bg-danger-7 transition-colors"
                             >
                               Confirm
                             </button>
@@ -344,7 +344,7 @@ export default function UserPage() {
                         ) : (
                           <button
                             onClick={() => setConfirmDeleteUserId(u.id)}
-                            className="text-xs text-danger-300 hover:text-danger-500 transition-colors"
+                            className="text-xs text-danger-4 hover:text-danger-6 transition-colors"
                           >
                             Delete
                           </button>
@@ -373,9 +373,9 @@ export default function UserPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <div className="text-sm font-medium text-gray-800">{req.songTitle}{req.songArtist ? ` — ${req.songArtist}` : ''}</div>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        req.requestType === 'SONG_METADATA' ? 'bg-info-100 text-info-700' :
-                        req.requestType === 'SONG_CHART' ? 'bg-chart-100 text-chart-700' :
-                        'bg-beatmap-100 text-beatmap-700'
+                        req.requestType === 'SONG_METADATA' ? 'bg-info-1 text-info-7' :
+                        req.requestType === 'SONG_CHART' ? 'bg-chart-1 text-chart-2' :
+                        'bg-beatmap-1 text-beatmap-2'
                       }`}>
                         {req.requestType === 'SONG_METADATA' ? 'Metadata' : req.requestType === 'SONG_CHART' ? 'Chart' : 'Beatmap'}
                       </span>
@@ -384,7 +384,7 @@ export default function UserPage() {
                   </div>
                   <button
                     onClick={() => setReviewingUpdateId(req.id)}
-                    className="text-xs px-3 py-1 rounded-lg border border-primary-300 text-primary-600 hover:bg-primary-50 transition-colors"
+                    className="text-xs px-3 py-1 rounded-lg border border-brand-3 text-brand-6 hover:bg-brand-1 transition-colors"
                   >
                     Review
                   </button>
@@ -400,11 +400,11 @@ export default function UserPage() {
         <div className="mt-8 pt-6 border-t border-gray-100">
           {confirmDelete ? (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-danger-600">Submit a deletion request for admin review?</span>
+              <span className="text-sm text-danger-7">Submit a deletion request for admin review?</span>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleting || isSuperAdmin}
-                className="text-xs px-3 py-1.5 rounded-lg bg-danger-600 text-white hover:bg-danger-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="text-xs px-3 py-1.5 rounded-lg bg-danger-7 text-white hover:bg-danger-8 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {deleting ? 'Submitting…' : 'Submit request'}
               </button>
@@ -420,7 +420,7 @@ export default function UserPage() {
               onClick={() => !isSuperAdmin && setConfirmDelete(true)}
               disabled={isSuperAdmin}
               title={isSuperAdmin ? 'Primary admin account cannot be deleted' : undefined}
-              className={`text-xs transition-colors ${isSuperAdmin ? 'text-gray-300 cursor-not-allowed' : 'text-danger-400 hover:text-danger-600'}`}
+              className={`text-xs transition-colors ${isSuperAdmin ? 'text-gray-300 cursor-not-allowed' : 'text-danger-5 hover:text-danger-7'}`}
             >
               Delete account
             </button>

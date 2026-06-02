@@ -14,7 +14,7 @@ interface Props {
 
 
 const SELECT_CLASS =
-  'border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-primary-400';
+  'border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-brand-4';
 
 export default function InstrumentSelector({
   instrument, customTuning = '', onInstrumentChange, onCustomTuningChange, onSubmit, error, excludeCustom = false, compact = false,
@@ -46,14 +46,14 @@ export default function InstrumentSelector({
           <button
             type="button"
             onClick={onSubmit}
-            className="px-3 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            className="px-3 py-2 text-sm bg-brand-6 text-white rounded-lg hover:bg-brand-7"
           >
             Apply
           </button>
         </div>
       )}
 
-      {error && <p className="text-danger-500 text-xs">{error}</p>}
+      {error && <p className="text-danger-6 text-xs">{error}</p>}
     </div>
   );
 }

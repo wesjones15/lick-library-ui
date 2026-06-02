@@ -110,7 +110,7 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
               return (
                 <div key={pl.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
                   <button
-                    className="text-sm text-gray-900 hover:text-primary-600 flex-1 text-left"
+                    className="text-sm text-gray-900 hover:text-brand-6 flex-1 text-left"
                     onClick={() => { navigate(`/playlist/${pl.id}`); onClose(); }}
                   >
                     {pl.name}
@@ -123,10 +123,10 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
                       isAdded ? handleRemove(pl.id) : handleAdd(pl.id);
                     }}
                     className={`text-lg leading-none transition-colors ${
-                      isRecent ? 'text-success-500 cursor-default'
-                      : showUpdate ? 'text-primary-500 hover:text-primary-700'
-                      : isAdded ? 'text-danger-400 hover:text-danger-600'
-                      : 'text-info-400 hover:text-info-600'
+                      isRecent ? 'text-success-5 cursor-default'
+                      : showUpdate ? 'text-brand-5 hover:text-brand-7'
+                      : isAdded ? 'text-danger-5 hover:text-danger-7'
+                      : 'text-info-4 hover:text-info-6'
                     }`}
                     disabled={isRecent}
                   >

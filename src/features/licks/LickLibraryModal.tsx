@@ -39,7 +39,7 @@ export default function LickLibraryModal({ onSelect, onClose }: Props) {
 
         <div className="overflow-y-auto flex-1 px-4 py-3 space-y-2">
           {loading && <p className="text-sm text-gray-400 text-center py-6">Loading…</p>}
-          {error && <p className="text-sm text-danger-500 text-center py-6">{error}</p>}
+          {error && <p className="text-sm text-danger-6 text-center py-6">{error}</p>}
           {!loading && !error && licks.length === 0 && (
             <p className="text-sm text-gray-400 text-center py-6">No licks saved yet.</p>
           )}
@@ -47,11 +47,11 @@ export default function LickLibraryModal({ onSelect, onClose }: Props) {
             <button
               key={lick.id}
               onClick={() => onSelect(lick.rawTab)}
-              className="w-full text-left border border-gray-200 rounded-lg px-4 py-3 hover:border-primary-400 hover:bg-primary-50 transition-colors"
+              className="w-full text-left border border-gray-200 rounded-lg px-4 py-3 hover:border-brand-4 hover:bg-brand-1 transition-colors"
             >
               <div className="flex items-center gap-2 mb-1.5">
                 {lick.mode && (
-                  <span className="text-xs bg-primary-100 text-primary-700 rounded px-1.5 py-0.5 font-medium">
+                  <span className="text-xs bg-brand-2 text-brand-7 rounded px-1.5 py-0.5 font-medium">
                     {lick.mode}
                   </span>
                 )}

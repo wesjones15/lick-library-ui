@@ -47,7 +47,7 @@ export default function HomePage() {
         {!currentUser && (
           <a
             href={`${BACKEND}/api/oauth2/authorize/google`}
-            className="text-sm px-4 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:border-primary-300 hover:text-primary-600 transition-all"
+            className="text-sm px-4 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:border-brand-3 hover:text-brand-6 transition-all"
           >
             Sign in with Google
           </a>

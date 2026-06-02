@@ -56,7 +56,7 @@ export default function LickDetailPage() {
                 <span className="font-mono text-sm text-gray-500">{lick.intervalDisplayString}</span>
                 {lick.mode && (
                   <span className="relative group w-fit">
-                    <span className="text-xs px-2 py-0.5 bg-primary-100 text-primary-700 rounded-full font-medium cursor-default">
+                    <span className="text-xs px-2 py-0.5 bg-brand-2 text-brand-7 rounded-full font-medium cursor-default">
                       {modeLabel(lick.mode)}
                     </span>
                     <span className="absolute left-0 top-full mt-1 px-2 py-1 text-xs font-mono bg-gray-800 text-white rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
@@ -77,7 +77,7 @@ export default function LickDetailPage() {
                 <div className="flex rounded-lg overflow-hidden border border-gray-300 text-sm self-start">
                   {(['greedy', 'chord', 'dfs'] as const).map(a => (
                     <button key={a} onClick={() => setAlgo(a)}
-                      className={`px-3 py-1.5 ${algo === a ? 'bg-primary-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}>
+                      className={`px-3 py-1.5 ${algo === a ? 'bg-brand-6 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}>
                       {{ greedy: 'Greedy', chord: 'Chord', dfs: 'DFS' }[a]}
                     </button>
                   ))}
@@ -111,7 +111,7 @@ export default function LickDetailPage() {
           </span>
         </p>
         {loading && <p className="text-gray-400 text-sm">Loading…</p>}
-        {error && <p className="text-danger-500 text-sm">{error}</p>}
+        {error && <p className="text-danger-6 text-sm">{error}</p>}
         {!loading && lick && lick.positions.length === 0 && (
           <p className="text-gray-400 text-sm">No positions found for this key.</p>
         )}

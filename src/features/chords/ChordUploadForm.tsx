@@ -96,9 +96,9 @@ export default function ChordUploadForm({
           value={chordName}
           onChange={e => handleChordNameChange(e.target.value)}
           disabled={lockChordName}
-          className={`border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary-400 ${lockChordName ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
+          className={`border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-4 ${lockChordName ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
         />
-        {parseError && <p className="text-danger-500 text-xs">{parseError}</p>}
+        {parseError && <p className="text-danger-6 text-xs">{parseError}</p>}
       </div>
 
       {lockInstrument ? (
@@ -125,7 +125,7 @@ export default function ChordUploadForm({
                   onChange={val => setFret(fretsIdx, val)}
                   placeholder="—"
                   extraKeys={[{ label: 'x', value: 'x' }]}
-                  className="w-16 border border-gray-300 rounded px-2 py-1 text-sm font-mono text-center focus:outline-none focus:border-primary-400"
+                  className="w-16 border border-gray-300 rounded px-2 py-1 text-sm font-mono text-center focus:outline-none focus:border-brand-4"
                 />
               </div>
             ))}
@@ -137,11 +137,11 @@ export default function ChordUploadForm({
       <button
         type="submit"
         disabled={!canSubmit}
-        className="px-5 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end"
+        className="px-5 py-2 bg-brand-6 text-white text-sm font-medium rounded-lg hover:bg-brand-7 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end"
       >
         {loading ? 'Uploading…' : 'Upload Voicing'}
       </button>
-      {error && <p className="text-danger-500 text-sm">{error}</p>}
+      {error && <p className="text-danger-6 text-sm">{error}</p>}
     </form>
   );
 }

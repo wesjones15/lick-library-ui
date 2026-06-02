@@ -24,7 +24,7 @@ function parseStoredKey(stored: string): { root: string; mode: string } {
   return { root, mode: modeName ? ` ${modeName}` : minorSuffix };
 }
 
-const BTN_SUBMIT = 'px-5 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end';
+const BTN_SUBMIT = 'px-5 py-2 bg-brand-6 text-white text-sm font-medium rounded-lg hover:bg-brand-7 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end';
 
 function extractChordNames(song: SongDetail): string[] {
   const seen = new Set<string>();
@@ -233,7 +233,7 @@ export default function SongManagePage() {
   return (
     <div className={`mx-auto px-6 py-8 ${mode === 'chords' ? 'max-w-3xl' : 'max-w-lg'}`}>
       {/* Breadcrumb */}
-      <Link to={`/song/${id}`} className="text-sm text-primary-500 hover:text-primary-700 mb-6 inline-block">
+      <Link to={`/song/${id}`} className="text-sm text-brand-5 hover:text-brand-7 mb-6 inline-block">
         ← {song.title}
       </Link>
 
@@ -342,18 +342,18 @@ export default function SongManagePage() {
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
-                className="px-4 py-2 text-sm border border-danger-200 rounded-lg text-danger-400 hover:bg-danger-50 transition-colors"
+                className="px-4 py-2 text-sm border border-danger-3 rounded-lg text-danger-5 hover:bg-danger-1 transition-colors"
               >
                 Delete Song
               </button>
             ) : (
-              <div className="flex flex-col gap-2 p-3 bg-danger-50 border border-danger-200 rounded-lg">
-                <p className="text-sm text-danger-600">Are you sure? This action cannot be undone.</p>
+              <div className="flex flex-col gap-2 p-3 bg-danger-1 border border-danger-3 rounded-lg">
+                <p className="text-sm text-danger-7">Are you sure? This action cannot be undone.</p>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={handleDelete}
-                    className="flex-1 px-3 py-1.5 bg-danger-500 text-white text-sm rounded-lg hover:bg-danger-600 transition-colors"
+                    className="flex-1 px-3 py-1.5 bg-danger-6 text-white text-sm rounded-lg hover:bg-danger-7 transition-colors"
                   >
                     Confirm
                   </button>
@@ -369,13 +369,13 @@ export default function SongManagePage() {
             ))}
           </div>
 
-          {error && <p className="text-danger-500 text-sm">{error}</p>}
+          {error && <p className="text-danger-6 text-sm">{error}</p>}
         </form>
       )}
 
       {mode === 'chart' && (
         <form onSubmit={isOwner ? handleChartSubmit : handleChartSubmitNonOwner} className="flex flex-col gap-3 mt-4">
-          <button type="button" onClick={() => { setRawChordSheet(song.rawChordSheet ?? ''); setMode('metadata'); setSubmitSuccess(false); }} className="text-sm text-primary-500 hover:text-primary-700 self-start">
+          <button type="button" onClick={() => { setRawChordSheet(song.rawChordSheet ?? ''); setMode('metadata'); setSubmitSuccess(false); }} className="text-sm text-brand-5 hover:text-brand-7 self-start">
             ← Back
           </button>
           <textarea
@@ -391,13 +391,13 @@ export default function SongManagePage() {
           >
             {loading ? 'Saving…' : isOwner ? 'Save & Re-parse' : 'Submit for review'}
           </button>
-          {error && <p className="text-danger-500 text-sm">{error}</p>}
+          {error && <p className="text-danger-6 text-sm">{error}</p>}
         </form>
       )}
 
       {mode === 'chords' && (
         <div className="flex flex-col gap-4 mt-4">
-          <button type="button" onClick={() => setMode('metadata')} className="text-sm text-primary-500 hover:text-primary-700 self-start">
+          <button type="button" onClick={() => setMode('metadata')} className="text-sm text-brand-5 hover:text-brand-7 self-start">
             ← Back
           </button>
           {extractChordNames(song).length === 0 ? (
@@ -417,7 +417,7 @@ export default function SongManagePage() {
                     <button
                       title="Add voicing"
                       onClick={() => setSelectedChord(name)}
-                      className="absolute top-1 right-2 text-gray-300 hover:text-primary-500 text-xl leading-none"
+                      className="absolute top-1 right-2 text-gray-300 hover:text-brand-5 text-xl leading-none"
                     >
                       +
                     </button>

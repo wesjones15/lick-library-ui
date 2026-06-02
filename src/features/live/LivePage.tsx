@@ -161,25 +161,25 @@ export default function LivePage() {
 
         <button
           className={`${BTN} ${listening
-            ? 'bg-danger-50 border-danger-300 text-danger-700 hover:bg-danger-100'
+            ? 'bg-danger-1 border-danger-4 text-danger-8 hover:bg-danger-2'
             : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
           onClick={() => setListening(l => !l)}
         >
           {listening ? '⏹ Stop' : '🎙 Listen'}
         </button>
         {listening && !micError && (
-          <span className="text-sm text-success-600 animate-pulse">● Listening</span>
+          <span className="text-sm text-success-6 animate-pulse">● Listening</span>
         )}
       </div>
 
       {micError === 'NotAllowedError' && (
-        <p className="text-sm text-danger-500 mb-4">Mic access denied. Allow microphone permission and try again.</p>
+        <p className="text-sm text-danger-6 mb-4">Mic access denied. Allow microphone permission and try again.</p>
       )}
       {micError === 'NotFoundError' && (
-        <p className="text-sm text-danger-500 mb-4">No microphone found.</p>
+        <p className="text-sm text-danger-6 mb-4">No microphone found.</p>
       )}
       {micError === 'NotSecureContext' && (
-        <p className="text-sm text-danger-500 mb-4">Mic requires a secure connection (HTTPS). Try accessing the app via HTTPS, or on the same device as the server.</p>
+        <p className="text-sm text-danger-6 mb-4">Mic requires a secure connection (HTTPS). Try accessing the app via HTTPS, or on the same device as the server.</p>
       )}
 
       <GuitarNeck

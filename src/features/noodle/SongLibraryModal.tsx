@@ -38,7 +38,7 @@ export default function SongLibraryModal({ onSelect, onClose }: Props) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search songs…"
-            className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary-400"
+            className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-brand-4"
           />
         </div>
         <div className="overflow-y-auto flex-1 divide-y divide-gray-50">
@@ -46,7 +46,7 @@ export default function SongLibraryModal({ onSelect, onClose }: Props) {
             <button
               key={song.id}
               onClick={() => onSelect(song)}
-              className="w-full text-left px-4 py-3 hover:bg-primary-50 transition-colors"
+              className="w-full text-left px-4 py-3 hover:bg-brand-1 transition-colors"
             >
               <div className="text-sm font-medium text-gray-800">{song.title}</div>
               {song.artist && <div className="text-xs text-gray-400">{song.artist}</div>}

@@ -27,7 +27,7 @@ export default function ChordCard({ rootDisplay, quality, displayQuality, label,
   return (
     <>
       <div
-        className={`border rounded-lg p-3 bg-white flex flex-col gap-2 min-h-[160px] transition-colors ${manageMode ? 'border-primary-200 cursor-pointer hover:ring-2 hover:ring-primary-300' : 'border-gray-200'}`}
+        className={`border rounded-lg p-3 bg-white flex flex-col gap-2 min-h-[160px] transition-colors ${manageMode ? 'border-primary-200 cursor-pointer hover:ring-2 hover:ring-brand-3' : 'border-gray-200'}`}
         onClick={manageMode ? () => setModalOpen(true) : undefined}
       >
         <div>
@@ -54,7 +54,7 @@ export default function ChordCard({ rootDisplay, quality, displayQuality, label,
           </div>
         )}
         {manageMode && (
-          <div className="text-xs text-primary-400 text-center">click to manage</div>
+          <div className="text-xs text-brand-4 text-center">click to manage</div>
         )}
       </div>
 

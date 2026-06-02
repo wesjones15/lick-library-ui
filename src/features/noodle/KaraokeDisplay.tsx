@@ -25,7 +25,7 @@ function dotRow(count: number, filled: number, size: number): React.ReactNode {
     <span
       key={i}
       className={`inline-block rounded-full flex-shrink-0 transition-colors duration-75 ${
-        i < filled ? 'bg-primary-500' : 'bg-gray-200'
+        i < filled ? 'bg-brand-5' : 'bg-gray-200'
       }`}
       style={{ width: size, height: size }}
     />
@@ -102,7 +102,7 @@ function ActiveChordLine({
           </span>
         )}
         {isCurrent ? (
-          <strong className={`transition-colors duration-75 ${pulsed ? 'text-primary-600' : 'text-primary-400'}`}>
+          <strong className={`transition-colors duration-75 ${pulsed ? 'text-brand-6' : 'text-brand-4'}`}>
             {match[0]}
           </strong>
         ) : match[0]}
@@ -165,7 +165,7 @@ function KaraokeSlot({
             return (
               <>
                 {text.slice(0, s)}
-                <strong className={`transition-colors duration-75 ${pulsed ? 'text-primary-600' : 'text-primary-400'}`}>
+                <strong className={`transition-colors duration-75 ${pulsed ? 'text-brand-6' : 'text-brand-4'}`}>
                   {text.slice(s, e)}
                 </strong>
                 {text.slice(e)}

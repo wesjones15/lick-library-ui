@@ -121,7 +121,7 @@ export default function LickLibraryPage() {
       </div>
 
       {loading && <p className="text-gray-400 text-sm">Loading…</p>}
-      {error && <p className="text-danger-500 text-sm">{error}</p>}
+      {error && <p className="text-danger-6 text-sm">{error}</p>}
       {!loading && !error && (
         <LickList licks={licks} onDelete={handleDelete} onFork={handleFork} isManaging={isManaging} />
       )}

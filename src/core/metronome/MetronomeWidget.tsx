@@ -77,7 +77,7 @@ export default function Metronome() {
         }`}
       >
         <span className={`inline-block w-2 h-2 rounded-full transition-all duration-75 ${
-          isPlaying ? (pulsed ? 'bg-white' : 'bg-primary-500') : 'opacity-0'
+          isPlaying ? (pulsed ? 'bg-white' : 'bg-brand-5') : 'opacity-0'
         }`} />
         <span>♩ {bpm}</span>
       </button>
@@ -101,7 +101,7 @@ export default function Metronome() {
                   onChange={val => setBpmInput(val)}
                   onCommit={val => commitBpm(val)}
                   placeholder="BPM"
-                  className="w-14 text-center text-2xl font-bold text-gray-900 tabular-nums bg-transparent border-b border-gray-300 focus:border-primary-500 focus:outline-none"
+                  className="w-14 text-center text-2xl font-bold text-gray-900 tabular-nums bg-transparent border-b border-gray-300 focus:border-brand-5 focus:outline-none"
                 />
                 <span className="text-xs text-gray-400">BPM</span>
               </div>
@@ -121,14 +121,14 @@ export default function Metronome() {
                     key={beat}
                     className={`rounded-full transition-all duration-75 ${
                       beat === 0 ? 'w-3.5 h-3.5' : 'w-2.5 h-2.5'
-                    } ${activeBeat === beat ? (pulsed ? 'bg-white' : 'bg-primary-500') : 'bg-gray-200'}`}
+                    } ${activeBeat === beat ? (pulsed ? 'bg-white' : 'bg-brand-5') : 'bg-gray-200'}`}
                   />
                 ))}
               </div>
               <button
                 onClick={() => setShowAdvanced(a => !a)}
                 className={`text-sm leading-none transition-colors ${
-                  showAdvanced ? 'text-primary-500' : 'text-gray-400 hover:text-gray-700'
+                  showAdvanced ? 'text-brand-5' : 'text-gray-400 hover:text-gray-700'
                 }`}
                 title="Time signature"
               >⚙︎</button>
@@ -143,7 +143,7 @@ export default function Metronome() {
                     onClick={() => setBeatsPerBar(opt.value)}
                     className={`px-2 py-0.5 rounded text-xs font-medium border transition-colors ${
                       beatsPerBar === opt.value
-                        ? 'bg-primary-600 text-white border-primary-600'
+                        ? 'bg-brand-6 text-white border-brand-6'
                         : 'border-gray-300 text-gray-600 hover:bg-gray-50'
                     }`}
                   >{opt.label}</button>
@@ -156,8 +156,8 @@ export default function Metronome() {
               onClick={() => setIsPlaying(p => !p)}
               className={`w-full py-2 rounded-lg text-sm font-semibold text-white transition-colors ${
                 isPlaying
-                  ? 'bg-danger-500 hover:bg-danger-600'
-                  : 'bg-success-500 hover:bg-success-600'
+                  ? 'bg-danger-6 hover:bg-danger-7'
+                  : 'bg-success-5 hover:bg-success-6'
               }`}
             >
               {isPlaying ? 'Stop' : 'Start'}

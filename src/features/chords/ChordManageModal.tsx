@@ -85,14 +85,14 @@ export default function ChordManageModal({ chordName, voicings: initialVoicings,
                         <button
                           onClick={() => handleDelete(v.id)}
                           disabled={deleting}
-                          className="text-danger-500 hover:text-danger-700 font-semibold text-sm disabled:opacity-50"
+                          className="text-danger-6 hover:text-danger-8 font-semibold text-sm disabled:opacity-50"
                         >
                           delete?
                         </button>
                       ) : (
                         <button
                           onClick={() => setConfirmId(v.id)}
-                          className="text-gray-300 hover:text-danger-400 text-5xl leading-none"
+                          className="text-gray-300 hover:text-danger-5 text-5xl leading-none"
                         >
                           ✕
                         </button>

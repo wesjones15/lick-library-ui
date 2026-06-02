@@ -282,7 +282,7 @@ export default function SongDetailPage() {
     }
   }
   const stubBtnClass = (active: boolean) =>
-    `px-2 py-1 text-xs rounded border transition-colors ${active ? 'border-primary-300 bg-primary-50 text-primary-600' : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
+    `px-2 py-1 text-xs rounded border transition-colors ${active ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
 
   const currentPlaylistEntry = playlistState?.entries[playlistState.currentIndex];
   const overrideChanged = !!playlistState && song != null && (
@@ -317,7 +317,7 @@ export default function SongDetailPage() {
                 {song.tempo != null && (
                   <button
                     onClick={() => { if (isPlaying && bpm === song.tempo) { setIsPlaying(false); } else { setBpm(song.tempo!); if (song.timeSignature) setBeatsPerBar(song.timeSignature); setIsPlaying(true); } }}
-                    className="text-left text-xs text-gray-400 hover:text-primary-500 transition-colors"
+                    className="text-left text-xs text-gray-400 hover:text-brand-5 transition-colors"
                   >
                     {song.tempo} BPM
                   </button>
@@ -332,7 +332,7 @@ export default function SongDetailPage() {
               {viewMode === 'scroll' && (
                 <button
                   onClick={() => setAutoScrolling(a => !a)}
-                  className={`w-8 h-8 rounded-lg border flex items-center justify-center text-xl leading-none transition-colors ${autoScrolling ? 'border-primary-300 bg-primary-50 text-primary-500' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+                  className={`w-8 h-8 rounded-lg border flex items-center justify-center text-xl leading-none transition-colors ${autoScrolling ? 'border-brand-3 bg-brand-1 text-brand-5' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
                   aria-label={autoScrolling ? 'Pause autoscroll' : 'Start autoscroll'}
                 >
                   {autoScrolling ? '⏸' : '▶'}
@@ -342,7 +342,7 @@ export default function SongDetailPage() {
               {/* Desktop (md+): named text buttons */}
               <button
                 onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}&tempoOverride=${currentPlaylistEntry?.tempoOverride ?? ''}`)}
-                className="hidden md:flex items-center text-tempo-400 hover:text-tempo-500 transition-colors text-5xl leading-none"
+                className="hidden md:flex items-center text-noodle-1 hover:text-noodle-2 transition-colors text-5xl leading-none"
                 aria-label="Noodle"
                 title="Noodle"
               >
@@ -352,7 +352,7 @@ export default function SongDetailPage() {
                 <button
                   onClick={handleTabLicksToggle}
                   disabled={reparsing}
-                  className={`hidden md:flex w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? 'border-danger-300 bg-danger-50 text-danger-500' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+                  className={`hidden md:flex w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? 'border-danger-4 bg-danger-1 text-danger-6' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
                   aria-label="Tab positions (experimental)"
                   title="Tab positions (experimental)"
                 >
@@ -374,7 +374,7 @@ export default function SongDetailPage() {
               </button>
               <button
                 onClick={() => setAddToPlaylistOpen(true)}
-                className={`hidden md:block transition-colors text-xl leading-none ${overrideChanged ? 'text-primary-500 hover:text-primary-700' : 'text-info-400 hover:text-info-600'}`}
+                className={`hidden md:block transition-colors text-xl leading-none ${overrideChanged ? 'text-brand-5 hover:text-brand-7' : 'text-info-4 hover:text-info-6'}`}
                 aria-label="Add to playlist"
                 title="Add to playlist"
               >
@@ -383,7 +383,7 @@ export default function SongDetailPage() {
               {song?.ownedByCurrentUser && (
                 <button
                   onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-                  className="hidden md:block text-gray-300 hover:text-primary-500 transition-colors text-4xl leading-none"
+                  className="hidden md:block text-gray-300 hover:text-brand-5 transition-colors text-4xl leading-none"
                   aria-label="Manage song"
                 >
                   ✎
@@ -393,7 +393,7 @@ export default function SongDetailPage() {
               {/* Landscape (sm–md): icon buttons */}
               <button
                 onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}&tempoOverride=${currentPlaylistEntry?.tempoOverride ?? ''}`)}
-                className="hidden sm:flex md:hidden w-12 h-12 rounded-lg border border-tempo-200 items-center justify-center text-4xl leading-none transition-colors text-tempo-500 hover:text-tempo-600"
+                className="hidden sm:flex md:hidden w-8 h-8 rounded-lg border border-gray-200 items-center justify-center text-4xl leading-none transition-colors text-noodle-1 hover:text-noodle-2"
                 aria-label="Noodle"
                 title="Noodle"
               >
@@ -403,7 +403,7 @@ export default function SongDetailPage() {
                 <button
                   onClick={handleTabLicksToggle}
                   disabled={reparsing}
-                  className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? 'border-danger-300 bg-danger-50 text-danger-500' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+                  className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? 'border-danger-4 bg-danger-1 text-danger-6' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
                   aria-label="Tab positions (experimental)"
                   title="Tab positions (experimental)"
                 >
@@ -412,7 +412,7 @@ export default function SongDetailPage() {
               )}
               <button
                 onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
-                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs transition-colors ${viewMode === 'scroll' ? 'border-primary-300 bg-primary-50 text-primary-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs transition-colors ${viewMode === 'scroll' ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
                 aria-label="Toggle view"
                 title={viewMode === 'scroll' ? 'Switch to columns' : 'Switch to scroll'}
               >
@@ -420,7 +420,7 @@ export default function SongDetailPage() {
               </button>
               <button
                 onClick={() => setShowChords(v => !v)}
-                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${showChords ? 'border-primary-300 bg-primary-50 text-primary-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${showChords ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
                 aria-label="Show chords"
                 title="Show chords"
               >
@@ -428,7 +428,7 @@ export default function SongDetailPage() {
               </button>
               <button
                 onClick={() => setAddToPlaylistOpen(true)}
-                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${overrideChanged ? 'border-primary-300 text-primary-500 hover:text-primary-700 hover:border-primary-400' : 'border-info-200 text-info-400 hover:text-info-600 hover:border-info-300'}`}
+                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${overrideChanged ? 'border-brand-3 text-brand-5 hover:text-brand-7 hover:border-brand-4' : 'border-gray-200 text-info-4 hover:text-info-6 hover:border-gray-300'}`}
                 aria-label="Add to playlist"
                 title="Add to playlist"
               >
@@ -437,7 +437,7 @@ export default function SongDetailPage() {
               {song?.ownedByCurrentUser && (
                 <button
                   onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-                  className="hidden sm:block md:hidden text-gray-300 hover:text-primary-500 transition-colors text-3xl leading-none"
+                  className="hidden sm:block md:hidden text-gray-300 hover:text-brand-5 transition-colors text-3xl leading-none"
                   aria-label="Manage song"
                 >
                   ✎
@@ -469,7 +469,7 @@ export default function SongDetailPage() {
                     </button>
                     <button
                       onClick={() => { setAddToPlaylistOpen(true); setOverflowOpen(false); }}
-                      className={`px-4 py-2 text-sm text-left hover:bg-gray-50 ${overrideChanged ? 'text-primary-600' : 'text-info-500'}`}
+                      className={`px-4 py-2 text-sm text-left hover:bg-gray-50 ${overrideChanged ? 'text-brand-6' : 'text-info-5'}`}
                     >
                       Add to playlist
                     </button>
@@ -491,7 +491,7 @@ export default function SongDetailPage() {
                       <button
                         onClick={() => { handleTabLicksToggle(); setOverflowOpen(false); }}
                         disabled={reparsing}
-                        className={`px-4 py-2 text-sm text-left transition-colors disabled:opacity-40 ${showTabLicks ? 'text-danger-500' : 'text-gray-600 hover:bg-gray-50'}`}
+                        className={`px-4 py-2 text-sm text-left transition-colors disabled:opacity-40 ${showTabLicks ? 'text-danger-6' : 'text-gray-600 hover:bg-gray-50'}`}
                       >
                         {reparsing ? 'Detecting tabs…' : showTabLicks ? 'Tab positions: on' : 'Tab positions'}
                       </button>
@@ -505,7 +505,7 @@ export default function SongDetailPage() {
                 onClick={() => setCapTranspOpen(true)}
                 className={`md:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-base transition-colors ${
                   (capo !== (song?.capo ?? 0) || semitones !== 0)
-                    ? 'border-primary-300 bg-primary-50 text-primary-600'
+                    ? 'border-brand-3 bg-brand-1 text-brand-6'
                     : 'border-gray-200 text-gray-400 hover:text-gray-600'
                 }`}
                 aria-label="Capo & Transpose"
@@ -572,7 +572,7 @@ export default function SongDetailPage() {
           </div>
           )} {/* end !collapsed */}
 
-          {error && <p className="text-danger-500 text-sm mb-4">{error}</p>}
+          {error && <p className="text-danger-6 text-sm mb-4">{error}</p>}
 
           <div ref={scrollContainerRef} className={viewMode === 'scroll' ? 'max-w-2xl mx-auto mt-8 overflow-x-hidden' : 'overflow-hidden'}>
             <ChordSheet
@@ -694,7 +694,7 @@ export default function SongDetailPage() {
       )}
 
       {!song && loading && <p className="text-gray-400 text-sm">Loading…</p>}
-      {!song && error && <p className="text-danger-500 text-sm">{error}</p>}
+      {!song && error && <p className="text-danger-6 text-sm">{error}</p>}
 
       {uploadChord && (
         <ChordUploadModal

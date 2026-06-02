@@ -10,9 +10,9 @@ interface Props {
 }
 
 const TYPE_BADGE: Record<string, string> = {
-  SONG_METADATA: 'bg-info-100 text-info-700',
-  SONG_CHART: 'bg-chart-100 text-chart-700',
-  SONG_BEATMAP: 'bg-beatmap-100 text-beatmap-700',
+  SONG_METADATA: 'bg-info-1 text-info-7',
+  SONG_CHART: 'bg-chart-1 text-chart-2',
+  SONG_BEATMAP: 'bg-beatmap-1 text-beatmap-2',
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -40,10 +40,10 @@ function MetadataDiff({ current, proposed }: { current: string; proposed: string
           const propVal = String(prop[f] ?? '');
           const changed = curVal !== propVal && propVal !== '' && propVal !== '0';
           return (
-            <tr key={f} className={`border-b border-gray-100 ${changed ? 'bg-warn-50' : ''}`}>
+            <tr key={f} className={`border-b border-gray-100 ${changed ? 'bg-warn-1' : ''}`}>
               <td className="py-1.5 pr-4 text-gray-500 font-medium">{f}</td>
               <td className="py-1.5 pr-4 text-gray-500">{curVal || '—'}</td>
-              <td className={`py-1.5 ${changed ? 'text-warn-700 font-medium' : 'text-gray-400'}`}>
+              <td className={`py-1.5 ${changed ? 'text-warn-6 font-medium' : 'text-gray-400'}`}>
                 {propVal || '—'}
               </td>
             </tr>
@@ -64,8 +64,8 @@ function ChartDiff({ current, proposed }: { current: string; proposed: string })
         <pre className="font-mono text-xs bg-gray-50 border border-gray-200 rounded p-3 overflow-auto max-h-56 whitespace-pre-wrap">{curSheet || '(empty)'}</pre>
       </div>
       <div>
-        <div className="text-xs font-medium text-warn-600 mb-1">Proposed</div>
-        <pre className="font-mono text-xs bg-warn-50 border border-warn-200 rounded p-3 overflow-auto max-h-56 whitespace-pre-wrap">{propSheet || '(empty)'}</pre>
+        <div className="text-xs font-medium text-warn-5 mb-1">Proposed</div>
+        <pre className="font-mono text-xs bg-warn-1 border border-warn-3 rounded p-3 overflow-auto max-h-56 whitespace-pre-wrap">{propSheet || '(empty)'}</pre>
       </div>
     </div>
   );
@@ -77,7 +77,7 @@ function BeatmapDiff({ current, proposed }: { current: string; proposed: string 
   return (
     <div className="flex flex-col gap-2 text-xs">
       <div><span className="text-gray-400 font-medium mr-2">Current beats:</span><span className="font-mono text-gray-600">[{curBeats.join(', ') || 'none'}]</span></div>
-      <div><span className="text-warn-600 font-medium mr-2">Proposed beats:</span><span className="font-mono text-warn-700">[{propBeats.join(', ') || 'none'}]</span></div>
+      <div><span className="text-warn-5 font-medium mr-2">Proposed beats:</span><span className="font-mono text-warn-6">[{propBeats.join(', ') || 'none'}]</span></div>
     </div>
   );
 }
@@ -163,7 +163,7 @@ export default function SongUpdateReviewModal({ updateId, onClose, onDone }: Pro
           <button
             onClick={handleReject}
             disabled={acting || !data}
-            className="px-4 py-2 text-sm rounded-lg border border-danger-300 text-danger-600 hover:bg-danger-50 disabled:opacity-50 transition-colors"
+            className="px-4 py-2 text-sm rounded-lg border border-danger-4 text-danger-7 hover:bg-danger-1 disabled:opacity-50 transition-colors"
           >
             Reject
           </button>

@@ -18,7 +18,7 @@ export default function LickCard({ lick, onDelete, onFork, isManaging }: Props) 
   return (
     <div
       onClick={() => navigate(`/lick/${lick.id}`)}
-      className="border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-primary-400 hover:shadow-sm transition-all bg-white"
+      className="border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-brand-4 hover:shadow-sm transition-all bg-white"
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2 min-w-0">
@@ -34,14 +34,14 @@ export default function LickCard({ lick, onDelete, onFork, isManaging }: Props) 
             </span>
           )}
           {lick.mode && (
-            <span className="text-xs px-2 py-0.5 bg-primary-100 text-primary-700 rounded-full font-medium">
+            <span className="text-xs px-2 py-0.5 bg-brand-2 text-brand-7 rounded-full font-medium">
               {modeLabel(lick.mode)}
             </span>
           )}
           {!lick.autoImported && isManaging && lick.ownedByCurrentUser && (
             <button
               onClick={e => { e.stopPropagation(); onDelete(); }}
-              className="text-danger-400 hover:text-danger-600 text-base leading-none transition-colors"
+              className="text-danger-5 hover:text-danger-7 text-base leading-none transition-colors"
               aria-label="Delete lick"
             >
               ×
@@ -50,7 +50,7 @@ export default function LickCard({ lick, onDelete, onFork, isManaging }: Props) 
           {!lick.autoImported && isManaging && !lick.ownedByCurrentUser && (
             <button
               onClick={e => { e.stopPropagation(); onFork(); }}
-              className="text-primary-400 hover:text-primary-600 text-xs leading-none transition-colors border border-primary-200 rounded px-1.5 py-0.5"
+              className="text-brand-4 hover:text-brand-6 text-xs leading-none transition-colors border border-primary-200 rounded px-1.5 py-0.5"
               aria-label="Fork lick"
               title="Fork — save a copy to your library"
             >
