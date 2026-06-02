@@ -488,7 +488,18 @@ export default function NoodlePage() {
       const cols = tabColumnsByTab.get(tabLine);
       const N = cols?.length ?? 1;
       const M = Math.max(1, parseChordsFromLine((line as ChordLyric).chords).length);
-      colIdx = Math.min(Math.floor(intraChordIdx * N / M), N - 1);
+      const lineDist = beatmapByLine?.[currentIdx];
+      let absHalfBeat: number;
+      let totalHalfBeats: number;
+      if (lineDist && lineDist.length > 0) {
+        const priorBeats = lineDist.slice(0, intraChordIdx).reduce((a, b) => a + b, 0);
+        absHalfBeat = priorBeats + Math.max(0, beatInChord - 1); // beatInChord is 1-based
+        totalHalfBeats = lineDist.reduce((a, b) => a + b, 0);
+      } else {
+        absHalfBeat = intraChordIdx;
+        totalHalfBeats = M;
+      }
+      colIdx = Math.min(Math.floor(absHalfBeat * N / Math.max(1, totalHalfBeats)), N - 1);
     }
 
     const cols = tabColumnsByTab.get(tabLine);
@@ -508,7 +519,7 @@ export default function NoodlePage() {
       });
       return shifted;
     });
-  }, [lickModeEnabled, noodleMode, contentLines, currentIdx, intraChordIdx, tabColumnsByTab, tabLineMap, localCapo, instrument]);
+  }, [lickModeEnabled, noodleMode, contentLines, currentIdx, intraChordIdx, beatInChord, beatmapByLine, tabColumnsByTab, tabLineMap, localCapo, instrument]);
 
   const mergedDots = useMemo(() => {
     if (!lickOverlayDots) return dots;
