@@ -8,7 +8,6 @@ import type { ChordVoicing } from '../../core/api/client';
 import type { InstrumentName } from '../../core/useInstrument';
 
 import { formatNoteEnum, NOTE_KEYS, ROOT_CHROMATIC } from '../../core/music';
-import { C_DANGER_BG, C_DANGER_BG_DARK, C_DANGER_BG_SOFT, C_DANGER_BG_SUBTLE, C_DANGER_BORDER_MID, C_DANGER_BORDER_SOFT, C_DANGER_TEXT, C_DANGER_TEXT_MID, C_GRAY_BG_50, C_GRAY_BORDER_300, C_GRAY_TEXT_500, C_GRAY_TEXT_900, C_WHITE_TEXT } from '../../core/colors';
 
 const QUALITIES = [
   { quality: '',     label: 'Major'    },
@@ -75,7 +74,7 @@ export default function ChordsGalleryPage() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className={`text-2xl font-bold ${C_GRAY_TEXT_900}`}>Chord Gallery</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Chord Gallery</h1>
         <div className="flex items-center gap-3">
           <KeySelector value={root} onChange={setRoot} />
           <InstrumentSelector
@@ -86,7 +85,7 @@ export default function ChordsGalleryPage() {
           {!manageMode && (
             <button
               onClick={() => navigate('/chords/theory')}
-              className={`px-3 py-2 text-sm border ${C_GRAY_BORDER_300} rounded-lg ${C_GRAY_TEXT_500} hover:${C_GRAY_TEXT_900} hover:${C_GRAY_BG_50}`}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50"
             >
               Chord Theory
             </button>
@@ -94,14 +93,14 @@ export default function ChordsGalleryPage() {
           {!manageMode && (
             <button
               onClick={() => navigate('/chords/upload')}
-              className={`px-3 py-2 text-sm border ${C_GRAY_BORDER_300} rounded-lg ${C_GRAY_TEXT_500} hover:${C_GRAY_TEXT_900} hover:${C_GRAY_BG_50}`}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50"
             >
               Upload Voicing
             </button>
           )}
           <button
             onClick={() => { setManageMode(m => !m); setReseedConfirm(false); }}
-            className={`px-3 py-2 text-sm border rounded-lg transition-colors ${manageMode ? '${C_PRIMARY_BORDER_MID} ${C_PRIMARY_BG_SOFT} ${C_PRIMARY_TEXT_DARK}' : '${C_GRAY_BORDER_300} ${C_GRAY_TEXT_500} hover:${C_GRAY_TEXT_900} hover:${C_GRAY_BG_50}'}`}
+            className={`px-3 py-2 text-sm border rounded-lg transition-colors ${manageMode ? 'border-primary-400 bg-primary-50 text-primary-700' : 'border-gray-300 text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
           >
             {manageMode ? 'Done' : 'Manage'}
           </button>
@@ -111,18 +110,18 @@ export default function ChordsGalleryPage() {
       {manageMode && (
         <div className="mb-4 flex items-center gap-3">
           {reseedConfirm ? (
-            <div className={`flex items-center gap-3 px-4 py-2 ${C_DANGER_BG_SOFT} border ${C_DANGER_BORDER_SOFT} rounded-lg text-sm ${C_DANGER_TEXT}`}>
+            <div className="flex items-center gap-3 px-4 py-2 bg-danger-50 border border-danger-200 rounded-lg text-sm text-danger-700">
               <span>This will restore any deleted system voicings. Continue?</span>
               <button
                 onClick={handleReseed}
                 disabled={reseeding}
-                className={`px-3 py-1 ${C_DANGER_BG} ${C_WHITE_TEXT} rounded hover:${C_DANGER_BG_DARK} disabled:opacity-50`}
+                className="px-3 py-1 bg-danger-600 text-white rounded hover:bg-danger-700 disabled:opacity-50"
               >
                 {reseeding ? 'Restoring…' : 'Confirm'}
               </button>
               <button
                 onClick={() => setReseedConfirm(false)}
-                className={`px-3 py-1 border ${C_DANGER_BORDER_MID} rounded hover:${C_DANGER_BG_SUBTLE}`}
+                className="px-3 py-1 border border-danger-300 rounded hover:bg-danger-100"
               >
                 Cancel
               </button>
@@ -130,7 +129,7 @@ export default function ChordsGalleryPage() {
           ) : (
             <button
               onClick={() => setReseedConfirm(true)}
-              className={`px-3 py-2 text-sm border ${C_DANGER_BORDER_MID} ${C_DANGER_TEXT_MID} rounded-lg hover:${C_DANGER_BG_SOFT}`}
+              className="px-3 py-2 text-sm border border-danger-300 text-danger-600 rounded-lg hover:bg-danger-50"
             >
               Reseed Defaults
             </button>

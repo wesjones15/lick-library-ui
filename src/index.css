@@ -1,5 +1,67 @@
 @import "tailwindcss";
 
-/* hover:/focus: variants used via hover:${TOKEN} template composition aren't
-   detected by Tailwind's text scanner — listed here so they're always generated. */
-@source inline("hover:bg-indigo-700 hover:bg-red-700 hover:bg-green-700 hover:bg-red-50 hover:bg-red-100 hover:bg-green-600 hover:border-blue-300 hover:text-blue-600 hover:text-yellow-500 hover:text-yellow-600 hover:bg-gray-50 hover:bg-gray-100 hover:border-gray-300 hover:border-gray-400 hover:text-gray-500 hover:text-gray-600 hover:text-gray-700 hover:text-gray-900 focus:border-indigo-400");
+@theme {
+  /* Primary — change var() targets here to rebrand */
+  --color-primary-50:  var(--color-indigo-50);
+  --color-primary-100: var(--color-indigo-100);
+  --color-primary-300: var(--color-indigo-300);
+  --color-primary-400: var(--color-indigo-400);
+  --color-primary-500: var(--color-indigo-500);
+  --color-primary-600: var(--color-indigo-600);
+  --color-primary-700: var(--color-indigo-700);
+  --color-primary-800: var(--color-indigo-800);
+
+  /* Danger */
+  --color-danger-50:  var(--color-red-50);
+  --color-danger-100: var(--color-red-100);
+  --color-danger-200: var(--color-red-200);
+  --color-danger-300: var(--color-red-300);
+  --color-danger-400: var(--color-red-400);
+  --color-danger-500: var(--color-red-500);
+  --color-danger-600: var(--color-red-600);
+  --color-danger-700: var(--color-red-700);
+
+  /* Success */
+  --color-success-50:  var(--color-green-50);
+  --color-success-100: var(--color-green-100);
+  --color-success-200: var(--color-green-200);
+  --color-success-400: var(--color-green-400);
+  --color-success-500: var(--color-green-500);
+  --color-success-600: var(--color-green-600);
+  --color-success-700: var(--color-green-700);
+
+  /* Warn */
+  --color-warn-50:  var(--color-amber-50);
+  --color-warn-100: var(--color-amber-100);
+  --color-warn-200: var(--color-amber-200);
+  --color-warn-500: var(--color-amber-500);
+  --color-warn-600: var(--color-amber-600);
+  --color-warn-700: var(--color-amber-700);
+
+  /* Info */
+  --color-info-100: var(--color-blue-100);
+  --color-info-200: var(--color-blue-200);
+  --color-info-300: var(--color-blue-300);
+  --color-info-400: var(--color-blue-400);
+  --color-info-500: var(--color-blue-500);
+  --color-info-600: var(--color-blue-600);
+  --color-info-700: var(--color-blue-700);
+
+  /* Tempo */
+  --color-tempo-50:  var(--color-yellow-50);
+  --color-tempo-200: var(--color-yellow-200);
+  --color-tempo-300: var(--color-yellow-300);
+  --color-tempo-400: var(--color-yellow-400);
+  --color-tempo-500: var(--color-yellow-500);
+  --color-tempo-600: var(--color-yellow-600);
+
+  /* Type badges */
+  --color-chart-100:   var(--color-purple-100);
+  --color-chart-700:   var(--color-purple-700);
+  --color-beatmap-100: var(--color-teal-100);
+  --color-beatmap-700: var(--color-teal-700);
+  --color-theory-50:   var(--color-orange-50);
+  --color-theory-100:  var(--color-orange-100);
+  --color-theory-400:  var(--color-orange-400);
+  --color-theory-700:  var(--color-orange-700);
+}

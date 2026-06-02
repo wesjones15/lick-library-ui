@@ -1,6 +1,5 @@
 import { formatNoteEnum, MODE_DATA } from '../../core/music';
 import { BTN_SM, SELECT } from '../../core/ui';
-import { C_GRAY_BG_50, C_GRAY_BG_800, C_GRAY_BORDER_200, C_GRAY_BORDER_300, C_GRAY_BORDER_800, C_GRAY_TEXT_400, C_GRAY_TEXT_600, C_WHITE_TEXT } from '../../core/colors';
 
 const GRID_NOTES = [
   ['C', 'C_SHARP', 'D', 'D_SHARP'],
@@ -36,7 +35,7 @@ export default function PentatonicWidget({
       <div className="mt-4 p-3 inline-block">
         <button
           onClick={onToggle}
-          className={`${BTN_SM} ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50}`}
+          className={`${BTN_SM} border-gray-300 text-gray-600 hover:bg-gray-50`}
         >
           Pentatonic
         </button>
@@ -45,12 +44,12 @@ export default function PentatonicWidget({
   }
 
   return (
-    <div className={`mt-4 p-3 border ${C_GRAY_BORDER_200} rounded-lg ${C_GRAY_BG_50} inline-block`}>
+    <div className="mt-4 p-3 border border-gray-200 rounded-lg bg-gray-50 inline-block">
       {/* Row 1: toggle button + mode dropdown */}
       <div className="flex items-center gap-2">
         <button
           onClick={onToggle}
-          className={`${BTN_SM} ${C_GRAY_BG_800} ${C_WHITE_TEXT} ${C_GRAY_BORDER_800}`}
+          className={`${BTN_SM} bg-gray-800 text-white border-gray-800`}
         >
           Pentatonic
         </button>
@@ -70,11 +69,11 @@ export default function PentatonicWidget({
         <button
           style={{ visibility: activePentKeys.length > 0 ? 'visible' : 'hidden' }}
           onClick={() => activePentKeys.forEach(k => onKeyToggle(k))}
-          className={`text-xs ${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600} underline`}
+          className="text-xs text-gray-400 hover:text-gray-600 underline"
         >
           Clear
         </button>
-        <span className={`text-xs ${C_GRAY_TEXT_400}`} style={{ visibility: pentModeSynced ? 'visible' : 'hidden' }}>
+        <span className="text-xs text-gray-400" style={{ visibility: pentModeSynced ? 'visible' : 'hidden' }}>
           synced
         </span>
       </div>
@@ -94,12 +93,12 @@ export default function PentatonicWidget({
                   onClick={() => onKeyToggle(key)}
                   className={`w-12 py-1.5 text-xs font-medium rounded border transition-colors ${
                     isActive
-                      ? '${C_GRAY_BG_800} ${C_WHITE_TEXT} ${C_GRAY_BORDER_800}'
+                      ? 'bg-gray-800 text-white border-gray-800'
                       : isFull
-                        ? '${C_THEORY_BG_SOFT} ${C_THEORY_BORDER} ${C_THEORY_TEXT}'
+                        ? 'bg-theory-50 border-theory-400 text-theory-700'
                         : isPartial
-                          ? '${C_TEMPO_BG_SOFT} ${C_TEMPO_BORDER_MID} ${C_TEMPO_TEXT_MID}'
-                          : '${C_WHITE_BG} ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_100}'
+                          ? 'bg-tempo-50 border-tempo-300 text-tempo-600'
+                          : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
                   }`}
                 >
                   {formatNoteEnum(key)}

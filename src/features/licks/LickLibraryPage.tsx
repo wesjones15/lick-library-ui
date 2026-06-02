@@ -8,7 +8,6 @@ import type { InstrumentName } from '../../core/useInstrument';
 import { MODE_DATA } from '../../core/music';
 import NumpadInput from '../../core/components/NumpadInput';
 import { TOGGLE_SOFT, TOGGLE_SOFT_ON, TOGGLE_SOFT_OFF, INPUT_SM } from '../../core/ui';
-import { C_DANGER_TEXT_SOFT, C_GRAY_TEXT_400 } from '../../core/colors';
 
 export default function LickLibraryPage() {
   const [licks, setLicks] = useState<LickSummary[]>([]);
@@ -66,7 +65,7 @@ export default function LickLibraryPage() {
       <LickSubNav active="library" />
 
       <div className="mb-4 flex items-start gap-3 flex-wrap">
-        <span className={`text-xs font-semibold ${C_GRAY_TEXT_400} uppercase tracking-widest pt-2.5`}>Instrument</span>
+        <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest pt-2.5">Instrument</span>
         <InstrumentSelector
           instrument={instrument}
           customTuning={customTuning}
@@ -121,8 +120,8 @@ export default function LickLibraryPage() {
         />
       </div>
 
-      {loading && <p className={`${C_GRAY_TEXT_400} text-sm`}>Loading…</p>}
-      {error && <p className={`${C_DANGER_TEXT_SOFT} text-sm`}>{error}</p>}
+      {loading && <p className="text-gray-400 text-sm">Loading…</p>}
+      {error && <p className="text-danger-500 text-sm">{error}</p>}
       {!loading && !error && (
         <LickList licks={licks} onDelete={handleDelete} onFork={handleFork} isManaging={isManaging} />
       )}

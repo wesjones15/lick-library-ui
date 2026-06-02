@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../core/auth/AuthContext';
 import { ALERT_AMBER } from '../../core/ui';
-import { C_GRAY_BORDER_200, C_GRAY_TEXT_400, C_GRAY_TEXT_600, C_GRAY_TEXT_900, C_PRIMARY_BORDER_SOFT, C_PRIMARY_TEXT, C_WHITE_BG } from '../../core/colors';
 
 const FEATURES = [
   {
@@ -44,17 +43,17 @@ export default function HomePage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-16">
       <div className="flex items-center justify-between mb-2">
-        <h1 className={`text-3xl font-bold ${C_GRAY_TEXT_900}`}>Lick Library</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Lick Library</h1>
         {!currentUser && (
           <a
             href={`${BACKEND}/api/oauth2/authorize/google`}
-            className={`text-sm px-4 py-1.5 rounded-lg border ${C_GRAY_BORDER_200} ${C_GRAY_TEXT_600} hover:${C_PRIMARY_BORDER_SOFT} hover:${C_PRIMARY_TEXT} transition-all`}
+            className="text-sm px-4 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:border-primary-300 hover:text-primary-600 transition-all"
           >
             Sign in with Google
           </a>
         )}
       </div>
-      <p className={`${C_GRAY_TEXT_400} text-sm mb-6`}>A guitar practice tool.</p>
+      <p className="text-gray-400 text-sm mb-6">A guitar practice tool.</p>
       {currentUser && currentUser.status !== 'APPROVED' && currentUser.role !== 'ADMIN' && (
         <div className={`mb-6 ${ALERT_AMBER}`}>
           {currentUser.status === 'REJECTED'
@@ -69,10 +68,10 @@ export default function HomePage() {
           <button
             key={f.to}
             onClick={() => navigate(f.to)}
-            className={`text-left border ${C_GRAY_BORDER_200} rounded-xl p-5 ${C_WHITE_BG} hover:shadow-sm hover:border-indigo-200 transition-all`}
+            className="text-left border border-gray-200 rounded-xl p-5 bg-white hover:shadow-sm hover:border-primary-200 transition-all"
           >
-            <div className={`text-base font-semibold ${C_GRAY_TEXT_900} mb-1`}>{f.title}</div>
-            <div className={`text-xs ${C_GRAY_TEXT_400} leading-snug`}>{f.description}</div>
+            <div className="text-base font-semibold text-gray-900 mb-1">{f.title}</div>
+            <div className="text-xs text-gray-400 leading-snug">{f.description}</div>
           </button>
         ))}
       </div>

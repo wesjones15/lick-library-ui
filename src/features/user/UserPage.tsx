@@ -10,7 +10,6 @@ import {
 import type { UserProfileResponse, AdminUserResponse, LickSummary, SongSummary, PlaylistSummary, SongUpdateRequestSummary } from '../../core/api/client';
 import SongUpdateReviewModal from '../songs/SongUpdateReviewModal';
 import { ALERT_AMBER, ALERT_RED } from '../../core/ui';
-import { C_DANGER_BG, C_DANGER_BG_DARK, C_DANGER_BG_MID, C_DANGER_BG_SOFT, C_DANGER_BORDER_MID, C_DANGER_TEXT_MID, C_DANGER_TEXT_SOFT, C_GRAY_BG_50, C_GRAY_BORDER_100, C_GRAY_BORDER_200, C_GRAY_BORDER_300, C_GRAY_TEXT_300, C_GRAY_TEXT_400, C_GRAY_TEXT_500, C_GRAY_TEXT_600, C_GRAY_TEXT_700, C_GRAY_TEXT_800, C_GRAY_TEXT_900, C_PRIMARY_BG, C_PRIMARY_BG_DARK, C_PRIMARY_BG_SOFT, C_PRIMARY_BORDER_MID, C_PRIMARY_BORDER_SOFT, C_PRIMARY_TEXT, C_PRIMARY_TEXT_DARK, C_PRIMARY_TEXT_MID, C_SUCCESS_BG, C_SUCCESS_BG_DARK, C_WHITE_BG, C_WHITE_TEXT } from '../../core/colors';
 
 export default function UserPage() {
   const { currentUser, logout } = useAuth();
@@ -108,7 +107,7 @@ export default function UserPage() {
     <button
       onClick={loadData}
       title="Refresh"
-      className={`${C_GRAY_TEXT_300} hover:${C_PRIMARY_TEXT_MID} transition-colors text-base leading-none`}
+      className="text-gray-300 hover:text-primary-500 transition-colors text-base leading-none"
       aria-label="Refresh"
     >
       ↺
@@ -119,14 +118,14 @@ export default function UserPage() {
     <>
     <div className="max-w-3xl mx-auto px-6 py-10">
       {isAdmin && (
-        <h1 className={`text-3xl font-bold ${C_PRIMARY_TEXT_DARK} mb-1`}>Welcome aboard, captain.</h1>
+        <h1 className="text-3xl font-bold text-primary-700 mb-1">Welcome aboard, captain.</h1>
       )}
       {!isAdmin && (
-        <h1 className={`text-3xl font-bold ${C_GRAY_TEXT_900} mb-1`}>Account</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-1">Account</h1>
       )}
 
       {/* Profile card */}
-      <div className={`border ${C_GRAY_BORDER_200} rounded-xl p-5 mb-6 ${C_WHITE_BG}`}>
+      <div className="border border-gray-200 rounded-xl p-5 mb-6 bg-white">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             {editingUsername !== null ? (
@@ -136,30 +135,30 @@ export default function UserPage() {
                   value={editingUsername}
                   onChange={e => setEditingUsername(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') handleSaveUsername(); if (e.key === 'Escape') setEditingUsername(null); }}
-                  className={`text-sm border ${C_GRAY_BORDER_300} rounded px-2 py-0.5 ${C_GRAY_TEXT_900} focus:outline-none focus:${C_PRIMARY_BORDER_MID} w-40`}
+                  className="text-sm border border-gray-300 rounded px-2 py-0.5 text-gray-900 focus:outline-none focus:border-primary-400 w-40"
                 />
                 <button
                   onClick={handleSaveUsername}
                   disabled={savingUsername}
-                  className={`text-xs px-2 py-0.5 rounded ${C_PRIMARY_BG} ${C_WHITE_TEXT} hover:${C_PRIMARY_BG_DARK} disabled:opacity-50 transition-colors`}
+                  className="text-xs px-2 py-0.5 rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
                 >
                   {savingUsername ? '…' : 'Save'}
                 </button>
                 <button
                   onClick={() => setEditingUsername(null)}
-                  className={`text-xs ${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600} transition-colors`}
+                  className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   ×
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-1.5 mb-0.5">
-                <span className={`font-semibold ${C_GRAY_TEXT_900}`}>{profile?.username ?? '—'}</span>
+                <span className="font-semibold text-gray-900">{profile?.username ?? '—'}</span>
                 {managing && (
                   <button
                     onClick={() => setEditingUsername(profile?.username ?? '')}
                     title="Edit username"
-                    className={`${C_GRAY_TEXT_300} hover:${C_PRIMARY_TEXT_MID} transition-colors text-sm leading-none`}
+                    className="text-gray-300 hover:text-primary-500 transition-colors text-sm leading-none"
                     aria-label="Edit username"
                   >
                     ✎
@@ -167,9 +166,9 @@ export default function UserPage() {
                 )}
               </div>
             )}
-            <div className={`text-sm ${C_GRAY_TEXT_400}`}>{profile?.email}</div>
+            <div className="text-sm text-gray-400">{profile?.email}</div>
             {profile?.creationTs && (
-              <div className={`text-xs ${C_GRAY_TEXT_300} mt-1`}>
+              <div className="text-xs text-gray-300 mt-1">
                 Joined {new Date(profile.creationTs).toLocaleDateString()}
               </div>
             )}
@@ -179,18 +178,18 @@ export default function UserPage() {
               {!isAdmin && refreshButton}
               <button
                 onClick={() => { setManaging(m => !m); setEditingUsername(null); setConfirmDelete(false); }}
-                className={`text-xs ${C_GRAY_TEXT_400} hover:${C_PRIMARY_TEXT} transition-colors`}
+                className="text-xs text-gray-400 hover:text-primary-600 transition-colors"
               >
                 {managing ? 'Done' : 'Manage'}
               </button>
             </div>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isAdmin ? '${C_PRIMARY_BG_SUBTLE} ${C_PRIMARY_TEXT_DARK}' : '${C_GRAY_BG_100} ${C_GRAY_TEXT_500}'}`}>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isAdmin ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-500'}`}>
               {currentUser.role}
             </span>
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-              currentUser.status === 'APPROVED' ? '${C_SUCCESS_BG_SUBTLE} ${C_SUCCESS_TEXT}' :
-              currentUser.status === 'REJECTED' ? '${C_DANGER_BG_SUBTLE} ${C_DANGER_TEXT}' :
-              'bg-amber-100 ${C_WARN_TEXT}'
+              currentUser.status === 'APPROVED' ? 'bg-success-100 text-success-700' :
+              currentUser.status === 'REJECTED' ? 'bg-danger-100 text-danger-700' :
+              'bg-warn-100 text-warn-700'
             }`}>
               {currentUser.status}
             </span>
@@ -215,19 +214,19 @@ export default function UserPage() {
       {/* My Uploads */}
       {isApproved && (
         <div className="mb-8">
-          <h2 className={`text-lg font-semibold ${C_GRAY_TEXT_800} mb-3`}>My Uploads</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-3">My Uploads</h2>
           <div className="grid grid-cols-3 gap-4">
-            <div className={`border ${C_GRAY_BORDER_200} rounded-xl p-4 text-center`}>
-              <div className={`text-2xl font-bold ${C_PRIMARY_TEXT}`}>{myLicks.length}</div>
-              <div className={`text-xs ${C_GRAY_TEXT_400} mt-1`}>Licks</div>
+            <div className="border border-gray-200 rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-primary-600">{myLicks.length}</div>
+              <div className="text-xs text-gray-400 mt-1">Licks</div>
             </div>
-            <div className={`border ${C_GRAY_BORDER_200} rounded-xl p-4 text-center`}>
-              <div className={`text-2xl font-bold ${C_PRIMARY_TEXT}`}>{mySongs.length}</div>
-              <div className={`text-xs ${C_GRAY_TEXT_400} mt-1`}>Songs</div>
+            <div className="border border-gray-200 rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-primary-600">{mySongs.length}</div>
+              <div className="text-xs text-gray-400 mt-1">Songs</div>
             </div>
-            <div className={`border ${C_GRAY_BORDER_200} rounded-xl p-4 text-center`}>
-              <div className={`text-2xl font-bold ${C_PRIMARY_TEXT}`}>{myPlaylists.length}</div>
-              <div className={`text-xs ${C_GRAY_TEXT_400} mt-1`}>Playlists</div>
+            <div className="border border-gray-200 rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-primary-600">{myPlaylists.length}</div>
+              <div className="text-xs text-gray-400 mt-1">Playlists</div>
             </div>
           </div>
         </div>
@@ -237,46 +236,46 @@ export default function UserPage() {
       {isAdmin && (
         <div className="mb-8">
           <div className="flex items-center justify-between mb-3">
-            <h2 className={`text-lg font-semibold ${C_GRAY_TEXT_800}`}>Approval Queue</h2>
+            <h2 className="text-lg font-semibold text-gray-800">Approval Queue</h2>
             <div className="flex items-center gap-2">
               {refreshButton}
               <button
                 onClick={() => { setManaging(m => !m); setEditingUsername(null); setConfirmDelete(false); }}
-                className={`text-xs ${C_GRAY_TEXT_400} hover:${C_PRIMARY_TEXT} transition-colors`}
+                className="text-xs text-gray-400 hover:text-primary-600 transition-colors"
               >
                 {managing ? 'Done' : 'Manage'}
               </button>
             </div>
           </div>
           {queue.length === 0 ? (
-            <p className={`text-sm ${C_GRAY_TEXT_400}`}>No pending users.</p>
+            <p className="text-sm text-gray-400">No pending users.</p>
           ) : (
             <div className="flex flex-col gap-2">
               {queue.map(u => (
-                <div key={u.id} className={`flex items-center justify-between border ${C_GRAY_BORDER_200} rounded-lg px-4 py-2.5 ${C_WHITE_BG}`}>
+                <div key={u.id} className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-2.5 bg-white">
                   <div>
                     <div className="flex items-center gap-2">
-                      <div className={`text-sm font-medium ${C_GRAY_TEXT_800}`}>{u.username}</div>
+                      <div className="text-sm font-medium text-gray-800">{u.username}</div>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                         u.requestType === 'ACCOUNT_DELETION'
-                          ? '${C_DANGER_BG_SUBTLE} ${C_DANGER_TEXT}'
-                          : '${C_INFO_BG_SUBTLE} ${C_INFO_TEXT}'
+                          ? 'bg-danger-100 text-danger-700'
+                          : 'bg-info-100 text-info-700'
                       }`}>
                         {u.requestType === 'ACCOUNT_DELETION' ? 'Deletion' : 'Account Creation'}
                       </span>
                     </div>
-                    <div className={`text-xs ${C_GRAY_TEXT_400}`}>{u.email}</div>
+                    <div className="text-xs text-gray-400">{u.email}</div>
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleApprove(u.id)}
-                      className={`text-xs px-3 py-1 rounded-lg ${C_SUCCESS_BG} ${C_WHITE_TEXT} hover:${C_SUCCESS_BG_DARK} transition-colors`}
+                      className="text-xs px-3 py-1 rounded-lg bg-success-600 text-white hover:bg-success-700 transition-colors"
                     >
                       Approve
                     </button>
                     <button
                       onClick={() => handleReject(u.id)}
-                      className={`text-xs px-3 py-1 rounded-lg border ${C_DANGER_BORDER_MID} ${C_DANGER_TEXT_MID} hover:${C_DANGER_BG_SOFT} transition-colors`}
+                      className="text-xs px-3 py-1 rounded-lg border border-danger-300 text-danger-600 hover:bg-danger-50 transition-colors"
                     >
                       Reject
                     </button>
@@ -291,11 +290,11 @@ export default function UserPage() {
       {/* Admin: All Users table */}
       {isAdmin && allUsers.length > 0 && (
         <div className="mb-8">
-          <h2 className={`text-lg font-semibold ${C_GRAY_TEXT_800} mb-3`}>All Users</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-3">All Users</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-xs border-collapse">
               <thead>
-                <tr className={`border-b ${C_GRAY_BORDER_200} ${C_GRAY_TEXT_400} text-left`}>
+                <tr className="border-b border-gray-200 text-gray-400 text-left">
                   <th className="pb-2 pr-4">ID</th>
                   <th className="pb-2 pr-4">Username</th>
                   <th className="pb-2 pr-4">Email</th>
@@ -306,20 +305,20 @@ export default function UserPage() {
               </thead>
               <tbody>
                 {allUsers.map(u => (
-                  <tr key={u.id} className={`border-b ${C_GRAY_BORDER_100}`}>
-                    <td className={`py-1.5 pr-4 ${C_GRAY_TEXT_400}`}>{u.id}</td>
-                    <td className={`py-1.5 pr-4 ${C_GRAY_TEXT_700}`}>{u.username}</td>
-                    <td className={`py-1.5 pr-4 ${C_GRAY_TEXT_500}`}>{u.email}</td>
+                  <tr key={u.id} className="border-b border-gray-100">
+                    <td className="py-1.5 pr-4 text-gray-400">{u.id}</td>
+                    <td className="py-1.5 pr-4 text-gray-700">{u.username}</td>
+                    <td className="py-1.5 pr-4 text-gray-500">{u.email}</td>
                     <td className="py-1.5 pr-4">
-                      <span className={`px-1.5 py-0.5 rounded text-xs ${u.role === 'ADMIN' ? '${C_PRIMARY_BG_SUBTLE} ${C_PRIMARY_TEXT_DARK}' : '${C_GRAY_BG_100} ${C_GRAY_TEXT_500}'}`}>
+                      <span className={`px-1.5 py-0.5 rounded text-xs ${u.role === 'ADMIN' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-500'}`}>
                         {u.role}
                       </span>
                     </td>
                     <td className="py-1.5 pr-4">
                       <span className={`px-1.5 py-0.5 rounded text-xs ${
-                        u.status === 'APPROVED' ? '${C_SUCCESS_BG_SUBTLE} ${C_SUCCESS_TEXT}' :
-                        u.status === 'REJECTED' ? '${C_DANGER_BG_SUBTLE} ${C_DANGER_TEXT}' :
-                        'bg-amber-100 ${C_WARN_TEXT}'
+                        u.status === 'APPROVED' ? 'bg-success-100 text-success-700' :
+                        u.status === 'REJECTED' ? 'bg-danger-100 text-danger-700' :
+                        'bg-warn-100 text-warn-700'
                       }`}>
                         {u.status}
                       </span>
@@ -328,16 +327,16 @@ export default function UserPage() {
                       {u.id !== profile?.id && (
                         confirmDeleteUserId === u.id ? (
                           <div className="flex items-center gap-1">
-                            <span className={`text-xs ${C_DANGER_TEXT_SOFT}`}>Sure?</span>
+                            <span className="text-xs text-danger-500">Sure?</span>
                             <button
                               onClick={() => handleDeleteUser(u.id)}
-                              className={`text-xs px-2 py-0.5 rounded ${C_DANGER_BG_MID} ${C_WHITE_TEXT} hover:${C_DANGER_BG} transition-colors`}
+                              className="text-xs px-2 py-0.5 rounded bg-danger-500 text-white hover:bg-danger-600 transition-colors"
                             >
                               Confirm
                             </button>
                             <button
                               onClick={() => setConfirmDeleteUserId(null)}
-                              className={`text-xs px-2 py-0.5 rounded border ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_500} hover:${C_GRAY_BG_50} transition-colors`}
+                              className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors"
                             >
                               Cancel
                             </button>
@@ -345,7 +344,7 @@ export default function UserPage() {
                         ) : (
                           <button
                             onClick={() => setConfirmDeleteUserId(u.id)}
-                            className={`text-xs text-red-300 hover:${C_DANGER_TEXT_SOFT} transition-colors`}
+                            className="text-xs text-danger-300 hover:text-danger-500 transition-colors"
                           >
                             Delete
                           </button>
@@ -363,29 +362,29 @@ export default function UserPage() {
       {/* Admin: Song Update Requests */}
       {isAdmin && (
         <div className="mb-8">
-          <h2 className={`text-lg font-semibold ${C_GRAY_TEXT_800} mb-3`}>Song Update Requests</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-3">Song Update Requests</h2>
           {songUpdateQueue.length === 0 ? (
-            <p className={`text-sm ${C_GRAY_TEXT_400}`}>No pending song updates.</p>
+            <p className="text-sm text-gray-400">No pending song updates.</p>
           ) : (
             <div className="flex flex-col gap-2">
               {songUpdateQueue.map(req => (
-                <div key={req.id} className={`flex items-center justify-between border ${C_GRAY_BORDER_200} rounded-lg px-4 py-2.5 ${C_WHITE_BG}`}>
+                <div key={req.id} className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-2.5 bg-white">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <div className={`text-sm font-medium ${C_GRAY_TEXT_800}`}>{req.songTitle}{req.songArtist ? ` — ${req.songArtist}` : ''}</div>
+                      <div className="text-sm font-medium text-gray-800">{req.songTitle}{req.songArtist ? ` — ${req.songArtist}` : ''}</div>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        req.requestType === 'SONG_METADATA' ? '${C_INFO_BG_SUBTLE} ${C_INFO_TEXT}' :
-                        req.requestType === 'SONG_CHART' ? '${C_CHART_BG} ${C_CHART_TEXT}' :
-                        '${C_BEATMAP_BG} ${C_BEATMAP_TEXT}'
+                        req.requestType === 'SONG_METADATA' ? 'bg-info-100 text-info-700' :
+                        req.requestType === 'SONG_CHART' ? 'bg-chart-100 text-chart-700' :
+                        'bg-beatmap-100 text-beatmap-700'
                       }`}>
                         {req.requestType === 'SONG_METADATA' ? 'Metadata' : req.requestType === 'SONG_CHART' ? 'Chart' : 'Beatmap'}
                       </span>
                     </div>
-                    <div className={`text-xs ${C_GRAY_TEXT_400}`}>submitted by {req.submitterUsername}</div>
+                    <div className="text-xs text-gray-400">submitted by {req.submitterUsername}</div>
                   </div>
                   <button
                     onClick={() => setReviewingUpdateId(req.id)}
-                    className={`text-xs px-3 py-1 rounded-lg border ${C_PRIMARY_BORDER_SOFT} ${C_PRIMARY_TEXT} hover:${C_PRIMARY_BG_SOFT} transition-colors`}
+                    className="text-xs px-3 py-1 rounded-lg border border-primary-300 text-primary-600 hover:bg-primary-50 transition-colors"
                   >
                     Review
                   </button>
@@ -398,20 +397,20 @@ export default function UserPage() {
 
       {/* Delete Account — only visible in manage mode */}
       {managing && (
-        <div className={`mt-8 pt-6 border-t ${C_GRAY_BORDER_100}`}>
+        <div className="mt-8 pt-6 border-t border-gray-100">
           {confirmDelete ? (
             <div className="flex items-center gap-3">
-              <span className={`text-sm ${C_DANGER_TEXT_MID}`}>Submit a deletion request for admin review?</span>
+              <span className="text-sm text-danger-600">Submit a deletion request for admin review?</span>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleting || isSuperAdmin}
-                className={`text-xs px-3 py-1.5 rounded-lg ${C_DANGER_BG} ${C_WHITE_TEXT} hover:${C_DANGER_BG_DARK} disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
+                className="text-xs px-3 py-1.5 rounded-lg bg-danger-600 text-white hover:bg-danger-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {deleting ? 'Submitting…' : 'Submit request'}
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
-                className={`text-xs px-3 py-1.5 rounded-lg border ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50} transition-colors`}
+                className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </button>
@@ -421,7 +420,7 @@ export default function UserPage() {
               onClick={() => !isSuperAdmin && setConfirmDelete(true)}
               disabled={isSuperAdmin}
               title={isSuperAdmin ? 'Primary admin account cannot be deleted' : undefined}
-              className={`text-xs transition-colors ${isSuperAdmin ? '${C_GRAY_TEXT_300} cursor-not-allowed' : '${C_DANGER_TEXT_MUTED} hover:${C_DANGER_TEXT_MID}'}`}
+              className={`text-xs transition-colors ${isSuperAdmin ? 'text-gray-300 cursor-not-allowed' : 'text-danger-400 hover:text-danger-600'}`}
             >
               Delete account
             </button>

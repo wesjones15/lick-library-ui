@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { getLick } from '../../core/api/client';
 import type { PositionResponse } from '../../core/api/client';
 import { getStringLabels } from '../../core/music';
-import { C_DANGER_TEXT_MUTED, C_GRAY_TEXT_400, C_PRIMARY_TEXT_MID } from '../../core/colors';
 
 interface Props {
   lickId: string | null;
@@ -74,7 +73,7 @@ export default function SongLickCard({ lickId, rawTab, currentKey, semitones, fo
     return (
       <div className="my-1">
         {renderColoredTab(emptyTabForInstrument(instrument, customTuning), fontSize)}
-        <p className={`text-[10px] ${C_DANGER_TEXT_MUTED} mt-0.5 font-mono`}>
+        <p className="text-[10px] text-danger-400 mt-0.5 font-mono">
           no valid positions found for lick with {instrument.toLowerCase()}
         </p>
       </div>
@@ -94,15 +93,15 @@ export default function SongLickCard({ lickId, rawTab, currentKey, semitones, fo
         <div className="flex items-center gap-2 mt-0.5">
           <button
             onClick={e => { e.stopPropagation(); setPosIdx(i => (i - 1 + positions.length) % positions.length); }}
-            className={`${C_GRAY_TEXT_400} hover:${C_PRIMARY_TEXT_MID} text-sm leading-none`}
+            className="text-gray-400 hover:text-primary-500 text-sm leading-none"
             aria-label="Previous position"
           >
             ‹
           </button>
-          <span className={`text-[10px] ${C_GRAY_TEXT_400} font-mono`}>{posIdx + 1}/{positions.length}</span>
+          <span className="text-[10px] text-gray-400 font-mono">{posIdx + 1}/{positions.length}</span>
           <button
             onClick={e => { e.stopPropagation(); setPosIdx(i => (i + 1) % positions.length); }}
-            className={`${C_GRAY_TEXT_400} hover:${C_PRIMARY_TEXT_MID} text-sm leading-none`}
+            className="text-gray-400 hover:text-primary-500 text-sm leading-none"
             aria-label="Next position"
           >
             ›

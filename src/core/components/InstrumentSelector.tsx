@@ -1,6 +1,5 @@
 import { INSTRUMENT_LIST } from '../music';
 import type { InstrumentName } from '../music';
-import { C_DANGER_TEXT_SOFT, C_PRIMARY_BG, C_PRIMARY_BG_DARK, C_WHITE_TEXT } from '../colors';
 
 interface Props {
   instrument: InstrumentName;
@@ -15,7 +14,7 @@ interface Props {
 
 
 const SELECT_CLASS =
-  'border ${C_GRAY_BORDER_300} rounded-lg ${C_WHITE_BG} focus:outline-none focus:${C_PRIMARY_BORDER_MID}';
+  'border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-primary-400';
 
 export default function InstrumentSelector({
   instrument, customTuning = '', onInstrumentChange, onCustomTuningChange, onSubmit, error, excludeCustom = false, compact = false,
@@ -47,14 +46,14 @@ export default function InstrumentSelector({
           <button
             type="button"
             onClick={onSubmit}
-            className={`px-3 py-2 text-sm ${C_PRIMARY_BG} ${C_WHITE_TEXT} rounded-lg hover:${C_PRIMARY_BG_DARK}`}
+            className="px-3 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700"
           >
             Apply
           </button>
         </div>
       )}
 
-      {error && <p className={`${C_DANGER_TEXT_SOFT} text-xs`}>{error}</p>}
+      {error && <p className="text-danger-500 text-xs">{error}</p>}
     </div>
   );
 }

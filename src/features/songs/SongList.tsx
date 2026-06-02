@@ -1,6 +1,5 @@
 import SongCard from './SongCard';
 import type { SongSummary } from '../../core/api/client';
-import { C_GRAY_TEXT_400 } from '../../core/colors';
 
 interface Props {
   songs: SongSummary[];
@@ -11,7 +10,7 @@ interface Props {
 
 export default function SongList({ songs, managing = false, onReparse, onAddToPlaylist }: Props) {
   if (songs.length === 0) {
-    return <p className={`${C_GRAY_TEXT_400} text-sm`}>No songs yet.</p>;
+    return <p className="text-gray-400 text-sm">No songs yet.</p>;
   }
   return (
     <div className="grid grid-cols-1 portrait:grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">

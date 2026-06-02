@@ -14,9 +14,8 @@ import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { useSongNavContext } from '../../core/context/SongNavContext';
 import { formatNoteEnum, NOTE_KEYS, CHROMATIC_NOTES, MODE_SUFFIX, getStringCount } from '../../core/music';
 import { BTN_ICON } from '../../core/ui';
-import { C_BLACK_BG, C_DANGER_TEXT_SOFT, C_GRAY_BG_50, C_GRAY_BORDER_100, C_GRAY_BORDER_200, C_GRAY_TEXT_300, C_GRAY_TEXT_400, C_GRAY_TEXT_500, C_GRAY_TEXT_600, C_GRAY_TEXT_700, C_GRAY_TEXT_900, C_PRIMARY_TEXT_MID, C_TEMPO_BORDER_SOFT, C_TEMPO_TEXT, C_TEMPO_TEXT_MID, C_TEMPO_TEXT_SOFT, C_WHITE_BG } from '../../core/colors';
 
-const MENU_ITEM = 'px-4 py-2 text-sm text-left ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50}';
+const MENU_ITEM = 'px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50';
 
 function keyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
   if (!originalKey) return '';
@@ -283,7 +282,7 @@ export default function SongDetailPage() {
     }
   }
   const stubBtnClass = (active: boolean) =>
-    `px-2 py-1 text-xs rounded border transition-colors ${active ? '${C_PRIMARY_BORDER_SOFT} ${C_PRIMARY_BG_SOFT} ${C_PRIMARY_TEXT}' : '${C_GRAY_BORDER_200} ${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600} hover:${C_GRAY_BORDER_300}'}`;
+    `px-2 py-1 text-xs rounded border transition-colors ${active ? 'border-primary-300 bg-primary-50 text-primary-600' : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
 
   const currentPlaylistEntry = playlistState?.entries[playlistState.currentIndex];
   const overrideChanged = !!playlistState && song != null && (
@@ -297,15 +296,15 @@ export default function SongDetailPage() {
         <>
           {/* Header — hidden when collapsed */}
           {!collapsed && (
-          <div className={viewMode === 'scroll' ? 'sticky top-14 z-40 ${C_WHITE_BG} border-b ${C_GRAY_BORDER_100} relative' : ''}>
+          <div className={viewMode === 'scroll' ? 'sticky top-14 z-40 bg-white border-b border-gray-100 relative' : ''}>
 
 
           <div className="flex items-start justify-between mb-1">
             {/* Left: title + meta */}
             <div>
-              {song.artist && <div className={`text-xs ${C_GRAY_TEXT_400}`}>{song.artist}</div>}
-              <h1 className={`text-xl font-bold ${C_GRAY_TEXT_900}`}>{song.title}</h1>
-              <div className={`flex flex-col md:flex-row md:gap-3 mt-0.5 text-xs ${C_GRAY_TEXT_400} gap-0.5`}>
+              {song.artist && <div className="text-xs text-gray-400">{song.artist}</div>}
+              <h1 className="text-xl font-bold text-gray-900">{song.title}</h1>
+              <div className="flex flex-col md:flex-row md:gap-3 mt-0.5 text-xs text-gray-400 gap-0.5">
                 <div className="flex gap-2 items-center">
                   <InstrumentSelector
                     instrument={instrument as InstrumentName}
@@ -318,7 +317,7 @@ export default function SongDetailPage() {
                 {song.tempo != null && (
                   <button
                     onClick={() => { if (isPlaying && bpm === song.tempo) { setIsPlaying(false); } else { setBpm(song.tempo!); if (song.timeSignature) setBeatsPerBar(song.timeSignature); setIsPlaying(true); } }}
-                    className={`text-left text-xs ${C_GRAY_TEXT_400} hover:${C_PRIMARY_TEXT_MID} transition-colors`}
+                    className="text-left text-xs text-gray-400 hover:text-primary-500 transition-colors"
                   >
                     {song.tempo} BPM
                   </button>
@@ -333,7 +332,7 @@ export default function SongDetailPage() {
               {viewMode === 'scroll' && (
                 <button
                   onClick={() => setAutoScrolling(a => !a)}
-                  className={`w-8 h-8 rounded-lg border flex items-center justify-center text-xl leading-none transition-colors ${autoScrolling ? '${C_PRIMARY_BORDER_SOFT} ${C_PRIMARY_BG_SOFT} ${C_PRIMARY_TEXT_MID}' : '${C_GRAY_BORDER_200} ${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}'}`}
+                  className={`w-8 h-8 rounded-lg border flex items-center justify-center text-xl leading-none transition-colors ${autoScrolling ? 'border-primary-300 bg-primary-50 text-primary-500' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
                   aria-label={autoScrolling ? 'Pause autoscroll' : 'Start autoscroll'}
                 >
                   {autoScrolling ? '⏸' : '▶'}
@@ -343,7 +342,7 @@ export default function SongDetailPage() {
               {/* Desktop (md+): named text buttons */}
               <button
                 onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}&tempoOverride=${currentPlaylistEntry?.tempoOverride ?? ''}`)}
-                className={`hidden md:flex items-center ${C_TEMPO_TEXT_SOFT} hover:${C_TEMPO_TEXT} transition-colors text-5xl leading-none`}
+                className="hidden md:flex items-center text-tempo-400 hover:text-tempo-500 transition-colors text-5xl leading-none"
                 aria-label="Noodle"
                 title="Noodle"
               >
@@ -353,7 +352,7 @@ export default function SongDetailPage() {
                 <button
                   onClick={handleTabLicksToggle}
                   disabled={reparsing}
-                  className={`hidden md:flex w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? '${C_DANGER_BORDER_MID} ${C_DANGER_BG_SOFT} ${C_DANGER_TEXT_SOFT}' : '${C_GRAY_BORDER_200} ${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}'}`}
+                  className={`hidden md:flex w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? 'border-danger-300 bg-danger-50 text-danger-500' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
                   aria-label="Tab positions (experimental)"
                   title="Tab positions (experimental)"
                 >
@@ -375,7 +374,7 @@ export default function SongDetailPage() {
               </button>
               <button
                 onClick={() => setAddToPlaylistOpen(true)}
-                className={`hidden md:block transition-colors text-xl leading-none ${overrideChanged ? '${C_PRIMARY_TEXT_MID} hover:${C_PRIMARY_TEXT_DARK}' : '${C_INFO_TEXT_SOFT} hover:${C_INFO_TEXT_DARK}'}`}
+                className={`hidden md:block transition-colors text-xl leading-none ${overrideChanged ? 'text-primary-500 hover:text-primary-700' : 'text-info-400 hover:text-info-600'}`}
                 aria-label="Add to playlist"
                 title="Add to playlist"
               >
@@ -384,7 +383,7 @@ export default function SongDetailPage() {
               {song?.ownedByCurrentUser && (
                 <button
                   onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-                  className={`hidden md:block ${C_GRAY_TEXT_300} hover:${C_PRIMARY_TEXT_MID} transition-colors text-4xl leading-none`}
+                  className="hidden md:block text-gray-300 hover:text-primary-500 transition-colors text-4xl leading-none"
                   aria-label="Manage song"
                 >
                   ✎
@@ -394,7 +393,7 @@ export default function SongDetailPage() {
               {/* Landscape (sm–md): icon buttons */}
               <button
                 onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}&tempoOverride=${currentPlaylistEntry?.tempoOverride ?? ''}`)}
-                className={`hidden sm:flex md:hidden w-12 h-12 rounded-lg border ${C_TEMPO_BORDER_SOFT} items-center justify-center text-4xl leading-none transition-colors ${C_TEMPO_TEXT} hover:${C_TEMPO_TEXT_MID}`}
+                className="hidden sm:flex md:hidden w-12 h-12 rounded-lg border border-tempo-200 items-center justify-center text-4xl leading-none transition-colors text-tempo-500 hover:text-tempo-600"
                 aria-label="Noodle"
                 title="Noodle"
               >
@@ -404,7 +403,7 @@ export default function SongDetailPage() {
                 <button
                   onClick={handleTabLicksToggle}
                   disabled={reparsing}
-                  className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? '${C_DANGER_BORDER_MID} ${C_DANGER_BG_SOFT} ${C_DANGER_TEXT_SOFT}' : '${C_GRAY_BORDER_200} ${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}'}`}
+                  className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? 'border-danger-300 bg-danger-50 text-danger-500' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
                   aria-label="Tab positions (experimental)"
                   title="Tab positions (experimental)"
                 >
@@ -413,7 +412,7 @@ export default function SongDetailPage() {
               )}
               <button
                 onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
-                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs transition-colors ${viewMode === 'scroll' ? '${C_PRIMARY_BORDER_SOFT} ${C_PRIMARY_BG_SOFT} ${C_PRIMARY_TEXT}' : '${C_GRAY_BORDER_200} ${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}'}`}
+                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs transition-colors ${viewMode === 'scroll' ? 'border-primary-300 bg-primary-50 text-primary-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
                 aria-label="Toggle view"
                 title={viewMode === 'scroll' ? 'Switch to columns' : 'Switch to scroll'}
               >
@@ -421,7 +420,7 @@ export default function SongDetailPage() {
               </button>
               <button
                 onClick={() => setShowChords(v => !v)}
-                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${showChords ? '${C_PRIMARY_BORDER_SOFT} ${C_PRIMARY_BG_SOFT} ${C_PRIMARY_TEXT}' : '${C_GRAY_BORDER_200} ${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}'}`}
+                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${showChords ? 'border-primary-300 bg-primary-50 text-primary-600' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
                 aria-label="Show chords"
                 title="Show chords"
               >
@@ -429,7 +428,7 @@ export default function SongDetailPage() {
               </button>
               <button
                 onClick={() => setAddToPlaylistOpen(true)}
-                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${overrideChanged ? '${C_PRIMARY_BORDER_SOFT} ${C_PRIMARY_TEXT_MID} hover:${C_PRIMARY_TEXT_DARK} hover:${C_PRIMARY_BORDER_MID}' : '${C_INFO_BORDER_SOFT} ${C_INFO_TEXT_SOFT} hover:${C_INFO_TEXT_DARK} hover:${C_INFO_BORDER_MID}'}`}
+                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${overrideChanged ? 'border-primary-300 text-primary-500 hover:text-primary-700 hover:border-primary-400' : 'border-info-200 text-info-400 hover:text-info-600 hover:border-info-300'}`}
                 aria-label="Add to playlist"
                 title="Add to playlist"
               >
@@ -438,7 +437,7 @@ export default function SongDetailPage() {
               {song?.ownedByCurrentUser && (
                 <button
                   onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-                  className={`hidden sm:block md:hidden ${C_GRAY_TEXT_300} hover:${C_PRIMARY_TEXT_MID} transition-colors text-3xl leading-none`}
+                  className="hidden sm:block md:hidden text-gray-300 hover:text-primary-500 transition-colors text-3xl leading-none"
                   aria-label="Manage song"
                 >
                   ✎
@@ -449,13 +448,13 @@ export default function SongDetailPage() {
               <div ref={overflowRef} className="relative sm:hidden">
                 <button
                   onClick={() => setOverflowOpen(o => !o)}
-                  className={`w-8 h-8 rounded-lg border ${C_GRAY_BORDER_200} ${C_GRAY_TEXT_500} hover:${C_GRAY_BG_50} flex items-center justify-center text-xl leading-none`}
+                  className="w-8 h-8 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 flex items-center justify-center text-xl leading-none"
                   aria-label="More options"
                 >
                   ⋮
                 </button>
                 {overflowOpen && (
-                  <div className={`absolute right-0 top-full mt-1 w-44 ${C_WHITE_BG} border ${C_GRAY_BORDER_200} rounded-lg shadow-lg z-50 flex flex-col py-1`}>
+                  <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-50 flex flex-col py-1">
                     <button
                       onClick={() => { setViewMode(m => m === 'columns' ? 'scroll' : 'columns'); setOverflowOpen(false); }}
                       className={MENU_ITEM}
@@ -470,7 +469,7 @@ export default function SongDetailPage() {
                     </button>
                     <button
                       onClick={() => { setAddToPlaylistOpen(true); setOverflowOpen(false); }}
-                      className={`px-4 py-2 text-sm text-left hover:${C_GRAY_BG_50} ${overrideChanged ? '${C_PRIMARY_TEXT}' : '${C_INFO_TEXT_MID}'}`}
+                      className={`px-4 py-2 text-sm text-left hover:bg-gray-50 ${overrideChanged ? 'text-primary-600' : 'text-info-500'}`}
                     >
                       Add to playlist
                     </button>
@@ -492,7 +491,7 @@ export default function SongDetailPage() {
                       <button
                         onClick={() => { handleTabLicksToggle(); setOverflowOpen(false); }}
                         disabled={reparsing}
-                        className={`px-4 py-2 text-sm text-left transition-colors disabled:opacity-40 ${showTabLicks ? '${C_DANGER_TEXT_SOFT}' : '${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50}'}`}
+                        className={`px-4 py-2 text-sm text-left transition-colors disabled:opacity-40 ${showTabLicks ? 'text-danger-500' : 'text-gray-600 hover:bg-gray-50'}`}
                       >
                         {reparsing ? 'Detecting tabs…' : showTabLicks ? 'Tab positions: on' : 'Tab positions'}
                       </button>
@@ -506,8 +505,8 @@ export default function SongDetailPage() {
                 onClick={() => setCapTranspOpen(true)}
                 className={`md:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-base transition-colors ${
                   (capo !== (song?.capo ?? 0) || semitones !== 0)
-                    ? '${C_PRIMARY_BORDER_SOFT} ${C_PRIMARY_BG_SOFT} ${C_PRIMARY_TEXT}'
-                    : '${C_GRAY_BORDER_200} ${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}'
+                    ? 'border-primary-300 bg-primary-50 text-primary-600'
+                    : 'border-gray-200 text-gray-400 hover:text-gray-600'
                 }`}
                 aria-label="Capo & Transpose"
                 title="Capo & Transpose"
@@ -517,52 +516,52 @@ export default function SongDetailPage() {
 
               {/* Desktop inline capo (md+) */}
               <div className="hidden md:flex flex-col items-center gap-1">
-                <span className={`text-xs ${C_GRAY_TEXT_400}`}>Capo</span>
+                <span className="text-xs text-gray-400">Capo</span>
                 <div className="flex items-center gap-2">
                   <button onClick={() => setCapo(c => Math.max(0, c - 1))} className={BTN_ICON}>−</button>
                   <div className="flex items-center justify-center w-8">
-                    <span className={`text-base font-semibold ${C_GRAY_TEXT_900}`}>{capo}</span>
+                    <span className="text-base font-semibold text-gray-900">{capo}</span>
                   </div>
                   <button onClick={() => setCapo(c => Math.min(11, c + 1))} className={BTN_ICON}>+</button>
                 </div>
                 <button
                   onClick={() => setCapo(song.capo ?? 0)}
-                  className={`text-xs text-center transition-colors ${capo !== (song.capo ?? 0) ? '${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}' : 'invisible'}`}
+                  className={`text-xs text-center transition-colors ${capo !== (song.capo ?? 0) ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
                 >
                   reset
                 </button>
               </div>
 
               {/* Divider (md+) */}
-              <div className={`hidden md:block self-stretch border-l ${C_GRAY_BORDER_200}`} />
+              <div className="hidden md:block self-stretch border-l border-gray-200" />
 
               {/* Desktop inline transpose (md+) */}
               <div className="hidden md:flex flex-col items-center gap-1">
-                <span className={`text-xs ${C_GRAY_TEXT_400}`}>Transpose</span>
+                <span className="text-xs text-gray-400">Transpose</span>
                 <div className="flex items-center gap-2">
                   <button onClick={() => setSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={BTN_ICON}>−</button>
                   <div className="flex gap-3 items-center">
                     <div className="flex flex-col items-center w-10">
-                      <span className={`text-base font-semibold ${C_GRAY_TEXT_900}`}>
+                      <span className="text-base font-semibold text-gray-900">
                         {rootKeyLabel(song.originalKey, semitones - (song.capo ?? 0), song.mode)}
                       </span>
-                      <span className={`text-xs ${C_GRAY_TEXT_400}`}>shape</span>
+                      <span className="text-xs text-gray-400">shape</span>
                     </div>
-                    <span className={`text-xs ${C_GRAY_TEXT_300}`}>
+                    <span className="text-xs text-gray-300">
                       {semitones > 0 ? `+${semitones}` : `${semitones}`}
                     </span>
                     <div className="flex flex-col items-center w-10">
-                      <span className={`text-base font-semibold ${C_GRAY_TEXT_900}`}>
+                      <span className="text-base font-semibold text-gray-900">
                         {rootKeyLabel(song.originalKey, semitones + capo - (song.capo ?? 0), song.mode)}
                       </span>
-                      <span className={`text-xs ${C_GRAY_TEXT_400}`}>sound</span>
+                      <span className="text-xs text-gray-400">sound</span>
                     </div>
                   </div>
                   <button onClick={() => setSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={BTN_ICON}>+</button>
                 </div>
                 <button
                   onClick={() => setSemitones(0)}
-                  className={`text-xs text-center transition-colors ${semitones !== 0 ? '${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}' : 'invisible'}`}
+                  className={`text-xs text-center transition-colors ${semitones !== 0 ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
                 >
                   reset
                 </button>
@@ -573,7 +572,7 @@ export default function SongDetailPage() {
           </div>
           )} {/* end !collapsed */}
 
-          {error && <p className={`${C_DANGER_TEXT_SOFT} text-sm mb-4`}>{error}</p>}
+          {error && <p className="text-danger-500 text-sm mb-4">{error}</p>}
 
           <div ref={scrollContainerRef} className={viewMode === 'scroll' ? 'max-w-2xl mx-auto mt-8 overflow-x-hidden' : 'overflow-hidden'}>
             <ChordSheet
@@ -592,58 +591,58 @@ export default function SongDetailPage() {
 
           {capTranspOpen && (
             <div
-              className={`fixed inset-0 z-50 flex items-end justify-center ${C_BLACK_BG}/30`}
+              className="fixed inset-0 z-50 flex items-end justify-center bg-black/30"
               onClick={() => setCapTranspOpen(false)}
             >
               <div
-                className={`${C_WHITE_BG} rounded-t-xl shadow-xl p-6 w-full max-w-sm flex flex-col gap-6`}
+                className="bg-white rounded-t-xl shadow-xl p-6 w-full max-w-sm flex flex-col gap-6"
                 onClick={e => e.stopPropagation()}
               >
                 {/* Capo */}
                 <div className="flex flex-col items-center gap-1">
-                  <span className={`text-xs ${C_GRAY_TEXT_400}`}>Capo</span>
+                  <span className="text-xs text-gray-400">Capo</span>
                   <div className="flex items-center gap-2">
                     <button onClick={() => setCapo(c => Math.max(0, c - 1))} className={BTN_ICON}>−</button>
                     <div className="flex items-center justify-center w-8">
-                      <span className={`text-base font-semibold ${C_GRAY_TEXT_900}`}>{capo}</span>
+                      <span className="text-base font-semibold text-gray-900">{capo}</span>
                     </div>
                     <button onClick={() => setCapo(c => Math.min(11, c + 1))} className={BTN_ICON}>+</button>
                   </div>
                   <button
                     onClick={() => setCapo(song?.capo ?? 0)}
-                    className={`text-xs text-center transition-colors ${capo !== (song?.capo ?? 0) ? '${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}' : 'invisible'}`}
+                    className={`text-xs text-center transition-colors ${capo !== (song?.capo ?? 0) ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
                   >
                     reset
                   </button>
                 </div>
-                <div className={`border-t ${C_GRAY_BORDER_100}`} />
+                <div className="border-t border-gray-100" />
                 {/* Transpose */}
                 <div className="flex flex-col items-center gap-1">
-                  <span className={`text-xs ${C_GRAY_TEXT_400}`}>Transpose</span>
+                  <span className="text-xs text-gray-400">Transpose</span>
                   <div className="flex items-center gap-2">
                     <button onClick={() => setSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={BTN_ICON}>−</button>
                     <div className="flex gap-3 items-center">
                       <div className="flex flex-col items-center w-10">
-                        <span className={`text-base font-semibold ${C_GRAY_TEXT_900}`}>
+                        <span className="text-base font-semibold text-gray-900">
                           {rootKeyLabel(song?.originalKey ?? null, semitones - (song?.capo ?? 0), song?.mode)}
                         </span>
-                        <span className={`text-xs ${C_GRAY_TEXT_400}`}>shape</span>
+                        <span className="text-xs text-gray-400">shape</span>
                       </div>
-                      <span className={`text-xs ${C_GRAY_TEXT_300}`}>
+                      <span className="text-xs text-gray-300">
                         {semitones > 0 ? `+${semitones}` : `${semitones}`}
                       </span>
                       <div className="flex flex-col items-center w-10">
-                        <span className={`text-base font-semibold ${C_GRAY_TEXT_900}`}>
+                        <span className="text-base font-semibold text-gray-900">
                           {rootKeyLabel(song?.originalKey ?? null, semitones + capo - (song?.capo ?? 0), song?.mode)}
                         </span>
-                        <span className={`text-xs ${C_GRAY_TEXT_400}`}>sound</span>
+                        <span className="text-xs text-gray-400">sound</span>
                       </div>
                     </div>
                     <button onClick={() => setSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={BTN_ICON}>+</button>
                   </div>
                   <button
                     onClick={() => setSemitones(0)}
-                    className={`text-xs text-center transition-colors ${semitones !== 0 ? '${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600}' : 'invisible'}`}
+                    className={`text-xs text-center transition-colors ${semitones !== 0 ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
                   >
                     reset
                   </button>
@@ -653,7 +652,7 @@ export default function SongDetailPage() {
           )}
 
           {showChords && (
-            <div className={`fixed bottom-0 left-0 right-0 z-40 ${C_WHITE_BG} border-t ${C_GRAY_BORDER_200} shadow-lg`}>
+            <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg">
               <div className="flex gap-3 overflow-x-auto px-4 py-3">
                 {extractChordNames(song).map(name => {
                   const voicings = chordVoicings[name] ?? [];
@@ -663,9 +662,9 @@ export default function SongDetailPage() {
                   return (
                     <div
                       key={name}
-                      className={`flex-shrink-0 flex flex-col items-center border ${C_GRAY_BORDER_200} rounded-lg px-2 pt-2 pb-1 ${C_WHITE_BG}`}
+                      className="flex-shrink-0 flex flex-col items-center border border-gray-200 rounded-lg px-2 pt-2 pb-1 bg-white"
                     >
-                      <span className={`text-xs font-semibold ${C_GRAY_TEXT_700} mb-1`}>{name}</span>
+                      <span className="text-xs font-semibold text-gray-700 mb-1">{name}</span>
                       <div
                         style={isEmpty ? { cursor: 'pointer' } : undefined}
                         onClick={isEmpty ? () => setUploadChord(name) : undefined}
@@ -673,14 +672,14 @@ export default function SongDetailPage() {
                         <ChordDiagram frets={frets} width={90} stringCount={getStringCount(instrument)} />
                       </div>
                       {voicings.length > 1 && (
-                        <div className={`flex items-center justify-between w-full text-xs ${C_GRAY_TEXT_400} mt-1`}>
+                        <div className="flex items-center justify-between w-full text-xs text-gray-400 mt-1">
                           <button
-                            className={`hover:${C_GRAY_TEXT_600} px-1 text-2xl leading-none`}
+                            className="hover:text-gray-600 px-1 text-2xl leading-none"
                             onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx - 1 + voicings.length) % voicings.length }))}
                           >‹</button>
                           <span>{idx + 1}/{voicings.length}</span>
                           <button
-                            className={`hover:${C_GRAY_TEXT_600} px-1 text-2xl leading-none`}
+                            className="hover:text-gray-600 px-1 text-2xl leading-none"
                             onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx + 1) % voicings.length }))}
                           >›</button>
                         </div>
@@ -694,8 +693,8 @@ export default function SongDetailPage() {
         </>
       )}
 
-      {!song && loading && <p className={`${C_GRAY_TEXT_400} text-sm`}>Loading…</p>}
-      {!song && error && <p className={`${C_DANGER_TEXT_SOFT} text-sm`}>{error}</p>}
+      {!song && loading && <p className="text-gray-400 text-sm">Loading…</p>}
+      {!song && error && <p className="text-danger-500 text-sm">{error}</p>}
 
       {uploadChord && (
         <ChordUploadModal

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAllSongs } from '../../core/api/client';
 import type { SongSummary } from '../../core/api/client';
-import { C_BLACK_BG, C_GRAY_BORDER_100, C_GRAY_BORDER_200, C_GRAY_TEXT_400, C_GRAY_TEXT_600, C_GRAY_TEXT_800, C_PRIMARY_BG_SOFT, C_PRIMARY_BORDER_MID, C_WHITE_BG } from '../../core/colors';
 
 interface Props {
   onSelect: (song: SongSummary) => void;
@@ -24,14 +23,14 @@ export default function SongLibraryModal({ onSelect, onClose }: Props) {
     : songs;
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center ${C_BLACK_BG}/40`} onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
       <div
-        className={`${C_WHITE_BG} rounded-xl shadow-xl w-full max-w-sm mx-4 flex flex-col max-h-[70vh]`}
+        className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4 flex flex-col max-h-[70vh]"
         onClick={e => e.stopPropagation()}
       >
-        <div className={`flex items-center justify-between px-4 py-3 border-b ${C_GRAY_BORDER_100}`}>
-          <span className={`font-semibold text-sm ${C_GRAY_TEXT_800}`}>Load Song</span>
-          <button onClick={onClose} className={`${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600} text-xl leading-none`}>✕</button>
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <span className="font-semibold text-sm text-gray-800">Load Song</span>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
         <div className="px-4 py-2">
           <input
@@ -39,7 +38,7 @@ export default function SongLibraryModal({ onSelect, onClose }: Props) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search songs…"
-            className={`w-full border ${C_GRAY_BORDER_200} rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:${C_PRIMARY_BORDER_MID}`}
+            className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary-400"
           />
         </div>
         <div className="overflow-y-auto flex-1 divide-y divide-gray-50">
@@ -47,14 +46,14 @@ export default function SongLibraryModal({ onSelect, onClose }: Props) {
             <button
               key={song.id}
               onClick={() => onSelect(song)}
-              className={`w-full text-left px-4 py-3 hover:${C_PRIMARY_BG_SOFT} transition-colors`}
+              className="w-full text-left px-4 py-3 hover:bg-primary-50 transition-colors"
             >
-              <div className={`text-sm font-medium ${C_GRAY_TEXT_800}`}>{song.title}</div>
-              {song.artist && <div className={`text-xs ${C_GRAY_TEXT_400}`}>{song.artist}</div>}
+              <div className="text-sm font-medium text-gray-800">{song.title}</div>
+              {song.artist && <div className="text-xs text-gray-400">{song.artist}</div>}
             </button>
           ))}
           {filtered.length === 0 && (
-            <div className={`px-4 py-6 text-sm ${C_GRAY_TEXT_400} text-center`}>No songs found</div>
+            <div className="px-4 py-6 text-sm text-gray-400 text-center">No songs found</div>
           )}
         </div>
       </div>

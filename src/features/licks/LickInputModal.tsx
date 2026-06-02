@@ -2,7 +2,6 @@ import { useState, useRef, useLayoutEffect } from 'react';
 import { NOTE_KEYS, MODE_DATA, EMPTY_TAB, VALID_INPUT } from '../../core/music';
 import { BTN_SECONDARY, TEXTAREA_MONO, SELECT } from '../../core/ui';
 import NumpadInput, { isTouch } from '../../core/components/NumpadInput';
-import { C_BLACK_BG, C_GRAY_BORDER_100, C_GRAY_TEXT_400, C_GRAY_TEXT_600, C_GRAY_TEXT_800, C_PRIMARY_BG, C_PRIMARY_BG_DARK, C_PRIMARY_BORDER, C_WHITE_BG, C_WHITE_TEXT } from '../../core/colors';
 
 function expandTab(tab: string): string {
   return tab.split('\n').map(line => {
@@ -103,16 +102,16 @@ export default function LickInputModal({ title, initialTab, onVisualize, onClose
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center ${C_BLACK_BG}/40`}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
       onClick={onClose}
     >
       <div
-        className={`${C_WHITE_BG} rounded-xl shadow-xl w-full max-w-lg flex flex-col`}
+        className="bg-white rounded-xl shadow-xl w-full max-w-lg flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        <div className={`flex items-center justify-between px-5 py-4 border-b ${C_GRAY_BORDER_100}`}>
-          <h2 className={`text-base font-semibold ${C_GRAY_TEXT_800}`}>{title}</h2>
-          <button onClick={onClose} className={`${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600} text-xl leading-none`}>✕</button>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <h2 className="text-base font-semibold text-gray-800">{title}</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
 
         <div className="px-5 py-4">
@@ -159,7 +158,7 @@ export default function LickInputModal({ title, initialTab, onVisualize, onClose
             <button
               onClick={() => onVisualize(rawTab, inputKey || undefined, mode || undefined)}
               disabled={!hasNotes}
-              className={`px-5 py-2 text-sm rounded-lg ${C_PRIMARY_BG} ${C_WHITE_TEXT} border ${C_PRIMARY_BORDER} hover:${C_PRIMARY_BG_DARK} disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
+              className="px-5 py-2 text-sm rounded-lg bg-primary-600 text-white border border-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Visualize
             </button>

@@ -8,7 +8,6 @@ import { uploadLick } from '../../core/api/client';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { getStringCount, getStringLabels } from '../../core/music';
 import { BTN, TOGGLE, TOGGLE_ON, TOGGLE_OFF } from '../../core/ui';
-import { C_DANGER_TEXT_SOFT, C_GRAY_BG_50, C_GRAY_BORDER_300, C_GRAY_TEXT_400, C_GRAY_TEXT_600, C_GRAY_TEXT_700, C_PRIMARY_BG, C_PRIMARY_BG_DARK, C_PRIMARY_BORDER, C_WHITE_BG, C_WHITE_TEXT } from '../../core/colors';
 import {
   FRET_COUNT,
   SPREAD_SLOT,
@@ -113,13 +112,13 @@ export default function LickVisualizerPage() {
         <div className="flex gap-3 items-center mb-2 flex-wrap">
           <button
             onClick={() => setShowLibrary(true)}
-            className={`${BTN} ${C_WHITE_BG} ${C_GRAY_TEXT_700} ${C_GRAY_BORDER_300} hover:${C_GRAY_BG_50}`}
+            className={`${BTN} bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
           >
             Load from Library
           </button>
           <button
             onClick={() => setShowNewLick(true)}
-            className={`${BTN} ${C_PRIMARY_BG} ${C_WHITE_TEXT} ${C_PRIMARY_BORDER} hover:${C_PRIMARY_BG_DARK}`}
+            className={`${BTN} bg-primary-600 text-white border-primary-600 hover:bg-primary-700`}
           >
             New Lick
           </button>
@@ -134,12 +133,12 @@ export default function LickVisualizerPage() {
         {columns.length > 0 && (
           <div className="mt-4">
             {displayMode === 'all' ? (
-              <pre className={`font-mono text-xs ${C_GRAY_TEXT_600} leading-tight mb-3 whitespace-pre overflow-x-auto`}>
+              <pre className="font-mono text-xs text-gray-600 leading-tight mb-3 whitespace-pre overflow-x-auto">
                 {rawTab}
               </pre>
             ) : (
               <div className="font-mono text-xs mb-1" style={{ display: 'inline-block', maxWidth: '100%', overflowX: 'auto' }}>
-                <pre className={`${C_GRAY_TEXT_600} leading-tight m-0 p-0 whitespace-pre`}>
+                <pre className="text-gray-600 leading-tight m-0 p-0 whitespace-pre">
                   {buildSpreadTab(rawTab, columns)}
                 </pre>
                 <div className="relative" style={{ paddingLeft: '3ch', paddingRight: '5ch' }}>
@@ -150,13 +149,13 @@ export default function LickVisualizerPage() {
                     step={1}
                     value={currentCol}
                     onChange={e => setCurrentCol(+e.target.value)}
-                    className="w-full accent-indigo-600"
+                    className="w-full accent-primary-600"
                   />
                   {columns.length > 1 && columns.map((col, i) =>
                     col.isRest ? (
                       <span
                         key={i}
-                        className={`absolute top-5 text-[10px] ${C_GRAY_TEXT_400} font-mono -translate-x-1/2 pointer-events-none`}
+                        className="absolute top-5 text-[10px] text-gray-400 font-mono -translate-x-1/2 pointer-events-none"
                         style={{ left: `${(i / (columns.length - 1)) * 100}%` }}
                       >
                         ~
@@ -168,9 +167,9 @@ export default function LickVisualizerPage() {
             )}
 
             <div className="flex gap-4 items-center flex-wrap mb-3 mt-4">
-              <div className={`flex rounded-md overflow-hidden border ${C_GRAY_BORDER_300}`}>
+              <div className="flex rounded-md overflow-hidden border border-gray-300">
                 <button
-                  className={`${TOGGLE} rounded-none border-0 border-r ${C_GRAY_BORDER_300} ${displayMode === 'column' ? TOGGLE_ON : TOGGLE_OFF}`}
+                  className={`${TOGGLE} rounded-none border-0 border-r border-gray-300 ${displayMode === 'column' ? TOGGLE_ON : TOGGLE_OFF}`}
                   onClick={() => setDisplayMode('column')}
                 >
                   Column
@@ -185,9 +184,9 @@ export default function LickVisualizerPage() {
 
               {displayMode === 'column' && (
                 <>
-                  <div className={`flex rounded-md overflow-hidden border ${C_GRAY_BORDER_300}`}>
+                  <div className="flex rounded-md overflow-hidden border border-gray-300">
                     <button
-                      className={`${TOGGLE} rounded-none border-0 border-r ${C_GRAY_BORDER_300} ${speedMode === 'fixed' ? TOGGLE_ON : TOGGLE_OFF}`}
+                      className={`${TOGGLE} rounded-none border-0 border-r border-gray-300 ${speedMode === 'fixed' ? TOGGLE_ON : TOGGLE_OFF}`}
                       onClick={() => setSpeedMode('fixed')}
                     >
                       1/sec
@@ -202,8 +201,8 @@ export default function LickVisualizerPage() {
                   <button
                     onClick={() => setIsRunning(r => !r)}
                     className={`${BTN} ${isRunning
-                      ? '${C_WHITE_BG} ${C_GRAY_TEXT_700} ${C_GRAY_BORDER_300} hover:${C_GRAY_BG_50}'
-                      : '${C_PRIMARY_BG} ${C_WHITE_TEXT} ${C_PRIMARY_BORDER} hover:${C_PRIMARY_BG_DARK}'}`}
+                      ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      : 'bg-primary-600 text-white border-primary-600 hover:bg-primary-700'}`}
                   >
                     {isRunning ? 'Pause' : 'Resume'}
                   </button>
@@ -214,7 +213,7 @@ export default function LickVisualizerPage() {
                 {lickSource === 'library' && (
                   <button
                     onClick={() => setShowEditLick(true)}
-                    className={`${BTN} ${C_WHITE_BG} ${C_GRAY_TEXT_700} ${C_GRAY_BORDER_300} hover:${C_GRAY_BG_50}`}
+                    className={`${BTN} bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
                   >
                     Edit Lick
                   </button>
@@ -223,19 +222,19 @@ export default function LickVisualizerPage() {
                   onClick={handleSaveLick}
                   disabled={!canSave || saveLoading}
                   className={`${BTN} ${canSave
-                    ? '${C_SUCCESS_BG} ${C_WHITE_TEXT} border-green-600 hover:${C_SUCCESS_BG_DARK}'
-                    : '${C_GRAY_BG_100} ${C_GRAY_TEXT_400} ${C_GRAY_BORDER_200} cursor-not-allowed'} disabled:opacity-60`}
+                    ? 'bg-success-600 text-white border-success-600 hover:bg-success-700'
+                    : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'} disabled:opacity-60`}
                 >
                   {saveLoading ? 'Saving…' : 'Save Lick'}
                 </button>
               </div>
             </div>
-            {saveError && <p className={`text-sm ${C_DANGER_TEXT_SOFT} mt-1`}>{saveError}</p>}
+            {saveError && <p className="text-sm text-danger-500 mt-1">{saveError}</p>}
           </div>
         )}
 
         {lickSource === 'none' && (
-          <p className={`text-sm ${C_GRAY_TEXT_400} mt-4`}>Load a lick from the library or create a new one to get started.</p>
+          <p className="text-sm text-gray-400 mt-4">Load a lick from the library or create a new one to get started.</p>
         )}
 
         {showLibrary && (

@@ -5,7 +5,6 @@ import { TEXTAREA_MONO, SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import NumpadInput from '../../core/components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
-import { C_DANGER_TEXT_SOFT, C_GRAY_BORDER_300, C_PRIMARY_BG, C_PRIMARY_BG_DARK, C_PRIMARY_BORDER_MID, C_WHITE_BG, C_WHITE_TEXT } from '../../core/colors';
 
 interface Props {
   onSuccess: () => void;
@@ -92,7 +91,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
           value={keyMode}
           onChange={e => setKeyMode(e.target.value)}
           disabled={!keyRoot}
-          className={`w-24 border ${C_GRAY_BORDER_300} rounded-lg px-2 py-2 text-sm ${C_WHITE_BG} focus:outline-none focus:${C_PRIMARY_BORDER_MID} disabled:opacity-40`}
+          className="w-24 border border-gray-300 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:border-primary-400 disabled:opacity-40"
         >
           {MODE_DATA.map(m => (
             <option key={m.suffix} value={m.suffix}>{m.label}</option>
@@ -122,7 +121,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
         <select
           value={timeSignature}
           onChange={e => setTimeSignature(Number(e.target.value))}
-          className={`w-20 border ${C_GRAY_BORDER_300} rounded-lg px-2 py-2 text-sm ${C_WHITE_BG} focus:outline-none focus:${C_PRIMARY_BORDER_MID}`}
+          className="w-20 border border-gray-300 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:border-primary-400"
         >
           <option value={1}>1/4</option>
           <option value={2}>2/4</option>
@@ -142,11 +141,11 @@ export default function SongUploadForm({ onSuccess }: Props) {
       <button
         type="submit"
         disabled={loading || !title.trim() || !rawChordSheet.trim()}
-        className={`px-5 py-2 ${C_PRIMARY_BG} ${C_WHITE_TEXT} text-sm font-medium rounded-lg hover:${C_PRIMARY_BG_DARK} disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end`}
+        className="px-5 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end"
       >
         {loading ? 'Uploading…' : 'Upload'}
       </button>
-      {error && <p className={`${C_DANGER_TEXT_SOFT} text-sm`}>{error}</p>}
+      {error && <p className="text-danger-500 text-sm">{error}</p>}
     </form>
   );
 }

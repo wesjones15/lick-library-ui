@@ -10,7 +10,6 @@ import { BTN_SECONDARY, SELECT, TEXTAREA_MONO, ALERT_AMBER, ALERT_GREEN } from '
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import NumpadInput from '../../core/components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
-import { C_DANGER_BG, C_DANGER_BG_MID, C_DANGER_BG_SOFT, C_DANGER_BORDER_SOFT, C_DANGER_TEXT_MID, C_DANGER_TEXT_MUTED, C_DANGER_TEXT_SOFT, C_GRAY_BG_50, C_GRAY_BORDER_100, C_GRAY_BORDER_200, C_GRAY_BORDER_300, C_GRAY_TEXT_300, C_GRAY_TEXT_400, C_GRAY_TEXT_600, C_GRAY_TEXT_700, C_PRIMARY_TEXT_DARK, C_PRIMARY_TEXT_MID, C_WHITE_BG, C_WHITE_TEXT } from '../../core/colors';
 
 const LEGACY_KEY_MAP: Record<string, string> = {
   C_SHARP: 'C#', D_SHARP: 'D#', F_SHARP: 'F#', G_SHARP: 'G#', B_FLAT: 'Bb',
@@ -25,7 +24,7 @@ function parseStoredKey(stored: string): { root: string; mode: string } {
   return { root, mode: modeName ? ` ${modeName}` : minorSuffix };
 }
 
-const BTN_SUBMIT = 'px-5 py-2 ${C_PRIMARY_BG} ${C_WHITE_TEXT} text-sm font-medium rounded-lg hover:${C_PRIMARY_BG_DARK} disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end';
+const BTN_SUBMIT = 'px-5 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end';
 
 function extractChordNames(song: SongDetail): string[] {
   const seen = new Set<string>();
@@ -186,7 +185,7 @@ export default function SongManagePage() {
     }
   };
 
-  if (!song) return <div className={`px-6 pt-8 text-sm ${C_GRAY_TEXT_400}`}>Loading…</div>;
+  if (!song) return <div className="px-6 pt-8 text-sm text-gray-400">Loading…</div>;
 
   const isOwner = song.ownedByCurrentUser;
 
@@ -234,7 +233,7 @@ export default function SongManagePage() {
   return (
     <div className={`mx-auto px-6 py-8 ${mode === 'chords' ? 'max-w-3xl' : 'max-w-lg'}`}>
       {/* Breadcrumb */}
-      <Link to={`/song/${id}`} className={`text-sm ${C_PRIMARY_TEXT_MID} hover:${C_PRIMARY_TEXT_DARK} mb-6 inline-block`}>
+      <Link to={`/song/${id}`} className="text-sm text-primary-500 hover:text-primary-700 mb-6 inline-block">
         ← {song.title}
       </Link>
 
@@ -330,7 +329,7 @@ export default function SongManagePage() {
           </button>
 
           {/* Mode switchers */}
-          <div className={`flex flex-col gap-2 mt-2 pt-4 border-t ${C_GRAY_BORDER_100}`}>
+          <div className="flex flex-col gap-2 mt-2 pt-4 border-t border-gray-100">
             <button type="button" onClick={() => { setMode('chart'); setSubmitSuccess(false); }} className={BTN_SECONDARY}>
               Update Song Chart
             </button>
@@ -343,25 +342,25 @@ export default function SongManagePage() {
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
-                className={`px-4 py-2 text-sm border ${C_DANGER_BORDER_SOFT} rounded-lg ${C_DANGER_TEXT_MUTED} hover:${C_DANGER_BG_SOFT} transition-colors`}
+                className="px-4 py-2 text-sm border border-danger-200 rounded-lg text-danger-400 hover:bg-danger-50 transition-colors"
               >
                 Delete Song
               </button>
             ) : (
-              <div className={`flex flex-col gap-2 p-3 ${C_DANGER_BG_SOFT} border ${C_DANGER_BORDER_SOFT} rounded-lg`}>
-                <p className={`text-sm ${C_DANGER_TEXT_MID}`}>Are you sure? This action cannot be undone.</p>
+              <div className="flex flex-col gap-2 p-3 bg-danger-50 border border-danger-200 rounded-lg">
+                <p className="text-sm text-danger-600">Are you sure? This action cannot be undone.</p>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={handleDelete}
-                    className={`flex-1 px-3 py-1.5 ${C_DANGER_BG_MID} ${C_WHITE_TEXT} text-sm rounded-lg hover:${C_DANGER_BG} transition-colors`}
+                    className="flex-1 px-3 py-1.5 bg-danger-500 text-white text-sm rounded-lg hover:bg-danger-600 transition-colors"
                   >
                     Confirm
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(false)}
-                    className={`flex-1 px-3 py-1.5 border ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} text-sm rounded-lg hover:${C_GRAY_BG_50} transition-colors`}
+                    className="flex-1 px-3 py-1.5 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Cancel
                   </button>
@@ -370,13 +369,13 @@ export default function SongManagePage() {
             ))}
           </div>
 
-          {error && <p className={`${C_DANGER_TEXT_SOFT} text-sm`}>{error}</p>}
+          {error && <p className="text-danger-500 text-sm">{error}</p>}
         </form>
       )}
 
       {mode === 'chart' && (
         <form onSubmit={isOwner ? handleChartSubmit : handleChartSubmitNonOwner} className="flex flex-col gap-3 mt-4">
-          <button type="button" onClick={() => { setRawChordSheet(song.rawChordSheet ?? ''); setMode('metadata'); setSubmitSuccess(false); }} className={`text-sm ${C_PRIMARY_TEXT_MID} hover:${C_PRIMARY_TEXT_DARK} self-start`}>
+          <button type="button" onClick={() => { setRawChordSheet(song.rawChordSheet ?? ''); setMode('metadata'); setSubmitSuccess(false); }} className="text-sm text-primary-500 hover:text-primary-700 self-start">
             ← Back
           </button>
           <textarea
@@ -392,17 +391,17 @@ export default function SongManagePage() {
           >
             {loading ? 'Saving…' : isOwner ? 'Save & Re-parse' : 'Submit for review'}
           </button>
-          {error && <p className={`${C_DANGER_TEXT_SOFT} text-sm`}>{error}</p>}
+          {error && <p className="text-danger-500 text-sm">{error}</p>}
         </form>
       )}
 
       {mode === 'chords' && (
         <div className="flex flex-col gap-4 mt-4">
-          <button type="button" onClick={() => setMode('metadata')} className={`text-sm ${C_PRIMARY_TEXT_MID} hover:${C_PRIMARY_TEXT_DARK} self-start`}>
+          <button type="button" onClick={() => setMode('metadata')} className="text-sm text-primary-500 hover:text-primary-700 self-start">
             ← Back
           </button>
           {extractChordNames(song).length === 0 ? (
-            <p className={`text-sm ${C_GRAY_TEXT_400}`}>No chords detected in this song.</p>
+            <p className="text-sm text-gray-400">No chords detected in this song.</p>
           ) : (
             <div className="grid grid-cols-6 gap-3">
               {extractChordNames(song).map(name => {
@@ -412,26 +411,26 @@ export default function SongManagePage() {
                 return (
                   <div
                     key={name}
-                    className={`relative flex-shrink-0 flex flex-col items-center border ${C_GRAY_BORDER_200} rounded-lg px-2 pt-2 pb-1 ${C_WHITE_BG}`}
+                    className="relative flex-shrink-0 flex flex-col items-center border border-gray-200 rounded-lg px-2 pt-2 pb-1 bg-white"
                   >
-                    <span className={`text-xs font-semibold ${C_GRAY_TEXT_700} mb-1`}>{name}</span>
+                    <span className="text-xs font-semibold text-gray-700 mb-1">{name}</span>
                     <button
                       title="Add voicing"
                       onClick={() => setSelectedChord(name)}
-                      className={`absolute top-1 right-2 ${C_GRAY_TEXT_300} hover:${C_PRIMARY_TEXT_MID} text-xl leading-none`}
+                      className="absolute top-1 right-2 text-gray-300 hover:text-primary-500 text-xl leading-none"
                     >
                       +
                     </button>
                     <ChordDiagram frets={frets} width={90} />
                     {voicings.length > 1 && (
-                      <div className={`flex items-center justify-between w-full text-xs ${C_GRAY_TEXT_400} mt-1`}>
+                      <div className="flex items-center justify-between w-full text-xs text-gray-400 mt-1">
                         <button
-                          className={`hover:${C_GRAY_TEXT_600} px-1 text-2xl leading-none`}
+                          className="hover:text-gray-600 px-1 text-2xl leading-none"
                           onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx - 1 + voicings.length) % voicings.length }))}
                         >‹</button>
                         <span>{idx + 1}/{voicings.length}</span>
                         <button
-                          className={`hover:${C_GRAY_TEXT_600} px-1 text-2xl leading-none`}
+                          className="hover:text-gray-600 px-1 text-2xl leading-none"
                           onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx + 1) % voicings.length }))}
                         >›</button>
                       </div>

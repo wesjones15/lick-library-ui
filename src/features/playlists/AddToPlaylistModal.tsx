@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { getAllPlaylists, addPlaylistEntry, removePlaylistEntry, updatePlaylistEntry, getPlaylistsContainingSong } from '../../core/api/client';
 import type { PlaylistSummary } from '../../core/api/client';
 import { SELECT } from '../../core/ui';
-import { C_BLACK_BG, C_GRAY_BG_50, C_GRAY_TEXT_400, C_GRAY_TEXT_600, C_GRAY_TEXT_900, C_PRIMARY_TEXT, C_WHITE_BG } from '../../core/colors';
 
 interface Props {
   songId: string;
@@ -80,16 +79,16 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center ${C_BLACK_BG}/30`}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
       onClick={onClose}
     >
       <div
-        className={`${C_WHITE_BG} rounded-xl shadow-xl p-5 w-full max-w-sm mx-4`}
+        className="bg-white rounded-xl shadow-xl p-5 w-full max-w-sm mx-4"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-3">
-          <span className={`font-semibold ${C_GRAY_TEXT_900} text-sm truncate pr-4`}>Add "{songTitle}" to playlist</span>
-          <button onClick={onClose} className={`${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600} text-xl leading-none shrink-0`}>×</button>
+          <span className="font-semibold text-gray-900 text-sm truncate pr-4">Add "{songTitle}" to playlist</span>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none shrink-0">×</button>
         </div>
 
         <input
@@ -101,7 +100,7 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
         />
 
         {visible.length === 0 ? (
-          <p className={`text-xs ${C_GRAY_TEXT_400} text-center py-4`}>No playlists found</p>
+          <p className="text-xs text-gray-400 text-center py-4">No playlists found</p>
         ) : (
           <div className="flex flex-col gap-1 max-h-56 overflow-y-auto">
             {visible.map(pl => {
@@ -109,13 +108,13 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
               const isAdded = added.has(pl.id);
               const showUpdate = !isRecent && overrideChanged && pl.id === currentPlaylistId && isAdded && !updatedPlaylists.has(pl.id);
               return (
-                <div key={pl.id} className={`flex items-center justify-between px-3 py-2 rounded-lg hover:${C_GRAY_BG_50}`}>
+                <div key={pl.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
                   <button
-                    className={`text-sm ${C_GRAY_TEXT_900} hover:${C_PRIMARY_TEXT} flex-1 text-left`}
+                    className="text-sm text-gray-900 hover:text-primary-600 flex-1 text-left"
                     onClick={() => { navigate(`/playlist/${pl.id}`); onClose(); }}
                   >
                     {pl.name}
-                    <span className={`text-xs ${C_GRAY_TEXT_400} ml-2`}>{pl.songCount} songs</span>
+                    <span className="text-xs text-gray-400 ml-2">{pl.songCount} songs</span>
                   </button>
                   <button
                     onClick={() => {
@@ -124,10 +123,10 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
                       isAdded ? handleRemove(pl.id) : handleAdd(pl.id);
                     }}
                     className={`text-lg leading-none transition-colors ${
-                      isRecent ? 'text-green-500 cursor-default'
-                      : showUpdate ? '${C_PRIMARY_TEXT_MID} hover:${C_PRIMARY_TEXT_DARK}'
-                      : isAdded ? '${C_DANGER_TEXT_MUTED} hover:${C_DANGER_TEXT_MID}'
-                      : '${C_INFO_TEXT_SOFT} hover:${C_INFO_TEXT_DARK}'
+                      isRecent ? 'text-success-500 cursor-default'
+                      : showUpdate ? 'text-primary-500 hover:text-primary-700'
+                      : isAdded ? 'text-danger-400 hover:text-danger-600'
+                      : 'text-info-400 hover:text-info-600'
                     }`}
                     disabled={isRecent}
                   >

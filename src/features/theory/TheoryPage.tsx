@@ -8,7 +8,6 @@ import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum, getStringCount, getStringLa
 import { SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
-import { C_GRAY_BG_50, C_GRAY_BORDER_300, C_GRAY_TEXT_500, C_GRAY_TEXT_900 } from '../../core/colors';
 
 const FRET_COUNT = 12;
 
@@ -215,7 +214,7 @@ export default function TheoryPage() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       <div className="flex items-center gap-4 mb-4 flex-wrap">
-        <h1 className={`text-3xl font-bold ${C_GRAY_TEXT_900}`}>Theory</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Theory</h1>
 
         <select className={SELECT} value={root} onChange={e => setRoot(e.target.value)}>
           <option value="">— Key —</option>
@@ -275,7 +274,7 @@ export default function TheoryPage() {
         {highlightedDegrees.size > 0 && (
           <button
             onClick={() => setHighlightedDegrees(new Set())}
-            className={`px-2 py-1 text-xs rounded border ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_500} hover:${C_GRAY_BG_50}`}
+            className="px-2 py-1 text-xs rounded border border-gray-300 text-gray-500 hover:bg-gray-50"
           >
             Clear
           </button>

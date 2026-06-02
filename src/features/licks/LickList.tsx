@@ -1,6 +1,5 @@
 import type { LickSummary } from '../../core/api/client';
 import LickCard from './LickCard';
-import { C_GRAY_TEXT_400 } from '../../core/colors';
 
 interface Props {
   licks: LickSummary[];
@@ -11,7 +10,7 @@ interface Props {
 
 export default function LickList({ licks, onDelete, onFork, isManaging }: Props) {
   if (licks.length === 0) {
-    return <p className={`${C_GRAY_TEXT_400} text-sm`}>No licks yet. Upload one above.</p>;
+    return <p className="text-gray-400 text-sm">No licks yet. Upload one above.</p>;
   }
   return (
     <div className="flex flex-col gap-3">

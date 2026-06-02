@@ -14,7 +14,6 @@ import SongLibraryModal from './SongLibraryModal';
 import { useChordHighlight } from './useChordHighlight';
 import ChordInfoBox from './ChordInfoBox';
 import NumpadInput from '../../core/components/NumpadInput';
-import { C_BLACK_BG, C_GRAY_BG_100, C_GRAY_BG_200, C_GRAY_BG_50, C_GRAY_BORDER_100, C_GRAY_BORDER_200, C_GRAY_BORDER_300, C_GRAY_TEXT_400, C_GRAY_TEXT_500, C_GRAY_TEXT_600, C_GRAY_TEXT_700, C_GRAY_TEXT_800, C_GRAY_TEXT_900, C_PRIMARY_BG, C_PRIMARY_BG_DARK, C_PRIMARY_BG_SOFT, C_PRIMARY_BORDER, C_PRIMARY_BORDER_MID, C_PRIMARY_TEXT, C_PRIMARY_TEXT_MID, C_WARN_TEXT_ICON, C_WHITE_BG, C_WHITE_TEXT } from '../../core/colors';
 
 type NoodleMode = 'none' | 'song' | 'freeChords';
 
@@ -95,7 +94,7 @@ function FreeChordsKaraoke({ lines, currentLineIdx, intraIdx, highlightActive }:
   highlightActive: boolean;
 }) {
   return (
-    <div className={`flex flex-col items-center gap-2 px-4 py-2 ${C_GRAY_BG_50} rounded-xl overflow-x-auto`}>
+    <div className="flex flex-col items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl overflow-x-auto">
       <FreeChordsKaraokeSlot line={lines[currentLineIdx - 1]} variant="prev" />
       <FreeChordsKaraokeSlot line={lines[currentLineIdx]} intraIdx={intraIdx} highlightActive={highlightActive} variant="current" />
       <FreeChordsKaraokeSlot line={lines[currentLineIdx + 1]} variant="next" />
@@ -449,8 +448,8 @@ export default function NoodlePage() {
   }
 
   const btnBase = 'px-3 py-1 rounded-lg text-sm font-medium transition-colors border';
-  const btnActive = `${btnBase} ${C_PRIMARY_BG} ${C_WHITE_TEXT} ${C_PRIMARY_BORDER}`;
-  const btnInactive = `${btnBase} ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50}`;
+  const btnActive = `${btnBase} bg-primary-600 text-white border-primary-600`;
+  const btnInactive = `${btnBase} border-gray-300 text-gray-600 hover:bg-gray-50`;
 
   const showBackLink = !!(activeSongId && loadedViaUrl.current && urlSongId === activeSongId);
   const beatCycle = getBeatCycle(song?.timeSignature ?? 4);
@@ -462,7 +461,7 @@ export default function NoodlePage() {
       <div className="flex items-center">
         {/* Left: title + mode buttons + song info + chord box (song mode) */}
         <div className="flex items-center gap-2 min-w-0">
-          <h1 className={`text-3xl font-bold ${C_GRAY_TEXT_900} shrink-0`}>{guitarKaraokeMode && noodleMode === 'song' ? 'Guitar Karaoke' : 'Noodle'}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 shrink-0">{guitarKaraokeMode && noodleMode === 'song' ? 'Guitar Karaoke' : 'Noodle'}</h1>
           <div className="flex gap-2 shrink-0">
             <button
               onClick={() => { setIsPlaying(false); setNoodleMode('freeChords'); halfBeatRef.current = 0; setChordIdx(0); setFreeHasAdvanced(false); }}
@@ -481,17 +480,17 @@ export default function NoodlePage() {
           {noodleMode === 'song' && song && (
             <div className="flex flex-col min-w-0">
               {song.artist && (
-                <span className={`text-xs ${C_GRAY_TEXT_400} leading-tight truncate`}>{song.artist}</span>
+                <span className="text-xs text-gray-400 leading-tight truncate">{song.artist}</span>
               )}
               {showBackLink ? (
                 <Link
                   to={`/song/${activeSongId}`}
-                  className={`font-bold text-base ${C_GRAY_TEXT_900} hover:${C_PRIMARY_TEXT} leading-tight truncate`}
+                  className="font-bold text-base text-gray-900 hover:text-primary-600 leading-tight truncate"
                 >
                   {song.title}
                 </Link>
               ) : (
-                <span className={`font-bold text-base ${C_GRAY_TEXT_900} leading-tight truncate`}>{song.title}</span>
+                <span className="font-bold text-base text-gray-900 leading-tight truncate">{song.title}</span>
               )}
             </div>
           )}
@@ -531,7 +530,7 @@ export default function NoodlePage() {
           {noodleMode === 'song' && (
             <button
               onClick={() => setGuitarKaraokeMode(v => !v)}
-              className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${guitarKaraokeMode ? '${C_PRIMARY_TEXT_MID}' : '${C_GRAY_TEXT_300} hover:${C_GRAY_TEXT_500}'}`}
+              className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${guitarKaraokeMode ? 'text-primary-500' : 'text-gray-300 hover:text-gray-500'}`}
               aria-label="Toggle guitar karaoke"
             >
               ◎
@@ -541,15 +540,15 @@ export default function NoodlePage() {
             onClick={handlePlay}
             className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
               isPlaying
-                ? '${C_DANGER_BG_SOFT} border ${C_DANGER_BORDER_MID} ${C_DANGER_TEXT_SOFT} hover:${C_DANGER_BG_SUBTLE}'
-                : '${C_PRIMARY_BG} ${C_WHITE_TEXT} hover:${C_PRIMARY_BG_DARK}'
+                ? 'bg-danger-50 border border-danger-300 text-danger-500 hover:bg-danger-100'
+                : 'bg-primary-600 text-white hover:bg-primary-700'
             }`}
           >
             {isPlaying ? '⏸ Pause' : '▶ Play'}
           </button>
           <button
             onClick={handleRestart}
-            className={`w-8 h-8 flex items-center justify-center text-xl ${C_GRAY_TEXT_400} hover:${C_PRIMARY_TEXT_MID} transition-colors`}
+            className="w-8 h-8 flex items-center justify-center text-xl text-gray-400 hover:text-primary-500 transition-colors"
             aria-label="Restart"
             title="Restart"
           >
@@ -564,7 +563,7 @@ export default function NoodlePage() {
       {/* Controls row */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-1.5">
-          <span className={`text-xs ${C_GRAY_TEXT_400}`}>BPM</span>
+          <span className="text-xs text-gray-400">BPM</span>
           <NumpadInput
             value={bpmInput}
             onChange={val => setBpmInput(val)}
@@ -576,7 +575,7 @@ export default function NoodlePage() {
             placeholder="120"
             min={40}
             max={240}
-            className={`border ${C_GRAY_BORDER_300} rounded-lg px-1.5 py-0.5 text-xs focus:outline-none focus:${C_PRIMARY_BORDER_MID} ${C_WHITE_BG} w-12 text-center`}
+            className="border border-gray-300 rounded-lg px-1.5 py-0.5 text-xs focus:outline-none focus:border-primary-400 bg-white w-12 text-center"
           />
         </div>
 
@@ -592,7 +591,7 @@ export default function NoodlePage() {
         ) : keyDisplay ? (
           <button
             onClick={() => setNeckRefresh(n => n + 1)}
-            className={`text-xs font-medium ${C_PRIMARY_TEXT} px-1.5 py-0.5 hover:${C_PRIMARY_BG_SOFT} rounded transition-colors`}
+            className="text-xs font-medium text-primary-600 px-1.5 py-0.5 hover:bg-primary-50 rounded transition-colors"
             title="Reload scale for this key"
           >
             {keyDisplay}
@@ -607,31 +606,31 @@ export default function NoodlePage() {
         />
 
         <div className="flex items-center gap-1">
-          <span className={`text-xs ${C_GRAY_TEXT_400}`}>Capo</span>
+          <span className="text-xs text-gray-400">Capo</span>
           <button
             onClick={() => setLocalCapo(c => Math.max(0, c - 1))}
-            className={`w-6 h-6 flex items-center justify-center text-sm ${C_GRAY_TEXT_500} hover:${C_PRIMARY_TEXT_MID} border ${C_GRAY_BORDER_200} rounded`}
+            className="w-6 h-6 flex items-center justify-center text-sm text-gray-500 hover:text-primary-500 border border-gray-200 rounded"
           >−</button>
-          <span className={`text-sm ${C_GRAY_TEXT_700} w-5 text-center tabular-nums`}>{localCapo}</span>
+          <span className="text-sm text-gray-700 w-5 text-center tabular-nums">{localCapo}</span>
           <button
             onClick={() => setLocalCapo(c => Math.min(11, c + 1))}
-            className={`w-6 h-6 flex items-center justify-center text-sm ${C_GRAY_TEXT_500} hover:${C_PRIMARY_TEXT_MID} border ${C_GRAY_BORDER_200} rounded`}
+            className="w-6 h-6 flex items-center justify-center text-sm text-gray-500 hover:text-primary-500 border border-gray-200 rounded"
           >+</button>
         </div>
 
         {noodleMode === 'song' && (
           <div className="flex items-center gap-1">
-            <span className={`text-xs ${C_GRAY_TEXT_400}`}>Transpose</span>
+            <span className="text-xs text-gray-400">Transpose</span>
             <button
               onClick={() => { setLocalSemitones(s => s - 1); setNeckRefresh(n => n + 1); }}
-              className={`w-6 h-6 flex items-center justify-center text-sm ${C_GRAY_TEXT_500} hover:${C_PRIMARY_TEXT_MID} border ${C_GRAY_BORDER_200} rounded`}
+              className="w-6 h-6 flex items-center justify-center text-sm text-gray-500 hover:text-primary-500 border border-gray-200 rounded"
             >−</button>
-            <span className={`text-sm ${C_GRAY_TEXT_700} w-6 text-center tabular-nums`}>
+            <span className="text-sm text-gray-700 w-6 text-center tabular-nums">
               {localSemitones > 0 ? `+${localSemitones}` : localSemitones}
             </span>
             <button
               onClick={() => { setLocalSemitones(s => s + 1); setNeckRefresh(n => n + 1); }}
-              className={`w-6 h-6 flex items-center justify-center text-sm ${C_GRAY_TEXT_500} hover:${C_PRIMARY_TEXT_MID} border ${C_GRAY_BORDER_200} rounded`}
+              className="w-6 h-6 flex items-center justify-center text-sm text-gray-500 hover:text-primary-500 border border-gray-200 rounded"
             >+</button>
           </div>
         )}
@@ -640,12 +639,12 @@ export default function NoodlePage() {
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => { setBeatmapDraft([...beatmap]); setShowBeatmapEditor(v => !v); }}
-              className={`px-2 py-0.5 text-xs rounded border transition-colors ${showBeatmapEditor ? '${C_PRIMARY_BORDER_MID} ${C_PRIMARY_TEXT} ${C_PRIMARY_BG_SOFT}' : '${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50}'}`}
+              className={`px-2 py-0.5 text-xs rounded border transition-colors ${showBeatmapEditor ? 'border-primary-400 text-primary-600 bg-primary-50' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
             >
               Beat Map
             </button>
             {beatmapAutoGenerated && (
-              <span className={`text-xs ${C_WARN_TEXT_ICON}`} title="Auto-generated — may be inaccurate">⚠ auto</span>
+              <span className="text-xs text-warn-500" title="Auto-generated — may be inaccurate">⚠ auto</span>
             )}
           </div>
         )}
@@ -653,12 +652,12 @@ export default function NoodlePage() {
 
       {/* Beat Map editor modal */}
       {noodleMode === 'song' && showBeatmapEditor && beatmapDraft.length > 0 && (
-        <div className={`fixed inset-0 z-50 flex items-center justify-center ${C_BLACK_BG}/40`} onClick={() => setShowBeatmapEditor(false)}>
-          <div className={`${C_WHITE_BG} rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col mx-4`} onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowBeatmapEditor(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col mx-4" onClick={e => e.stopPropagation()}>
             {/* Header */}
-            <div className={`flex items-center justify-between px-5 py-3 border-b ${C_GRAY_BORDER_100} shrink-0`}>
-              <span className={`font-semibold text-sm ${C_GRAY_TEXT_800}`}>Beat Map</span>
-              <button onClick={() => setShowBeatmapEditor(false)} className={`${C_GRAY_TEXT_400} hover:${C_GRAY_TEXT_600} text-lg leading-none`}>✕</button>
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 shrink-0">
+              <span className="font-semibold text-sm text-gray-800">Beat Map</span>
+              <button onClick={() => setShowBeatmapEditor(false)} className="text-gray-400 hover:text-gray-600 text-lg leading-none">✕</button>
             </div>
 
             {/* Scrollable body */}
@@ -679,11 +678,11 @@ export default function NoodlePage() {
                           const set = (v: number) => setBeatmapDraft(d => { const n = [...d]; n[start + ci] = Math.max(0, Math.min(16, v)); return n; });
                           return (
                             <div key={ci} className="flex flex-col items-center gap-1">
-                              <span className={`font-mono text-xs ${C_PRIMARY_TEXT}`}>{chord}</span>
+                              <span className="font-mono text-xs text-primary-600">{chord}</span>
                               <div className="flex items-center gap-1">
-                                <button onClick={() => set(stepBeat(val, -1, beatCycle))} className={`w-7 h-7 flex items-center justify-center text-sm border ${C_GRAY_BORDER_200} rounded ${C_GRAY_TEXT_500} hover:${C_GRAY_BG_100} active:${C_GRAY_BG_200}`}>−</button>
+                                <button onClick={() => set(stepBeat(val, -1, beatCycle))} className="w-7 h-7 flex items-center justify-center text-sm border border-gray-200 rounded text-gray-500 hover:bg-gray-100 active:bg-gray-200">−</button>
                                 <span className="w-6 text-center text-xs tabular-nums">{val}</span>
-                                <button onClick={() => set(stepBeat(val, 1, beatCycle))} className={`w-7 h-7 flex items-center justify-center text-sm border ${C_GRAY_BORDER_200} rounded ${C_GRAY_TEXT_500} hover:${C_GRAY_BG_100} active:${C_GRAY_BG_200}`}>+</button>
+                                <button onClick={() => set(stepBeat(val, 1, beatCycle))} className="w-7 h-7 flex items-center justify-center text-sm border border-gray-200 rounded text-gray-500 hover:bg-gray-100 active:bg-gray-200">+</button>
                               </div>
                             </div>
                           );
@@ -691,7 +690,7 @@ export default function NoodlePage() {
                       </div>
                       {/* Lyric reference */}
                       {line.lyrics.trim() && (
-                        <span className={`font-mono text-xs ${C_GRAY_TEXT_400} pl-0.5`}>{line.lyrics.trimEnd()}</span>
+                        <span className="font-mono text-xs text-gray-400 pl-0.5">{line.lyrics.trimEnd()}</span>
                       )}
                     </div>
                   );
@@ -700,9 +699,9 @@ export default function NoodlePage() {
             </div>
 
             {/* Footer */}
-            <div className={`flex flex-col gap-2 px-5 py-3 border-t ${C_GRAY_BORDER_100} shrink-0`}>
+            <div className="flex flex-col gap-2 px-5 py-3 border-t border-gray-100 shrink-0">
               {beatmapSubmitSuccess && (
-                <p className="text-xs text-green-600">Beatmap update submitted for review.</p>
+                <p className="text-xs text-success-600">Beatmap update submitted for review.</p>
               )}
               <div className="flex gap-2">
                 <button
@@ -725,13 +724,13 @@ export default function NoodlePage() {
                         .catch(() => {});
                     }
                   }}
-                  className={`px-4 py-1.5 text-xs rounded-lg ${C_PRIMARY_BG} ${C_WHITE_TEXT} hover:${C_PRIMARY_BG_DARK} transition-colors font-medium`}
+                  className="px-4 py-1.5 text-xs rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors font-medium"
                 >
                   {song?.ownedByCurrentUser ? 'Save' : 'Submit for review'}
                 </button>
                 <button
                   onClick={() => { setShowBeatmapEditor(false); setBeatmapSubmitSuccess(false); }}
-                  className={`px-4 py-1.5 text-xs rounded-lg border ${C_GRAY_BORDER_300} ${C_GRAY_TEXT_600} hover:${C_GRAY_BG_50} transition-colors`}
+                  className="px-4 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
@@ -746,7 +745,7 @@ export default function NoodlePage() {
         <div className="grid grid-cols-3 gap-4 items-start">
           {/* Left: input + submit */}
           <div className="flex flex-col gap-2">
-            <label className={`text-xs ${C_GRAY_TEXT_400}`}>Separate chords with |, lines with ↵</label>
+            <label className="text-xs text-gray-400">Separate chords with |, lines with ↵</label>
             <textarea
               ref={freeInputRef}
               value={freeInput}
@@ -766,11 +765,11 @@ export default function NoodlePage() {
               }}
               placeholder="G | Am | F | C"
               rows={3}
-              className={`w-full border ${C_GRAY_BORDER_200} rounded-lg p-3 font-mono text-sm focus:outline-none focus:${C_PRIMARY_BORDER_MID} resize-none`}
+              className="w-full border border-gray-200 rounded-lg p-3 font-mono text-sm focus:outline-none focus:border-primary-400 resize-none"
             />
             <button
               onClick={handleFreeSubmit}
-              className={`self-start px-3 py-1 rounded-lg text-sm font-medium ${C_PRIMARY_BG} ${C_WHITE_TEXT} hover:${C_PRIMARY_BG_DARK} transition-colors`}
+              className="self-start px-3 py-1 rounded-lg text-sm font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors"
             >
               Apply
             </button>
