@@ -1,192 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  getPlaylist, deletePlaylist, addPlaylistEntry,
-  removePlaylistEntry, updatePlaylistEntry, renamePlaylist,
-  clearPlaylistEntryOverrides, getAllSongs, setPlaylistVisibility,
+  getPlaylist, deletePlaylist, updatePlaylistEntry, renamePlaylist,
+  clearPlaylistEntryOverrides, removePlaylistEntry, getAllSongs, setPlaylistVisibility,
 } from '../../core/api/client';
 import type { PlaylistDetail, PlaylistEntry, SongSummary } from '../../core/api/client';
 
-import { BTN_ICON, SELECT } from '../../core/ui';
-import InstrumentSelector from '../../core/components/InstrumentSelector';
-import CapoTransposeControls from '../../core/components/CapoTransposeControls';
-import NumpadInput from '../../core/components/NumpadInput';
-import type { InstrumentName } from '../../core/useInstrument';
 import { keyLabel } from '../songs/songKeyUtils';
-
-function VoicingModal({ entry, onSave, onClose }: {
-  entry: PlaylistEntry;
-  onSave: (keyOffset: number, capoOffset: number, instrument: string, tempoOverride: number | null) => void;
-  onClose: () => void;
-}) {
-  const [localSemitones, setLocalSemitones] = useState(entry.keyOffset);
-  const [localCapo, setLocalCapo] = useState(entry.defaultCapo + entry.capoOffset);
-  const [localTempoOverride, setLocalTempoOverride] = useState<number | null>(entry.tempoOverride ?? null);
-  const defaultInstrument = (entry.defaultInstrument ?? 'GUITAR') as InstrumentName;
-  const [localInstrument, setLocalInstrument] = useState<InstrumentName>(
-    (entry.instrument ?? entry.defaultInstrument ?? 'GUITAR') as InstrumentName
-  );
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-xs mx-4" onClick={e => e.stopPropagation()}>
-        <div className="font-semibold text-gray-900 text-sm mb-5 text-center">{entry.title}</div>
-        <div className="flex justify-center mb-6">
-          <CapoTransposeControls
-            capo={localCapo} setCapo={setLocalCapo}
-            semitones={localSemitones} setSemitones={setLocalSemitones}
-            originalKey={entry.originalKey}
-            originalCapo={entry.defaultCapo}
-            mode={entry.mode}
-          />
-        </div>
-
-          {/* BPM override widget */}
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-xs text-gray-400">BPM</span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setLocalTempoOverride(t => Math.min(240, Math.max(40, (t ?? entry.tempo ?? 120) - 1)))}
-                className={BTN_ICON}
-              >−</button>
-              <div className="flex items-center justify-center w-12">
-                <NumpadInput
-                  value={localTempoOverride != null ? String(localTempoOverride) : ''}
-                  onChange={val => {
-                    if (val === '') { setLocalTempoOverride(null); return; }
-                    const v = parseInt(val, 10);
-                    setLocalTempoOverride(isNaN(v) ? null : v);
-                  }}
-                  onCommit={val => {
-                    if (!val.trim()) { setLocalTempoOverride(null); return; }
-                    const v = parseInt(val, 10);
-                    if (!isNaN(v)) setLocalTempoOverride(Math.min(240, Math.max(40, v)));
-                  }}
-                  placeholder={entry.tempo != null ? String(entry.tempo) : '—'}
-                  className="w-12 text-center text-base font-semibold text-gray-900 bg-transparent border-b border-gray-300 focus:border-brand-5 focus:outline-none"
-                />
-              </div>
-              <button
-                onClick={() => setLocalTempoOverride(t => Math.min(240, Math.max(40, (t ?? entry.tempo ?? 120) + 1)))}
-                className={BTN_ICON}
-              >+</button>
-            </div>
-            <button
-              onClick={() => setLocalTempoOverride(null)}
-              className={`text-xs transition-colors ${localTempoOverride !== null ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
-            >reset</button>
-          </div>
-
-        {/* Instrument selector */}
-        <div className="flex flex-col items-center gap-1 mb-6">
-          <span className="text-xs text-gray-400">Instrument</span>
-          <InstrumentSelector excludeCustom compact instrument={localInstrument} onInstrumentChange={setLocalInstrument} />
-          <button
-            onClick={() => setLocalInstrument(defaultInstrument)}
-            className={`text-xs transition-colors ${localInstrument !== defaultInstrument ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
-          >reset</button>
-        </div>
-
-        <button
-          onClick={() => { onSave(localSemitones, localCapo - entry.defaultCapo, localInstrument, localTempoOverride); onClose(); }}
-          className="w-full px-4 py-2 text-sm rounded-lg bg-brand-6 text-white hover:bg-brand-7"
-        >Save</button>
-      </div>
-    </div>
-  );
-}
-
-function AddSongsModal({
-  playlist,
-  allSongs,
-  onClose,
-  onUpdate,
-}: {
-  playlist: PlaylistDetail;
-  allSongs: SongSummary[];
-  onClose: () => void;
-  onUpdate: (updated: PlaylistDetail) => void;
-}) {
-  const [filter, setFilter] = useState('');
-  const [pending, setPending] = useState<Record<string, 'adding' | 'removing'>>({});
-  const [recentlyAdded, setRecentlyAdded] = useState<Set<string>>(new Set());
-
-  const inPlaylist = new Set(playlist.entries.map(e => e.songId));
-
-  const visible = allSongs.filter(s =>
-    s.title.toLowerCase().includes(filter.toLowerCase()) ||
-    (s.artist ?? '').toLowerCase().includes(filter.toLowerCase())
-  );
-
-  async function handleToggle(song: SongSummary) {
-    if (pending[song.id]) return;
-    if (inPlaylist.has(song.id)) {
-      setPending(p => ({ ...p, [song.id]: 'removing' }));
-      const entry = playlist.entries.find(e => e.songId === song.id);
-      if (entry) {
-        const updated = await removePlaylistEntry(playlist.id, entry.entryId);
-        onUpdate(updated);
-      }
-    } else {
-      setPending(p => ({ ...p, [song.id]: 'adding' }));
-      const updated = await addPlaylistEntry(playlist.id, song.id);
-      onUpdate(updated);
-      setRecentlyAdded(s => new Set(s).add(song.id));
-      setTimeout(() => setRecentlyAdded(s => { const n = new Set(s); n.delete(song.id); return n; }), 2000);
-    }
-    setPending(p => { const n = { ...p }; delete n[song.id]; return n; });
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-xl p-5 w-full max-w-lg mx-4 flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-3">
-          <span className="font-semibold text-gray-900">Add Songs</span>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
-        </div>
-        <input
-          autoFocus
-          type="text"
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
-          placeholder="Search songs…"
-          className={`${SELECT} mb-3`}
-        />
-        <div className="overflow-y-auto flex-1">
-          {visible.length === 0 ? (
-            <p className="text-xs text-gray-400 text-center py-6">No songs found</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {visible.map(s => {
-                const isIn = inPlaylist.has(s.id);
-                const justAdded = recentlyAdded.has(s.id);
-                const busy = !!pending[s.id];
-                return (
-                  <div
-                    key={s.id}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-colors ${isIn ? 'border-primary-200 bg-brand-1' : 'border-gray-100 hover:bg-gray-50'}`}
-                  >
-                    <div className="min-w-0 mr-2">
-                      <div className="text-sm font-medium text-gray-900 truncate">{s.title}</div>
-                      {s.artist && <div className="text-xs text-gray-400 truncate">{s.artist}</div>}
-                    </div>
-                    <button
-                      onClick={() => handleToggle(s)}
-                      disabled={busy || justAdded}
-                      className={`text-xl leading-none shrink-0 transition-colors ${busy ? 'opacity-40' : justAdded ? 'text-success-5 cursor-default' : isIn ? 'text-danger-5 hover:text-danger-7' : 'text-gray-300 hover:text-success-5'}`}
-                    >
-                      {justAdded ? '✓' : isIn ? '×' : '+'}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+import VoicingModal from './VoicingModal';
+import AddSongsModal from './AddSongsModal';
 
 export default function PlaylistDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -290,9 +112,8 @@ export default function PlaylistDetailPage() {
     });
   }
 
-  return (
-    <div className="max-w-3xl mx-auto px-6 py-10">
-      {/* Header */}
+  function renderHeader() {
+    return (
       <div className="flex items-start justify-between mb-6 gap-3">
         <div className="min-w-0 flex-1">
           <Link to="/playlists" className="text-sm text-gray-400 hover:text-brand-5 transition-colors">← Playlists</Link>
@@ -361,8 +182,83 @@ export default function PlaylistDetailPage() {
           )}
         </div>
       </div>
+    );
+  }
 
-      {/* Add Songs button (owner only, manage mode, or always when empty) */}
+  function renderEntryRow(entry: PlaylistEntry, idx: number) {
+    return (
+      <div key={entry.entryId} className="border border-gray-200 rounded-xl p-3">
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-gray-300 w-5 text-right shrink-0">{idx + 1}</span>
+
+          {managing && playlist!.ownedByCurrentUser && (
+            <div className="flex flex-col gap-0.5 shrink-0">
+              <button onClick={() => handleReorder(entry.entryId, -1)} disabled={idx === 0}
+                className="text-gray-300 hover:text-gray-600 disabled:opacity-20 text-xs leading-none">▲</button>
+              <button onClick={() => handleReorder(entry.entryId, 1)} disabled={idx === entries.length - 1}
+                className="text-gray-300 hover:text-gray-600 disabled:opacity-20 text-xs leading-none">▼</button>
+            </div>
+          )}
+
+          <div
+            className="flex-1 cursor-pointer hover:text-brand-7 transition-colors min-w-0"
+            onClick={() => !managing && handleOpenSong(idx)}
+          >
+            <div className="font-medium text-gray-900 truncate">{entry.title}</div>
+            {entry.artist && <div className="text-xs text-gray-400 truncate">{entry.artist}</div>}
+            <div className="flex items-center gap-2 text-xs font-mono mt-0.5">
+              {entry.originalKey && (
+                <span className={entry.keyOffset !== 0 || entry.capoOffset !== 0 ? 'text-brand-5' : 'text-gray-400'}>
+                  {keyLabel(entry.originalKey, entry.keyOffset + entry.capoOffset, entry.mode)}
+                </span>
+              )}
+              <span className={entry.capoOffset !== 0 ? 'text-brand-5' : 'text-gray-400'}>
+                {entry.defaultCapo + entry.capoOffset > 0 ? `Capo ${entry.defaultCapo + entry.capoOffset}` : 'No Capo'}
+              </span>
+              {(entry.tempoOverride != null || entry.tempo != null) && (
+                <span className={entry.tempoOverride != null ? 'text-brand-5' : 'text-gray-400'}>
+                  {entry.tempoOverride ?? entry.tempo} BPM{entry.tempoOverride != null ? ' (override)' : ''}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {!managing && (
+            <button
+              onClick={() => handleOpenSong(idx)}
+              className="text-gray-300 hover:text-brand-4 transition-colors text-lg leading-none shrink-0"
+              title="Open song"
+            >›</button>
+          )}
+
+          {managing && playlist!.ownedByCurrentUser && (
+            <div className="flex items-center gap-4 shrink-0 ml-2 mr-2">
+              <button
+                onClick={() => setEditingEntry(entry.entryId)}
+                className="text-gray-400 hover:text-brand-5 transition-colors leading-none"
+                style={{ fontSize: '2.1875rem' }}
+                title="Edit voicing offset"
+              >✎</button>
+              {confirmRemove === entry.entryId ? (
+                <div className="flex gap-1">
+                  <button onClick={() => handleRemoveEntry(entry.entryId)} className="text-xs px-2 py-0.5 rounded bg-danger-6 text-white hover:bg-danger-7">Remove</button>
+                  <button onClick={() => setConfirmRemove(null)} className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-600">Cancel</button>
+                </div>
+              ) : (
+                <button onClick={() => setConfirmRemove(entry.entryId)}
+                  className="text-danger-5 hover:text-danger-7 transition-colors text-2xl leading-none">×</button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto px-6 py-10">
+      {renderHeader()}
+
       {playlist.ownedByCurrentUser && (managing || entries.length === 0) && (
         <button
           onClick={() => setShowAddSongs(true)}
@@ -372,82 +268,11 @@ export default function PlaylistDetailPage() {
         </button>
       )}
 
-      {/* Song list */}
       {entries.length === 0 ? (
         <p className="text-gray-400 text-sm">{managing ? 'Use Add Songs to add songs to this playlist.' : 'No songs yet.'}</p>
       ) : (
         <div className="flex flex-col gap-2">
-          {entries.map((entry, idx) => (
-            <div key={entry.entryId} className="border border-gray-200 rounded-xl p-3">
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-300 w-5 text-right shrink-0">{idx + 1}</span>
-
-                {/* Reorder (owner + manage only) */}
-                {managing && playlist.ownedByCurrentUser && (
-                  <div className="flex flex-col gap-0.5 shrink-0">
-                    <button onClick={() => handleReorder(entry.entryId, -1)} disabled={idx === 0}
-                      className="text-gray-300 hover:text-gray-600 disabled:opacity-20 text-xs leading-none">▲</button>
-                    <button onClick={() => handleReorder(entry.entryId, 1)} disabled={idx === entries.length - 1}
-                      className="text-gray-300 hover:text-gray-600 disabled:opacity-20 text-xs leading-none">▼</button>
-                  </div>
-                )}
-
-                {/* Song info */}
-                <div
-                  className="flex-1 cursor-pointer hover:text-brand-7 transition-colors min-w-0"
-                  onClick={() => !managing && handleOpenSong(idx)}
-                >
-                  <div className="font-medium text-gray-900 truncate">{entry.title}</div>
-                  {entry.artist && <div className="text-xs text-gray-400 truncate">{entry.artist}</div>}
-                  <div className="flex items-center gap-2 text-xs font-mono mt-0.5">
-                    {entry.originalKey && (
-                      <span className={entry.keyOffset !== 0 || entry.capoOffset !== 0 ? 'text-brand-5' : 'text-gray-400'}>
-                        {keyLabel(entry.originalKey, entry.keyOffset + entry.capoOffset, entry.mode)}
-                      </span>
-                    )}
-                    <span className={entry.capoOffset !== 0 ? 'text-brand-5' : 'text-gray-400'}>
-                      {entry.defaultCapo + entry.capoOffset > 0 ? `Capo ${entry.defaultCapo + entry.capoOffset}` : 'No Capo'}
-                    </span>
-                    {(entry.tempoOverride != null || entry.tempo != null) && (
-                      <span className={entry.tempoOverride != null ? 'text-brand-5' : 'text-gray-400'}>
-                        {entry.tempoOverride ?? entry.tempo} BPM{entry.tempoOverride != null ? ' (override)' : ''}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Open song (non-manage) */}
-                {!managing && (
-                  <button
-                    onClick={() => handleOpenSong(idx)}
-                    className="text-gray-300 hover:text-brand-4 transition-colors text-lg leading-none shrink-0"
-                    title="Open song"
-                  >›</button>
-                )}
-
-                {/* Voicing edit + remove (owner + manage only) */}
-                {managing && playlist.ownedByCurrentUser && (
-                  <div className="flex items-center gap-4 shrink-0 ml-2 mr-2">
-                    <button
-                      onClick={() => setEditingEntry(entry.entryId)}
-                      className="text-gray-400 hover:text-brand-5 transition-colors leading-none"
-                      style={{ fontSize: '2.1875rem' }}
-                      title="Edit voicing offset"
-                    >✎</button>
-                    {confirmRemove === entry.entryId ? (
-                      <div className="flex gap-1">
-                        <button onClick={() => handleRemoveEntry(entry.entryId)} className="text-xs px-2 py-0.5 rounded bg-danger-6 text-white hover:bg-danger-7">Remove</button>
-                        <button onClick={() => setConfirmRemove(null)} className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-600">Cancel</button>
-                      </div>
-                    ) : (
-                      <button onClick={() => setConfirmRemove(entry.entryId)}
-                        className="text-danger-5 hover:text-danger-7 transition-colors text-2xl leading-none">×</button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+          {entries.map((entry, idx) => renderEntryRow(entry, idx))}
         </div>
       )}
 
