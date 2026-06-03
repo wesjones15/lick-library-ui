@@ -1,5 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { usePlaylistNav } from '../playlists/playlistNavTypes';
 import { getSong, getChordVoicings, reparseSong } from '../../core/api/client';
 import AddToPlaylistModal from '../playlists/AddToPlaylistModal';
 import ChordUploadModal from '../chords/ChordUploadModal';
@@ -46,28 +47,10 @@ function extractChordNames(song: SongDetail): string[] {
   return result;
 }
 
-interface PlaylistNavEntry {
-  entryId: string;
-  songId: string;
-  title: string;
-  keyOffset: number;
-  capoOffset: number;
-  tempoOverride?: number | null;
-  instrument?: string | null;
-}
-
-interface PlaylistNavState {
-  playlistId: string;
-  playlistName: string;
-  entries: PlaylistNavEntry[];
-  currentIndex: number;
-}
-
 export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
-  const playlistState = (location.state as PlaylistNavState | null) ?? null;
+  const playlistState = usePlaylistNav();
   const { setBpm, setIsPlaying, bpm, isPlaying, setBeatsPerBar } = useMetronomeContext();
   const { setInfo, collapsed, showChords, setShowChords, setMiniActions } = useSongNavContext();
   const isPortrait = usePortrait();
@@ -94,8 +77,7 @@ export default function SongDetailPage() {
   useEffect(() => {
     if (id && id !== prevIdRef.current) {
       prevIdRef.current = id;
-      const ps = (location.state as PlaylistNavState | null);
-      const entry = ps?.entries[ps.currentIndex];
+      const entry = playlistState?.entries[playlistState.currentIndex];
       setSemitones(entry?.keyOffset ?? 0);
     }
   }, [id]);
