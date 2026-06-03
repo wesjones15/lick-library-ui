@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getSong, getChordVoicings, reparseSong } from '../../core/api/client';
 import AddToPlaylistModal from '../playlists/AddToPlaylistModal';
 import ChordUploadModal from '../chords/ChordUploadModal';
@@ -7,31 +7,15 @@ import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/cli
 import ChordSheet from './ChordSheet';
 import ChordDiagram from '../chords/ChordDiagram';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
+import CapoTransposeControls from '../../core/components/CapoTransposeControls';
 import { useInstrument } from '../../core/useInstrument';
 import type { InstrumentName } from '../../core/useInstrument';
 import { parseChordName } from './parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { useSongNavContext } from '../../core/context/SongNavContext';
-import { formatNoteEnum, NOTE_KEYS, CHROMATIC_NOTES, MODE_SUFFIX, getStringCount } from '../../core/music';
-import { BTN_ICON } from '../../core/ui';
-
-const MENU_ITEM = 'px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50';
-
-function keyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
-  if (!originalKey) return '';
-  const display = formatNoteEnum(originalKey);
-  const match = display.match(/^([A-G][#b]?)/);
-  if (!match) return display;
-  const idx = CHROMATIC_NOTES.indexOf(match[1]);
-  if (idx === -1) return display;
-  const root = CHROMATIC_NOTES[((idx + semitones) % 12 + 12) % 12];
-  return root + (mode ? (MODE_SUFFIX[mode] ?? '') : '');
-}
-
-// Strips mode label suffixes (e.g. " Dorian") but preserves "m" (AEOLIAN) for transpose modal.
-function rootKeyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
-  return keyLabel(originalKey, semitones, mode).replace(/ .+$/, '');
-}
+import { NOTE_KEYS, getStringCount } from '../../core/music';
+import { keyLabel } from './songKeyUtils';
+import SongDetailToolbar from './SongDetailToolbar';
 
 function usePortrait() {
   const [p, setP] = useState(() => window.matchMedia('(orientation: portrait)').matches);
@@ -99,16 +83,13 @@ export default function SongDetailPage() {
   const [chordVoicingIdx, setChordVoicingIdx] = useState<Record<string, number>>({});
   const [uploadChord, setUploadChord] = useState<string | null>(null);
   const [autoScrolling, setAutoScrolling] = useState(false);
-  const [overflowOpen, setOverflowOpen] = useState(false);
   const [capTranspOpen, setCapTranspOpen] = useState(false);
   const [addToPlaylistOpen, setAddToPlaylistOpen] = useState(false);
   const [scrollFontScale, setScrollFontScale] = useState<number | null>(null);
   const { instrument, customTuning, setInstrument, setCustomTuning } = useInstrument();
   const loadedSongIdRef = useRef<string | null>(null);
-  const overflowRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Reset semitones/capo when navigating to a different song (including within playlist)
   const prevIdRef = useRef<string | undefined>(undefined);
   useEffect(() => {
     if (id && id !== prevIdRef.current) {
@@ -136,7 +117,6 @@ export default function SongDetailPage() {
       .finally(() => setLoading(false));
   }, [id, semitones]);
 
-  // Apply instrument from playlist entry override, song default, or GUITAR — fires once per song navigation
   useEffect(() => {
     if (!song) return;
     const navEntry = playlistState?.entries[playlistState.currentIndex];
@@ -154,7 +134,6 @@ export default function SongDetailPage() {
     if (viewMode !== 'scroll') setAutoScrolling(false);
   }, [viewMode]);
 
-  // Populate mini-navbar context
   useEffect(() => {
     if (!song) return;
     setInfo({
@@ -171,7 +150,6 @@ export default function SongDetailPage() {
   const hasTabLines = song?.chordLines.some(line => (line as GuitarTabLine).type === 'tab') ?? false;
   const hasSongLicks = Object.keys(song?.songLicks ?? {}).length > 0;
 
-  // Populate mini-navbar action bundle
   useEffect(() => {
     if (!song) { setMiniActions(null); return; }
     const ps = playlistState;
@@ -213,17 +191,6 @@ export default function SongDetailPage() {
   }, [song, viewMode, autoScrolling, showTabLicks, hasTabLines, playlistState, instrument, semitones, id, capo]);
 
   useEffect(() => {
-    if (!overflowOpen) return;
-    function handle(e: MouseEvent) {
-      if (overflowRef.current && !overflowRef.current.contains(e.target as Node)) {
-        setOverflowOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handle);
-    return () => document.removeEventListener('mousedown', handle);
-  }, [overflowOpen]);
-
-  useEffect(() => {
     if (!showChords || !song) return;
     const names = extractChordNames(song);
     Promise.all(
@@ -249,7 +216,6 @@ export default function SongDetailPage() {
     function computeScale() {
       const containerWidth = el.clientWidth;
       if (containerWidth <= 0) return;
-      // 1100 matches ChordSheetParser.CONTENT_WIDTH on the backend
       const backendColumnWidth = 1100 / Math.max(1, numColumns);
       setScrollFontScale(Math.min(baseFontScale, containerWidth / backendColumnWidth));
     }
@@ -258,7 +224,6 @@ export default function SongDetailPage() {
     ro.observe(el);
     return () => ro.disconnect();
   }, [viewMode, song, isPortrait]);
-
 
   const currentNoteKey = (() => {
     if (!song?.originalKey) return null;
@@ -281,8 +246,6 @@ export default function SongDetailPage() {
       setReparsing(false);
     }
   }
-  const stubBtnClass = (active: boolean) =>
-    `px-2 py-1 text-xs rounded border transition-colors ${active ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
 
   const currentPlaylistEntry = playlistState?.entries[playlistState.currentIndex];
   const overrideChanged = !!playlistState && song != null && (
@@ -290,442 +253,237 @@ export default function SongDetailPage() {
     (capo - (song.capo ?? 0)) !== (currentPlaylistEntry?.capoOffset ?? 0)
   );
 
+  // ── Render helpers ────────────────────────────────────────────────────────
+
+  function renderSongMeta() {
+    if (!song) return null;
+    return (
+      <div>
+        {song.artist && <div className="text-xs text-gray-400">{song.artist}</div>}
+        <h1 className="text-xl font-bold text-gray-900">{song.title}</h1>
+        <div className="flex flex-col md:flex-row md:gap-3 mt-0.5 text-xs text-gray-400 gap-0.5">
+          <div className="flex gap-2 items-center">
+            <InstrumentSelector
+              instrument={instrument as InstrumentName}
+              onInstrumentChange={setInstrument}
+              excludeCustom
+              compact
+            />
+            {song.originalKey && <span>{keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0), song.mode)}</span>}
+          </div>
+          {song.tempo != null && (
+            <button
+              onClick={() => {
+                if (isPlaying && bpm === song.tempo) { setIsPlaying(false); }
+                else { setBpm(song.tempo!); if (song.timeSignature) setBeatsPerBar(song.timeSignature); setIsPlaying(true); }
+              }}
+              className="text-left text-xs text-gray-400 hover:text-brand-5 transition-colors"
+            >
+              {song.tempo} BPM
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  function renderCapoTransposeInline() {
+    if (!song) return null;
+    return (
+      <>
+        {/* Δ — mobile capo/transpose modal trigger (below md) */}
+        <button
+          onClick={() => setCapTranspOpen(true)}
+          className={`md:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-base transition-colors ${
+            (capo !== (song.capo ?? 0) || semitones !== 0)
+              ? 'border-brand-3 bg-brand-1 text-brand-6'
+              : 'border-gray-200 text-gray-400 hover:text-gray-600'
+          }`}
+          aria-label="Capo & Transpose"
+          title="Capo & Transpose"
+        >
+          Δ
+        </button>
+        <CapoTransposeControls
+          capo={capo} setCapo={setCapo}
+          semitones={semitones} setSemitones={setSemitones}
+          originalKey={song.originalKey}
+          originalCapo={song.capo ?? 0}
+          mode={song.mode}
+          className="hidden md:flex"
+        />
+      </>
+    );
+  }
+
+  function renderChordSheet() {
+    if (!song) return null;
+    return (
+      <div ref={scrollContainerRef} className={viewMode === 'scroll' ? 'max-w-2xl mx-auto mt-8 overflow-x-hidden' : 'overflow-hidden'}>
+        <ChordSheet
+          chordLines={song.chordLines}
+          numColumns={viewMode === 'scroll' ? 1 : song.numColumns}
+          fontScale={effectiveFontScale}
+          className={loading ? 'opacity-50 transition-opacity duration-150' : 'transition-opacity duration-150'}
+          showTabLicks={showTabLicks}
+          songLicks={song.songLicks ?? {}}
+          currentKey={currentNoteKey}
+          semitones={semitones}
+          instrument={instrument}
+          customTuning={customTuning}
+        />
+      </div>
+    );
+  }
+
+  function renderCapTranspModal() {
+    if (!capTranspOpen || !song) return null;
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-end justify-center bg-black/30"
+        onClick={() => setCapTranspOpen(false)}
+      >
+        <div
+          className="bg-white rounded-t-xl shadow-xl p-6 w-full max-w-sm flex flex-col gap-6"
+          onClick={e => e.stopPropagation()}
+        >
+          <CapoTransposeControls
+            capo={capo} setCapo={setCapo}
+            semitones={semitones} setSemitones={setSemitones}
+            originalKey={song.originalKey}
+            originalCapo={song.capo ?? 0}
+            mode={song.mode}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  function renderChordDiagramPanel() {
+    if (!showChords || !song) return null;
+    return (
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg">
+        <div className="flex gap-3 overflow-x-auto px-4 py-3">
+          {extractChordNames(song).map(name => {
+            const voicings = chordVoicings[name] ?? [];
+            const idx = chordVoicingIdx[name] ?? 0;
+            const frets = voicings.length > 0 ? voicings[idx].frets : Array(getStringCount(instrument)).fill(0);
+            const isEmpty = voicings.length === 0;
+            return (
+              <div
+                key={name}
+                className="flex-shrink-0 flex flex-col items-center border border-gray-200 rounded-lg px-2 pt-2 pb-1 bg-white"
+              >
+                <span className="text-xs font-semibold text-gray-700 mb-1">{name}</span>
+                <div
+                  style={isEmpty ? { cursor: 'pointer' } : undefined}
+                  onClick={isEmpty ? () => setUploadChord(name) : undefined}
+                >
+                  <ChordDiagram frets={frets} width={90} stringCount={getStringCount(instrument)} />
+                </div>
+                {voicings.length > 1 && (
+                  <div className="flex items-center justify-between w-full text-xs text-gray-400 mt-1">
+                    <button
+                      className="hover:text-gray-600 px-1 text-2xl leading-none"
+                      onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx - 1 + voicings.length) % voicings.length }))}
+                    >‹</button>
+                    <span>{idx + 1}/{voicings.length}</span>
+                    <button
+                      className="hover:text-gray-600 px-1 text-2xl leading-none"
+                      onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx + 1) % voicings.length }))}
+                    >›</button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  function renderChordUploadModal() {
+    if (!uploadChord) return null;
+    return (
+      <ChordUploadModal
+        chordName={uploadChord}
+        instrument={instrument}
+        lockInstrument
+        onClose={() => setUploadChord(null)}
+        onSuccess={() => {
+          const name = uploadChord;
+          setUploadChord(null);
+          const parsed = parseChordName(name);
+          if (parsed) {
+            getChordVoicings(parsed.root, parsed.quality, instrument).then(vs => {
+              setChordVoicings(s => ({ ...s, [name]: vs }));
+            });
+          }
+        }}
+      />
+    );
+  }
+
+  function renderAddToPlaylistModal() {
+    if (!addToPlaylistOpen || !song) return null;
+    return (
+      <AddToPlaylistModal
+        songId={id!}
+        songTitle={song.title}
+        onClose={() => setAddToPlaylistOpen(false)}
+        keyOffset={semitones}
+        capoOffset={capo - (song.capo ?? 0)}
+        overrideChanged={overrideChanged}
+        currentPlaylistId={playlistState?.playlistId}
+      />
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+
   return (
     <div className={`px-3 sm:px-6 pb-4 ${viewMode === 'scroll' ? 'pt-0' : playlistState ? 'pt-2' : 'pt-4'}`}>
       {song && (
         <>
-          {/* Header — hidden when collapsed */}
           {!collapsed && (
-          <div className={viewMode === 'scroll' ? 'sticky top-14 z-40 bg-white border-b border-gray-100 relative' : ''}>
-
-
-          <div className="flex items-start justify-between mb-1">
-            {/* Left: title + meta */}
-            <div>
-              {song.artist && <div className="text-xs text-gray-400">{song.artist}</div>}
-              <h1 className="text-xl font-bold text-gray-900">{song.title}</h1>
-              <div className="flex flex-col md:flex-row md:gap-3 mt-0.5 text-xs text-gray-400 gap-0.5">
-                <div className="flex gap-2 items-center">
-                  <InstrumentSelector
-                    instrument={instrument as InstrumentName}
-                    onInstrumentChange={setInstrument}
-                    excludeCustom
-                    compact
+            <div className={viewMode === 'scroll' ? 'sticky top-14 z-40 bg-white border-b border-gray-100 relative' : ''}>
+              <div className="flex items-start justify-between mb-1">
+                {renderSongMeta()}
+                <div className="flex items-center gap-2 md:gap-4">
+                  <SongDetailToolbar
+                    id={id!}
+                    song={song}
+                    semitones={semitones}
+                    capo={capo}
+                    viewMode={viewMode}
+                    setViewMode={setViewMode}
+                    showChords={showChords}
+                    setShowChords={setShowChords}
+                    autoScrolling={autoScrolling}
+                    setAutoScrolling={setAutoScrolling}
+                    showTabLicks={showTabLicks}
+                    hasTabLines={hasTabLines}
+                    reparsing={reparsing}
+                    handleTabLicksToggle={handleTabLicksToggle}
+                    currentPlaylistEntryTempoOverride={currentPlaylistEntry?.tempoOverride}
+                    overrideChanged={overrideChanged}
+                    setAddToPlaylistOpen={setAddToPlaylistOpen}
                   />
-                  {song.originalKey && <span>{keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0), song.mode)}</span>}
+                  {renderCapoTransposeInline()}
                 </div>
-                {song.tempo != null && (
-                  <button
-                    onClick={() => { if (isPlaying && bpm === song.tempo) { setIsPlaying(false); } else { setBpm(song.tempo!); if (song.timeSignature) setBeatsPerBar(song.timeSignature); setIsPlaying(true); } }}
-                    className="text-left text-xs text-gray-400 hover:text-brand-5 transition-colors"
-                  >
-                    {song.tempo} BPM
-                  </button>
-                )}
               </div>
             </div>
-
-            {/* Right: action buttons + capo/transpose */}
-            <div className="flex items-center gap-2 md:gap-4">
-
-              {/* Play/pause — inline in toolbar when scroll mode is active */}
-              {viewMode === 'scroll' && (
-                <button
-                  onClick={() => setAutoScrolling(a => !a)}
-                  className={`w-8 h-8 rounded-lg border flex items-center justify-center text-xl leading-none transition-colors ${autoScrolling ? 'border-brand-3 bg-brand-1 text-brand-5' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
-                  aria-label={autoScrolling ? 'Pause autoscroll' : 'Start autoscroll'}
-                >
-                  {autoScrolling ? '⏸' : '▶'}
-                </button>
-              )}
-
-              {/* Desktop (md+): named text buttons */}
-              <button
-                onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}&tempoOverride=${currentPlaylistEntry?.tempoOverride ?? ''}`)}
-                className="hidden md:flex items-center text-noodle-1 hover:text-noodle-2 transition-colors text-5xl leading-none"
-                aria-label="Noodle"
-                title="Noodle"
-              >
-                <span className="inline-block -translate-y-[0.15em]">∿</span>
-              </button>
-              {hasTabLines && (
-                <button
-                  onClick={handleTabLicksToggle}
-                  disabled={reparsing}
-                  className={`hidden md:flex w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? 'border-danger-4 bg-danger-1 text-danger-6' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
-                  aria-label="Tab positions (experimental)"
-                  title="Tab positions (experimental)"
-                >
-                  {reparsing ? '…' : '≡'}
-                </button>
-              )}
-              <button
-                onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
-                className={`hidden md:flex ${stubBtnClass(viewMode === 'scroll')} flex-col items-center w-14`}
-              >
-                <span style={{ fontSize: '9px' }}>view:</span>
-                <span style={{ fontSize: '9px' }}>{viewMode === 'scroll' ? 'scroll' : 'columns'}</span>
-              </button>
-              <button
-                onClick={() => setShowChords(v => !v)}
-                className={`hidden md:block ${stubBtnClass(showChords)}`}
-              >
-                Show Chords
-              </button>
-              <button
-                onClick={() => setAddToPlaylistOpen(true)}
-                className={`hidden md:block transition-colors text-xl leading-none ${overrideChanged ? 'text-brand-5 hover:text-brand-7' : 'text-info-4 hover:text-info-6'}`}
-                aria-label="Add to playlist"
-                title="Add to playlist"
-              >
-                ♪+
-              </button>
-              {song?.ownedByCurrentUser && (
-                <button
-                  onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-                  className="hidden md:block text-gray-300 hover:text-brand-5 transition-colors text-4xl leading-none"
-                  aria-label="Manage song"
-                >
-                  ✎
-                </button>
-              )}
-
-              {/* Landscape (sm–md): icon buttons */}
-              <button
-                onClick={() => navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}&tempoOverride=${currentPlaylistEntry?.tempoOverride ?? ''}`)}
-                className="hidden sm:flex md:hidden w-8 h-8 rounded-lg border border-gray-200 items-center justify-center text-4xl leading-none transition-colors text-noodle-1 hover:text-noodle-2"
-                aria-label="Noodle"
-                title="Noodle"
-              >
-                <span className="inline-block -translate-y-[0.15em]">∿</span>
-              </button>
-              {hasTabLines && (
-                <button
-                  onClick={handleTabLicksToggle}
-                  disabled={reparsing}
-                  className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? 'border-danger-4 bg-danger-1 text-danger-6' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
-                  aria-label="Tab positions (experimental)"
-                  title="Tab positions (experimental)"
-                >
-                  {reparsing ? '…' : '≡'}
-                </button>
-              )}
-              <button
-                onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
-                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs transition-colors ${viewMode === 'scroll' ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
-                aria-label="Toggle view"
-                title={viewMode === 'scroll' ? 'Switch to columns' : 'Switch to scroll'}
-              >
-                {viewMode === 'scroll' ? '↕' : '⊞'}
-              </button>
-              <button
-                onClick={() => setShowChords(v => !v)}
-                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${showChords ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
-                aria-label="Show chords"
-                title="Show chords"
-              >
-                ♬
-              </button>
-              <button
-                onClick={() => setAddToPlaylistOpen(true)}
-                className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${overrideChanged ? 'border-brand-3 text-brand-5 hover:text-brand-7 hover:border-brand-4' : 'border-gray-200 text-info-4 hover:text-info-6 hover:border-gray-300'}`}
-                aria-label="Add to playlist"
-                title="Add to playlist"
-              >
-                ♪+
-              </button>
-              {song?.ownedByCurrentUser && (
-                <button
-                  onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-                  className="hidden sm:block md:hidden text-gray-300 hover:text-brand-5 transition-colors text-3xl leading-none"
-                  aria-label="Manage song"
-                >
-                  ✎
-                </button>
-              )}
-
-              {/* Portrait (<sm): hamburger ⋮ */}
-              <div ref={overflowRef} className="relative sm:hidden">
-                <button
-                  onClick={() => setOverflowOpen(o => !o)}
-                  className="w-8 h-8 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 flex items-center justify-center text-xl leading-none"
-                  aria-label="More options"
-                >
-                  ⋮
-                </button>
-                {overflowOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-50 flex flex-col py-1">
-                    <button
-                      onClick={() => { setViewMode(m => m === 'columns' ? 'scroll' : 'columns'); setOverflowOpen(false); }}
-                      className={MENU_ITEM}
-                    >
-                      View: {viewMode === 'scroll' ? 'columns' : 'scroll'}
-                    </button>
-                    <button
-                      onClick={() => { setShowChords(v => !v); setOverflowOpen(false); }}
-                      className={MENU_ITEM}
-                    >
-                      {showChords ? 'Hide Chords' : 'Show Chords'}
-                    </button>
-                    <button
-                      onClick={() => { setAddToPlaylistOpen(true); setOverflowOpen(false); }}
-                      className={`px-4 py-2 text-sm text-left hover:bg-gray-50 ${overrideChanged ? 'text-brand-6' : 'text-info-5'}`}
-                    >
-                      Add to playlist
-                    </button>
-                    {song?.ownedByCurrentUser && (
-                      <button
-                        onClick={() => { navigate(`/song/${id}/manage?semitones=${semitones}`); setOverflowOpen(false); }}
-                        className={MENU_ITEM}
-                      >
-                        Manage
-                      </button>
-                    )}
-                    <button
-                      onClick={() => { navigate(`/noodle?songId=${id}&semitones=${semitones}&capo=${capo}&tempoOverride=${currentPlaylistEntry?.tempoOverride ?? ''}`); setOverflowOpen(false); }}
-                      className={MENU_ITEM}
-                    >
-                      Noodle
-                    </button>
-                    {hasTabLines && (
-                      <button
-                        onClick={() => { handleTabLicksToggle(); setOverflowOpen(false); }}
-                        disabled={reparsing}
-                        className={`px-4 py-2 text-sm text-left transition-colors disabled:opacity-40 ${showTabLicks ? 'text-danger-6' : 'text-gray-600 hover:bg-gray-50'}`}
-                      >
-                        {reparsing ? 'Detecting tabs…' : showTabLicks ? 'Tab positions: on' : 'Tab positions'}
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Δ — mobile capo/transpose modal trigger (below md) */}
-              <button
-                onClick={() => setCapTranspOpen(true)}
-                className={`md:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-base transition-colors ${
-                  (capo !== (song?.capo ?? 0) || semitones !== 0)
-                    ? 'border-brand-3 bg-brand-1 text-brand-6'
-                    : 'border-gray-200 text-gray-400 hover:text-gray-600'
-                }`}
-                aria-label="Capo & Transpose"
-                title="Capo & Transpose"
-              >
-                Δ
-              </button>
-
-              {/* Desktop inline capo (md+) */}
-              <div className="hidden md:flex flex-col items-center gap-1">
-                <span className="text-xs text-gray-400">Capo</span>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setCapo(c => Math.max(0, c - 1))} className={BTN_ICON}>−</button>
-                  <div className="flex items-center justify-center w-8">
-                    <span className="text-base font-semibold text-gray-900">{capo}</span>
-                  </div>
-                  <button onClick={() => setCapo(c => Math.min(11, c + 1))} className={BTN_ICON}>+</button>
-                </div>
-                <button
-                  onClick={() => setCapo(song.capo ?? 0)}
-                  className={`text-xs text-center transition-colors ${capo !== (song.capo ?? 0) ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
-                >
-                  reset
-                </button>
-              </div>
-
-              {/* Divider (md+) */}
-              <div className="hidden md:block self-stretch border-l border-gray-200" />
-
-              {/* Desktop inline transpose (md+) */}
-              <div className="hidden md:flex flex-col items-center gap-1">
-                <span className="text-xs text-gray-400">Transpose</span>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={BTN_ICON}>−</button>
-                  <div className="flex gap-3 items-center">
-                    <div className="flex flex-col items-center w-10">
-                      <span className="text-base font-semibold text-gray-900">
-                        {rootKeyLabel(song.originalKey, semitones - (song.capo ?? 0), song.mode)}
-                      </span>
-                      <span className="text-xs text-gray-400">shape</span>
-                    </div>
-                    <span className="text-xs text-gray-300">
-                      {semitones > 0 ? `+${semitones}` : `${semitones}`}
-                    </span>
-                    <div className="flex flex-col items-center w-10">
-                      <span className="text-base font-semibold text-gray-900">
-                        {rootKeyLabel(song.originalKey, semitones + capo - (song.capo ?? 0), song.mode)}
-                      </span>
-                      <span className="text-xs text-gray-400">sound</span>
-                    </div>
-                  </div>
-                  <button onClick={() => setSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={BTN_ICON}>+</button>
-                </div>
-                <button
-                  onClick={() => setSemitones(0)}
-                  className={`text-xs text-center transition-colors ${semitones !== 0 ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
-                >
-                  reset
-                </button>
-              </div>
-
-            </div>
-          </div>
-          </div>
-          )} {/* end !collapsed */}
-
+          )}
           {error && <p className="text-danger-6 text-sm mb-4">{error}</p>}
-
-          <div ref={scrollContainerRef} className={viewMode === 'scroll' ? 'max-w-2xl mx-auto mt-8 overflow-x-hidden' : 'overflow-hidden'}>
-            <ChordSheet
-              chordLines={song.chordLines}
-              numColumns={viewMode === 'scroll' ? 1 : song.numColumns}
-              fontScale={effectiveFontScale}
-              className={loading ? 'opacity-50 transition-opacity duration-150' : 'transition-opacity duration-150'}
-              showTabLicks={showTabLicks}
-              songLicks={song.songLicks ?? {}}
-              currentKey={currentNoteKey}
-              semitones={semitones}
-              instrument={instrument}
-              customTuning={customTuning}
-            />
-          </div>
-
-          {capTranspOpen && (
-            <div
-              className="fixed inset-0 z-50 flex items-end justify-center bg-black/30"
-              onClick={() => setCapTranspOpen(false)}
-            >
-              <div
-                className="bg-white rounded-t-xl shadow-xl p-6 w-full max-w-sm flex flex-col gap-6"
-                onClick={e => e.stopPropagation()}
-              >
-                {/* Capo */}
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-xs text-gray-400">Capo</span>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => setCapo(c => Math.max(0, c - 1))} className={BTN_ICON}>−</button>
-                    <div className="flex items-center justify-center w-8">
-                      <span className="text-base font-semibold text-gray-900">{capo}</span>
-                    </div>
-                    <button onClick={() => setCapo(c => Math.min(11, c + 1))} className={BTN_ICON}>+</button>
-                  </div>
-                  <button
-                    onClick={() => setCapo(song?.capo ?? 0)}
-                    className={`text-xs text-center transition-colors ${capo !== (song?.capo ?? 0) ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
-                  >
-                    reset
-                  </button>
-                </div>
-                <div className="border-t border-gray-100" />
-                {/* Transpose */}
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-xs text-gray-400">Transpose</span>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => setSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={BTN_ICON}>−</button>
-                    <div className="flex gap-3 items-center">
-                      <div className="flex flex-col items-center w-10">
-                        <span className="text-base font-semibold text-gray-900">
-                          {rootKeyLabel(song?.originalKey ?? null, semitones - (song?.capo ?? 0), song?.mode)}
-                        </span>
-                        <span className="text-xs text-gray-400">shape</span>
-                      </div>
-                      <span className="text-xs text-gray-300">
-                        {semitones > 0 ? `+${semitones}` : `${semitones}`}
-                      </span>
-                      <div className="flex flex-col items-center w-10">
-                        <span className="text-base font-semibold text-gray-900">
-                          {rootKeyLabel(song?.originalKey ?? null, semitones + capo - (song?.capo ?? 0), song?.mode)}
-                        </span>
-                        <span className="text-xs text-gray-400">sound</span>
-                      </div>
-                    </div>
-                    <button onClick={() => setSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={BTN_ICON}>+</button>
-                  </div>
-                  <button
-                    onClick={() => setSemitones(0)}
-                    className={`text-xs text-center transition-colors ${semitones !== 0 ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
-                  >
-                    reset
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {showChords && (
-            <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg">
-              <div className="flex gap-3 overflow-x-auto px-4 py-3">
-                {extractChordNames(song).map(name => {
-                  const voicings = chordVoicings[name] ?? [];
-                  const idx = chordVoicingIdx[name] ?? 0;
-                  const frets = voicings.length > 0 ? voicings[idx].frets : Array(getStringCount(instrument)).fill(0);
-                  const isEmpty = voicings.length === 0;
-                  return (
-                    <div
-                      key={name}
-                      className="flex-shrink-0 flex flex-col items-center border border-gray-200 rounded-lg px-2 pt-2 pb-1 bg-white"
-                    >
-                      <span className="text-xs font-semibold text-gray-700 mb-1">{name}</span>
-                      <div
-                        style={isEmpty ? { cursor: 'pointer' } : undefined}
-                        onClick={isEmpty ? () => setUploadChord(name) : undefined}
-                      >
-                        <ChordDiagram frets={frets} width={90} stringCount={getStringCount(instrument)} />
-                      </div>
-                      {voicings.length > 1 && (
-                        <div className="flex items-center justify-between w-full text-xs text-gray-400 mt-1">
-                          <button
-                            className="hover:text-gray-600 px-1 text-2xl leading-none"
-                            onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx - 1 + voicings.length) % voicings.length }))}
-                          >‹</button>
-                          <span>{idx + 1}/{voicings.length}</span>
-                          <button
-                            className="hover:text-gray-600 px-1 text-2xl leading-none"
-                            onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx + 1) % voicings.length }))}
-                          >›</button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          {renderChordSheet()}
+          {renderCapTranspModal()}
+          {renderChordDiagramPanel()}
         </>
       )}
-
       {!song && loading && <p className="text-gray-400 text-sm">Loading…</p>}
       {!song && error && <p className="text-danger-6 text-sm">{error}</p>}
-
-      {uploadChord && (
-        <ChordUploadModal
-          chordName={uploadChord}
-          instrument={instrument}
-          lockInstrument
-          onClose={() => setUploadChord(null)}
-          onSuccess={() => {
-            const name = uploadChord;
-            setUploadChord(null);
-            const parsed = parseChordName(name);
-            if (parsed) {
-              getChordVoicings(parsed.root, parsed.quality, instrument).then(vs => {
-                setChordVoicings(s => ({ ...s, [name]: vs }));
-              });
-            }
-          }}
-        />
-      )}
-
-      {addToPlaylistOpen && song && (
-        <AddToPlaylistModal
-          songId={id!}
-          songTitle={song.title}
-          onClose={() => setAddToPlaylistOpen(false)}
-          keyOffset={semitones}
-          capoOffset={capo - (song?.capo ?? 0)}
-          overrideChanged={overrideChanged}
-          currentPlaylistId={playlistState?.playlistId}
-        />
-      )}
+      {renderChordUploadModal()}
+      {renderAddToPlaylistModal()}
     </div>
   );
 }

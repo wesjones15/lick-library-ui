@@ -7,26 +7,12 @@ import {
 } from '../../core/api/client';
 import type { PlaylistDetail, PlaylistEntry, SongSummary } from '../../core/api/client';
 
-import { formatNoteEnum, CHROMATIC_NOTES, MODE_SUFFIX } from '../../core/music';
 import { BTN_ICON, SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
+import CapoTransposeControls from '../../core/components/CapoTransposeControls';
 import NumpadInput from '../../core/components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
-
-function keyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
-  if (!originalKey) return '?';
-  const display = formatNoteEnum(originalKey);
-  const match = display.match(/^([A-G][#b]?)/);
-  if (!match) return display;
-  const idx = CHROMATIC_NOTES.indexOf(match[1]);
-  if (idx === -1) return display;
-  const root = CHROMATIC_NOTES[((idx + semitones) % 12 + 12) % 12];
-  return root + (mode ? (MODE_SUFFIX[mode] ?? '') : '');
-}
-
-function rootKeyLabel(originalKey: string | null, semitones: number, mode?: string | null): string {
-  return keyLabel(originalKey, semitones, mode).replace(/ .+$/, '');
-}
+import { keyLabel } from '../songs/songKeyUtils';
 
 function VoicingModal({ entry, onSave, onClose }: {
   entry: PlaylistEntry;
@@ -45,50 +31,14 @@ function VoicingModal({ entry, onSave, onClose }: {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-xs mx-4" onClick={e => e.stopPropagation()}>
         <div className="font-semibold text-gray-900 text-sm mb-5 text-center">{entry.title}</div>
-        <div className="flex gap-8 justify-center mb-6">
-
-          {/* Capo widget */}
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-xs text-gray-400">Capo</span>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setLocalCapo(c => Math.max(0, c - 1))} className={BTN_ICON}>−</button>
-              <div className="flex items-center justify-center w-8">
-                <span className="text-base font-semibold text-gray-900">{localCapo}</span>
-              </div>
-              <button onClick={() => setLocalCapo(c => Math.min(12, c + 1))} className={BTN_ICON}>+</button>
-            </div>
-            <button
-              onClick={() => setLocalCapo(entry.defaultCapo)}
-              className={`text-xs transition-colors ${localCapo !== entry.defaultCapo ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
-            >reset</button>
-          </div>
-
-          {/* Transpose widget */}
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-xs text-gray-400">Transpose</span>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setLocalSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={BTN_ICON}>−</button>
-              <div className="flex gap-2 items-center">
-                <div className="flex flex-col items-center w-8">
-                  <span className="text-base font-semibold text-gray-900">
-                    {rootKeyLabel(entry.originalKey, localSemitones - entry.defaultCapo, entry.mode)}
-                  </span>
-                  <span className="text-xs text-gray-400">shape</span>
-                </div>
-                <div className="flex flex-col items-center w-8">
-                  <span className="text-base font-semibold text-gray-900">
-                    {rootKeyLabel(entry.originalKey, localSemitones + localCapo - entry.defaultCapo, entry.mode)}
-                  </span>
-                  <span className="text-xs text-gray-400">sound</span>
-                </div>
-              </div>
-              <button onClick={() => setLocalSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={BTN_ICON}>+</button>
-            </div>
-            <button
-              onClick={() => setLocalSemitones(0)}
-              className={`text-xs transition-colors ${localSemitones !== 0 ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
-            >reset</button>
-          </div>
+        <div className="flex justify-center mb-6">
+          <CapoTransposeControls
+            capo={localCapo} setCapo={setLocalCapo}
+            semitones={localSemitones} setSemitones={setLocalSemitones}
+            originalKey={entry.originalKey}
+            originalCapo={entry.defaultCapo}
+            mode={entry.mode}
+          />
         </div>
 
           {/* BPM override widget */}
