@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../core/auth/AuthContext';
 import {
-  getUserProfile, requestDeletion, deleteOwnAccount,
+  getUserProfile, requestDeletion,
   getAllLicks, getAllSongs, getAllPlaylists,
   getAdminQueue, getAdminUsers, approveUser, rejectUser, deleteAdminUser,
   updateUsername, getAdminSongUpdateQueue,
@@ -114,320 +114,330 @@ export default function UserPage() {
     </button>
   );
 
-  return (
-    <>
-    <div className="max-w-3xl mx-auto px-6 py-10">
-      {isAdmin && (
-        <h1 className="text-3xl font-bold text-brand-7 mb-1">Welcome aboard, captain.</h1>
-      )}
-      {!isAdmin && (
-        <h1 className="text-3xl font-bold text-gray-900 mb-1">Account</h1>
-      )}
-
-      {/* Profile card */}
-      <div className="border border-gray-200 rounded-xl p-5 mb-6 bg-white">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            {editingUsername !== null ? (
-              <div className="flex items-center gap-2 mb-0.5">
-                <input
-                  autoFocus
-                  value={editingUsername}
-                  onChange={e => setEditingUsername(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') handleSaveUsername(); if (e.key === 'Escape') setEditingUsername(null); }}
-                  className="text-sm border border-gray-300 rounded px-2 py-0.5 text-gray-900 focus:outline-none focus:border-brand-4 w-40"
-                />
-                <button
-                  onClick={handleSaveUsername}
-                  disabled={savingUsername}
-                  className="text-xs px-2 py-0.5 rounded bg-brand-6 text-white hover:bg-brand-7 disabled:opacity-50 transition-colors"
-                >
-                  {savingUsername ? '…' : 'Save'}
-                </button>
-                <button
-                  onClick={() => setEditingUsername(null)}
-                  className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  ×
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <span className="font-semibold text-gray-900">{profile?.username ?? '—'}</span>
-                {managing && (
-                  <button
-                    onClick={() => setEditingUsername(profile?.username ?? '')}
-                    title="Edit username"
-                    className="text-gray-300 hover:text-brand-5 transition-colors text-sm leading-none"
-                    aria-label="Edit username"
-                  >
-                    ✎
-                  </button>
-                )}
-              </div>
-            )}
-            <div className="text-sm text-gray-400">{profile?.email}</div>
-            {profile?.creationTs && (
-              <div className="text-xs text-gray-300 mt-1">
-                Joined {new Date(profile.creationTs).toLocaleDateString()}
-              </div>
-            )}
+  function renderMyUploads() {
+    return (
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">My Uploads</h2>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="border border-gray-200 rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-brand-6">{myLicks.length}</div>
+            <div className="text-xs text-gray-400 mt-1">Licks</div>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex items-center gap-2">
-              {!isAdmin && refreshButton}
-              <button
-                onClick={() => { setManaging(m => !m); setEditingUsername(null); setConfirmDelete(false); }}
-                className="text-xs text-gray-400 hover:text-brand-6 transition-colors"
-              >
-                {managing ? 'Done' : 'Manage'}
-              </button>
-            </div>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isAdmin ? 'bg-brand-2 text-brand-7' : 'bg-gray-100 text-gray-500'}`}>
-              {currentUser.role}
-            </span>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-              currentUser.status === 'APPROVED' ? 'bg-success-2 text-success-7' :
-              currentUser.status === 'REJECTED' ? 'bg-danger-2 text-danger-8' :
-              'bg-warn-2 text-warn-6'
-            }`}>
-              {currentUser.status}
-            </span>
+          <div className="border border-gray-200 rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-brand-6">{mySongs.length}</div>
+            <div className="text-xs text-gray-400 mt-1">Songs</div>
+          </div>
+          <div className="border border-gray-200 rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-brand-6">{myPlaylists.length}</div>
+            <div className="text-xs text-gray-400 mt-1">Playlists</div>
           </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Status banners for non-approved non-admin */}
-      {isPending && !isAdmin && (
-        <div className={`mb-6 ${ALERT_AMBER}`}>
-          {currentUser.requestType === 'ACCOUNT_DELETION'
-            ? 'Your deletion request is pending admin review.'
-            : "Your account is pending approval. You'll have full access once an admin approves your request."}
-        </div>
-      )}
-      {isRejected && !isAdmin && (
-        <div className={`mb-6 ${ALERT_RED}`}>
-          Your account request was not approved.
-        </div>
-      )}
-
-      {/* My Uploads */}
-      {isApproved && (
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">My Uploads</h2>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="border border-gray-200 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-brand-6">{myLicks.length}</div>
-              <div className="text-xs text-gray-400 mt-1">Licks</div>
-            </div>
-            <div className="border border-gray-200 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-brand-6">{mySongs.length}</div>
-              <div className="text-xs text-gray-400 mt-1">Songs</div>
-            </div>
-            <div className="border border-gray-200 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-brand-6">{myPlaylists.length}</div>
-              <div className="text-xs text-gray-400 mt-1">Playlists</div>
-            </div>
+  function renderApprovalQueue() {
+    return (
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-gray-800">Approval Queue</h2>
+          <div className="flex items-center gap-2">
+            {refreshButton}
+            <button
+              onClick={() => { setManaging(m => !m); setEditingUsername(null); setConfirmDelete(false); }}
+              className="text-xs text-gray-400 hover:text-brand-6 transition-colors"
+            >
+              {managing ? 'Done' : 'Manage'}
+            </button>
           </div>
         </div>
-      )}
-
-      {/* Admin: Approval Queue */}
-      {isAdmin && (
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-gray-800">Approval Queue</h2>
-            <div className="flex items-center gap-2">
-              {refreshButton}
-              <button
-                onClick={() => { setManaging(m => !m); setEditingUsername(null); setConfirmDelete(false); }}
-                className="text-xs text-gray-400 hover:text-brand-6 transition-colors"
-              >
-                {managing ? 'Done' : 'Manage'}
-              </button>
-            </div>
-          </div>
-          {queue.length === 0 ? (
-            <p className="text-sm text-gray-400">No pending users.</p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {queue.map(u => (
-                <div key={u.id} className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-2.5 bg-white">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm font-medium text-gray-800">{u.username}</div>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        u.requestType === 'ACCOUNT_DELETION'
-                          ? 'bg-danger-2 text-danger-8'
-                          : 'bg-info-1 text-info-7'
-                      }`}>
-                        {u.requestType === 'ACCOUNT_DELETION' ? 'Deletion' : 'Account Creation'}
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-400">{u.email}</div>
+        {queue.length === 0 ? (
+          <p className="text-sm text-gray-400">No pending users.</p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {queue.map(u => (
+              <div key={u.id} className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-2.5 bg-white">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-sm font-medium text-gray-800">{u.username}</div>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      u.requestType === 'ACCOUNT_DELETION'
+                        ? 'bg-danger-2 text-danger-8'
+                        : 'bg-info-1 text-info-7'
+                    }`}>
+                      {u.requestType === 'ACCOUNT_DELETION' ? 'Deletion' : 'Account Creation'}
+                    </span>
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleApprove(u.id)}
-                      className="text-xs px-3 py-1 rounded-lg bg-success-6 text-white hover:bg-success-7 transition-colors"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => handleReject(u.id)}
-                      className="text-xs px-3 py-1 rounded-lg border border-danger-4 text-danger-7 hover:bg-danger-1 transition-colors"
-                    >
-                      Reject
-                    </button>
-                  </div>
+                  <div className="text-xs text-gray-400">{u.email}</div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Admin: All Users table */}
-      {isAdmin && allUsers.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">All Users</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-gray-200 text-gray-400 text-left">
-                  <th className="pb-2 pr-4">ID</th>
-                  <th className="pb-2 pr-4">Username</th>
-                  <th className="pb-2 pr-4">Email</th>
-                  <th className="pb-2 pr-4">Role</th>
-                  <th className="pb-2 pr-4">Status</th>
-                  <th className="pb-2"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {allUsers.map(u => (
-                  <tr key={u.id} className="border-b border-gray-100">
-                    <td className="py-1.5 pr-4 text-gray-400">{u.id}</td>
-                    <td className="py-1.5 pr-4 text-gray-700">{u.username}</td>
-                    <td className="py-1.5 pr-4 text-gray-500">{u.email}</td>
-                    <td className="py-1.5 pr-4">
-                      <span className={`px-1.5 py-0.5 rounded text-xs ${u.role === 'ADMIN' ? 'bg-brand-2 text-brand-7' : 'bg-gray-100 text-gray-500'}`}>
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="py-1.5 pr-4">
-                      <span className={`px-1.5 py-0.5 rounded text-xs ${
-                        u.status === 'APPROVED' ? 'bg-success-2 text-success-7' :
-                        u.status === 'REJECTED' ? 'bg-danger-2 text-danger-8' :
-                        'bg-warn-2 text-warn-6'
-                      }`}>
-                        {u.status}
-                      </span>
-                    </td>
-                    <td className="py-1.5">
-                      {u.id !== profile?.id && (
-                        confirmDeleteUserId === u.id ? (
-                          <div className="flex items-center gap-1">
-                            <span className="text-xs text-danger-6">Sure?</span>
-                            <button
-                              onClick={() => handleDeleteUser(u.id)}
-                              className="text-xs px-2 py-0.5 rounded bg-danger-6 text-white hover:bg-danger-7 transition-colors"
-                            >
-                              Confirm
-                            </button>
-                            <button
-                              onClick={() => setConfirmDeleteUserId(null)}
-                              className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => setConfirmDeleteUserId(u.id)}
-                            className="text-xs text-danger-4 hover:text-danger-6 transition-colors"
-                          >
-                            Delete
-                          </button>
-                        )
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Admin: Song Update Requests */}
-      {isAdmin && (
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">Song Update Requests</h2>
-          {songUpdateQueue.length === 0 ? (
-            <p className="text-sm text-gray-400">No pending song updates.</p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {songUpdateQueue.map(req => (
-                <div key={req.id} className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-2.5 bg-white">
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <div className="text-sm font-medium text-gray-800">{req.songTitle}{req.songArtist ? ` — ${req.songArtist}` : ''}</div>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        req.requestType === 'SONG_METADATA' ? 'bg-info-1 text-info-7' :
-                        req.requestType === 'SONG_CHART' ? 'bg-chart-1 text-chart-2' :
-                        'bg-beatmap-1 text-beatmap-2'
-                      }`}>
-                        {req.requestType === 'SONG_METADATA' ? 'Metadata' : req.requestType === 'SONG_CHART' ? 'Chart' : 'Beatmap'}
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-400">submitted by {req.submitterUsername}</div>
-                  </div>
+                <div className="flex gap-2">
                   <button
-                    onClick={() => setReviewingUpdateId(req.id)}
-                    className="text-xs px-3 py-1 rounded-lg border border-brand-3 text-brand-6 hover:bg-brand-1 transition-colors"
+                    onClick={() => handleApprove(u.id)}
+                    className="text-xs px-3 py-1 rounded-lg bg-success-6 text-white hover:bg-success-7 transition-colors"
                   >
-                    Review
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleReject(u.id)}
+                    className="text-xs px-3 py-1 rounded-lg border border-danger-4 text-danger-7 hover:bg-danger-1 transition-colors"
+                  >
+                    Reject
                   </button>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
-      {/* Delete Account — only visible in manage mode */}
-      {managing && (
-        <div className="mt-8 pt-6 border-t border-gray-100">
-          {confirmDelete ? (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-danger-7">Submit a deletion request for admin review?</span>
-              <button
-                onClick={handleDeleteAccount}
-                disabled={deleting || isSuperAdmin}
-                className="text-xs px-3 py-1.5 rounded-lg bg-danger-7 text-white hover:bg-danger-8 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {deleting ? 'Submitting…' : 'Submit request'}
-              </button>
-              <button
-                onClick={() => setConfirmDelete(false)}
-                className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => !isSuperAdmin && setConfirmDelete(true)}
-              disabled={isSuperAdmin}
-              title={isSuperAdmin ? 'Primary admin account cannot be deleted' : undefined}
-              className={`text-xs transition-colors ${isSuperAdmin ? 'text-gray-300 cursor-not-allowed' : 'text-danger-5 hover:text-danger-7'}`}
-            >
-              Delete account
-            </button>
-          )}
+  function renderAllUsers() {
+    return (
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">All Users</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-gray-200 text-gray-400 text-left">
+                <th className="pb-2 pr-4">ID</th>
+                <th className="pb-2 pr-4">Username</th>
+                <th className="pb-2 pr-4">Email</th>
+                <th className="pb-2 pr-4">Role</th>
+                <th className="pb-2 pr-4">Status</th>
+                <th className="pb-2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {allUsers.map(u => (
+                <tr key={u.id} className="border-b border-gray-100">
+                  <td className="py-1.5 pr-4 text-gray-400">{u.id}</td>
+                  <td className="py-1.5 pr-4 text-gray-700">{u.username}</td>
+                  <td className="py-1.5 pr-4 text-gray-500">{u.email}</td>
+                  <td className="py-1.5 pr-4">
+                    <span className={`px-1.5 py-0.5 rounded text-xs ${u.role === 'ADMIN' ? 'bg-brand-2 text-brand-7' : 'bg-gray-100 text-gray-500'}`}>
+                      {u.role}
+                    </span>
+                  </td>
+                  <td className="py-1.5 pr-4">
+                    <span className={`px-1.5 py-0.5 rounded text-xs ${
+                      u.status === 'APPROVED' ? 'bg-success-2 text-success-7' :
+                      u.status === 'REJECTED' ? 'bg-danger-2 text-danger-8' :
+                      'bg-warn-2 text-warn-6'
+                    }`}>
+                      {u.status}
+                    </span>
+                  </td>
+                  <td className="py-1.5">
+                    {u.id !== profile?.id && (
+                      confirmDeleteUserId === u.id ? (
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-danger-6">Sure?</span>
+                          <button
+                            onClick={() => handleDeleteUser(u.id)}
+                            className="text-xs px-2 py-0.5 rounded bg-danger-6 text-white hover:bg-danger-7 transition-colors"
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            onClick={() => setConfirmDeleteUserId(null)}
+                            className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDeleteUserId(u.id)}
+                          className="text-xs text-danger-4 hover:text-danger-6 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      )
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}
-    </div>
+      </div>
+    );
+  }
+
+  function renderSongUpdateQueue() {
+    return (
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">Song Update Requests</h2>
+        {songUpdateQueue.length === 0 ? (
+          <p className="text-sm text-gray-400">No pending song updates.</p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {songUpdateQueue.map(req => (
+              <div key={req.id} className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-2.5 bg-white">
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="text-sm font-medium text-gray-800">{req.songTitle}{req.songArtist ? ` — ${req.songArtist}` : ''}</div>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      req.requestType === 'SONG_METADATA' ? 'bg-info-1 text-info-7' :
+                      req.requestType === 'SONG_CHART' ? 'bg-chart-1 text-chart-2' :
+                      'bg-beatmap-1 text-beatmap-2'
+                    }`}>
+                      {req.requestType === 'SONG_METADATA' ? 'Metadata' : req.requestType === 'SONG_CHART' ? 'Chart' : 'Beatmap'}
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-400">submitted by {req.submitterUsername}</div>
+                </div>
+                <button
+                  onClick={() => setReviewingUpdateId(req.id)}
+                  className="text-xs px-3 py-1 rounded-lg border border-brand-3 text-brand-6 hover:bg-brand-1 transition-colors"
+                >
+                  Review
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function renderDeleteAccount() {
+    return (
+      <div className="mt-8 pt-6 border-t border-gray-100">
+        {confirmDelete ? (
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-danger-7">Submit a deletion request for admin review?</span>
+            <button
+              onClick={handleDeleteAccount}
+              disabled={deleting || isSuperAdmin}
+              className="text-xs px-3 py-1.5 rounded-lg bg-danger-7 text-white hover:bg-danger-8 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {deleting ? 'Submitting…' : 'Submit request'}
+            </button>
+            <button
+              onClick={() => setConfirmDelete(false)}
+              className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => !isSuperAdmin && setConfirmDelete(true)}
+            disabled={isSuperAdmin}
+            title={isSuperAdmin ? 'Primary admin account cannot be deleted' : undefined}
+            className={`text-xs transition-colors ${isSuperAdmin ? 'text-gray-300 cursor-not-allowed' : 'text-danger-5 hover:text-danger-7'}`}
+          >
+            Delete account
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="max-w-3xl mx-auto px-6 py-10">
+        <h1 className="text-3xl font-bold text-gray-900 mb-1">Account</h1>
+
+        {/* Profile card */}
+        <div className="border border-gray-200 rounded-xl p-5 mb-6 bg-white">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              {editingUsername !== null ? (
+                <div className="flex items-center gap-2 mb-0.5">
+                  <input
+                    autoFocus
+                    value={editingUsername}
+                    onChange={e => setEditingUsername(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') handleSaveUsername(); if (e.key === 'Escape') setEditingUsername(null); }}
+                    className="text-sm border border-gray-300 rounded px-2 py-0.5 text-gray-900 focus:outline-none focus:border-brand-4 w-40"
+                  />
+                  <button
+                    onClick={handleSaveUsername}
+                    disabled={savingUsername}
+                    className="text-xs px-2 py-0.5 rounded bg-brand-6 text-white hover:bg-brand-7 disabled:opacity-50 transition-colors"
+                  >
+                    {savingUsername ? '…' : 'Save'}
+                  </button>
+                  <button
+                    onClick={() => setEditingUsername(null)}
+                    className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="font-semibold text-gray-900">{profile?.username ?? '—'}</span>
+                  {managing && (
+                    <button
+                      onClick={() => setEditingUsername(profile?.username ?? '')}
+                      title="Edit username"
+                      className="text-gray-300 hover:text-brand-5 transition-colors text-sm leading-none"
+                      aria-label="Edit username"
+                    >
+                      ✎
+                    </button>
+                  )}
+                </div>
+              )}
+              <div className="text-sm text-gray-400">{profile?.email}</div>
+              {profile?.creationTs && (
+                <div className="text-xs text-gray-300 mt-1">
+                  Joined {new Date(profile.creationTs).toLocaleDateString()}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <div className="flex items-center gap-2">
+                {!isAdmin && refreshButton}
+                <button
+                  onClick={() => { setManaging(m => !m); setEditingUsername(null); setConfirmDelete(false); }}
+                  className="text-xs text-gray-400 hover:text-brand-6 transition-colors"
+                >
+                  {managing ? 'Done' : 'Manage'}
+                </button>
+              </div>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isAdmin ? 'bg-brand-2 text-brand-7' : 'bg-gray-100 text-gray-500'}`}>
+                {currentUser.role}
+              </span>
+              {isAdmin ? (
+                <span className="text-xs italic text-brand-6">Welcome aboard, captain.</span>
+              ) : (
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                  currentUser.status === 'APPROVED' ? 'bg-success-2 text-success-7' :
+                  currentUser.status === 'REJECTED' ? 'bg-danger-2 text-danger-8' :
+                  'bg-warn-2 text-warn-6'
+                }`}>
+                  {currentUser.status}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Status banners for non-approved non-admin */}
+        {isPending && !isAdmin && (
+          <div className={`mb-6 ${ALERT_AMBER}`}>
+            {currentUser.requestType === 'ACCOUNT_DELETION'
+              ? 'Your deletion request is pending admin review.'
+              : "Your account is pending approval. You'll have full access once an admin approves your request."}
+          </div>
+        )}
+        {isRejected && !isAdmin && (
+          <div className={`mb-6 ${ALERT_RED}`}>
+            Your account request was not approved.
+          </div>
+        )}
+
+        {isApproved && renderMyUploads()}
+        {isAdmin && renderApprovalQueue()}
+        {isAdmin && allUsers.length > 0 && renderAllUsers()}
+        {isAdmin && renderSongUpdateQueue()}
+        {managing && renderDeleteAccount()}
+      </div>
 
       {reviewingUpdateId && (
         <SongUpdateReviewModal
