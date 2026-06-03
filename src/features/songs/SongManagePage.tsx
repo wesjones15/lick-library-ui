@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { getSong, updateSong, deleteSong, getChordVoicings, submitSongUpdateRequest } from '../../core/api/client';
-import type { SongDetail, ChordVoicing, GuitarTabLine } from '../../core/api/client';
+import type { SongDetail, ChordVoicing } from '../../core/api/client';
 import ChordDiagram from '../chords/ChordDiagram';
-import { parseChordName } from './parseChordName';
+import { parseChordName, extractChordNames } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
 import { CHROMATIC_NOTES, MODE_DATA, MODE_SUFFIX, SONG_MODE_TO_ENUM } from '../../core/music';
 import { BTN_SECONDARY, SELECT, TEXTAREA_MONO, ALERT_AMBER, ALERT_GREEN } from '../../core/ui';
@@ -25,24 +25,6 @@ function parseStoredKey(stored: string): { root: string; mode: string } {
 }
 
 const BTN_SUBMIT = 'px-5 py-2 bg-brand-6 text-white text-sm font-medium rounded-lg hover:bg-brand-7 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end';
-
-function extractChordNames(song: SongDetail): string[] {
-  const seen = new Set<string>();
-  const result: string[] = [];
-  song.chordLines.forEach(line => {
-    const text = (line as GuitarTabLine).type === 'tab'
-      ? (line as GuitarTabLine).header
-      : (line as { chords: string }).chords;
-    text.split(/\s+/).forEach(t => {
-      const core = t.replace(/^\(+/, '').replace(/[)*]+$/, '');
-      if (/^[A-G]/.test(core) && !seen.has(core)) {
-        seen.add(core);
-        result.push(core);
-      }
-    });
-  });
-  return result;
-}
 
 export default function SongManagePage() {
   const { id } = useParams<{ id: string }>();
@@ -230,9 +212,207 @@ export default function SongManagePage() {
     }
   };
 
+  function renderMetadataPanel() {
+    return (
+      <form onSubmit={isOwner ? handleMetadataSubmit : handleMetadataSubmitNonOwner} className="flex flex-col gap-3 mt-4">
+        <input
+          type="text"
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          placeholder="Title *"
+          required
+          className={`${SELECT} w-full`}
+        />
+        <input
+          type="text"
+          value={artist}
+          onChange={e => setArtist(e.target.value)}
+          placeholder="Artist"
+          className={`${SELECT} w-full`}
+        />
+        <div className="flex gap-2">
+          <select
+            value={keyRoot}
+            onChange={e => setKeyRoot(e.target.value)}
+            className={`${SELECT} flex-1`}
+          >
+            <option value="">— Key —</option>
+            {CHROMATIC_NOTES.map(r => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+          <select
+            value={keyMode}
+            onChange={e => setKeyMode(e.target.value)}
+            disabled={!keyRoot}
+            className={`${SELECT} w-24 disabled:opacity-40`}
+          >
+            {MODE_DATA.map(m => (
+              <option key={m.suffix} value={m.suffix}>{m.label}</option>
+            ))}
+          </select>
+          <NumpadInput
+            value={capo}
+            onChange={val => setCapo(val)}
+            placeholder="Capo"
+            min={0}
+            max={11}
+            className={`${SELECT} w-20`}
+          />
+          <NumpadInput
+            value={tempo}
+            onChange={val => setTempo(val)}
+            placeholder="BPM"
+            min={1}
+            className={`${SELECT} w-24`}
+          />
+          <select
+            value={timeSignature}
+            onChange={e => setTimeSignature(Number(e.target.value))}
+            className={`${SELECT} w-20`}
+          >
+            <option value={1}>1/4</option>
+            <option value={2}>2/4</option>
+            <option value={3}>3/4</option>
+            <option value={4}>4/4</option>
+            <option value={6}>6/8</option>
+          </select>
+        </div>
+        <InstrumentSelector
+          excludeCustom
+          compact
+          instrument={instrument}
+          onInstrumentChange={setInstrument}
+        />
+        <button
+          type="submit"
+          disabled={loading || !metadataIsDirty || !title.trim()}
+          className={BTN_SUBMIT}
+        >
+          {loading ? 'Saving…' : isOwner ? 'Save' : 'Submit for review'}
+        </button>
+
+        <div className="flex flex-col gap-2 mt-2 pt-4 border-t border-gray-100">
+          <button type="button" onClick={() => { setMode('chart'); setSubmitSuccess(false); }} className={BTN_SECONDARY}>
+            Update Song Chart
+          </button>
+          {isOwner && (
+            <button type="button" onClick={() => setMode('chords')} className={BTN_SECONDARY}>
+              Manage Chords
+            </button>
+          )}
+          {isOwner && (!showDeleteConfirm ? (
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="px-4 py-2 text-sm border border-danger-3 rounded-lg text-danger-5 hover:bg-danger-1 transition-colors"
+            >
+              Delete Song
+            </button>
+          ) : (
+            <div className="flex flex-col gap-2 p-3 bg-danger-1 border border-danger-3 rounded-lg">
+              <p className="text-sm text-danger-7">Are you sure? This action cannot be undone.</p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="flex-1 px-3 py-1.5 bg-danger-6 text-white text-sm rounded-lg hover:bg-danger-7 transition-colors"
+                >
+                  Confirm
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 px-3 py-1.5 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {error && <p className="text-danger-6 text-sm">{error}</p>}
+      </form>
+    );
+  }
+
+  function renderChartPanel() {
+    return (
+      <form onSubmit={isOwner ? handleChartSubmit : handleChartSubmitNonOwner} className="flex flex-col gap-3 mt-4">
+        <button type="button" onClick={() => { setRawChordSheet(song!.rawChordSheet ?? ''); setMode('metadata'); setSubmitSuccess(false); }} className="text-sm text-brand-5 hover:text-brand-7 self-start">
+          ← Back
+        </button>
+        <textarea
+          value={rawChordSheet}
+          onChange={e => setRawChordSheet(e.target.value)}
+          rows={14}
+          className={TEXTAREA_MONO}
+        />
+        <button
+          type="submit"
+          disabled={loading || !chartIsDirty}
+          className={BTN_SUBMIT}
+        >
+          {loading ? 'Saving…' : isOwner ? 'Save & Re-parse' : 'Submit for review'}
+        </button>
+        {error && <p className="text-danger-6 text-sm">{error}</p>}
+      </form>
+    );
+  }
+
+  function renderChordsPanel() {
+    return (
+      <div className="flex flex-col gap-4 mt-4">
+        <button type="button" onClick={() => setMode('metadata')} className="text-sm text-brand-5 hover:text-brand-7 self-start">
+          ← Back
+        </button>
+        {extractChordNames(song!).length === 0 ? (
+          <p className="text-sm text-gray-400">No chords detected in this song.</p>
+        ) : (
+          <div className="grid grid-cols-6 gap-3">
+            {extractChordNames(song!).map(name => {
+              const voicings = chordVoicings[name] ?? [];
+              const idx = chordVoicingIdx[name] ?? 0;
+              const frets = voicings.length > 0 ? voicings[idx].frets : [0, 0, 0, 0, 0, 0];
+              return (
+                <div
+                  key={name}
+                  className="relative flex-shrink-0 flex flex-col items-center border border-gray-200 rounded-lg px-2 pt-2 pb-1 bg-white"
+                >
+                  <span className="text-xs font-semibold text-gray-700 mb-1">{name}</span>
+                  <button
+                    title="Add voicing"
+                    onClick={() => setSelectedChord(name)}
+                    className="absolute top-1 right-2 text-gray-300 hover:text-brand-5 text-xl leading-none"
+                  >
+                    +
+                  </button>
+                  <ChordDiagram frets={frets} width={90} />
+                  {voicings.length > 1 && (
+                    <div className="flex items-center justify-between w-full text-xs text-gray-400 mt-1">
+                      <button
+                        className="hover:text-gray-600 px-1 text-2xl leading-none"
+                        onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx - 1 + voicings.length) % voicings.length }))}
+                      >‹</button>
+                      <span>{idx + 1}/{voicings.length}</span>
+                      <button
+                        className="hover:text-gray-600 px-1 text-2xl leading-none"
+                        onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx + 1) % voicings.length }))}
+                      >›</button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={`mx-auto px-6 py-8 ${mode === 'chords' ? 'max-w-3xl' : 'max-w-lg'}`}>
-      {/* Breadcrumb */}
       <Link to={`/song/${id}`} className="text-sm text-brand-5 hover:text-brand-7 mb-6 inline-block">
         ← {song.title}
       </Link>
@@ -249,199 +429,9 @@ export default function SongManagePage() {
         </div>
       )}
 
-      {mode === 'metadata' && (
-        <form onSubmit={isOwner ? handleMetadataSubmit : handleMetadataSubmitNonOwner} className="flex flex-col gap-3 mt-4">
-          <input
-            type="text"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            placeholder="Title *"
-            required
-            className={`${SELECT} w-full`}
-          />
-          <input
-            type="text"
-            value={artist}
-            onChange={e => setArtist(e.target.value)}
-            placeholder="Artist"
-            className={`${SELECT} w-full`}
-          />
-          <div className="flex gap-2">
-            <select
-              value={keyRoot}
-              onChange={e => setKeyRoot(e.target.value)}
-              className={`${SELECT} flex-1`}
-            >
-              <option value="">— Key —</option>
-              {CHROMATIC_NOTES.map(r => (
-                <option key={r} value={r}>{r}</option>
-              ))}
-            </select>
-            <select
-              value={keyMode}
-              onChange={e => setKeyMode(e.target.value)}
-              disabled={!keyRoot}
-              className={`${SELECT} w-24 disabled:opacity-40`}
-            >
-              {MODE_DATA.map(m => (
-                <option key={m.suffix} value={m.suffix}>{m.label}</option>
-              ))}
-            </select>
-            <NumpadInput
-              value={capo}
-              onChange={val => setCapo(val)}
-              placeholder="Capo"
-              min={0}
-              max={11}
-              className={`${SELECT} w-20`}
-            />
-            <NumpadInput
-              value={tempo}
-              onChange={val => setTempo(val)}
-              placeholder="BPM"
-              min={1}
-              className={`${SELECT} w-24`}
-            />
-            <select
-              value={timeSignature}
-              onChange={e => setTimeSignature(Number(e.target.value))}
-              className={`${SELECT} w-20`}
-            >
-              <option value={1}>1/4</option>
-              <option value={2}>2/4</option>
-              <option value={3}>3/4</option>
-              <option value={4}>4/4</option>
-              <option value={6}>6/8</option>
-            </select>
-          </div>
-          <InstrumentSelector
-            excludeCustom
-            compact
-            instrument={instrument}
-            onInstrumentChange={setInstrument}
-          />
-          <button
-            type="submit"
-            disabled={loading || !metadataIsDirty || !title.trim()}
-            className={BTN_SUBMIT}
-          >
-            {loading ? 'Saving…' : isOwner ? 'Save' : 'Submit for review'}
-          </button>
-
-          {/* Mode switchers */}
-          <div className="flex flex-col gap-2 mt-2 pt-4 border-t border-gray-100">
-            <button type="button" onClick={() => { setMode('chart'); setSubmitSuccess(false); }} className={BTN_SECONDARY}>
-              Update Song Chart
-            </button>
-            {isOwner && (
-              <button type="button" onClick={() => setMode('chords')} className={BTN_SECONDARY}>
-                Manage Chords
-              </button>
-            )}
-            {isOwner && (!showDeleteConfirm ? (
-              <button
-                type="button"
-                onClick={() => setShowDeleteConfirm(true)}
-                className="px-4 py-2 text-sm border border-danger-3 rounded-lg text-danger-5 hover:bg-danger-1 transition-colors"
-              >
-                Delete Song
-              </button>
-            ) : (
-              <div className="flex flex-col gap-2 p-3 bg-danger-1 border border-danger-3 rounded-lg">
-                <p className="text-sm text-danger-7">Are you sure? This action cannot be undone.</p>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={handleDelete}
-                    className="flex-1 px-3 py-1.5 bg-danger-6 text-white text-sm rounded-lg hover:bg-danger-7 transition-colors"
-                  >
-                    Confirm
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowDeleteConfirm(false)}
-                    className="flex-1 px-3 py-1.5 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {error && <p className="text-danger-6 text-sm">{error}</p>}
-        </form>
-      )}
-
-      {mode === 'chart' && (
-        <form onSubmit={isOwner ? handleChartSubmit : handleChartSubmitNonOwner} className="flex flex-col gap-3 mt-4">
-          <button type="button" onClick={() => { setRawChordSheet(song.rawChordSheet ?? ''); setMode('metadata'); setSubmitSuccess(false); }} className="text-sm text-brand-5 hover:text-brand-7 self-start">
-            ← Back
-          </button>
-          <textarea
-            value={rawChordSheet}
-            onChange={e => setRawChordSheet(e.target.value)}
-            rows={14}
-            className={TEXTAREA_MONO}
-          />
-          <button
-            type="submit"
-            disabled={loading || !chartIsDirty}
-            className={BTN_SUBMIT}
-          >
-            {loading ? 'Saving…' : isOwner ? 'Save & Re-parse' : 'Submit for review'}
-          </button>
-          {error && <p className="text-danger-6 text-sm">{error}</p>}
-        </form>
-      )}
-
-      {mode === 'chords' && (
-        <div className="flex flex-col gap-4 mt-4">
-          <button type="button" onClick={() => setMode('metadata')} className="text-sm text-brand-5 hover:text-brand-7 self-start">
-            ← Back
-          </button>
-          {extractChordNames(song).length === 0 ? (
-            <p className="text-sm text-gray-400">No chords detected in this song.</p>
-          ) : (
-            <div className="grid grid-cols-6 gap-3">
-              {extractChordNames(song).map(name => {
-                const voicings = chordVoicings[name] ?? [];
-                const idx = chordVoicingIdx[name] ?? 0;
-                const frets = voicings.length > 0 ? voicings[idx].frets : [0, 0, 0, 0, 0, 0];
-                return (
-                  <div
-                    key={name}
-                    className="relative flex-shrink-0 flex flex-col items-center border border-gray-200 rounded-lg px-2 pt-2 pb-1 bg-white"
-                  >
-                    <span className="text-xs font-semibold text-gray-700 mb-1">{name}</span>
-                    <button
-                      title="Add voicing"
-                      onClick={() => setSelectedChord(name)}
-                      className="absolute top-1 right-2 text-gray-300 hover:text-brand-5 text-xl leading-none"
-                    >
-                      +
-                    </button>
-                    <ChordDiagram frets={frets} width={90} />
-                    {voicings.length > 1 && (
-                      <div className="flex items-center justify-between w-full text-xs text-gray-400 mt-1">
-                        <button
-                          className="hover:text-gray-600 px-1 text-2xl leading-none"
-                          onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx - 1 + voicings.length) % voicings.length }))}
-                        >‹</button>
-                        <span>{idx + 1}/{voicings.length}</span>
-                        <button
-                          className="hover:text-gray-600 px-1 text-2xl leading-none"
-                          onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx + 1) % voicings.length }))}
-                        >›</button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
+      {mode === 'metadata' && renderMetadataPanel()}
+      {mode === 'chart' && renderChartPanel()}
+      {mode === 'chords' && renderChordsPanel()}
 
       {selectedChord && (
         <ChordUploadModal

@@ -1,3 +1,23 @@
+import type { SongDetail, GuitarTabLine } from '../../core/api/client';
+
+export function extractChordNames(song: SongDetail): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  song.chordLines.forEach(line => {
+    const text = (line as GuitarTabLine).type === 'tab'
+      ? (line as GuitarTabLine).header
+      : (line as { chords: string }).chords;
+    text.split(/\s+/).forEach(t => {
+      const core = t.replace(/^\(+/, '').replace(/[)*]+$/, '');
+      if (/^[A-G]/.test(core) && !seen.has(core)) {
+        seen.add(core);
+        result.push(core);
+      }
+    });
+  });
+  return result;
+}
+
 // Maps display root names to Java Note enum names
 const ROOT_TO_ENUM: Record<string, string> = {
   'C': 'C', 'C#': 'C_SHARP', 'Db': 'C_SHARP',

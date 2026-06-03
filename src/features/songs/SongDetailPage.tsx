@@ -11,7 +11,7 @@ import InstrumentSelector from '../../core/components/InstrumentSelector';
 import CapoTransposeControls from '../../core/components/CapoTransposeControls';
 import { useInstrument } from '../../core/useInstrument';
 import type { InstrumentName } from '../../core/useInstrument';
-import { parseChordName } from './parseChordName';
+import { parseChordName, extractChordNames } from './parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { useSongNavContext } from '../../core/context/SongNavContext';
 import { NOTE_KEYS, getStringCount } from '../../core/music';
@@ -27,24 +27,6 @@ function usePortrait() {
     return () => mq.removeEventListener('change', h);
   }, []);
   return p;
-}
-
-function extractChordNames(song: SongDetail): string[] {
-  const seen = new Set<string>();
-  const result: string[] = [];
-  song.chordLines.forEach(line => {
-    const text = (line as GuitarTabLine).type === 'tab'
-      ? (line as GuitarTabLine).header
-      : (line as { chords: string }).chords;
-    text.split(/\s+/).forEach(t => {
-      const core = t.replace(/^\(+/, '').replace(/[)*]+$/, '');
-      if (/^[A-G]/.test(core) && !seen.has(core)) {
-        seen.add(core);
-        result.push(core);
-      }
-    });
-  });
-  return result;
 }
 
 export default function SongDetailPage() {
