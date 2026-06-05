@@ -47,7 +47,7 @@ export default function NeckNoteDot({ dot, cx, cy }: NeckNoteDotProps) {
           <circle cx={cx} cy={cy} r={R_NORMAL} fill={OFF_SCALE_COLOR} />
           {dot.note && (
             <text x={cx} y={cy + fontSize * 0.38} textAnchor="middle"
-              fontSize={fontSize} fill="#111827" fontFamily="sans-serif" fontWeight="600"
+              fontSize={fontSize} fill="#9ca3af" fontFamily="sans-serif" fontWeight="600"
               style={{ pointerEvents: 'none', userSelect: 'none' }}>
               {dot.note}
             </text>
