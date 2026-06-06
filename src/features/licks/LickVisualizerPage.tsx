@@ -7,6 +7,8 @@ import LickSubNav from './LickSubNav';
 import { uploadLick } from '../../core/api/client';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { getStringCount, getStringLabels } from '../../core/music';
+import { useSoundContext } from '../../core/sound/SoundContext';
+import { dotToMidi } from '../../core/sound/midiUtils';
 import { BTN, TOGGLE, TOGGLE_ON, TOGGLE_OFF } from '../../core/ui';
 import {
   FRET_COUNT,
@@ -23,6 +25,7 @@ import {
 
 export default function LickVisualizerPage() {
   const { bpm } = useMetronomeContext();
+  const { playMidi } = useSoundContext();
   const location = useLocation();
 
   const [rawTab, setRawTab] = useState('');
@@ -73,6 +76,13 @@ export default function LickVisualizerPage() {
     }, ms);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [isRunning, speedMode, bpm, columns.length, displayMode]);
+
+  useEffect(() => {
+    if (!isRunning || displayMode !== 'column') return;
+    const col = columns[currentCol];
+    if (!col || col.isRest) return;
+    playMidi(col.notes.map(n => dotToMidi(n.string, n.fret, instrument)), 0);
+  }, [currentCol]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLibrarySelect = useCallback((selectedRawTab: string) => {
     const normalized = normalizeTab(selectedRawTab);

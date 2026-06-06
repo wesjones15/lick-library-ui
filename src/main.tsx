@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './index.css'
 import Layout from './core/components/Layout'
 import { MetronomeProvider } from './core/metronome/MetronomeContext'
+import { SoundProvider } from './core/sound/SoundContext'
 import { SongNavProvider } from './core/context/SongNavContext'
 import { AuthProvider, useAuth } from './core/auth/AuthContext'
 import AuthCallbackPage from './features/auth/AuthCallbackPage'
@@ -41,6 +42,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
       <MetronomeProvider>
+        <SoundProvider>
         <SongNavProvider>
           <BrowserRouter>
             <Routes>
@@ -70,6 +72,7 @@ createRoot(document.getElementById('root')!).render(
             </Routes>
           </BrowserRouter>
         </SongNavProvider>
+        </SoundProvider>
       </MetronomeProvider>
     </AuthProvider>
   </StrictMode>,

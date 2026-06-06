@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import Metronome from '../metronome/MetronomeWidget';
 import { useSongNavContext } from '../context/SongNavContext';
+import { useSoundContext } from '../sound/SoundContext';
 import { useAuth } from '../auth/AuthContext';
 import AccountDropdown from './AccountDropdown';
 import MiniBar from './MiniBar';
@@ -29,6 +30,7 @@ export default function Layout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { info, collapsed, setCollapsed, miniActions } = useSongNavContext();
+  const { soundEnabled, setSoundEnabled } = useSoundContext();
   const { currentUser, logout } = useAuth();
   const BACKEND = (import.meta.env.VITE_API_URL ?? `http://${window.location.hostname}:8080/api`).replace(/\/api$/, '');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -154,7 +156,15 @@ export default function Layout() {
     <div className="min-h-screen bg-white">
       <nav className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 z-50 flex items-center px-4 sm:px-6">
         {collapsed && info ? <MiniBar /> : renderNormalNav()}
-        <div className="ml-6 shrink-0">
+        <button
+          onClick={() => setSoundEnabled(!soundEnabled)}
+          className={`shrink-0 px-2 py-1.5 rounded-md text-sm transition-colors ${soundEnabled ? 'text-brand-5' : 'text-gray-400 hover:text-gray-600'}`}
+          aria-label={soundEnabled ? 'Mute sound' : 'Enable sound'}
+          title={soundEnabled ? 'Sound on' : 'Sound off'}
+        >
+          {soundEnabled ? '🔊' : '🔇'}
+        </button>
+        <div className="ml-2 shrink-0">
           <Metronome />
         </div>
       </nav>

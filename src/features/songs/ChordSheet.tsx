@@ -1,4 +1,6 @@
 import { useState, useRef, useLayoutEffect, useMemo } from 'react';
+import { useSoundContext } from '../../core/sound/SoundContext';
+import { voicingToMidi } from '../../core/sound/midiUtils';
 import type { ChordLyric, ChordSheetLine, GuitarTabLine, ChordVoicing, SongLickInfo } from '../../core/api/client';
 import { getChordVoicings } from '../../core/api/client';
 import { parseChordName } from './parseChordName';
@@ -26,6 +28,7 @@ function ChordToken({ name, instrument }: ChordTokenProps) {
   const [voicings, setVoicings] = useState<ChordVoicing[]>([]);
   const [voicingIdx, setVoicingIdx] = useState(0);
   const [open, setOpen] = useState(false);
+  const { playMidi } = useSoundContext();
   const [modalOpen, setModalOpen] = useState(false);
   const [showAbove, setShowAbove] = useState(false);
   const [popoverOffset, setPopoverOffset] = useState(0);
@@ -137,6 +140,13 @@ function ChordToken({ name, instrument }: ChordTokenProps) {
               )}
               <span style={{ fontSize: '7px', color: '#9ca3af', lineHeight: 1 }}>{formatInstrumentLabel(instrument)}</span>
             </span>
+            {voicings.length > 0 && (
+              <button
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', color: '#6b7280', fontSize: '14px', lineHeight: 1 }}
+                onClick={e => { e.stopPropagation(); playMidi(voicingToMidi(voicings[voicingIdx].frets, instrument), 20); }}
+                title="Play chord"
+              >▶</button>
+            )}
             <button
               style={{ background: 'none', border: 'none', cursor: voicings.length > 1 ? 'pointer' : 'default', padding: 0, color: voicings.length > 1 ? '#6b7280' : 'transparent', fontSize: '24px', lineHeight: 1 }}
               onClick={e => { e.stopPropagation(); if (voicings.length > 1) setVoicingIdx(i => (i + 1) % voicings.length); }}

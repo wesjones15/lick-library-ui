@@ -4,6 +4,8 @@ import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../../core/components/G
 import LickSubNav from './LickSubNav';
 import { uploadLick, getScalePositions } from '../../core/api/client';
 import { NOTE_KEYS, MODE_DATA, formatNoteEnum, getStringCount, getStringLabels } from '../../core/music';
+import { useSoundContext } from '../../core/sound/SoundContext';
+import { dotToMidi } from '../../core/sound/midiUtils';
 import { BTN } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -39,6 +41,7 @@ export default function LickBuilderPage() {
   const pendingNotesRef = useRef<{ string: number; fret: number }[]>([]);
   const chordTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const buildHighlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { playMidi } = useSoundContext();
 
   // Scale overlay fetch
   useEffect(() => {
@@ -85,6 +88,7 @@ export default function LickBuilderPage() {
   }, [isBuilding, commitPendingColumn]);
 
   const handleNeckClick = useCallback((si: number, fret: number) => {
+    playMidi([dotToMidi(si, fret, instrument)]);
     const degree = scaleDots[si]?.[fret]?.degree ?? 1;
     setBuildCurrentNote({ string: si, fret, degree });
     if (!isBuilding) {
@@ -110,7 +114,7 @@ export default function LickBuilderPage() {
     pendingNotesRef.current = [...pendingNotesRef.current, { string: si, fret }];
     if (chordTimerRef.current) clearTimeout(chordTimerRef.current);
     chordTimerRef.current = setTimeout(() => commitPendingColumn(), 1500);
-  }, [isBuilding, chordDetect, scaleDots, commitPendingColumn, buildLabels]);
+  }, [isBuilding, chordDetect, scaleDots, commitPendingColumn, buildLabels, playMidi, instrument]);
 
   const handleSaveBuiltLick = useCallback(async () => {
     if (!builtTabText.trim()) return;

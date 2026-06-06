@@ -5,6 +5,8 @@ import PentatonicWidget from './PentatonicWidget';
 import ChordsWidget from './ChordsWidget';
 import { getScalePositions } from '../../core/api/client';
 import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI, MODE_SEMITONES, ROOT_CHROMATIC, MODE_DATA, MODE_INTERVALS } from '../../core/music';
+import { useSoundContext } from '../../core/sound/SoundContext';
+import { dotToMidi } from '../../core/sound/midiUtils';
 import { SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -35,6 +37,7 @@ export default function TheoryPage() {
   const [pentWidgetMode, setPentWidgetMode] = useState(mode);
   const [pentModeSynced, setPentModeSynced] = useState(true);
   const noteHoldTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { playMidi } = useSoundContext();
 
   useEffect(() => {
     const sc = getStringCount(instrument);
@@ -201,6 +204,7 @@ export default function TheoryPage() {
     if (highlightedDegrees.size > 0) return;
     const dot = scaleDots[stringIndex]?.[fret];
     if (!dot || dot.degree === null) return;
+    playMidi([dotToMidi(stringIndex, fret, instrument)]);
     if (currentNote?.string === stringIndex && currentNote?.fret === fret) {
       if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
       setCurrentNote(null);

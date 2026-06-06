@@ -117,3 +117,17 @@ export const GUITAR_OPEN_MIDI = [40, 45, 50, 55, 59, 64];
 // Open-string semitone values from C=0, low string first (index = backend string index)
 export const INSTRUMENT_OPEN_SEMITONES: Record<string, number[]> =
   Object.fromEntries(INSTRUMENT_DATA.map(i => [i.value, i.openSemitones]));
+
+// Open-string MIDI note numbers, low string first (index 0 = lowest string)
+export const INSTRUMENT_OPEN_MIDI: Record<string, number[]> = {
+  GUITAR:   [40, 45, 50, 55, 59, 64], // E2 A2 D3 G3 B3 E4
+  DROP_D:   [38, 45, 50, 55, 59, 64], // D2 A2 D3 G3 B3 E4
+  OPEN_G:   [38, 43, 50, 55, 59, 62], // D2 G2 D3 G3 B3 D4
+  OPEN_D:   [38, 45, 50, 54, 57, 62], // D2 A2 D3 F#3 A3 D4
+  DADGAD:   [38, 45, 50, 55, 57, 62], // D2 A2 D3 G3 A3 D4
+  EB:       [39, 44, 49, 54, 58, 63], // Eb2 Ab2 Db3 Gb3 Bb3 Eb4
+  BASS:     [28, 33, 38, 43],         // E1 A1 D2 G2
+  UKULELE:  [55, 60, 64, 69],         // G3 C4 E4 A4
+  MANDOLIN: [55, 62, 69, 76],         // G3 D4 A4 E5
+  BANJO:    [38, 55, 59, 62, 67],     // D2 G3 B3 D4 G4
+};

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSongNavContext } from '../context/SongNavContext';
 import { useMetronomeContext } from '../metronome/MetronomeContext';
+import { useSoundContext } from '../sound/SoundContext';
 import { useClickOutside } from '../useClickOutside';
 import InstrumentSelector from './InstrumentSelector';
 import type { InstrumentName } from '../useInstrument';
@@ -8,6 +9,7 @@ import type { InstrumentName } from '../useInstrument';
 export default function MiniBar() {
   const { info, collapsed, setCollapsed, showChords, setShowChords, miniActions } = useSongNavContext();
   const { bpm, isPlaying, setBpm, setIsPlaying } = useMetronomeContext();
+  const { soundEnabled, setSoundEnabled } = useSoundContext();
   const [iconsOpen, setIconsOpen] = useState(false);
   const [playlistPanelOpen, setPlaylistPanelOpen] = useState(false);
   const [instrumentPanelOpen, setInstrumentPanelOpen] = useState(false);
@@ -168,6 +170,14 @@ export default function MiniBar() {
                 )}
               </div>
             )}
+
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${soundEnabled ? 'text-brand-5' : 'text-gray-400 hover:text-brand-5'}`}
+              aria-label={soundEnabled ? 'Mute sound' : 'Enable sound'}
+            >
+              {soundEnabled ? '🔊' : '🔇'}
+            </button>
 
             <button
               onClick={() => { miniActions?.navigateManage(); setIconsOpen(false); }}

@@ -3,6 +3,8 @@ import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../../core/components/G
 import { getDiatonicChords, type DiatonicChord } from './diatonicUtils';
 import { getChordVoicings, type ChordFrets } from '../../core/api/client';
 import { NOTE_KEYS, getStringCount, getStringLabels, MODE_DATA } from '../../core/music';
+import { useSoundContext } from '../../core/sound/SoundContext';
+import { voicingToMidi } from '../../core/sound/midiUtils';
 import { SELECT } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -39,6 +41,7 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
   const [allVoicings, setAllVoicings] = useState<ChordFrets[]>([]);
   const [loadingVoicing, setLoadingVoicing] = useState(false);
 
+  const { playMidi } = useSoundContext();
   const chords = getDiatonicChords(root, mode);
 
   // Reset selection when root, mode, or instrument changes
@@ -64,6 +67,7 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
         setAllVoicings(voicings.map(v => v.frets));
         setVoicingIdx(0);
         setVoicingDots(chordFretsToNeckDots(voicings[0].frets, n));
+        playMidi(voicingToMidi(voicings[0].frets, instrument), 20);
       } else {
         setAllVoicings([]);
         setVoicingDots(null);
@@ -80,6 +84,7 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
     if (next < 0 || next >= allVoicings.length) return;
     setVoicingIdx(next);
     setVoicingDots(chordFretsToNeckDots(allVoicings[next], getStringCount(instrument)));
+    playMidi(voicingToMidi(allVoicings[next], instrument), 20);
   }
 
   const qualityBadgeColor: Record<string, string> = {

@@ -4,6 +4,8 @@ import { getChordVoicings } from '../../core/api/client';
 import type { ChordVoicing } from '../../core/api/client';
 import { parseChordName } from '../songs/parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
+import { useSoundContext } from '../../core/sound/SoundContext';
+import { voicingToMidi } from '../../core/sound/midiUtils';
 import { CHROMATIC_NOTES, getStringLabels, MODE_DATA } from '../../core/music';
 import { SELECT_COMPACT } from '../../core/ui';
 import type { InstrumentName } from '../../core/useInstrument';
@@ -39,8 +41,10 @@ export default function NoodlePage() {
 
   const warmupRef = useRef(2);
   const halfBeatRef = useRef(0);
+  const prevActiveChordRef = useRef<string | null>(null);
 
   const { bpm, setBpm, isPlaying, setIsPlaying, subscribeBeat, unsubscribeBeat } = useMetronomeContext();
+  const { playMidi } = useSoundContext();
 
   const songMode = useSongMode({
     instrument,
@@ -155,6 +159,14 @@ export default function NoodlePage() {
   const capoOffset = noodleMode === 'song' ? songMode.localCapo : 0;
   const activeVoicing = (activeChord ? cachedVoicings[activeChord]?.[0] : null) ?? null;
   const nextChord = noodleMode === 'song' ? songMode.nextActiveChord : null;
+
+  useEffect(() => {
+    if (activeChord !== prevActiveChordRef.current && activeChord !== null) {
+      const midiNotes = voicingToMidi(activeVoicing?.frets ?? [], instrument);
+      playMidi(midiNotes, 20);
+    }
+    prevActiveChordRef.current = activeChord;
+  }, [activeChord]); // eslint-disable-line react-hooks/exhaustive-deps
   const dots = useChordHighlight(activeChord, soundingRoot, soundingMode, instrument, capoOffset, activeVoicing, neckRefresh, nextChord);
 
   const mergedDots = useMemo(() => {
