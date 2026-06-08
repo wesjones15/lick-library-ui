@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import { getChordVoicings } from '../../core/api/client';
 import type { ChordVoicing } from '../../core/api/client';
@@ -41,10 +42,13 @@ export default function NoodlePage() {
 
   const warmupRef = useRef(2);
   const halfBeatRef = useRef(0);
-  const prevActiveChordRef = useRef<string | null>(null);
 
   const { bpm, setBpm, isPlaying, setIsPlaying, subscribeBeat, unsubscribeBeat } = useMetronomeContext();
-  const { playMidi } = useSoundContext();
+  const { playMidi, preload } = useSoundContext();
+
+  const activeVoicingRef = useRef<ChordVoicing | null>(null);
+  const instrumentRef = useRef(instrument);
+  const playMidiRef = useRef(playMidi);
 
   const songMode = useSongMode({
     instrument,
@@ -66,6 +70,7 @@ export default function NoodlePage() {
   const [freeHasAdvanced, setFreeHasAdvanced] = useState(false);
 
   function handleFreeApply(lines: string[][], chords: string[]) {
+    preload();
     setFreeChords(chords);
     setChordIdx(0);
     halfBeatRef.current = 0;
@@ -109,7 +114,10 @@ export default function NoodlePage() {
       warmupRef.current--;
       return;
     }
-    advanceRef.current();
+    flushSync(() => {
+      advanceRef.current();
+    });
+    playMidiRef.current(voicingToMidi(activeVoicingRef.current?.frets ?? [], instrumentRef.current), 8);
   }, []);
 
   useEffect(() => {
@@ -118,6 +126,7 @@ export default function NoodlePage() {
   }, [subscribeBeat, unsubscribeBeat, onBeat]);
 
   function handlePlay() {
+    preload();
     if (!isPlaying) {
       const parsed = parseInt(bpmInput, 10);
       if (!isNaN(parsed)) {
@@ -160,13 +169,9 @@ export default function NoodlePage() {
   const activeVoicing = (activeChord ? cachedVoicings[activeChord]?.[0] : null) ?? null;
   const nextChord = noodleMode === 'song' ? songMode.nextActiveChord : null;
 
-  useEffect(() => {
-    if (activeChord !== prevActiveChordRef.current && activeChord !== null) {
-      const midiNotes = voicingToMidi(activeVoicing?.frets ?? [], instrument);
-      playMidi(midiNotes, 20);
-    }
-    prevActiveChordRef.current = activeChord;
-  }, [activeChord]); // eslint-disable-line react-hooks/exhaustive-deps
+  activeVoicingRef.current = activeVoicing;
+  instrumentRef.current = instrument;
+  playMidiRef.current = playMidi;
   const dots = useChordHighlight(activeChord, soundingRoot, soundingMode, instrument, capoOffset, activeVoicing, neckRefresh, nextChord);
 
   const mergedDots = useMemo(() => {
@@ -385,7 +390,7 @@ export default function NoodlePage() {
       )}
 
       {songMode.showLibrary && (
-        <SongLibraryModal onSelect={songMode.loadSongById} onClose={() => songMode.setShowLibrary(false)} />
+        <SongLibraryModal onSelect={(id) => { preload(); songMode.loadSongById(id); }} onClose={() => songMode.setShowLibrary(false)} />
       )}
     </div>
   );
