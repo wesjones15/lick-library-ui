@@ -7,6 +7,7 @@ import Layout from './core/components/Layout'
 import { MetronomeProvider } from './core/metronome/MetronomeContext'
 import { SoundProvider } from './core/sound/SoundContext'
 import { SongNavProvider } from './core/context/SongNavContext'
+import { SongsListProvider } from './core/context/SongsListContext'
 import { AuthProvider, useAuth } from './core/auth/AuthContext'
 import AuthCallbackPage from './features/auth/AuthCallbackPage'
 import HomePage from './features/home/HomePage'
@@ -44,6 +45,7 @@ createRoot(document.getElementById('root')!).render(
       <MetronomeProvider>
         <SoundProvider>
         <SongNavProvider>
+        <SongsListProvider>
           <BrowserRouter>
             <Routes>
               <Route path="/auth" element={<AuthCallbackPage />} />
@@ -71,6 +73,7 @@ createRoot(document.getElementById('root')!).render(
               </Route>
             </Routes>
           </BrowserRouter>
+        </SongsListProvider>
         </SongNavProvider>
         </SoundProvider>
       </MetronomeProvider>

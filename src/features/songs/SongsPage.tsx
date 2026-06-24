@@ -5,6 +5,7 @@ import { BTN_PRIMARY, BTN_XS } from '../../core/ui';
 import type { SongSummary } from '../../core/api/client';
 import SongList from './SongList';
 import AddToPlaylistModal from '../playlists/AddToPlaylistModal';
+import { useSongsListContext } from '../../core/context/SongsListContext';
 
 type SortKey = 'title' | 'artist' | 'key' | 'tempo';
 const PAGE_SIZE = 16;
@@ -18,12 +19,8 @@ export default function SongsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [managing, setManaging] = useState(false);
-  const [sortBy, setSortBy] = useState<SortKey>('title');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
-  const [filterArtist, setFilterArtist] = useState('');
-  const [page, setPage] = useState(1);
-  const [showAll, setShowAll] = useState(false);
   const [addToPlaylist, setAddToPlaylist] = useState<SongSummary | null>(null);
+  const { sortBy, setSortBy, sortDir, setSortDir, filterArtist, setFilterArtist, page, setPage, showAll, setShowAll } = useSongsListContext();
 
   const fetchSongs = async () => {
     try {
