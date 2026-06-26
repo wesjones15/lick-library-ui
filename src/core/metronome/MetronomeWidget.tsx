@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useMetronomeContext } from './MetronomeContext';
 import NumpadInput from '../components/NumpadInput';
+import { CHROMATIC_NOTES } from '../music';
 
 const MIN_BPM = 40;
 const MAX_BPM = 240;
@@ -14,7 +15,7 @@ const TIME_SIG_OPTIONS = [
 ];
 
 export default function Metronome() {
-  const { bpm, setBpm, isPlaying, setIsPlaying, beatsPerBar, setBeatsPerBar, subscribeBeat, unsubscribeBeat } = useMetronomeContext();
+  const { bpm, setBpm, isPlaying, setIsPlaying, beatsPerBar, setBeatsPerBar, subscribeBeat, unsubscribeBeat, clickKey, setClickKey } = useMetronomeContext();
   const [bpmInput, setBpmInput] = useState(String(bpm));
   const [activeBeat, setActiveBeat] = useState<number | null>(null);
   const [pulsed, setPulsed] = useState(false);
@@ -134,21 +135,36 @@ export default function Metronome() {
               >⚙︎</button>
             </div>
 
-            {/* Time signature selector */}
+            {/* Time signature + key selectors */}
             {showAdvanced && (
-              <div className="flex justify-center gap-1.5 flex-wrap">
-                {TIME_SIG_OPTIONS.map(opt => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setBeatsPerBar(opt.value)}
-                    className={`px-2 py-0.5 rounded text-xs font-medium border transition-colors ${
-                      beatsPerBar === opt.value
-                        ? 'bg-brand-6 text-white border-brand-6'
-                        : 'border-gray-300 text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >{opt.label}</button>
-                ))}
-              </div>
+              <>
+                <div className="flex justify-center gap-1.5 flex-wrap">
+                  {TIME_SIG_OPTIONS.map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setBeatsPerBar(opt.value)}
+                      className={`px-2 py-0.5 rounded text-xs font-medium border transition-colors ${
+                        beatsPerBar === opt.value
+                          ? 'bg-brand-6 text-white border-brand-6'
+                          : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >{opt.label}</button>
+                  ))}
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-gray-400">Key</span>
+                  <select
+                    value={clickKey ?? ''}
+                    onChange={e => setClickKey(e.target.value || null)}
+                    className="text-xs border border-gray-300 rounded px-1.5 py-0.5 text-gray-600 focus:outline-none focus:border-brand-4 bg-white"
+                  >
+                    <option value="">— none —</option>
+                    {CHROMATIC_NOTES.map(n => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
             )}
 
             {/* Start / Stop */}
