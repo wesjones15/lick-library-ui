@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllSongs } from '../../core/api/client';
 import { BTN_PRIMARY, BTN_XS } from '../../core/ui';
@@ -20,7 +20,8 @@ export default function SongsPage() {
   const [error, setError] = useState<string | null>(null);
   const [managing, setManaging] = useState(false);
   const [addToPlaylist, setAddToPlaylist] = useState<SongSummary | null>(null);
-  const { sortBy, setSortBy, sortDir, setSortDir, filterArtist, setFilterArtist, page, setPage, showAll, setShowAll } = useSongsListContext();
+  const { sortBy, setSortBy, sortDir, setSortDir, filterArtist, setFilterArtist, search, setSearch, page, setPage, showAll, setShowAll } = useSongsListContext();
+  const prevFiltersRef = useRef({ sortBy, sortDir, filterArtist, search });
 
   const fetchSongs = async () => {
     try {
@@ -35,7 +36,14 @@ export default function SongsPage() {
   };
 
   useEffect(() => { fetchSongs(); }, []);
-  useEffect(() => { setPage(1); setShowAll(false); }, [sortBy, sortDir, filterArtist]);
+  useEffect(() => {
+    const prev = prevFiltersRef.current;
+    if (prev.sortBy !== sortBy || prev.sortDir !== sortDir || prev.filterArtist !== filterArtist || prev.search !== search) {
+      setPage(1);
+      setShowAll(false);
+    }
+    prevFiltersRef.current = { sortBy, sortDir, filterArtist, search };
+  }, [sortBy, sortDir, filterArtist, search]);
 
   function handleSort(key: SortKey) {
     if (key === sortBy) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -44,8 +52,13 @@ export default function SongsPage() {
 
   const artists = [...new Set(songs.map(s => s.artist).filter(Boolean))].sort() as string[];
 
+  const searchLower = search.trim().toLowerCase();
   const filtered = songs
     .filter(s => !filterArtist || s.artist === filterArtist)
+    .filter(s => !searchLower ||
+      s.title?.toLowerCase().includes(searchLower) ||
+      s.artist?.toLowerCase().includes(searchLower)
+    )
     .sort((a, b) => {
       let cmp = 0;
       if (sortBy === 'title')  cmp = (a.title ?? '').localeCompare(b.title ?? '');
@@ -97,6 +110,13 @@ export default function SongsPage() {
             {artists.map(a => <option key={a} value={a}>{a}</option>)}
           </select>
         )}
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search…"
+          className="text-xs border border-gray-200 rounded px-2 py-1 text-gray-500 focus:outline-none focus:border-brand-4 bg-white min-w-[120px]"
+        />
       </div>
 
       {loading && <p className="text-gray-400 text-sm">Loading…</p>}
@@ -107,6 +127,10 @@ export default function SongsPage() {
             <div className="flex items-center justify-center gap-4 mb-4 text-sm text-gray-500">
               {!showAll && (
                 <>
+                  <button onClick={() => setPage(1)} disabled={page === 1}
+                    className="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                    «
+                  </button>
                   <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
                     className="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                     ← Prev
@@ -115,6 +139,10 @@ export default function SongsPage() {
                   <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
                     className="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                     Next →
+                  </button>
+                  <button onClick={() => setPage(totalPages)} disabled={page === totalPages}
+                    className="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                    »
                   </button>
                 </>
               )}

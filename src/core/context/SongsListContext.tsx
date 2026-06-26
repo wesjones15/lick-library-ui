@@ -10,6 +10,8 @@ interface SongsListContextValue {
   setSortDir: (v: 'asc' | 'desc') => void;
   filterArtist: string;
   setFilterArtist: (v: string) => void;
+  search: string;
+  setSearch: (v: string) => void;
   page: number;
   setPage: (v: number) => void;
   showAll: boolean;
@@ -22,11 +24,12 @@ export function SongsListProvider({ children }: { children: ReactNode }) {
   const [sortBy, setSortBy] = useState<SortKey>('title');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [filterArtist, setFilterArtist] = useState('');
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
 
   return (
-    <SongsListContext.Provider value={{ sortBy, setSortBy, sortDir, setSortDir, filterArtist, setFilterArtist, page, setPage, showAll, setShowAll }}>
+    <SongsListContext.Provider value={{ sortBy, setSortBy, sortDir, setSortDir, filterArtist, setFilterArtist, search, setSearch, page, setPage, showAll, setShowAll }}>
       {children}
     </SongsListContext.Provider>
   );
