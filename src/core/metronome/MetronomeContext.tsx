@@ -10,6 +10,8 @@ interface MetronomeContextValue {
   setBeatsPerBar: (v: number) => void;
   subscribeBeat: (fn: (beat: number) => void) => void;
   unsubscribeBeat: (fn: (beat: number) => void) => void;
+  clickKey: string | null;
+  setClickKey: (key: string | null) => void;
 }
 
 const MetronomeContext = createContext<MetronomeContextValue | null>(null);
@@ -18,6 +20,7 @@ export function MetronomeProvider({ children }: { children: React.ReactNode }) {
   const [bpm, setBpm] = useState(120);
   const [isPlaying, setIsPlaying] = useState(false);
   const [beatsPerBar, setBeatsPerBar] = useState(4);
+  const [clickKey, setClickKey] = useState<string | null>(null);
 
   const beatListeners = useRef<Set<(beat: number) => void>>(new Set());
 
@@ -33,10 +36,10 @@ export function MetronomeProvider({ children }: { children: React.ReactNode }) {
     beatListeners.current.forEach(fn => fn(beat));
   }, []);
 
-  useMetronome(bpm, isPlaying, masterOnBeat, beatsPerBar);
+  useMetronome(bpm, isPlaying, masterOnBeat, beatsPerBar, clickKey);
 
   return (
-    <MetronomeContext.Provider value={{ bpm, setBpm, isPlaying, setIsPlaying, beatsPerBar, setBeatsPerBar, subscribeBeat, unsubscribeBeat }}>
+    <MetronomeContext.Provider value={{ bpm, setBpm, isPlaying, setIsPlaying, beatsPerBar, setBeatsPerBar, subscribeBeat, unsubscribeBeat, clickKey, setClickKey }}>
       {children}
     </MetronomeContext.Provider>
   );

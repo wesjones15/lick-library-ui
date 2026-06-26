@@ -43,7 +43,7 @@ export default function NoodlePage() {
   const warmupRef = useRef(2);
   const halfBeatRef = useRef(0);
 
-  const { bpm, setBpm, isPlaying, setIsPlaying, subscribeBeat, unsubscribeBeat } = useMetronomeContext();
+  const { bpm, setBpm, isPlaying, setIsPlaying, subscribeBeat, unsubscribeBeat, setClickKey } = useMetronomeContext();
   const { playMidi, preload } = useSoundContext();
 
   const activeVoicingRef = useRef<ChordVoicing | null>(null);
@@ -158,6 +158,11 @@ export default function NoodlePage() {
       soundingMode: songMode.soundingMode,
     };
   }, [noodleMode, freeRoot, freeMode, songMode.soundingRoot, songMode.shapeRoot, songMode.soundingMode]);
+
+  useEffect(() => {
+    if (noodleMode !== 'none') setClickKey(soundingRoot || null);
+    return () => { setClickKey(null); };
+  }, [soundingRoot, noodleMode]);
 
   const activeChord = noodleMode === 'song'
     ? songMode.activeChord

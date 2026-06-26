@@ -33,7 +33,7 @@ export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const playlistState = usePlaylistNav();
-  const { setBpm, setIsPlaying, bpm, isPlaying, setBeatsPerBar } = useMetronomeContext();
+  const { setBpm, setIsPlaying, bpm, isPlaying, setBeatsPerBar, setClickKey } = useMetronomeContext();
   const { setInfo, collapsed, showChords, setShowChords, setMiniActions } = useSongNavContext();
   const isPortrait = usePortrait();
   const [semitones, setSemitones] = useState(() => playlistState?.entries[playlistState.currentIndex]?.keyOffset ?? 0);
@@ -100,15 +100,17 @@ export default function SongDetailPage() {
 
   useEffect(() => {
     if (!song) return;
+    const soundKey = keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0), song.mode);
     setInfo({
       title: song.title,
       artist: song.artist ?? undefined,
       bpm: song.tempo ?? undefined,
       shapeKey: keyLabel(song.originalKey, semitones - (song.capo ?? 0), song.mode),
-      soundKey: keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0), song.mode),
+      soundKey,
       capo,
     });
-    return () => setInfo(null);
+    setClickKey(soundKey);
+    return () => { setInfo(null); setClickKey(null); };
   }, [song, semitones, capo]);
 
   const hasTabLines = song?.chordLines.some(line => (line as GuitarTabLine).type === 'tab') ?? false;

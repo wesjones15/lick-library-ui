@@ -118,6 +118,18 @@ export const GUITAR_OPEN_MIDI = [40, 45, 50, 55, 59, 64];
 export const INSTRUMENT_OPEN_SEMITONES: Record<string, number[]> =
   Object.fromEntries(INSTRUMENT_DATA.map(i => [i.value, i.openSemitones]));
 
+// Semitone delta from A4 (440 Hz = offset 0). Used to compute click pitch from song key.
+export const NOTE_SEMITONE_DELTA: Record<string, number> = {
+  'C': -9, 'C#': -8, 'D': -7, 'D#': -6, 'E': -5, 'F': -4,
+  'F#': -3, 'G': -2, 'G#': -1, 'A': 0, 'Bb': 1, 'B': 2,
+};
+
+// octaveOffset = 0 → octave 4 (A4 = 440 Hz), octaveOffset = 12 → octave 5 (A5 = 880 Hz)
+export function noteToHz(label: string, octaveOffset = 0): number {
+  const delta = NOTE_SEMITONE_DELTA[label] ?? 0;
+  return 440 * Math.pow(2, (delta + octaveOffset) / 12);
+}
+
 // Open-string MIDI note numbers, low string first (index 0 = lowest string)
 export const INSTRUMENT_OPEN_MIDI: Record<string, number[]> = {
   GUITAR:   [40, 45, 50, 55, 59, 64], // E2 A2 D3 G3 B3 E4

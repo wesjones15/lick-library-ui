@@ -1,14 +1,15 @@
 import { useRef, useEffect, useCallback } from 'react';
+import { noteToHz } from '../music';
 
 const LOOKAHEAD = 0.1;       // seconds to schedule ahead
 const TICK_INTERVAL = 25;    // ms between scheduler ticks
 
-function scheduleClick(ctx: AudioContext, time: number, accent: boolean) {
+function scheduleClick(ctx: AudioContext, time: number, accent: boolean, accentHz: number, regularHz: number) {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.connect(gain);
   gain.connect(ctx.destination);
-  osc.frequency.value = accent ? 1000 : 800;
+  osc.frequency.value = accent ? accentHz : regularHz;
   gain.gain.setValueAtTime(accent ? 0.4 : 0.25, time);
   gain.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
   osc.start(time);
@@ -20,6 +21,7 @@ export function useMetronome(
   isPlaying: boolean,
   onBeat: (beat: number) => void,
   beatsPerBar = 4,
+  clickKey?: string | null,
 ) {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const nextBeatTimeRef = useRef(0);
@@ -30,9 +32,11 @@ export function useMetronome(
   const bpmRef = useRef(bpm);
   const onBeatRef = useRef(onBeat);
   const beatsPerBarRef = useRef(beatsPerBar);
+  const clickKeyRef = useRef(clickKey);
   useEffect(() => { bpmRef.current = bpm; }, [bpm]);
   useEffect(() => { onBeatRef.current = onBeat; }, [onBeat]);
   useEffect(() => { beatsPerBarRef.current = beatsPerBar; }, [beatsPerBar]);
+  useEffect(() => { clickKeyRef.current = clickKey; }, [clickKey]);
 
   const scheduler = useCallback(() => {
     const ctx = audioCtxRef.current;
@@ -40,7 +44,10 @@ export function useMetronome(
     const secondsPerBeat = 60 / bpmRef.current;
     while (nextBeatTimeRef.current < ctx.currentTime + LOOKAHEAD) {
       const beat = currentBeatRef.current;
-      scheduleClick(ctx, nextBeatTimeRef.current, beat === 0);
+      const key = clickKeyRef.current;
+      const accentHz  = key ? noteToHz(key, 12) : 1000;
+      const regularHz = key ? noteToHz(key, 0)  : 800;
+      scheduleClick(ctx, nextBeatTimeRef.current, beat === 0, accentHz, regularHz);
       const delay = Math.max(0, (nextBeatTimeRef.current - ctx.currentTime) * 1000);
       setTimeout(() => onBeatRef.current(beat), delay);
       currentBeatRef.current = (beat + 1) % beatsPerBarRef.current;
