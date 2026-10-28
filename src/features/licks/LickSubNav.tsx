@@ -15,12 +15,12 @@ export default function LickSubNav({ active }: { active: ActiveTab }) {
   return (
     <div className="flex items-baseline gap-4 mb-6">
       <h1 className="text-3xl font-bold text-gray-900 shrink-0">{activeTab.label}</h1>
-      <div className="flex rounded-md overflow-hidden border border-gray-300">
+      <div className="flex rounded-md overflow-hidden border border-gray-400">
         {inactiveTabs.map((tab, i) => (
           <Link
             key={tab.key}
             to={tab.to}
-            className={`px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors${i < inactiveTabs.length - 1 ? ' border-r border-gray-300' : ''}`}
+            className={`px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors${i < inactiveTabs.length - 1 ? ' border-r border-gray-400' : ''}`}
           >
             {tab.label}
           </Link>

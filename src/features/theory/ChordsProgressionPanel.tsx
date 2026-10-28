@@ -126,7 +126,7 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
               key={chord.degree}
               onClick={() => selectChord(chord)}
               className={`flex flex-col items-center px-3 py-2 rounded-xl border-2 transition-colors min-w-[64px] ${
-                isSelected ? 'border-gray-800 bg-gray-50' : 'border-gray-200 bg-white hover:border-gray-400'
+                isSelected ? 'border-gray-800 bg-gray-50' : 'border-gray-400 bg-white hover:border-gray-500'
               }`}
             >
               {/* Degree color dot */}
@@ -162,7 +162,7 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
                   <button
                     disabled={voicingIdx === 0}
                     onClick={() => changeVoicing(-1)}
-                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-400 text-gray-700 hover:bg-gray-50 disabled:opacity-60"
                   >‹</button>
                   <span className="text-sm text-gray-700">
                     Voicing {voicingIdx + 1} / {allVoicings.length}
@@ -170,7 +170,7 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
                   <button
                     disabled={voicingIdx === allVoicings.length - 1}
                     onClick={() => changeVoicing(1)}
-                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-400 text-gray-700 hover:bg-gray-50 disabled:opacity-60"
                   >›</button>
                 </div>
               )}

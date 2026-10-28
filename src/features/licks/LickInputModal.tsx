@@ -109,7 +109,7 @@ export default function LickInputModal({ title, initialTab, onVisualize, onClose
         className="bg-white rounded-xl shadow-xl w-full max-w-lg flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-300">
           <h2 className="text-base font-semibold text-gray-900">{title}</h2>
           <button onClick={onClose} className="text-gray-600 hover:text-gray-900 text-xl leading-none">✕</button>
         </div>

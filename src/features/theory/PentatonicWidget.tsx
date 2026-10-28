@@ -35,7 +35,7 @@ export default function PentatonicWidget({
       <div className="mt-4 p-3 inline-block">
         <button
           onClick={onToggle}
-          className={`${BTN_SM} border-gray-300 text-gray-700 hover:bg-gray-50`}
+          className={`${BTN_SM} border-gray-400 text-gray-700 hover:bg-gray-50`}
         >
           Pentatonic
         </button>
@@ -44,7 +44,7 @@ export default function PentatonicWidget({
   }
 
   return (
-    <div className="mt-4 p-3 border border-gray-200 rounded-lg bg-gray-50 inline-block">
+    <div className="mt-4 p-3 border border-gray-400 rounded-lg bg-gray-50 inline-block">
       {/* Row 1: toggle button + mode dropdown */}
       <div className="flex items-center gap-2">
         <button
@@ -98,7 +98,7 @@ export default function PentatonicWidget({
                         ? 'bg-pent-full-1 border-pent-full-2 text-pent-full-3'
                         : isPartial
                           ? 'bg-pent-part-1 border-pent-part-2 text-pent-part-3'
-                          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'
+                          : 'bg-white border-gray-400 text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   {formatNoteEnum(key)}

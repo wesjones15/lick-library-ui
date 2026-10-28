@@ -28,7 +28,7 @@ const MENU_ITEM = 'px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-50';
 function stubBtnClass(active: boolean) {
   return `px-2 py-1 text-xs rounded border transition-colors ${active
     ? 'border-brand-3 bg-brand-1 text-brand-6'
-    : 'border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300'}`;
+    : 'border-gray-400 text-gray-600 hover:text-gray-900 hover:border-gray-500'}`;
 }
 
 export default function SongDetailToolbar({
@@ -64,7 +64,7 @@ export default function SongDetailToolbar({
       {viewMode === 'scroll' && (
         <button
           onClick={() => setAutoScrolling(a => !a)}
-          className={`w-8 h-8 rounded-lg border flex items-center justify-center text-xl leading-none transition-colors ${autoScrolling ? 'border-brand-3 bg-brand-1 text-brand-5' : 'border-gray-200 text-gray-600 hover:text-gray-900'}`}
+          className={`w-8 h-8 rounded-lg border flex items-center justify-center text-xl leading-none transition-colors ${autoScrolling ? 'border-brand-3 bg-brand-1 text-brand-5' : 'border-gray-400 text-gray-600 hover:text-gray-900'}`}
           aria-label={autoScrolling ? 'Pause autoscroll' : 'Start autoscroll'}
         >
           {autoScrolling ? '⏸' : '▶'}
@@ -83,7 +83,7 @@ export default function SongDetailToolbar({
         <button
           onClick={handleTabLicksToggle}
           disabled={reparsing}
-          className={`hidden md:flex w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-60 ${showTabLicks ? 'border-danger-4 bg-danger-1 text-danger-6' : 'border-gray-200 text-gray-600 hover:text-gray-900'}`}
+          className={`hidden md:flex w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-60 ${showTabLicks ? 'border-danger-4 bg-danger-1 text-danger-6' : 'border-gray-400 text-gray-600 hover:text-gray-900'}`}
           aria-label="Tab positions (experimental)" title="Tab positions (experimental)"
         >
           {reparsing ? '…' : '≡'}
@@ -122,7 +122,7 @@ export default function SongDetailToolbar({
       {/* Landscape (sm–md): icon buttons */}
       <button
         onClick={() => navigate(noodleUrl)}
-        className="hidden sm:flex md:hidden w-8 h-8 rounded-lg border border-gray-200 items-center justify-center text-4xl leading-none transition-colors text-noodle-1 hover:text-noodle-2"
+        className="hidden sm:flex md:hidden w-8 h-8 rounded-lg border border-gray-400 items-center justify-center text-4xl leading-none transition-colors text-noodle-1 hover:text-noodle-2"
         aria-label="Noodle" title="Noodle"
       >
         <span className="inline-block -translate-y-[0.15em]">∿</span>
@@ -131,7 +131,7 @@ export default function SongDetailToolbar({
         <button
           onClick={handleTabLicksToggle}
           disabled={reparsing}
-          className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-60 ${showTabLicks ? 'border-danger-4 bg-danger-1 text-danger-6' : 'border-gray-200 text-gray-600 hover:text-gray-900'}`}
+          className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-60 ${showTabLicks ? 'border-danger-4 bg-danger-1 text-danger-6' : 'border-gray-400 text-gray-600 hover:text-gray-900'}`}
           aria-label="Tab positions (experimental)" title="Tab positions (experimental)"
         >
           {reparsing ? '…' : '≡'}
@@ -139,7 +139,7 @@ export default function SongDetailToolbar({
       )}
       <button
         onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
-        className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs transition-colors ${viewMode === 'scroll' ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-600 hover:text-gray-900'}`}
+        className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs transition-colors ${viewMode === 'scroll' ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-400 text-gray-600 hover:text-gray-900'}`}
         aria-label="Toggle view"
         title={viewMode === 'scroll' ? 'Switch to columns' : 'Switch to scroll'}
       >
@@ -147,14 +147,14 @@ export default function SongDetailToolbar({
       </button>
       <button
         onClick={() => setShowChords(v => !v)}
-        className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${showChords ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-600 hover:text-gray-900'}`}
+        className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${showChords ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-400 text-gray-600 hover:text-gray-900'}`}
         aria-label="Show chords" title="Show chords"
       >
         ♬
       </button>
       <button
         onClick={() => setAddToPlaylistOpen(true)}
-        className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${overrideChanged ? 'border-brand-3 text-brand-5 hover:text-brand-7 hover:border-brand-4' : 'border-gray-200 text-info-4 hover:text-info-6 hover:border-gray-300'}`}
+        className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${overrideChanged ? 'border-brand-3 text-brand-5 hover:text-brand-7 hover:border-brand-4' : 'border-gray-400 text-info-4 hover:text-info-6 hover:border-gray-500'}`}
         aria-label="Add to playlist" title="Add to playlist"
       >
         ♪+
@@ -173,13 +173,13 @@ export default function SongDetailToolbar({
       <div ref={overflowRef} className="relative sm:hidden">
         <button
           onClick={() => setOverflowOpen(o => !o)}
-          className="w-8 h-8 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center text-xl leading-none"
+          className="w-8 h-8 rounded-lg border border-gray-400 text-gray-700 hover:bg-gray-50 flex items-center justify-center text-xl leading-none"
           aria-label="More options"
         >
           ⋮
         </button>
         {overflowOpen && (
-          <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-50 flex flex-col py-1">
+          <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-400 rounded-lg shadow-lg z-50 flex flex-col py-1">
             <button
               onClick={() => { setViewMode(m => m === 'columns' ? 'scroll' : 'columns'); setOverflowOpen(false); }}
               className={MENU_ITEM}

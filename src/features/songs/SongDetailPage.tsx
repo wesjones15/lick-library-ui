@@ -263,7 +263,7 @@ export default function SongDetailPage() {
           className={`md:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-base transition-colors ${
             (capo !== (song.capo ?? 0) || semitones !== 0)
               ? 'border-brand-3 bg-brand-1 text-brand-6'
-              : 'border-gray-200 text-gray-600 hover:text-gray-900'
+              : 'border-gray-400 text-gray-600 hover:text-gray-900'
           }`}
           aria-label="Capo & Transpose"
           title="Capo & Transpose"
@@ -328,7 +328,7 @@ export default function SongDetailPage() {
   function renderChordDiagramPanel() {
     if (!showChords || !song) return null;
     return (
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-400 shadow-lg">
         <div className="flex gap-3 overflow-x-auto px-4 py-3">
           {extractChordNames(song).map(name => {
             const voicings = chordVoicings[name] ?? [];
@@ -338,7 +338,7 @@ export default function SongDetailPage() {
             return (
               <div
                 key={name}
-                className="flex-shrink-0 flex flex-col items-center border border-gray-200 rounded-lg px-2 pt-2 pb-1 bg-white"
+                className="flex-shrink-0 flex flex-col items-center border border-gray-400 rounded-lg px-2 pt-2 pb-1 bg-white"
               >
                 <span className="text-xs font-semibold text-gray-900 mb-1">{name}</span>
                 <div
@@ -412,7 +412,7 @@ export default function SongDetailPage() {
       {song && (
         <>
           {!collapsed && (
-            <div className={viewMode === 'scroll' ? 'sticky top-14 z-40 bg-white border-b border-gray-100 relative' : ''}>
+            <div className={viewMode === 'scroll' ? 'sticky top-14 z-40 bg-white border-b border-gray-300 relative' : ''}>
               <div className="flex items-start justify-between mb-1">
                 {renderSongMeta()}
                 <div className="flex items-center gap-2 md:gap-4">

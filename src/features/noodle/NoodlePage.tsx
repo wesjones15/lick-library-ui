@@ -190,7 +190,7 @@ export default function NoodlePage() {
 
   const btnBase = 'px-3 py-1 rounded-lg text-sm font-medium transition-colors border';
   const btnActive = `${btnBase} bg-brand-6 text-white border-brand-6`;
-  const btnInactive = `${btnBase} border-gray-300 text-gray-700 hover:bg-gray-50`;
+  const btnInactive = `${btnBase} border-gray-400 text-gray-700 hover:bg-gray-50`;
 
   return (
     <div className={`max-w-6xl mx-auto px-6 py-4 flex flex-col gap-2 ${noodleMode === 'song' ? 'min-h-[calc(100vh-3.5rem)]' : ''}`}>
@@ -302,7 +302,7 @@ export default function NoodlePage() {
             placeholder="120"
             min={40}
             max={240}
-            className="border border-gray-300 rounded-lg px-1.5 py-0.5 text-xs focus:outline-none focus:border-brand-4 bg-white w-12 text-center"
+            className="border border-gray-400 rounded-lg px-1.5 py-0.5 text-xs focus:outline-none focus:border-brand-4 bg-white w-12 text-center"
           />
         </div>
 
@@ -336,12 +336,12 @@ export default function NoodlePage() {
           <span className="text-xs text-gray-600">Capo</span>
           <button
             onClick={() => songMode.setLocalCapo(c => Math.max(0, c - 1))}
-            className="w-6 h-6 flex items-center justify-center text-sm text-gray-700 hover:text-brand-5 border border-gray-200 rounded"
+            className="w-6 h-6 flex items-center justify-center text-sm text-gray-700 hover:text-brand-5 border border-gray-400 rounded"
           >−</button>
           <span className="text-sm text-gray-900 w-5 text-center tabular-nums">{songMode.localCapo}</span>
           <button
             onClick={() => songMode.setLocalCapo(c => Math.min(11, c + 1))}
-            className="w-6 h-6 flex items-center justify-center text-sm text-gray-700 hover:text-brand-5 border border-gray-200 rounded"
+            className="w-6 h-6 flex items-center justify-center text-sm text-gray-700 hover:text-brand-5 border border-gray-400 rounded"
           >+</button>
         </div>
 

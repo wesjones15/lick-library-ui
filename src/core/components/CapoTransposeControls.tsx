@@ -37,7 +37,7 @@ export default function CapoTransposeControls({
         </button>
       </div>
 
-      <div className="self-stretch border-l border-gray-200" />
+      <div className="self-stretch border-l border-gray-400" />
 
       {/* Transpose */}
       <div className="flex flex-col items-center gap-1">

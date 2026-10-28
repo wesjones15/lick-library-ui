@@ -162,7 +162,7 @@ export default function LivePage() {
         <button
           className={`${BTN} ${listening
             ? 'bg-danger-1 border-danger-4 text-danger-8 hover:bg-danger-2'
-            : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+            : 'border-gray-400 text-gray-700 hover:bg-gray-50'}`}
           onClick={() => setListening(l => !l)}
         >
           {listening ? '⏹ Stop' : '🎙 Listen'}

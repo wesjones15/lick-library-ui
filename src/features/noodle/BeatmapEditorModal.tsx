@@ -27,7 +27,7 @@ export default function BeatmapEditorModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowBeatmapEditor(false)}>
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col mx-4" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 shrink-0">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-300 shrink-0">
           <span className="font-semibold text-sm text-gray-900">Beat Map</span>
           <button onClick={() => setShowBeatmapEditor(false)} className="text-gray-600 hover:text-gray-900 text-lg leading-none">✕</button>
         </div>
@@ -51,9 +51,9 @@ export default function BeatmapEditorModal({
                         <div key={ci} className="flex flex-col items-center gap-1">
                           <span className="font-mono text-xs text-brand-6">{chord}</span>
                           <div className="flex items-center gap-1">
-                            <button onClick={() => set(stepBeat(val, -1, beatCycle))} className="w-7 h-7 flex items-center justify-center text-sm border border-gray-200 rounded text-gray-700 hover:bg-gray-100 active:bg-gray-200">−</button>
+                            <button onClick={() => set(stepBeat(val, -1, beatCycle))} className="w-7 h-7 flex items-center justify-center text-sm border border-gray-400 rounded text-gray-700 hover:bg-gray-100 active:bg-gray-200">−</button>
                             <span className="w-6 text-center text-xs tabular-nums">{val}</span>
-                            <button onClick={() => set(stepBeat(val, 1, beatCycle))} className="w-7 h-7 flex items-center justify-center text-sm border border-gray-200 rounded text-gray-700 hover:bg-gray-100 active:bg-gray-200">+</button>
+                            <button onClick={() => set(stepBeat(val, 1, beatCycle))} className="w-7 h-7 flex items-center justify-center text-sm border border-gray-400 rounded text-gray-700 hover:bg-gray-100 active:bg-gray-200">+</button>
                           </div>
                         </div>
                       );
@@ -68,7 +68,7 @@ export default function BeatmapEditorModal({
           })()}
         </div>
 
-        <div className="flex flex-col gap-2 px-5 py-3 border-t border-gray-100 shrink-0">
+        <div className="flex flex-col gap-2 px-5 py-3 border-t border-gray-300 shrink-0">
           {beatmapSubmitSuccess && (
             <p className="text-xs text-success-6">Beatmap update submitted for review.</p>
           )}
@@ -97,7 +97,7 @@ export default function BeatmapEditorModal({
             </button>
             <button
               onClick={() => { setShowBeatmapEditor(false); setBeatmapSubmitSuccess(false); }}
-              className="px-4 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+              className="px-4 py-1.5 text-xs rounded-lg border border-gray-400 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
