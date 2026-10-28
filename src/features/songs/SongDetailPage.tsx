@@ -14,7 +14,7 @@ import type { InstrumentName } from '../../core/useInstrument';
 import { parseChordName, extractChordNames } from './parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { useSongNavContext } from '../../core/context/SongNavContext';
-import { NOTE_KEYS, getStringCount } from '../../core/music';
+import { NOTE_KEYS, getStringCount, soundingOffset } from '../../core/music';
 import { keyLabel } from './songKeyUtils';
 import SongDetailToolbar from './SongDetailToolbar';
 
@@ -52,6 +52,8 @@ export default function SongDetailPage() {
   const [addToPlaylistOpen, setAddToPlaylistOpen] = useState(false);
   const [scrollFontScale, setScrollFontScale] = useState<number | null>(null);
   const { instrument, customTuning, setInstrument, setCustomTuning } = useInstrument();
+  // Eb tuning sounds a half step below the shapes on the chart
+  const tuningOffset = soundingOffset(instrument, customTuning);
   const loadedSongIdRef = useRef<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -100,7 +102,7 @@ export default function SongDetailPage() {
 
   useEffect(() => {
     if (!song) return;
-    const soundKey = keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0), song.mode);
+    const soundKey = keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0) + tuningOffset, song.mode);
     setInfo({
       title: song.title,
       artist: song.artist ?? undefined,
@@ -111,7 +113,7 @@ export default function SongDetailPage() {
     });
     setClickKey(soundKey);
     return () => { setInfo(null); setClickKey(null); };
-  }, [song, semitones, capo]);
+  }, [song, semitones, capo, tuningOffset]);
 
   const hasTabLines = song?.chordLines.some(line => (line as GuitarTabLine).type === 'tab') ?? false;
   const hasSongLicks = Object.keys(song?.songLicks ?? {}).length > 0;
@@ -191,9 +193,10 @@ export default function SongDetailPage() {
     return () => ro.disconnect();
   }, [viewMode, song, isPortrait]);
 
+  // Key the tab licks sound in on the selected instrument: the shape key, moved by the tuning
   const currentNoteKey = (() => {
     if (!song?.originalKey) return null;
-    const label = keyLabel(song.originalKey, semitones - (song.capo ?? 0));
+    const label = keyLabel(song.originalKey, semitones - (song.capo ?? 0) + tuningOffset);
     const rootMatch = label.match(/^([A-G][#b]?)/);
     if (!rootMatch) return null;
     return NOTE_KEYS.find(n => n.label === rootMatch[1])?.value ?? null;
@@ -235,7 +238,7 @@ export default function SongDetailPage() {
               excludeCustom
               compact
             />
-            {song.originalKey && <span>{keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0), song.mode)}</span>}
+            {song.originalKey && <span>{keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0) + tuningOffset, song.mode)}</span>}
           </div>
           {song.tempo != null && (
             <button
@@ -276,6 +279,7 @@ export default function SongDetailPage() {
           originalKey={song.originalKey}
           originalCapo={song.capo ?? 0}
           mode={song.mode}
+          tuningOffset={tuningOffset}
           className="hidden md:flex"
         />
       </>
@@ -319,6 +323,7 @@ export default function SongDetailPage() {
             originalKey={song.originalKey}
             originalCapo={song.capo ?? 0}
             mode={song.mode}
+            tuningOffset={tuningOffset}
           />
         </div>
       </div>

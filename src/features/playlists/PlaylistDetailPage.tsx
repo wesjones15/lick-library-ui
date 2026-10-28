@@ -7,6 +7,7 @@ import {
 import type { PlaylistDetail, PlaylistEntry, SongSummary } from '../../core/api/client';
 
 import { keyLabel } from '../songs/songKeyUtils';
+import { soundingOffset } from '../../core/music';
 import VoicingModal from './VoicingModal';
 import AddSongsModal from './AddSongsModal';
 
@@ -209,7 +210,7 @@ export default function PlaylistDetailPage() {
             <div className="flex items-center gap-2 text-xs font-mono mt-0.5">
               {entry.originalKey && (
                 <span className={entry.keyOffset !== 0 || entry.capoOffset !== 0 ? 'text-brand-5' : 'text-gray-600'}>
-                  {keyLabel(entry.originalKey, entry.keyOffset + entry.capoOffset, entry.mode)}
+                  {keyLabel(entry.originalKey, entry.keyOffset + entry.capoOffset + soundingOffset(entry.instrument ?? entry.defaultInstrument ?? 'GUITAR'), entry.mode)}
                 </span>
               )}
               <span className={entry.capoOffset !== 0 ? 'text-brand-5' : 'text-gray-600'}>

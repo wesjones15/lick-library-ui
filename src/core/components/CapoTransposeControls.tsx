@@ -10,12 +10,14 @@ interface CapoTransposeControlsProps {
   originalKey: string | null;
   originalCapo: number;
   mode?: string | null;
+  // Semitones the instrument sounds below/above its chart shapes (Eb tuning: -1)
+  tuningOffset?: number;
   className?: string;
 }
 
 export default function CapoTransposeControls({
   capo, setCapo, semitones, setSemitones,
-  originalKey, originalCapo, mode, className = '',
+  originalKey, originalCapo, mode, tuningOffset = 0, className = '',
 }: CapoTransposeControlsProps) {
   return (
     <div className={`flex items-center gap-4 ${className}`}>
@@ -56,7 +58,7 @@ export default function CapoTransposeControls({
             </span>
             <div className="flex flex-col items-center w-10">
               <span className="text-base font-semibold text-gray-900">
-                {rootKeyLabel(originalKey, semitones + capo - originalCapo, mode)}
+                {rootKeyLabel(originalKey, semitones + capo - originalCapo + tuningOffset, mode)}
               </span>
               <span className="text-xs text-gray-600">sound</span>
             </div>

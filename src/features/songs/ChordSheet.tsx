@@ -7,6 +7,7 @@ import { parseChordName } from './parseChordName';
 import ChordUploadModal from '../chords/ChordUploadModal';
 import ChordDiagram from '../chords/ChordDiagram';
 import SongLickCard from './SongLickCard';
+import { shiftTab } from './tabTranspose';
 import { getStringCount } from '../../core/music';
 
 // Cache fetched voicings so re-hovering the same chord doesn't re-fetch
@@ -263,7 +264,7 @@ export default function ChordSheet({ chordLines, numColumns, className, fontScal
                     />
                   ) : (
                     <div style={{ fontSize: `${line.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#1f2937', fontFamily: 'monospace' }}>
-                      {line.tabLines.join('\n')}
+                      {shiftTab(line.tabLines.join('\n'), semitones)}
                     </div>
                   )}
                 </div>

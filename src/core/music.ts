@@ -143,3 +143,41 @@ export const INSTRUMENT_OPEN_MIDI: Record<string, number[]> = {
   MANDOLIN: [55, 62, 69, 76],         // G3 D4 A4 E5
   BANJO:    [38, 55, 59, 62, 67],     // D2 G3 B3 D4 G4
 };
+
+const NATURAL_SEMITONES: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+
+// Semitone (C=0) of a note name as typed, tabbed or stored: "C#", "Db", "eb", "B♭", "F_SHARP", "B_FLAT"
+export function noteSemitone(name: string): number | null {
+  const m = name.trim().match(/^([A-Ga-g])(#|♯|_SHARP|b|♭|_FLAT)?$/i);
+  if (!m) return null;
+  const natural = NATURAL_SEMITONES[m[1].toUpperCase()];
+  const acc = (m[2] ?? '').toUpperCase();
+  const shift = acc === '#' || acc === '♯' || acc === '_SHARP' ? 1 : acc === '' ? 0 : -1;
+  return (natural + shift + 12) % 12;
+}
+
+// Open-string semitones, low string first, for a preset or a custom tuning string ("D G C F A D")
+export function tuningSemitones(instrument: string, customTuning?: string): number[] | null {
+  if (instrument === 'CUSTOM') {
+    const notes = (customTuning ?? '').trim().split(/\s+/).filter(Boolean).map(noteSemitone);
+    return notes.length > 0 && notes.every(n => n !== null) ? notes as number[] : null;
+  }
+  return INSTRUMENT_OPEN_SEMITONES[instrument] ?? null;
+}
+
+// Same string count and every string shifted by the same amount: the same fret shapes work on both
+export function shapeShift(a: number[], b: number[]): number | null {
+  if (a.length !== b.length || a.length === 0) return null;
+  const shift = ((b[0] - a[0]) % 12 + 12) % 12;
+  return a.every((s, i) => ((b[i] - s) % 12 + 12) % 12 === shift) ? shift : null;
+}
+
+// Semitones an instrument sounds relative to the standard-tuning shapes its charts are written in.
+// Eb tuning plays E shapes a half step down (-1); evenly down-tuned customs (D standard) follow suit.
+export function soundingOffset(instrument: string, customTuning?: string): number {
+  const tuning = tuningSemitones(instrument, customTuning);
+  if (!tuning || (instrument !== 'EB' && instrument !== 'CUSTOM')) return 0;
+  const shift = shapeShift(INSTRUMENT_OPEN_SEMITONES.GUITAR, tuning);
+  if (shift === null) return 0;
+  return shift > 6 ? shift - 12 : shift;
+}

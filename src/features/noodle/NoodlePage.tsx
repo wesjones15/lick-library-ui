@@ -159,10 +159,12 @@ export default function NoodlePage() {
     };
   }, [noodleMode, freeRoot, freeMode, songMode.soundingRoot, songMode.shapeRoot, songMode.soundingMode]);
 
+  // Click pitch follows what the listener hears (an Eb-tuned guitar is a half step under the chart)
+  const clickRoot = noodleMode === 'song' ? songMode.heardRoot : soundingRoot;
   useEffect(() => {
-    if (noodleMode !== 'none') setClickKey(soundingRoot || null);
+    if (noodleMode !== 'none') setClickKey(clickRoot || null);
     return () => { setClickKey(null); };
-  }, [soundingRoot, noodleMode]);
+  }, [clickRoot, noodleMode]);
 
   const activeChord = noodleMode === 'song'
     ? songMode.activeChord

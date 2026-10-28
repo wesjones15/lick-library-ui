@@ -5,7 +5,7 @@ import type { SongDetail, SongSummary, ChordLyric, GuitarTabLine, ChordVoicing }
 import { parseTabString, buildDotsForColumn } from '../licks/lickUtils';
 import type { TabColumn } from '../licks/lickUtils';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
-import { CHROMATIC_NOTES, getStringLabels, formatKeyWithMode } from '../../core/music';
+import { CHROMATIC_NOTES, getStringLabels, formatKeyWithMode, formatNoteEnum, soundingOffset } from '../../core/music';
 import type { InstrumentName } from '../../core/useInstrument';
 import { parseChordName } from '../songs/parseChordName';
 import {
@@ -167,21 +167,27 @@ export function useSongMode({
     });
   }, [beatmap, contentLines, tabColumnsByTab, lickSpeed]);
 
-  const { soundingRoot, shapeRoot, soundingMode } = useMemo(() => {
-    if (!song) return { soundingRoot: '', shapeRoot: '', soundingMode: 'IONIAN' };
-    const root = song.originalKey ?? 'C';
+  // soundingRoot/shapeRoot drive the neck, which works in chart (standard-shape) pitch;
+  // heardRoot is what actually comes out of an Eb-tuned guitar
+  const { soundingRoot, shapeRoot, soundingMode, heardRoot } = useMemo(() => {
+    if (!song) return { soundingRoot: '', shapeRoot: '', soundingMode: 'IONIAN', heardRoot: '' };
+    const root = formatNoteEnum(song.originalKey ?? 'C');
     const mode = song.mode ?? 'IONIAN';
     const idx = CHROMATIC_NOTES.indexOf(root);
-    if (idx === -1) return { soundingRoot: root, shapeRoot: root, soundingMode: mode };
+    if (idx === -1) return { soundingRoot: root, shapeRoot: root, soundingMode: mode, heardRoot: root };
     const soundingIdx = ((idx + localSemitones + localCapo - (song.capo ?? 0)) % 12 + 12) % 12;
     const shapeIdx    = ((idx + localSemitones            - (song.capo ?? 0)) % 12 + 12) % 12;
-    return { soundingRoot: CHROMATIC_NOTES[soundingIdx], shapeRoot: CHROMATIC_NOTES[shapeIdx], soundingMode: mode };
-  }, [song, localSemitones, localCapo]);
+    const heardIdx = ((soundingIdx + soundingOffset(instrument)) % 12 + 12) % 12;
+    return {
+      soundingRoot: CHROMATIC_NOTES[soundingIdx], shapeRoot: CHROMATIC_NOTES[shapeIdx], soundingMode: mode,
+      heardRoot: CHROMATIC_NOTES[heardIdx],
+    };
+  }, [song, localSemitones, localCapo, instrument]);
 
   const keyDisplay = useMemo(() => {
     if (!song?.originalKey) return '';
-    return formatKeyWithMode(soundingRoot, song.mode ?? 'IONIAN');
-  }, [song, soundingRoot]);
+    return formatKeyWithMode(heardRoot, song.mode ?? 'IONIAN');
+  }, [song, heardRoot]);
 
   const activeChord = useMemo(() => {
     if (!contentLines.length) return null;
@@ -379,7 +385,7 @@ export function useSongMode({
     karaokeChordIdx,
     currentChordBeats,
     nextChordBeats,
-    soundingRoot, shapeRoot, soundingMode,
+    soundingRoot, shapeRoot, soundingMode, heardRoot,
     keyDisplay,
     activeChord, nextActiveChord,
     showBackLink,
