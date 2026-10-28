@@ -36,7 +36,7 @@ export default function SongCard({ song, managing = false, onReparse, onAddToPla
   return (
     <div
       onClick={managing ? undefined : () => navigate(`/song/${song.id}`)}
-      className={`border border-gray-200 rounded-xl p-2 bg-white flex flex-col gap-0.5 min-h-[110px] portrait:flex-row portrait:min-h-0 portrait:items-center portrait:gap-3 transition-shadow ${managing ? 'cursor-default' : 'cursor-pointer hover:shadow-sm'}`}
+      className={`border border-gray-400 rounded-xl p-2 bg-white flex flex-col gap-0.5 min-h-[110px] portrait:flex-row portrait:min-h-0 portrait:items-center portrait:gap-3 transition-shadow ${managing ? 'cursor-default' : 'cursor-pointer hover:shadow-sm'}`}
     >
       <div className="flex-1">
         <div className={titleClass}>{song.title}</div>

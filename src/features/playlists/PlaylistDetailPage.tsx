@@ -7,6 +7,7 @@ import {
 import type { PlaylistDetail, PlaylistEntry, SongSummary } from '../../core/api/client';
 
 import { keyLabel } from '../songs/songKeyUtils';
+import { soundingOffset } from '../../core/music';
 import VoicingModal from './VoicingModal';
 import AddSongsModal from './AddSongsModal';
 
@@ -153,14 +154,14 @@ export default function PlaylistDetailPage() {
           {managing && playlist.ownedByCurrentUser && confirmDelete && (
             <div className="flex gap-2">
               <button onClick={handleDeletePlaylist} className="text-xs px-3 py-1.5 rounded bg-danger-6 text-white hover:bg-danger-7">Delete playlist</button>
-              <button onClick={() => setConfirmDelete(false)} className="text-xs px-3 py-1.5 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</button>
+              <button onClick={() => setConfirmDelete(false)} className="text-xs px-3 py-1.5 rounded border border-gray-400 text-gray-700 hover:bg-gray-50">Cancel</button>
             </div>
           )}
           {managing && playlist.ownedByCurrentUser && !confirmDelete && (
             <>
               <button
                 onClick={handleToggleVisibility}
-                className="px-3 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors"
+                className="px-3 py-2 text-sm rounded-lg border border-gray-400 text-gray-600 hover:text-gray-900 hover:border-gray-500 transition-colors"
                 title={playlist.isPublic ? 'Make private' : 'Make public'}
               >
                 {playlist.isPublic ? 'Make Private' : 'Make Public'}
@@ -175,7 +176,7 @@ export default function PlaylistDetailPage() {
               onClick={toggleManage}
               className={managing
                 ? 'px-4 py-2 text-sm rounded-lg border border-brand-3 text-brand-6 bg-brand-1 hover:bg-brand-2 transition-colors'
-                : 'px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors'}
+                : 'px-4 py-2 text-sm rounded-lg border border-gray-400 text-gray-600 hover:text-gray-900 hover:border-gray-500 transition-colors'}
             >
               {managing ? 'Done' : 'Manage'}
             </button>
@@ -187,7 +188,7 @@ export default function PlaylistDetailPage() {
 
   function renderEntryRow(entry: PlaylistEntry, idx: number) {
     return (
-      <div key={entry.entryId} className="border border-gray-200 rounded-xl p-3">
+      <div key={entry.entryId} className="border border-gray-400 rounded-xl p-3">
         <div className="flex items-center gap-3">
           <span className="text-xs text-gray-600 w-5 text-right shrink-0">{idx + 1}</span>
 
@@ -209,7 +210,7 @@ export default function PlaylistDetailPage() {
             <div className="flex items-center gap-2 text-xs font-mono mt-0.5">
               {entry.originalKey && (
                 <span className={entry.keyOffset !== 0 || entry.capoOffset !== 0 ? 'text-brand-5' : 'text-gray-600'}>
-                  {keyLabel(entry.originalKey, entry.keyOffset + entry.capoOffset, entry.mode)}
+                  {keyLabel(entry.originalKey, entry.keyOffset + entry.capoOffset + soundingOffset(entry.instrument ?? entry.defaultInstrument ?? 'GUITAR'), entry.mode)}
                 </span>
               )}
               <span className={entry.capoOffset !== 0 ? 'text-brand-5' : 'text-gray-600'}>
@@ -242,7 +243,7 @@ export default function PlaylistDetailPage() {
               {confirmRemove === entry.entryId ? (
                 <div className="flex gap-1">
                   <button onClick={() => handleRemoveEntry(entry.entryId)} className="text-xs px-2 py-0.5 rounded bg-danger-6 text-white hover:bg-danger-7">Remove</button>
-                  <button onClick={() => setConfirmRemove(null)} className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-700">Cancel</button>
+                  <button onClick={() => setConfirmRemove(null)} className="text-xs px-2 py-0.5 rounded border border-gray-400 text-gray-700">Cancel</button>
                 </div>
               ) : (
                 <button onClick={() => setConfirmRemove(entry.entryId)}

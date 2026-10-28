@@ -5,6 +5,7 @@ import InstrumentSelector from '../../core/components/InstrumentSelector';
 import CapoTransposeControls from '../../core/components/CapoTransposeControls';
 import NumpadInput from '../../core/components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
+import { soundingOffset } from '../../core/music';
 
 interface VoicingModalProps {
   entry: PlaylistEntry;
@@ -32,6 +33,7 @@ export default function VoicingModal({ entry, onSave, onClose }: VoicingModalPro
             originalKey={entry.originalKey}
             originalCapo={entry.defaultCapo}
             mode={entry.mode}
+            tuningOffset={soundingOffset(localInstrument)}
           />
         </div>
 
@@ -57,7 +59,7 @@ export default function VoicingModal({ entry, onSave, onClose }: VoicingModalPro
                     if (!isNaN(v)) setLocalTempoOverride(Math.min(240, Math.max(40, v)));
                   }}
                   placeholder={entry.tempo != null ? String(entry.tempo) : '—'}
-                  className="w-12 text-center text-base font-semibold text-gray-900 bg-transparent border-b border-gray-300 focus:border-brand-5 focus:outline-none"
+                  className="w-12 text-center text-base font-semibold text-gray-900 bg-transparent border-b border-gray-400 focus:border-brand-5 focus:outline-none"
                 />
               </div>
               <button

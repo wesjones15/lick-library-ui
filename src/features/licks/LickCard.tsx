@@ -18,7 +18,7 @@ export default function LickCard({ lick, onDelete, onFork, isManaging }: Props) 
   return (
     <div
       onClick={() => navigate(`/lick/${lick.id}`)}
-      className="border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-brand-4 hover:shadow-sm transition-all bg-white"
+      className="border border-gray-400 rounded-lg p-4 cursor-pointer hover:border-brand-4 hover:shadow-sm transition-all bg-white"
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2 min-w-0">

@@ -67,7 +67,7 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
   if (!show) {
     return (
       <div className="mt-4 p-3 inline-block">
-        <button onClick={onToggle} className={`${BTN_SM} border-gray-300 text-gray-700 hover:bg-gray-50`}>
+        <button onClick={onToggle} className={`${BTN_SM} border-gray-400 text-gray-700 hover:bg-gray-50`}>
           Chords
         </button>
       </div>
@@ -75,7 +75,7 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
   }
 
   return (
-    <div className="mt-4 p-3 border border-gray-200 rounded-lg bg-gray-50 inline-block min-w-48">
+    <div className="mt-4 p-3 border border-gray-400 rounded-lg bg-gray-50 inline-block min-w-48">
       <div className="flex items-center gap-2">
         <button onClick={onToggle} className={`${BTN_SM} bg-gray-800 text-white border-gray-800`}>
           Chords
@@ -88,7 +88,7 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
             {analysis.intervals.map((label, i) => (
               <span
                 key={i}
-                className="px-1.5 py-0.5 text-xs rounded border border-gray-300 bg-white text-gray-900 font-mono"
+                className="px-1.5 py-0.5 text-xs rounded border border-gray-400 bg-white text-gray-900 font-mono"
               >
                 {label}
               </span>

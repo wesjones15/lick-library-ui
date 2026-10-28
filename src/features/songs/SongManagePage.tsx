@@ -230,7 +230,7 @@ export default function SongManagePage() {
           placeholder="Artist"
           className={`${SELECT} w-full`}
         />
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <select
             value={keyRoot}
             onChange={e => setKeyRoot(e.target.value)}
@@ -292,7 +292,7 @@ export default function SongManagePage() {
           {loading ? 'Saving…' : isOwner ? 'Save' : 'Submit for review'}
         </button>
 
-        <div className="flex flex-col gap-2 mt-2 pt-4 border-t border-gray-100">
+        <div className="flex flex-col gap-2 mt-2 pt-4 border-t border-gray-300">
           <button type="button" onClick={() => { setMode('chart'); setSubmitSuccess(false); }} className={BTN_SECONDARY}>
             Update Song Chart
           </button>
@@ -323,7 +323,7 @@ export default function SongManagePage() {
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 px-3 py-1.5 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-3 py-1.5 border border-gray-400 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
@@ -378,7 +378,7 @@ export default function SongManagePage() {
               return (
                 <div
                   key={name}
-                  className="relative flex-shrink-0 flex flex-col items-center border border-gray-200 rounded-lg px-2 pt-2 pb-1 bg-white"
+                  className="relative flex-shrink-0 flex flex-col items-center border border-gray-400 rounded-lg px-2 pt-2 pb-1 bg-white"
                 >
                   <span className="text-xs font-semibold text-gray-900 mb-1">{name}</span>
                   <button

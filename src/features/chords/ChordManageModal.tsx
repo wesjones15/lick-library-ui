@@ -74,7 +74,7 @@ export default function ChordManageModal({ chordName, voicings: initialVoicings,
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {voicings.map(v => (
-                <div key={v.id} className="border border-gray-200 rounded-lg p-2 flex flex-row items-center gap-2">
+                <div key={v.id} className="border border-gray-400 rounded-lg p-2 flex flex-row items-center gap-2">
                   <ChordDiagram frets={v.frets} width={120} stringCount={getStringCount(instrument)} />
                   <div className="flex flex-col items-center justify-center gap-1">
                     {v.authorName && (
@@ -105,7 +105,7 @@ export default function ChordManageModal({ chordName, voicings: initialVoicings,
           )}
         </div>
 
-        <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
+        <div className="mt-4 pt-4 border-t border-gray-300 flex justify-end">
           <button
             onClick={() => setAddOpen(true)}
             className={BTN_PRIMARY}

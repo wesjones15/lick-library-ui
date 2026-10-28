@@ -14,7 +14,7 @@ import type { InstrumentName } from '../../core/useInstrument';
 import { parseChordName, extractChordNames } from './parseChordName';
 import { useMetronomeContext } from '../../core/metronome/MetronomeContext';
 import { useSongNavContext } from '../../core/context/SongNavContext';
-import { NOTE_KEYS, getStringCount } from '../../core/music';
+import { NOTE_KEYS, getStringCount, soundingOffset } from '../../core/music';
 import { keyLabel } from './songKeyUtils';
 import SongDetailToolbar from './SongDetailToolbar';
 
@@ -52,6 +52,8 @@ export default function SongDetailPage() {
   const [addToPlaylistOpen, setAddToPlaylistOpen] = useState(false);
   const [scrollFontScale, setScrollFontScale] = useState<number | null>(null);
   const { instrument, customTuning, setInstrument, setCustomTuning } = useInstrument();
+  // Eb tuning sounds a half step below the shapes on the chart
+  const tuningOffset = soundingOffset(instrument, customTuning);
   const loadedSongIdRef = useRef<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -100,7 +102,7 @@ export default function SongDetailPage() {
 
   useEffect(() => {
     if (!song) return;
-    const soundKey = keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0), song.mode);
+    const soundKey = keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0) + tuningOffset, song.mode);
     setInfo({
       title: song.title,
       artist: song.artist ?? undefined,
@@ -111,7 +113,7 @@ export default function SongDetailPage() {
     });
     setClickKey(soundKey);
     return () => { setInfo(null); setClickKey(null); };
-  }, [song, semitones, capo]);
+  }, [song, semitones, capo, tuningOffset]);
 
   const hasTabLines = song?.chordLines.some(line => (line as GuitarTabLine).type === 'tab') ?? false;
   const hasSongLicks = Object.keys(song?.songLicks ?? {}).length > 0;
@@ -191,9 +193,10 @@ export default function SongDetailPage() {
     return () => ro.disconnect();
   }, [viewMode, song, isPortrait]);
 
+  // Key the tab licks sound in on the selected instrument: the shape key, moved by the tuning
   const currentNoteKey = (() => {
     if (!song?.originalKey) return null;
-    const label = keyLabel(song.originalKey, semitones - (song.capo ?? 0));
+    const label = keyLabel(song.originalKey, semitones - (song.capo ?? 0) + tuningOffset);
     const rootMatch = label.match(/^([A-G][#b]?)/);
     if (!rootMatch) return null;
     return NOTE_KEYS.find(n => n.label === rootMatch[1])?.value ?? null;
@@ -235,7 +238,7 @@ export default function SongDetailPage() {
               excludeCustom
               compact
             />
-            {song.originalKey && <span>{keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0), song.mode)}</span>}
+            {song.originalKey && <span>{keyLabel(song.originalKey, semitones + capo - (song.capo ?? 0) + tuningOffset, song.mode)}</span>}
           </div>
           {song.tempo != null && (
             <button
@@ -263,7 +266,7 @@ export default function SongDetailPage() {
           className={`md:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-base transition-colors ${
             (capo !== (song.capo ?? 0) || semitones !== 0)
               ? 'border-brand-3 bg-brand-1 text-brand-6'
-              : 'border-gray-200 text-gray-600 hover:text-gray-900'
+              : 'border-gray-400 text-gray-600 hover:text-gray-900'
           }`}
           aria-label="Capo & Transpose"
           title="Capo & Transpose"
@@ -276,6 +279,7 @@ export default function SongDetailPage() {
           originalKey={song.originalKey}
           originalCapo={song.capo ?? 0}
           mode={song.mode}
+          tuningOffset={tuningOffset}
           className="hidden md:flex"
         />
       </>
@@ -290,6 +294,7 @@ export default function SongDetailPage() {
           chordLines={song.chordLines}
           numColumns={viewMode === 'scroll' ? 1 : song.numColumns}
           fontScale={effectiveFontScale}
+          fitToScreen={viewMode === 'columns'}
           className={loading ? 'opacity-50 transition-opacity duration-150' : 'transition-opacity duration-150'}
           showTabLicks={showTabLicks}
           songLicks={song.songLicks ?? {}}
@@ -319,6 +324,7 @@ export default function SongDetailPage() {
             originalKey={song.originalKey}
             originalCapo={song.capo ?? 0}
             mode={song.mode}
+            tuningOffset={tuningOffset}
           />
         </div>
       </div>
@@ -328,7 +334,7 @@ export default function SongDetailPage() {
   function renderChordDiagramPanel() {
     if (!showChords || !song) return null;
     return (
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-400 shadow-lg">
         <div className="flex gap-3 overflow-x-auto px-4 py-3">
           {extractChordNames(song).map(name => {
             const voicings = chordVoicings[name] ?? [];
@@ -338,7 +344,7 @@ export default function SongDetailPage() {
             return (
               <div
                 key={name}
-                className="flex-shrink-0 flex flex-col items-center border border-gray-200 rounded-lg px-2 pt-2 pb-1 bg-white"
+                className="flex-shrink-0 flex flex-col items-center border border-gray-400 rounded-lg px-2 pt-2 pb-1 bg-white"
               >
                 <span className="text-xs font-semibold text-gray-900 mb-1">{name}</span>
                 <div
@@ -412,10 +418,10 @@ export default function SongDetailPage() {
       {song && (
         <>
           {!collapsed && (
-            <div className={viewMode === 'scroll' ? 'sticky top-14 z-40 bg-white border-b border-gray-100 relative' : ''}>
-              <div className="flex items-start justify-between mb-1">
+            <div className={viewMode === 'scroll' ? 'sticky top-14 z-40 bg-white border-b border-gray-300 relative' : ''}>
+              <div className="flex flex-wrap items-start justify-between gap-y-2 mb-1">
                 {renderSongMeta()}
-                <div className="flex items-center gap-2 md:gap-4">
+                <div className="flex flex-wrap items-center justify-end gap-2 md:gap-4">
                   <SongDetailToolbar
                     id={id!}
                     song={song}

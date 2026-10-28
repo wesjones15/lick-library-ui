@@ -72,10 +72,10 @@ export default function ChordsGalleryPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Chord Gallery</h1>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <KeySelector value={root} onChange={setRoot} />
           <InstrumentSelector
             instrument={instrument as InstrumentName}
@@ -85,7 +85,7 @@ export default function ChordsGalleryPage() {
           {!manageMode && (
             <button
               onClick={() => navigate('/chords/theory')}
-              className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              className="px-3 py-2 text-sm border border-gray-400 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               Chord Theory
             </button>
@@ -93,14 +93,14 @@ export default function ChordsGalleryPage() {
           {!manageMode && (
             <button
               onClick={() => navigate('/chords/upload')}
-              className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              className="px-3 py-2 text-sm border border-gray-400 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               Upload Voicing
             </button>
           )}
           <button
             onClick={() => { setManageMode(m => !m); setReseedConfirm(false); }}
-            className={`px-3 py-2 text-sm border rounded-lg transition-colors ${manageMode ? 'border-brand-4 bg-brand-1 text-brand-7' : 'border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50'}`}
+            className={`px-3 py-2 text-sm border rounded-lg transition-colors ${manageMode ? 'border-brand-4 bg-brand-1 text-brand-7' : 'border-gray-400 text-gray-700 hover:text-gray-900 hover:bg-gray-50'}`}
           >
             {manageMode ? 'Done' : 'Manage'}
           </button>

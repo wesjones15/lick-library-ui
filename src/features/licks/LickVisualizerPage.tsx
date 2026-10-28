@@ -122,7 +122,7 @@ export default function LickVisualizerPage() {
         <div className="flex gap-3 items-center mb-2 flex-wrap">
           <button
             onClick={() => setShowLibrary(true)}
-            className={`${BTN} bg-white text-gray-900 border-gray-300 hover:bg-gray-50`}
+            className={`${BTN} bg-white text-gray-900 border-gray-400 hover:bg-gray-50`}
           >
             Load from Library
           </button>
@@ -177,9 +177,9 @@ export default function LickVisualizerPage() {
             )}
 
             <div className="flex gap-4 items-center flex-wrap mb-3 mt-4">
-              <div className="flex rounded-md overflow-hidden border border-gray-300">
+              <div className="flex rounded-md overflow-hidden border border-gray-400">
                 <button
-                  className={`${TOGGLE} rounded-none border-0 border-r border-gray-300 ${displayMode === 'column' ? TOGGLE_ON : TOGGLE_OFF}`}
+                  className={`${TOGGLE} rounded-none border-0 border-r border-gray-400 ${displayMode === 'column' ? TOGGLE_ON : TOGGLE_OFF}`}
                   onClick={() => setDisplayMode('column')}
                 >
                   Column
@@ -194,9 +194,9 @@ export default function LickVisualizerPage() {
 
               {displayMode === 'column' && (
                 <>
-                  <div className="flex rounded-md overflow-hidden border border-gray-300">
+                  <div className="flex rounded-md overflow-hidden border border-gray-400">
                     <button
-                      className={`${TOGGLE} rounded-none border-0 border-r border-gray-300 ${speedMode === 'fixed' ? TOGGLE_ON : TOGGLE_OFF}`}
+                      className={`${TOGGLE} rounded-none border-0 border-r border-gray-400 ${speedMode === 'fixed' ? TOGGLE_ON : TOGGLE_OFF}`}
                       onClick={() => setSpeedMode('fixed')}
                     >
                       1/sec
@@ -211,7 +211,7 @@ export default function LickVisualizerPage() {
                   <button
                     onClick={() => setIsRunning(r => !r)}
                     className={`${BTN} ${isRunning
-                      ? 'bg-white text-gray-900 border-gray-300 hover:bg-gray-50'
+                      ? 'bg-white text-gray-900 border-gray-400 hover:bg-gray-50'
                       : 'bg-brand-6 text-white border-brand-6 hover:bg-brand-7'}`}
                   >
                     {isRunning ? 'Pause' : 'Resume'}
@@ -223,7 +223,7 @@ export default function LickVisualizerPage() {
                 {lickSource === 'library' && (
                   <button
                     onClick={() => setShowEditLick(true)}
-                    className={`${BTN} bg-white text-gray-900 border-gray-300 hover:bg-gray-50`}
+                    className={`${BTN} bg-white text-gray-900 border-gray-400 hover:bg-gray-50`}
                   >
                     Edit Lick
                   </button>
@@ -233,7 +233,7 @@ export default function LickVisualizerPage() {
                   disabled={!canSave || saveLoading}
                   className={`${BTN} ${canSave
                     ? 'bg-success-6 text-white border-success-6 hover:bg-success-7'
-                    : 'bg-gray-100 text-gray-600 border-gray-200 cursor-not-allowed'} disabled:opacity-60`}
+                    : 'bg-gray-100 text-gray-600 border-gray-400 cursor-not-allowed'} disabled:opacity-60`}
                 >
                   {saveLoading ? 'Saving…' : 'Save Lick'}
                 </button>

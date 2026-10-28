@@ -68,7 +68,7 @@ export default function AddSongsModal({ playlist, allSongs, onClose, onUpdate }:
                 return (
                   <div
                     key={s.id}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-colors ${isIn ? 'border-primary-200 bg-brand-1' : 'border-gray-100 hover:bg-gray-50'}`}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-colors ${isIn ? 'border-primary-200 bg-brand-1' : 'border-gray-300 hover:bg-gray-50'}`}
                   >
                     <div className="min-w-0 mr-2">
                       <div className="text-sm font-medium text-gray-900 truncate">{s.title}</div>

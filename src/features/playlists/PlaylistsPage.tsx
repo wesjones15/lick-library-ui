@@ -80,7 +80,7 @@ export default function PlaylistsPage() {
               </button>
               <button
                 onClick={() => setManaging(true)}
-                className="px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors"
+                className="px-4 py-2 text-sm rounded-lg border border-gray-400 text-gray-600 hover:text-gray-900 hover:border-gray-500 transition-colors"
               >
                 Manage
               </button>
@@ -96,7 +96,7 @@ export default function PlaylistsPage() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1 text-xs rounded-lg border transition-colors ${filter === f ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-600 hover:text-gray-900'}`}
+              className={`px-3 py-1 text-xs rounded-lg border transition-colors ${filter === f ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-400 text-gray-600 hover:text-gray-900'}`}
             >
               {f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
@@ -111,7 +111,7 @@ export default function PlaylistsPage() {
           {filtered.map(pl => (
             <div
               key={pl.id}
-              className={`border border-gray-200 rounded-xl p-4 flex items-start justify-between transition-colors ${managing ? 'cursor-default' : 'hover:border-brand-3 cursor-pointer group'}`}
+              className={`border border-gray-400 rounded-xl p-4 flex items-start justify-between transition-colors ${managing ? 'cursor-default' : 'hover:border-brand-3 cursor-pointer group'}`}
               onClick={managing ? undefined : () => navigate(`/playlist/${pl.id}`)}
             >
               <div className="flex-1 min-w-0 mr-3">
@@ -149,7 +149,7 @@ export default function PlaylistsPage() {
                 ) : confirmDelete === pl.id ? (
                   <div className="flex gap-2 shrink-0" onClick={e => e.stopPropagation()}>
                     <button onClick={() => handleDelete(pl.id)} className="text-xs px-2 py-1 rounded bg-danger-6 text-white hover:bg-danger-7">Delete</button>
-                    <button onClick={() => setConfirmDelete(null)} className="text-xs px-2 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button onClick={() => setConfirmDelete(null)} className="text-xs px-2 py-1 rounded border border-gray-400 text-gray-700 hover:bg-gray-50">Cancel</button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-4 shrink-0" onClick={e => e.stopPropagation()}>

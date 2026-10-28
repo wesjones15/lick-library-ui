@@ -28,7 +28,7 @@ function MetadataDiff({ current, proposed }: { current: string; proposed: string
   return (
     <table className="w-full text-xs border-collapse">
       <thead>
-        <tr className="border-b border-gray-200 text-gray-600 text-left">
+        <tr className="border-b border-gray-400 text-gray-600 text-left">
           <th className="pb-2 pr-4">Field</th>
           <th className="pb-2 pr-4">Current</th>
           <th className="pb-2">Proposed</th>
@@ -40,7 +40,7 @@ function MetadataDiff({ current, proposed }: { current: string; proposed: string
           const propVal = String(prop[f] ?? '');
           const changed = curVal !== propVal && propVal !== '' && propVal !== '0';
           return (
-            <tr key={f} className={`border-b border-gray-100 ${changed ? 'bg-warn-1' : ''}`}>
+            <tr key={f} className={`border-b border-gray-300 ${changed ? 'bg-warn-1' : ''}`}>
               <td className="py-1.5 pr-4 text-gray-700 font-medium">{f}</td>
               <td className="py-1.5 pr-4 text-gray-700">{curVal || '—'}</td>
               <td className={`py-1.5 ${changed ? 'text-warn-6 font-medium' : 'text-gray-600'}`}>
@@ -61,7 +61,7 @@ function ChartDiff({ current, proposed }: { current: string; proposed: string })
     <div className="flex flex-col gap-3">
       <div>
         <div className="text-xs font-medium text-gray-600 mb-1">Current</div>
-        <pre className="font-mono text-xs bg-gray-50 border border-gray-200 rounded p-3 overflow-auto max-h-56 whitespace-pre-wrap">{curSheet || '(empty)'}</pre>
+        <pre className="font-mono text-xs bg-gray-50 border border-gray-400 rounded p-3 overflow-auto max-h-56 whitespace-pre-wrap">{curSheet || '(empty)'}</pre>
       </div>
       <div>
         <div className="text-xs font-medium text-warn-5 mb-1">Proposed</div>
@@ -119,7 +119,7 @@ export default function SongUpdateReviewModal({ updateId, onClose, onDone }: Pro
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex items-start justify-between px-6 py-4 border-b border-gray-300">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-semibold text-gray-900">{data?.songTitle ?? '…'}</span>
@@ -152,7 +152,7 @@ export default function SongUpdateReviewModal({ updateId, onClose, onDone }: Pro
         </div>
 
         {/* Footer */}
-        <div className="flex gap-2 px-6 py-4 border-t border-gray-100">
+        <div className="flex gap-2 px-6 py-4 border-t border-gray-300">
           <button
             onClick={handleApprove}
             disabled={acting || !data}
