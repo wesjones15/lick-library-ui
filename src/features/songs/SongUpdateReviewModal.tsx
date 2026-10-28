@@ -28,7 +28,7 @@ function MetadataDiff({ current, proposed }: { current: string; proposed: string
   return (
     <table className="w-full text-xs border-collapse">
       <thead>
-        <tr className="border-b border-gray-200 text-gray-400 text-left">
+        <tr className="border-b border-gray-200 text-gray-600 text-left">
           <th className="pb-2 pr-4">Field</th>
           <th className="pb-2 pr-4">Current</th>
           <th className="pb-2">Proposed</th>
@@ -41,9 +41,9 @@ function MetadataDiff({ current, proposed }: { current: string; proposed: string
           const changed = curVal !== propVal && propVal !== '' && propVal !== '0';
           return (
             <tr key={f} className={`border-b border-gray-100 ${changed ? 'bg-warn-1' : ''}`}>
-              <td className="py-1.5 pr-4 text-gray-500 font-medium">{f}</td>
-              <td className="py-1.5 pr-4 text-gray-500">{curVal || '—'}</td>
-              <td className={`py-1.5 ${changed ? 'text-warn-6 font-medium' : 'text-gray-400'}`}>
+              <td className="py-1.5 pr-4 text-gray-700 font-medium">{f}</td>
+              <td className="py-1.5 pr-4 text-gray-700">{curVal || '—'}</td>
+              <td className={`py-1.5 ${changed ? 'text-warn-6 font-medium' : 'text-gray-600'}`}>
                 {propVal || '—'}
               </td>
             </tr>
@@ -60,7 +60,7 @@ function ChartDiff({ current, proposed }: { current: string; proposed: string })
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <div className="text-xs font-medium text-gray-400 mb-1">Current</div>
+        <div className="text-xs font-medium text-gray-600 mb-1">Current</div>
         <pre className="font-mono text-xs bg-gray-50 border border-gray-200 rounded p-3 overflow-auto max-h-56 whitespace-pre-wrap">{curSheet || '(empty)'}</pre>
       </div>
       <div>
@@ -76,7 +76,7 @@ function BeatmapDiff({ current, proposed }: { current: string; proposed: string 
   const propBeats: number[] = JSON.parse(proposed).beats ?? [];
   return (
     <div className="flex flex-col gap-2 text-xs">
-      <div><span className="text-gray-400 font-medium mr-2">Current beats:</span><span className="font-mono text-gray-600">[{curBeats.join(', ') || 'none'}]</span></div>
+      <div><span className="text-gray-600 font-medium mr-2">Current beats:</span><span className="font-mono text-gray-700">[{curBeats.join(', ') || 'none'}]</span></div>
       <div><span className="text-warn-5 font-medium mr-2">Proposed beats:</span><span className="font-mono text-warn-6">[{propBeats.join(', ') || 'none'}]</span></div>
     </div>
   );
@@ -130,18 +130,18 @@ export default function SongUpdateReviewModal({ updateId, onClose, onDone }: Pro
               )}
             </div>
             {data && (
-              <div className="text-xs text-gray-400 mt-0.5">
+              <div className="text-xs text-gray-600 mt-0.5">
                 submitted by {data.submitterUsername}
               </div>
             )}
           </div>
-          <button onClick={onClose} className="text-gray-300 hover:text-gray-600 text-xl leading-none ml-4">×</button>
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-900 text-xl leading-none ml-4">×</button>
         </div>
 
         {/* Body */}
         <div className="px-6 py-4 overflow-auto flex-1">
           {!data ? (
-            <p className="text-sm text-gray-400">Loading…</p>
+            <p className="text-sm text-gray-600">Loading…</p>
           ) : data.requestType === 'SONG_METADATA' ? (
             <MetadataDiff current={data.currentValue} proposed={data.proposedValue} />
           ) : data.requestType === 'SONG_CHART' ? (

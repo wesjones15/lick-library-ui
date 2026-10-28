@@ -225,9 +225,9 @@ export default function SongDetailPage() {
     if (!song) return null;
     return (
       <div>
-        {song.artist && <div className="text-xs text-gray-400">{song.artist}</div>}
+        {song.artist && <div className="text-xs text-gray-600">{song.artist}</div>}
         <h1 className="text-xl font-bold text-gray-900">{song.title}</h1>
-        <div className="flex flex-col md:flex-row md:gap-3 mt-0.5 text-xs text-gray-400 gap-0.5">
+        <div className="flex flex-col md:flex-row md:gap-3 mt-0.5 text-xs text-gray-600 gap-0.5">
           <div className="flex gap-2 items-center">
             <InstrumentSelector
               instrument={instrument as InstrumentName}
@@ -243,7 +243,7 @@ export default function SongDetailPage() {
                 if (isPlaying && bpm === song.tempo) { setIsPlaying(false); }
                 else { setBpm(song.tempo!); if (song.timeSignature) setBeatsPerBar(song.timeSignature); setIsPlaying(true); }
               }}
-              className="text-left text-xs text-gray-400 hover:text-brand-5 transition-colors"
+              className="text-left text-xs text-gray-600 hover:text-brand-5 transition-colors"
             >
               {song.tempo} BPM
             </button>
@@ -263,7 +263,7 @@ export default function SongDetailPage() {
           className={`md:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-base transition-colors ${
             (capo !== (song.capo ?? 0) || semitones !== 0)
               ? 'border-brand-3 bg-brand-1 text-brand-6'
-              : 'border-gray-200 text-gray-400 hover:text-gray-600'
+              : 'border-gray-200 text-gray-600 hover:text-gray-900'
           }`}
           aria-label="Capo & Transpose"
           title="Capo & Transpose"
@@ -340,7 +340,7 @@ export default function SongDetailPage() {
                 key={name}
                 className="flex-shrink-0 flex flex-col items-center border border-gray-200 rounded-lg px-2 pt-2 pb-1 bg-white"
               >
-                <span className="text-xs font-semibold text-gray-700 mb-1">{name}</span>
+                <span className="text-xs font-semibold text-gray-900 mb-1">{name}</span>
                 <div
                   style={isEmpty ? { cursor: 'pointer' } : undefined}
                   onClick={isEmpty ? () => setUploadChord(name) : undefined}
@@ -348,14 +348,14 @@ export default function SongDetailPage() {
                   <ChordDiagram frets={frets} width={90} stringCount={getStringCount(instrument)} />
                 </div>
                 {voicings.length > 1 && (
-                  <div className="flex items-center justify-between w-full text-xs text-gray-400 mt-1">
+                  <div className="flex items-center justify-between w-full text-xs text-gray-600 mt-1">
                     <button
-                      className="hover:text-gray-600 px-1 text-2xl leading-none"
+                      className="hover:text-gray-900 px-1 text-2xl leading-none"
                       onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx - 1 + voicings.length) % voicings.length }))}
                     >‹</button>
                     <span>{idx + 1}/{voicings.length}</span>
                     <button
-                      className="hover:text-gray-600 px-1 text-2xl leading-none"
+                      className="hover:text-gray-900 px-1 text-2xl leading-none"
                       onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx + 1) % voicings.length }))}
                     >›</button>
                   </div>
@@ -446,7 +446,7 @@ export default function SongDetailPage() {
           {renderChordDiagramPanel()}
         </>
       )}
-      {!song && loading && <p className="text-gray-400 text-sm">Loading…</p>}
+      {!song && loading && <p className="text-gray-600 text-sm">Loading…</p>}
       {!song && error && <p className="text-danger-6 text-sm">{error}</p>}
       {renderChordUploadModal()}
       {renderAddToPlaylistModal()}

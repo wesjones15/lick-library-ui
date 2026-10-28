@@ -35,7 +35,7 @@ export default function PentatonicWidget({
       <div className="mt-4 p-3 inline-block">
         <button
           onClick={onToggle}
-          className={`${BTN_SM} border-gray-300 text-gray-600 hover:bg-gray-50`}
+          className={`${BTN_SM} border-gray-300 text-gray-700 hover:bg-gray-50`}
         >
           Pentatonic
         </button>
@@ -69,11 +69,11 @@ export default function PentatonicWidget({
         <button
           style={{ visibility: activePentKeys.length > 0 ? 'visible' : 'hidden' }}
           onClick={() => activePentKeys.forEach(k => onKeyToggle(k))}
-          className="text-xs text-gray-400 hover:text-gray-600 underline"
+          className="text-xs text-gray-600 hover:text-gray-900 underline"
         >
           Clear
         </button>
-        <span className="text-xs text-gray-400" style={{ visibility: pentModeSynced ? 'visible' : 'hidden' }}>
+        <span className="text-xs text-gray-600" style={{ visibility: pentModeSynced ? 'visible' : 'hidden' }}>
           synced
         </span>
       </div>
@@ -98,7 +98,7 @@ export default function PentatonicWidget({
                         ? 'bg-pent-full-1 border-pent-full-2 text-pent-full-3'
                         : isPartial
                           ? 'bg-pent-part-1 border-pent-part-2 text-pent-part-3'
-                          : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
+                          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   {formatNoteEnum(key)}

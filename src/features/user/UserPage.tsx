@@ -107,7 +107,7 @@ export default function UserPage() {
     <button
       onClick={loadData}
       title="Refresh"
-      className="text-gray-300 hover:text-brand-5 transition-colors text-base leading-none"
+      className="text-gray-600 hover:text-brand-5 transition-colors text-base leading-none"
       aria-label="Refresh"
     >
       ↺
@@ -117,19 +117,19 @@ export default function UserPage() {
   function renderMyUploads() {
     return (
       <div className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">My Uploads</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">My Uploads</h2>
         <div className="grid grid-cols-3 gap-4">
           <div className="border border-gray-200 rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-brand-6">{myLicks.length}</div>
-            <div className="text-xs text-gray-400 mt-1">Licks</div>
+            <div className="text-xs text-gray-600 mt-1">Licks</div>
           </div>
           <div className="border border-gray-200 rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-brand-6">{mySongs.length}</div>
-            <div className="text-xs text-gray-400 mt-1">Songs</div>
+            <div className="text-xs text-gray-600 mt-1">Songs</div>
           </div>
           <div className="border border-gray-200 rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-brand-6">{myPlaylists.length}</div>
-            <div className="text-xs text-gray-400 mt-1">Playlists</div>
+            <div className="text-xs text-gray-600 mt-1">Playlists</div>
           </div>
         </div>
       </div>
@@ -140,26 +140,26 @@ export default function UserPage() {
     return (
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-gray-800">Approval Queue</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Approval Queue</h2>
           <div className="flex items-center gap-2">
             {refreshButton}
             <button
               onClick={() => { setManaging(m => !m); setEditingUsername(null); setConfirmDelete(false); }}
-              className="text-xs text-gray-400 hover:text-brand-6 transition-colors"
+              className="text-xs text-gray-600 hover:text-brand-6 transition-colors"
             >
               {managing ? 'Done' : 'Manage'}
             </button>
           </div>
         </div>
         {queue.length === 0 ? (
-          <p className="text-sm text-gray-400">No pending users.</p>
+          <p className="text-sm text-gray-600">No pending users.</p>
         ) : (
           <div className="flex flex-col gap-2">
             {queue.map(u => (
               <div key={u.id} className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-2.5 bg-white">
                 <div>
                   <div className="flex items-center gap-2">
-                    <div className="text-sm font-medium text-gray-800">{u.username}</div>
+                    <div className="text-sm font-medium text-gray-900">{u.username}</div>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       u.requestType === 'ACCOUNT_DELETION'
                         ? 'bg-danger-2 text-danger-8'
@@ -168,7 +168,7 @@ export default function UserPage() {
                       {u.requestType === 'ACCOUNT_DELETION' ? 'Deletion' : 'Account Creation'}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-400">{u.email}</div>
+                  <div className="text-xs text-gray-600">{u.email}</div>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -195,11 +195,11 @@ export default function UserPage() {
   function renderAllUsers() {
     return (
       <div className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">All Users</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">All Users</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-xs border-collapse">
             <thead>
-              <tr className="border-b border-gray-200 text-gray-400 text-left">
+              <tr className="border-b border-gray-200 text-gray-600 text-left">
                 <th className="pb-2 pr-4">ID</th>
                 <th className="pb-2 pr-4">Username</th>
                 <th className="pb-2 pr-4">Email</th>
@@ -211,11 +211,11 @@ export default function UserPage() {
             <tbody>
               {allUsers.map(u => (
                 <tr key={u.id} className="border-b border-gray-100">
-                  <td className="py-1.5 pr-4 text-gray-400">{u.id}</td>
-                  <td className="py-1.5 pr-4 text-gray-700">{u.username}</td>
-                  <td className="py-1.5 pr-4 text-gray-500">{u.email}</td>
+                  <td className="py-1.5 pr-4 text-gray-600">{u.id}</td>
+                  <td className="py-1.5 pr-4 text-gray-900">{u.username}</td>
+                  <td className="py-1.5 pr-4 text-gray-700">{u.email}</td>
                   <td className="py-1.5 pr-4">
-                    <span className={`px-1.5 py-0.5 rounded text-xs ${u.role === 'ADMIN' ? 'bg-brand-2 text-brand-7' : 'bg-gray-100 text-gray-500'}`}>
+                    <span className={`px-1.5 py-0.5 rounded text-xs ${u.role === 'ADMIN' ? 'bg-brand-2 text-brand-7' : 'bg-gray-100 text-gray-700'}`}>
                       {u.role}
                     </span>
                   </td>
@@ -241,7 +241,7 @@ export default function UserPage() {
                           </button>
                           <button
                             onClick={() => setConfirmDeleteUserId(null)}
-                            className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors"
+                            className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
                           >
                             Cancel
                           </button>
@@ -268,16 +268,16 @@ export default function UserPage() {
   function renderSongUpdateQueue() {
     return (
       <div className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">Song Update Requests</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">Song Update Requests</h2>
         {songUpdateQueue.length === 0 ? (
-          <p className="text-sm text-gray-400">No pending song updates.</p>
+          <p className="text-sm text-gray-600">No pending song updates.</p>
         ) : (
           <div className="flex flex-col gap-2">
             {songUpdateQueue.map(req => (
               <div key={req.id} className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-2.5 bg-white">
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <div className="text-sm font-medium text-gray-800">{req.songTitle}{req.songArtist ? ` — ${req.songArtist}` : ''}</div>
+                    <div className="text-sm font-medium text-gray-900">{req.songTitle}{req.songArtist ? ` — ${req.songArtist}` : ''}</div>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       req.requestType === 'SONG_METADATA' ? 'bg-info-1 text-info-7' :
                       req.requestType === 'SONG_CHART' ? 'bg-chart-1 text-chart-2' :
@@ -286,7 +286,7 @@ export default function UserPage() {
                       {req.requestType === 'SONG_METADATA' ? 'Metadata' : req.requestType === 'SONG_CHART' ? 'Chart' : 'Beatmap'}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-400">submitted by {req.submitterUsername}</div>
+                  <div className="text-xs text-gray-600">submitted by {req.submitterUsername}</div>
                 </div>
                 <button
                   onClick={() => setReviewingUpdateId(req.id)}
@@ -317,7 +317,7 @@ export default function UserPage() {
             </button>
             <button
               onClick={() => setConfirmDelete(false)}
-              className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
+              className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
@@ -327,7 +327,7 @@ export default function UserPage() {
             onClick={() => !isSuperAdmin && setConfirmDelete(true)}
             disabled={isSuperAdmin}
             title={isSuperAdmin ? 'Primary admin account cannot be deleted' : undefined}
-            className={`text-xs transition-colors ${isSuperAdmin ? 'text-gray-300 cursor-not-allowed' : 'text-danger-5 hover:text-danger-7'}`}
+            className={`text-xs transition-colors ${isSuperAdmin ? 'text-gray-600 cursor-not-allowed' : 'text-danger-5 hover:text-danger-7'}`}
           >
             Delete account
           </button>
@@ -363,7 +363,7 @@ export default function UserPage() {
                   </button>
                   <button
                     onClick={() => setEditingUsername(null)}
-                    className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                    className="text-xs text-gray-600 hover:text-gray-900 transition-colors"
                   >
                     ×
                   </button>
@@ -375,7 +375,7 @@ export default function UserPage() {
                     <button
                       onClick={() => setEditingUsername(profile?.username ?? '')}
                       title="Edit username"
-                      className="text-gray-300 hover:text-brand-5 transition-colors text-sm leading-none"
+                      className="text-gray-600 hover:text-brand-5 transition-colors text-sm leading-none"
                       aria-label="Edit username"
                     >
                       ✎
@@ -383,9 +383,9 @@ export default function UserPage() {
                   )}
                 </div>
               )}
-              <div className="text-sm text-gray-400">{profile?.email}</div>
+              <div className="text-sm text-gray-600">{profile?.email}</div>
               {profile?.creationTs && (
-                <div className="text-xs text-gray-300 mt-1">
+                <div className="text-xs text-gray-600 mt-1">
                   Joined {new Date(profile.creationTs).toLocaleDateString()}
                 </div>
               )}
@@ -395,12 +395,12 @@ export default function UserPage() {
                 {!isAdmin && refreshButton}
                 <button
                   onClick={() => { setManaging(m => !m); setEditingUsername(null); setConfirmDelete(false); }}
-                  className="text-xs text-gray-400 hover:text-brand-6 transition-colors"
+                  className="text-xs text-gray-600 hover:text-brand-6 transition-colors"
                 >
                   {managing ? 'Done' : 'Manage'}
                 </button>
               </div>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isAdmin ? 'bg-brand-2 text-brand-7' : 'bg-gray-100 text-gray-500'}`}>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isAdmin ? 'bg-brand-2 text-brand-7' : 'bg-gray-100 text-gray-700'}`}>
                 {currentUser.role}
               </span>
               {isAdmin ? (

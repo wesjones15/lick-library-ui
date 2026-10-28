@@ -138,7 +138,7 @@ export default function ChordInfoBox({ chordName, voicing, instrument, effective
       <div className="flex items-center gap-2">
         <span className="font-bold text-base text-brand-6 leading-tight">
           {chordName}
-          {soundName && <span className="text-gray-400 font-normal text-sm ml-0.5">({soundName})</span>}
+          {soundName && <span className="text-gray-600 font-normal text-sm ml-0.5">({soundName})</span>}
         </span>
         <span
           className={`w-2 h-2 rounded-full transition-colors duration-150 shrink-0 ${
@@ -148,7 +148,7 @@ export default function ChordInfoBox({ chordName, voicing, instrument, effective
         {hasScale && (
           <button
             onClick={() => setShowScale(v => !v)}
-            className={`ml-auto text-[10px] leading-none transition-colors ${showScale ? 'text-brand-4' : 'text-gray-300 hover:text-gray-500'}`}
+            className={`ml-auto text-[10px] leading-none transition-colors ${showScale ? 'text-brand-4' : 'text-gray-600 hover:text-gray-900'}`}
             title={showScale ? 'Show chord intervals' : 'Show scale degrees'}
           >
             ⇄
@@ -159,13 +159,13 @@ export default function ChordInfoBox({ chordName, voicing, instrument, effective
         <span className="text-xs font-mono leading-tight">
           {tones.map((t, i) => (
             <span key={i}>
-              {i > 0 && <span className="text-gray-300"> · </span>}
+              {i > 0 && <span className="text-gray-600"> · </span>}
               <span style={{ color: t.color }}>{showScale ? t.scaleLabel : t.chordLabel}</span>
             </span>
           ))}
         </span>
       ) : plainIntervals.length > 0 ? (
-        <span className="text-xs text-gray-500 font-mono leading-tight">{plainIntervals.join(' · ')}</span>
+        <span className="text-xs text-gray-700 font-mono leading-tight">{plainIntervals.join(' · ')}</span>
       ) : null}
     </div>
   );

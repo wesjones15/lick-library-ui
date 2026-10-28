@@ -22,7 +22,7 @@ export default function ChordUploadModal({ chordName, instrument, lockInstrument
           <span className="text-sm font-semibold text-gray-900">Add voicing for {chordName}</span>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+            className="text-gray-600 hover:text-gray-900 text-lg leading-none"
           >
             ✕
           </button>

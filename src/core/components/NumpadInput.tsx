@@ -69,7 +69,7 @@ export default function NumpadInput({
 
   const btnBase = 'rounded-xl font-semibold select-none transition-colors';
   const digitCls = `${btnBase} bg-gray-100 text-gray-900 active:bg-gray-200`;
-  const specialCls = `${btnBase} bg-gray-200 text-gray-600 active:bg-gray-300`;
+  const specialCls = `${btnBase} bg-gray-200 text-gray-700 active:bg-gray-300`;
   const confirmCls = `${btnBase} bg-brand-6 text-white active:bg-brand-7`;
   const sizeCls = wide ? 'w-11 h-11 text-base' : 'h-12 text-lg';
 
@@ -188,7 +188,7 @@ export default function NumpadInput({
         onClick={handleOpen}
         className={`${className ?? ''} cursor-default text-left`}
       >
-        {value !== '' ? value : <span className="text-gray-400">{placeholder}</span>}
+        {value !== '' ? value : <span className="text-gray-600">{placeholder}</span>}
       </button>
 
       {open && (
@@ -204,7 +204,7 @@ export default function NumpadInput({
               onPointerDown={e => e.stopPropagation()}
             >
               <div className="text-center text-xl font-bold text-gray-900 tabular-nums mb-3 h-7 flex items-center justify-center">
-                {draft !== '' ? draft : <span className="text-gray-300">{placeholder ?? '—'}</span>}
+                {draft !== '' ? draft : <span className="text-gray-600">{placeholder ?? '—'}</span>}
               </div>
               <Grid />
             </div>
@@ -214,7 +214,7 @@ export default function NumpadInput({
               onPointerDown={e => e.stopPropagation()}
             >
               <div className="text-center text-4xl font-bold text-gray-900 tabular-nums mb-4 h-12 flex items-center justify-center">
-                {draft !== '' ? draft : <span className="text-gray-300">{placeholder ?? '—'}</span>}
+                {draft !== '' ? draft : <span className="text-gray-600">{placeholder ?? '—'}</span>}
               </div>
               <div className="max-w-xs mx-auto">
                 <Grid />

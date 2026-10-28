@@ -10,7 +10,7 @@ interface Props {
 
 export default function LickList({ licks, onDelete, onFork, isManaging }: Props) {
   if (licks.length === 0) {
-    return <p className="text-gray-400 text-sm">No licks yet. Upload one above.</p>;
+    return <p className="text-gray-600 text-sm">No licks yet. Upload one above.</p>;
   }
   return (
     <div className="flex flex-col gap-3">

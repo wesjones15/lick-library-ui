@@ -73,3 +73,9 @@
   --color-beatmap-1: var(--color-teal-100);
   --color-beatmap-2: var(--color-teal-700);
 }
+
+/* E-ink legibility: the browser default placeholder is a faded currentColor, which dithers to near-invisible. */
+::placeholder {
+  color: var(--color-gray-600);
+  opacity: 1;
+}

@@ -65,12 +65,12 @@ export default function ChordManageModal({ chordName, voicings: initialVoicings,
       >
         <div className="flex items-center justify-between mb-4">
           <span className="text-sm font-semibold text-gray-900">Manage voicings — {chordName}</span>
-          <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 text-lg leading-none">✕</button>
+          <button onClick={handleClose} className="text-gray-600 hover:text-gray-900 text-lg leading-none">✕</button>
         </div>
 
         <div className="flex-1 overflow-y-auto">
           {voicings.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-8">No voicings for {chordName}</p>
+            <p className="text-sm text-gray-600 text-center py-8">No voicings for {chordName}</p>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {voicings.map(v => (
@@ -78,7 +78,7 @@ export default function ChordManageModal({ chordName, voicings: initialVoicings,
                   <ChordDiagram frets={v.frets} width={120} stringCount={getStringCount(instrument)} />
                   <div className="flex flex-col items-center justify-center gap-1">
                     {v.authorName && (
-                      <span className="text-xs text-gray-300">{v.authorName}</span>
+                      <span className="text-xs text-gray-600">{v.authorName}</span>
                     )}
                     {v.ownedByCurrentUser && (
                       confirmId === v.id ? (
@@ -92,7 +92,7 @@ export default function ChordManageModal({ chordName, voicings: initialVoicings,
                       ) : (
                         <button
                           onClick={() => setConfirmId(v.id)}
-                          className="text-gray-300 hover:text-danger-5 text-5xl leading-none"
+                          className="text-gray-600 hover:text-danger-5 text-5xl leading-none"
                         >
                           ✕
                         </button>

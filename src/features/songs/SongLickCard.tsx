@@ -37,7 +37,7 @@ function renderColoredTab(tab: string, fontSize: number): React.ReactNode {
       {tab.split('\n').map((line, i) => (
         <div key={i} style={{ whiteSpace: 'pre' }}>
           <span style={{ color: '#ef4444' }}>{line[0] ?? ''}</span>
-          <span style={{ color: '#4b5563' }}>{line.slice(1)}</span>
+          <span style={{ color: '#1f2937' }}>{line.slice(1)}</span>
         </div>
       ))}
     </div>
@@ -93,15 +93,15 @@ export default function SongLickCard({ lickId, rawTab, currentKey, semitones, fo
         <div className="flex items-center gap-2 mt-0.5">
           <button
             onClick={e => { e.stopPropagation(); setPosIdx(i => (i - 1 + positions.length) % positions.length); }}
-            className="text-gray-400 hover:text-brand-5 text-sm leading-none"
+            className="text-gray-600 hover:text-brand-5 text-sm leading-none"
             aria-label="Previous position"
           >
             ‹
           </button>
-          <span className="text-[10px] text-gray-400 font-mono">{posIdx + 1}/{positions.length}</span>
+          <span className="text-[10px] text-gray-600 font-mono">{posIdx + 1}/{positions.length}</span>
           <button
             onClick={e => { e.stopPropagation(); setPosIdx(i => (i + 1) % positions.length); }}
-            className="text-gray-400 hover:text-brand-5 text-sm leading-none"
+            className="text-gray-600 hover:text-brand-5 text-sm leading-none"
             aria-label="Next position"
           >
             ›

@@ -244,7 +244,7 @@ export default function LickBuilderPage() {
             <button
               onClick={() => setIsBuilding(b => !b)}
               className={`${BTN} ${isBuilding
-                ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                ? 'bg-white text-gray-900 border-gray-300 hover:bg-gray-50'
                 : 'bg-brand-6 text-white border-brand-6 hover:bg-brand-7'}`}
             >
               {isBuilding ? 'Stop' : 'Start'}
@@ -254,7 +254,7 @@ export default function LickBuilderPage() {
               title="Chord detection: accumulate notes within 1.5s into one column"
               className={`${BTN} ${chordDetect
                 ? 'bg-success-6 text-white border-success-6'
-                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
             >
               ♭³
             </button>
@@ -276,7 +276,7 @@ export default function LickBuilderPage() {
             </button>
             <button
               onClick={() => { setBuiltCols([]); setBuiltTabText(''); setBuildCurrentNote(null); }}
-              className={`${BTN} bg-white text-gray-600 border-gray-300 hover:bg-gray-50`}
+              className={`${BTN} bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
             >
               Clear
             </button>
@@ -284,7 +284,7 @@ export default function LickBuilderPage() {
               onClick={() => { navigator.clipboard.writeText(builtTabText); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
               disabled={!builtTabText.trim()}
               title="Copy tab to clipboard"
-              className={`${BTN} ${copied ? 'bg-success-6 text-white border-success-6' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'} disabled:opacity-40 disabled:cursor-not-allowed`}
+              className={`${BTN} ${copied ? 'bg-success-6 text-white border-success-6' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'} disabled:opacity-60 disabled:cursor-not-allowed`}
             >
               {copied ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

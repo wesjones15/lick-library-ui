@@ -29,7 +29,7 @@ export default function MiniBar() {
     <div className="flex-1 min-w-0 flex items-center gap-3">
       <div className="flex flex-col min-w-0">
         {info!.artist && (
-          <span className="text-xs text-gray-400 truncate">
+          <span className="text-xs text-gray-600 truncate">
             {info!.artist}
           </span>
         )}
@@ -40,21 +40,21 @@ export default function MiniBar() {
       <div className="flex items-start gap-1.5 shrink-0">
         <div className="flex flex-col">
           {info!.soundKey && (
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-gray-700">
               {info!.soundKey}
             </span>
           )}
           {info!.bpm != null && (
             <button
               onClick={() => { if (isPlaying && bpm === info!.bpm) { setIsPlaying(false); } else { setBpm(info!.bpm!); setIsPlaying(true); } }}
-              className="text-xs text-gray-400 hover:text-brand-5 transition-colors"
+              className="text-xs text-gray-600 hover:text-brand-5 transition-colors"
             >
               {info!.bpm} BPM
             </button>
           )}
         </div>
         {info!.capo > 0 && (
-          <span className="text-xs text-gray-400">Capo {info!.capo}</span>
+          <span className="text-xs text-gray-600">Capo {info!.capo}</span>
         )}
       </div>
 
@@ -64,7 +64,7 @@ export default function MiniBar() {
             {miniActions?.viewMode === 'scroll' && (
               <button
                 onClick={() => miniActions?.toggleAutoScroll()}
-                className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.autoScrolling ? 'text-brand-5' : 'text-gray-400 hover:text-brand-5'}`}
+                className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.autoScrolling ? 'text-brand-5' : 'text-gray-600 hover:text-brand-5'}`}
                 aria-label={miniActions?.autoScrolling ? 'Pause autoscroll' : 'Start autoscroll'}
               >
                 {miniActions?.autoScrolling ? '⏸' : '▶'}
@@ -75,7 +75,7 @@ export default function MiniBar() {
               <div className="relative w-8 h-8 flex items-center justify-center" ref={playlistPanelRef}>
                 <button
                   onClick={() => setPlaylistPanelOpen(o => !o)}
-                  className={`w-8 h-8 flex items-center justify-center text-sm leading-none transition-colors ${playlistPanelOpen ? 'text-brand-5' : 'text-gray-400 hover:text-brand-5'}`}
+                  className={`w-8 h-8 flex items-center justify-center text-sm leading-none transition-colors ${playlistPanelOpen ? 'text-brand-5' : 'text-gray-600 hover:text-brand-5'}`}
                   aria-label="Playlist controls"
                 >
                   🎵
@@ -84,23 +84,23 @@ export default function MiniBar() {
                   <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-3 flex flex-col gap-2">
                     <button
                       onClick={() => { miniActions?.onPlaylistBack(); setPlaylistPanelOpen(false); setIconsOpen(false); }}
-                      className="text-xs text-left text-gray-500 hover:text-brand-5 transition-colors"
+                      className="text-xs text-left text-gray-700 hover:text-brand-5 transition-colors"
                     >
                       ← {miniActions?.playlistName}
                     </button>
                     <div className="flex items-center justify-between">
                       <button
                         onClick={() => miniActions?.onPlaylistPrev()}
-                        className="text-xs px-2 py-1 rounded border border-gray-200 text-gray-500 hover:bg-gray-50"
+                        className="text-xs px-2 py-1 rounded border border-gray-200 text-gray-700 hover:bg-gray-50"
                       >
                         Prev
                       </button>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-gray-600">
                         {(miniActions?.playlistCurrentIndex ?? 0) + 1}/{miniActions?.playlistTotal ?? 0}
                       </span>
                       <button
                         onClick={() => miniActions?.onPlaylistNext()}
-                        className="text-xs px-2 py-1 rounded border border-gray-200 text-gray-500 hover:bg-gray-50"
+                        className="text-xs px-2 py-1 rounded border border-gray-200 text-gray-700 hover:bg-gray-50"
                       >
                         Next
                       </button>
@@ -124,7 +124,7 @@ export default function MiniBar() {
             {miniActions?.hasTabLines && (
               <button
                 onClick={() => miniActions?.toggleTabLicks()}
-                className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.showTabLicks ? 'text-danger-6' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.showTabLicks ? 'text-danger-6' : 'text-gray-600 hover:text-gray-900'}`}
                 aria-label="Tab positions"
               >
                 ≡
@@ -133,7 +133,7 @@ export default function MiniBar() {
 
             <button
               onClick={() => miniActions?.toggleViewMode()}
-              className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.viewMode === 'scroll' ? 'text-brand-5' : 'text-gray-400 hover:text-brand-5'}`}
+              className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${miniActions?.viewMode === 'scroll' ? 'text-brand-5' : 'text-gray-600 hover:text-brand-5'}`}
               aria-label="Toggle view"
             >
               {miniActions?.viewMode === 'scroll' ? '↕' : '⊞'}
@@ -141,7 +141,7 @@ export default function MiniBar() {
 
             <button
               onClick={() => miniActions?.openTranspose()}
-              className="w-8 h-8 flex items-center justify-center text-xl leading-none text-gray-400 hover:text-brand-5 transition-colors"
+              className="w-8 h-8 flex items-center justify-center text-xl leading-none text-gray-600 hover:text-brand-5 transition-colors"
               aria-label="Capo / Transpose"
             >
               Δ
@@ -151,7 +151,7 @@ export default function MiniBar() {
               <div className="relative w-8 h-8 flex items-center justify-center" ref={instrumentPanelRef}>
                 <button
                   onClick={() => setInstrumentPanelOpen(o => !o)}
-                  className={`w-8 h-8 flex items-center justify-center text-sm leading-none transition-colors ${instrumentPanelOpen ? 'text-brand-5' : 'text-gray-400 hover:text-brand-5'}`}
+                  className={`w-8 h-8 flex items-center justify-center text-sm leading-none transition-colors ${instrumentPanelOpen ? 'text-brand-5' : 'text-gray-600 hover:text-brand-5'}`}
                   aria-label="Instrument"
                 >
                   🎸
@@ -173,7 +173,7 @@ export default function MiniBar() {
 
             <button
               onClick={() => setSoundEnabled(!soundEnabled)}
-              className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${soundEnabled ? 'text-brand-5' : 'text-gray-400 hover:text-brand-5'}`}
+              className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${soundEnabled ? 'text-brand-5' : 'text-gray-600 hover:text-brand-5'}`}
               aria-label={soundEnabled ? 'Mute sound' : 'Enable sound'}
             >
               {soundEnabled ? '🔊' : '🔇'}
@@ -181,7 +181,7 @@ export default function MiniBar() {
 
             <button
               onClick={() => { miniActions?.navigateManage(); setIconsOpen(false); }}
-              className="w-8 h-8 flex items-center justify-center text-2xl leading-none text-gray-400 hover:text-brand-5 transition-colors"
+              className="w-8 h-8 flex items-center justify-center text-2xl leading-none text-gray-600 hover:text-brand-5 transition-colors"
               aria-label="Manage"
             >
               ✎
@@ -191,7 +191,7 @@ export default function MiniBar() {
 
         <button
           onClick={() => { setIconsOpen(o => !o); setPlaylistPanelOpen(false); setInstrumentPanelOpen(false); }}
-          className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${iconsOpen ? 'text-brand-5 hover:text-brand-7' : 'text-gray-400 hover:text-brand-5'}`}
+          className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${iconsOpen ? 'text-brand-5 hover:text-brand-7' : 'text-gray-600 hover:text-brand-5'}`}
           aria-label={iconsOpen ? 'Less options' : 'More options'}
         >
           {iconsOpen ? '>' : '<'}
@@ -207,7 +207,7 @@ export default function MiniBar() {
 
         <button
           onClick={() => setShowChords(v => !v)}
-          className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${showChords ? 'text-brand-5' : 'text-gray-400 hover:text-brand-5'}`}
+          className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${showChords ? 'text-brand-5' : 'text-gray-600 hover:text-brand-5'}`}
           aria-label="Show chords"
           title="Show chords"
         >
@@ -216,7 +216,7 @@ export default function MiniBar() {
 
         <button
           onClick={() => setCollapsed(false)}
-          className="w-8 h-8 flex items-center justify-center text-xl leading-none text-gray-400 hover:text-brand-5 transition-colors"
+          className="w-8 h-8 flex items-center justify-center text-xl leading-none text-gray-600 hover:text-brand-5 transition-colors"
           aria-label="Restore full view"
           title="Restore full view"
         >

@@ -122,7 +122,7 @@ export default function LickVisualizerPage() {
         <div className="flex gap-3 items-center mb-2 flex-wrap">
           <button
             onClick={() => setShowLibrary(true)}
-            className={`${BTN} bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
+            className={`${BTN} bg-white text-gray-900 border-gray-300 hover:bg-gray-50`}
           >
             Load from Library
           </button>
@@ -143,12 +143,12 @@ export default function LickVisualizerPage() {
         {columns.length > 0 && (
           <div className="mt-4">
             {displayMode === 'all' ? (
-              <pre className="font-mono text-xs text-gray-600 leading-tight mb-3 whitespace-pre overflow-x-auto">
+              <pre className="font-mono text-xs text-gray-700 leading-tight mb-3 whitespace-pre overflow-x-auto">
                 {rawTab}
               </pre>
             ) : (
               <div className="font-mono text-xs mb-1" style={{ display: 'inline-block', maxWidth: '100%', overflowX: 'auto' }}>
-                <pre className="text-gray-600 leading-tight m-0 p-0 whitespace-pre">
+                <pre className="text-gray-700 leading-tight m-0 p-0 whitespace-pre">
                   {buildSpreadTab(rawTab, columns)}
                 </pre>
                 <div className="relative" style={{ paddingLeft: '3ch', paddingRight: '5ch' }}>
@@ -165,7 +165,7 @@ export default function LickVisualizerPage() {
                     col.isRest ? (
                       <span
                         key={i}
-                        className="absolute top-5 text-[10px] text-gray-400 font-mono -translate-x-1/2 pointer-events-none"
+                        className="absolute top-5 text-[10px] text-gray-600 font-mono -translate-x-1/2 pointer-events-none"
                         style={{ left: `${(i / (columns.length - 1)) * 100}%` }}
                       >
                         ~
@@ -211,7 +211,7 @@ export default function LickVisualizerPage() {
                   <button
                     onClick={() => setIsRunning(r => !r)}
                     className={`${BTN} ${isRunning
-                      ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      ? 'bg-white text-gray-900 border-gray-300 hover:bg-gray-50'
                       : 'bg-brand-6 text-white border-brand-6 hover:bg-brand-7'}`}
                   >
                     {isRunning ? 'Pause' : 'Resume'}
@@ -223,7 +223,7 @@ export default function LickVisualizerPage() {
                 {lickSource === 'library' && (
                   <button
                     onClick={() => setShowEditLick(true)}
-                    className={`${BTN} bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
+                    className={`${BTN} bg-white text-gray-900 border-gray-300 hover:bg-gray-50`}
                   >
                     Edit Lick
                   </button>
@@ -233,7 +233,7 @@ export default function LickVisualizerPage() {
                   disabled={!canSave || saveLoading}
                   className={`${BTN} ${canSave
                     ? 'bg-success-6 text-white border-success-6 hover:bg-success-7'
-                    : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'} disabled:opacity-60`}
+                    : 'bg-gray-100 text-gray-600 border-gray-200 cursor-not-allowed'} disabled:opacity-60`}
                 >
                   {saveLoading ? 'Saving…' : 'Save Lick'}
                 </button>
@@ -244,7 +244,7 @@ export default function LickVisualizerPage() {
         )}
 
         {lickSource === 'none' && (
-          <p className="text-sm text-gray-400 mt-4">Load a lick from the library or create a new one to get started.</p>
+          <p className="text-sm text-gray-600 mt-4">Load a lick from the library or create a new one to get started.</p>
         )}
 
         {showLibrary && (

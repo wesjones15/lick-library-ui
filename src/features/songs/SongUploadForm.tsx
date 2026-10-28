@@ -91,7 +91,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
           value={keyMode}
           onChange={e => setKeyMode(e.target.value)}
           disabled={!keyRoot}
-          className="w-24 border border-gray-300 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:border-brand-4 disabled:opacity-40"
+          className="w-24 border border-gray-300 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:border-brand-4 disabled:opacity-60"
         >
           {MODE_DATA.map(m => (
             <option key={m.suffix} value={m.suffix}>{m.label}</option>

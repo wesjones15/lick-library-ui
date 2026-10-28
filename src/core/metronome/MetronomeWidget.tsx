@@ -74,7 +74,7 @@ export default function Metronome() {
       <button
         onClick={() => setOpen(o => !o)}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-          open ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+          open ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
         }`}
       >
         <span className={`inline-block w-2 h-2 rounded-full transition-all duration-75 ${
@@ -92,7 +92,7 @@ export default function Metronome() {
             <div className="flex items-center justify-between gap-2">
               <button
                 onClick={() => adjustBpm(-1)}
-                className="w-8 h-8 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-lg font-medium leading-none"
+                className="w-8 h-8 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center justify-center text-lg font-medium leading-none"
               >
                 −
               </button>
@@ -104,11 +104,11 @@ export default function Metronome() {
                   placeholder="BPM"
                   className="w-14 text-center text-2xl font-bold text-gray-900 tabular-nums bg-transparent border-b border-gray-300 focus:border-brand-5 focus:outline-none"
                 />
-                <span className="text-xs text-gray-400">BPM</span>
+                <span className="text-xs text-gray-600">BPM</span>
               </div>
               <button
                 onClick={() => adjustBpm(1)}
-                className="w-8 h-8 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center text-lg font-medium leading-none"
+                className="w-8 h-8 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center justify-center text-lg font-medium leading-none"
               >
                 +
               </button>
@@ -129,7 +129,7 @@ export default function Metronome() {
               <button
                 onClick={() => setShowAdvanced(a => !a)}
                 className={`text-sm leading-none transition-colors ${
-                  showAdvanced ? 'text-brand-5' : 'text-gray-400 hover:text-gray-700'
+                  showAdvanced ? 'text-brand-5' : 'text-gray-600 hover:text-gray-900'
                 }`}
                 title="Time signature"
               >⚙︎</button>
@@ -146,17 +146,17 @@ export default function Metronome() {
                       className={`px-2 py-0.5 rounded text-xs font-medium border transition-colors ${
                         beatsPerBar === opt.value
                           ? 'bg-brand-6 text-white border-brand-6'
-                          : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
                       }`}
                     >{opt.label}</button>
                   ))}
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs text-gray-400">Key</span>
+                  <span className="text-xs text-gray-600">Key</span>
                   <select
                     value={clickKey ?? ''}
                     onChange={e => setClickKey(e.target.value || null)}
-                    className="text-xs border border-gray-300 rounded px-1.5 py-0.5 text-gray-600 focus:outline-none focus:border-brand-4 bg-white"
+                    className="text-xs border border-gray-300 rounded px-1.5 py-0.5 text-gray-700 focus:outline-none focus:border-brand-4 bg-white"
                   >
                     <option value="">— none —</option>
                     {CHROMATIC_NOTES.map(n => (

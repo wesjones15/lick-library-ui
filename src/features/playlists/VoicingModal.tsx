@@ -37,7 +37,7 @@ export default function VoicingModal({ entry, onSave, onClose }: VoicingModalPro
 
           {/* BPM override widget */}
           <div className="flex flex-col items-center gap-1">
-            <span className="text-xs text-gray-400">BPM</span>
+            <span className="text-xs text-gray-600">BPM</span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setLocalTempoOverride(t => Math.min(240, Math.max(40, (t ?? entry.tempo ?? 120) - 1)))}
@@ -67,17 +67,17 @@ export default function VoicingModal({ entry, onSave, onClose }: VoicingModalPro
             </div>
             <button
               onClick={() => setLocalTempoOverride(null)}
-              className={`text-xs transition-colors ${localTempoOverride !== null ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+              className={`text-xs transition-colors ${localTempoOverride !== null ? 'text-gray-600 hover:text-gray-900' : 'invisible'}`}
             >reset</button>
           </div>
 
         {/* Instrument selector */}
         <div className="flex flex-col items-center gap-1 mb-6">
-          <span className="text-xs text-gray-400">Instrument</span>
+          <span className="text-xs text-gray-600">Instrument</span>
           <InstrumentSelector excludeCustom compact instrument={localInstrument} onInstrumentChange={setLocalInstrument} />
           <button
             onClick={() => setLocalInstrument(defaultInstrument)}
-            className={`text-xs transition-colors ${localInstrument !== defaultInstrument ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+            className={`text-xs transition-colors ${localInstrument !== defaultInstrument ? 'text-gray-600 hover:text-gray-900' : 'invisible'}`}
           >reset</button>
         </div>
 

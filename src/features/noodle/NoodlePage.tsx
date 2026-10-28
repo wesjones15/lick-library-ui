@@ -190,7 +190,7 @@ export default function NoodlePage() {
 
   const btnBase = 'px-3 py-1 rounded-lg text-sm font-medium transition-colors border';
   const btnActive = `${btnBase} bg-brand-6 text-white border-brand-6`;
-  const btnInactive = `${btnBase} border-gray-300 text-gray-600 hover:bg-gray-50`;
+  const btnInactive = `${btnBase} border-gray-300 text-gray-700 hover:bg-gray-50`;
 
   return (
     <div className={`max-w-6xl mx-auto px-6 py-4 flex flex-col gap-2 ${noodleMode === 'song' ? 'min-h-[calc(100vh-3.5rem)]' : ''}`}>
@@ -268,7 +268,7 @@ export default function NoodlePage() {
           </button>
           <button
             onClick={handleRestart}
-            className="w-8 h-8 flex items-center justify-center text-xl text-gray-400 hover:text-brand-5 transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-xl text-gray-600 hover:text-brand-5 transition-colors"
             aria-label="Restart"
             title="Restart"
           >
@@ -290,7 +290,7 @@ export default function NoodlePage() {
       {/* Controls row */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-1.5">
-          <span className="text-xs text-gray-400">BPM</span>
+          <span className="text-xs text-gray-600">BPM</span>
           <NumpadInput
             value={bpmInput}
             onChange={val => setBpmInput(val)}
@@ -333,15 +333,15 @@ export default function NoodlePage() {
         />
 
         <div className="flex items-center gap-1">
-          <span className="text-xs text-gray-400">Capo</span>
+          <span className="text-xs text-gray-600">Capo</span>
           <button
             onClick={() => songMode.setLocalCapo(c => Math.max(0, c - 1))}
-            className="w-6 h-6 flex items-center justify-center text-sm text-gray-500 hover:text-brand-5 border border-gray-200 rounded"
+            className="w-6 h-6 flex items-center justify-center text-sm text-gray-700 hover:text-brand-5 border border-gray-200 rounded"
           >−</button>
-          <span className="text-sm text-gray-700 w-5 text-center tabular-nums">{songMode.localCapo}</span>
+          <span className="text-sm text-gray-900 w-5 text-center tabular-nums">{songMode.localCapo}</span>
           <button
             onClick={() => songMode.setLocalCapo(c => Math.min(11, c + 1))}
-            className="w-6 h-6 flex items-center justify-center text-sm text-gray-500 hover:text-brand-5 border border-gray-200 rounded"
+            className="w-6 h-6 flex items-center justify-center text-sm text-gray-700 hover:text-brand-5 border border-gray-200 rounded"
           >+</button>
         </div>
 

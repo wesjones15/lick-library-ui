@@ -47,13 +47,13 @@ export default function HomePage() {
         {!currentUser && (
           <a
             href={`${BACKEND}/api/oauth2/authorize/google`}
-            className="text-sm px-4 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:border-brand-3 hover:text-brand-6 transition-all"
+            className="text-sm px-4 py-1.5 rounded-lg border border-gray-200 text-gray-700 hover:border-brand-3 hover:text-brand-6 transition-all"
           >
             Sign in with Google
           </a>
         )}
       </div>
-      <p className="text-gray-400 text-sm mb-6">A guitar practice tool.</p>
+      <p className="text-gray-600 text-sm mb-6">A guitar practice tool.</p>
       {currentUser && currentUser.status !== 'APPROVED' && currentUser.role !== 'ADMIN' && (
         <div className={`mb-6 ${ALERT_AMBER}`}>
           {currentUser.status === 'REJECTED'
@@ -71,7 +71,7 @@ export default function HomePage() {
             className="text-left border border-gray-200 rounded-xl p-5 bg-white hover:shadow-sm hover:border-primary-200 transition-all"
           >
             <div className="text-base font-semibold text-gray-900 mb-1">{f.title}</div>
-            <div className="text-xs text-gray-400 leading-snug">{f.description}</div>
+            <div className="text-xs text-gray-600 leading-snug">{f.description}</div>
           </button>
         ))}
       </div>

@@ -29,7 +29,7 @@ export default function PlaylistDetailPage() {
     getAllSongs().then(setAllSongs).catch(() => {});
   }, [id]);
 
-  if (!playlist) return <div className="max-w-3xl mx-auto px-6 py-10 text-gray-400 text-sm">Loading…</div>;
+  if (!playlist) return <div className="max-w-3xl mx-auto px-6 py-10 text-gray-600 text-sm">Loading…</div>;
 
   const entries = playlist.entries;
 
@@ -116,7 +116,7 @@ export default function PlaylistDetailPage() {
     return (
       <div className="flex items-start justify-between mb-6 gap-3">
         <div className="min-w-0 flex-1">
-          <Link to="/playlists" className="text-sm text-gray-400 hover:text-brand-5 transition-colors">← Playlists</Link>
+          <Link to="/playlists" className="text-sm text-gray-600 hover:text-brand-5 transition-colors">← Playlists</Link>
           {editingName ? (
             <div className="flex items-center gap-2 mt-1">
               <input
@@ -135,15 +135,15 @@ export default function PlaylistDetailPage() {
               {managing && playlist.ownedByCurrentUser && (
                 <button
                   onClick={() => { setNameInput(playlist.name); setEditingName(true); }}
-                  className="text-gray-400 hover:text-brand-5 transition-colors text-3xl leading-none"
+                  className="text-gray-600 hover:text-brand-5 transition-colors text-3xl leading-none"
                   title="Rename playlist"
                 >✎</button>
               )}
             </div>
           )}
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-xs text-gray-400">{entries.length} {entries.length === 1 ? 'song' : 'songs'}</span>
-            <span className={`text-xs px-1.5 py-0.5 rounded-full ${playlist.isPublic ? 'bg-success-1 text-success-6' : 'bg-gray-100 text-gray-400'}`}>
+            <span className="text-xs text-gray-600">{entries.length} {entries.length === 1 ? 'song' : 'songs'}</span>
+            <span className={`text-xs px-1.5 py-0.5 rounded-full ${playlist.isPublic ? 'bg-success-1 text-success-6' : 'bg-gray-100 text-gray-600'}`}>
               {playlist.isPublic ? 'Public' : 'Private'}
             </span>
           </div>
@@ -153,14 +153,14 @@ export default function PlaylistDetailPage() {
           {managing && playlist.ownedByCurrentUser && confirmDelete && (
             <div className="flex gap-2">
               <button onClick={handleDeletePlaylist} className="text-xs px-3 py-1.5 rounded bg-danger-6 text-white hover:bg-danger-7">Delete playlist</button>
-              <button onClick={() => setConfirmDelete(false)} className="text-xs px-3 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">Cancel</button>
+              <button onClick={() => setConfirmDelete(false)} className="text-xs px-3 py-1.5 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</button>
             </div>
           )}
           {managing && playlist.ownedByCurrentUser && !confirmDelete && (
             <>
               <button
                 onClick={handleToggleVisibility}
-                className="px-3 py-2 text-sm rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
+                className="px-3 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors"
                 title={playlist.isPublic ? 'Make private' : 'Make public'}
               >
                 {playlist.isPublic ? 'Make Private' : 'Make Public'}
@@ -175,7 +175,7 @@ export default function PlaylistDetailPage() {
               onClick={toggleManage}
               className={managing
                 ? 'px-4 py-2 text-sm rounded-lg border border-brand-3 text-brand-6 bg-brand-1 hover:bg-brand-2 transition-colors'
-                : 'px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors'}
+                : 'px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors'}
             >
               {managing ? 'Done' : 'Manage'}
             </button>
@@ -189,14 +189,14 @@ export default function PlaylistDetailPage() {
     return (
       <div key={entry.entryId} className="border border-gray-200 rounded-xl p-3">
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-300 w-5 text-right shrink-0">{idx + 1}</span>
+          <span className="text-xs text-gray-600 w-5 text-right shrink-0">{idx + 1}</span>
 
           {managing && playlist!.ownedByCurrentUser && (
             <div className="flex flex-col gap-0.5 shrink-0">
               <button onClick={() => handleReorder(entry.entryId, -1)} disabled={idx === 0}
-                className="text-gray-300 hover:text-gray-600 disabled:opacity-20 text-xs leading-none">▲</button>
+                className="text-gray-600 hover:text-gray-900 disabled:opacity-40 text-xs leading-none">▲</button>
               <button onClick={() => handleReorder(entry.entryId, 1)} disabled={idx === entries.length - 1}
-                className="text-gray-300 hover:text-gray-600 disabled:opacity-20 text-xs leading-none">▼</button>
+                className="text-gray-600 hover:text-gray-900 disabled:opacity-40 text-xs leading-none">▼</button>
             </div>
           )}
 
@@ -205,18 +205,18 @@ export default function PlaylistDetailPage() {
             onClick={() => !managing && handleOpenSong(idx)}
           >
             <div className="font-medium text-gray-900 truncate">{entry.title}</div>
-            {entry.artist && <div className="text-xs text-gray-400 truncate">{entry.artist}</div>}
+            {entry.artist && <div className="text-xs text-gray-600 truncate">{entry.artist}</div>}
             <div className="flex items-center gap-2 text-xs font-mono mt-0.5">
               {entry.originalKey && (
-                <span className={entry.keyOffset !== 0 || entry.capoOffset !== 0 ? 'text-brand-5' : 'text-gray-400'}>
+                <span className={entry.keyOffset !== 0 || entry.capoOffset !== 0 ? 'text-brand-5' : 'text-gray-600'}>
                   {keyLabel(entry.originalKey, entry.keyOffset + entry.capoOffset, entry.mode)}
                 </span>
               )}
-              <span className={entry.capoOffset !== 0 ? 'text-brand-5' : 'text-gray-400'}>
+              <span className={entry.capoOffset !== 0 ? 'text-brand-5' : 'text-gray-600'}>
                 {entry.defaultCapo + entry.capoOffset > 0 ? `Capo ${entry.defaultCapo + entry.capoOffset}` : 'No Capo'}
               </span>
               {(entry.tempoOverride != null || entry.tempo != null) && (
-                <span className={entry.tempoOverride != null ? 'text-brand-5' : 'text-gray-400'}>
+                <span className={entry.tempoOverride != null ? 'text-brand-5' : 'text-gray-600'}>
                   {entry.tempoOverride ?? entry.tempo} BPM{entry.tempoOverride != null ? ' (override)' : ''}
                 </span>
               )}
@@ -226,7 +226,7 @@ export default function PlaylistDetailPage() {
           {!managing && (
             <button
               onClick={() => handleOpenSong(idx)}
-              className="text-gray-300 hover:text-brand-4 transition-colors text-lg leading-none shrink-0"
+              className="text-gray-600 hover:text-brand-4 transition-colors text-lg leading-none shrink-0"
               title="Open song"
             >›</button>
           )}
@@ -235,14 +235,14 @@ export default function PlaylistDetailPage() {
             <div className="flex items-center gap-4 shrink-0 ml-2 mr-2">
               <button
                 onClick={() => setEditingEntry(entry.entryId)}
-                className="text-gray-400 hover:text-brand-5 transition-colors leading-none"
+                className="text-gray-600 hover:text-brand-5 transition-colors leading-none"
                 style={{ fontSize: '2.1875rem' }}
                 title="Edit voicing offset"
               >✎</button>
               {confirmRemove === entry.entryId ? (
                 <div className="flex gap-1">
                   <button onClick={() => handleRemoveEntry(entry.entryId)} className="text-xs px-2 py-0.5 rounded bg-danger-6 text-white hover:bg-danger-7">Remove</button>
-                  <button onClick={() => setConfirmRemove(null)} className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-600">Cancel</button>
+                  <button onClick={() => setConfirmRemove(null)} className="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-700">Cancel</button>
                 </div>
               ) : (
                 <button onClick={() => setConfirmRemove(entry.entryId)}
@@ -269,7 +269,7 @@ export default function PlaylistDetailPage() {
       )}
 
       {entries.length === 0 ? (
-        <p className="text-gray-400 text-sm">{managing ? 'Use Add Songs to add songs to this playlist.' : 'No songs yet.'}</p>
+        <p className="text-gray-600 text-sm">{managing ? 'Use Add Songs to add songs to this playlist.' : 'No songs yet.'}</p>
       ) : (
         <div className="flex flex-col gap-2">
           {entries.map((entry, idx) => renderEntryRow(entry, idx))}

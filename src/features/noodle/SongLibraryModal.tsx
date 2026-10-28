@@ -29,8 +29,8 @@ export default function SongLibraryModal({ onSelect, onClose }: Props) {
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-          <span className="font-semibold text-sm text-gray-800">Load Song</span>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+          <span className="font-semibold text-sm text-gray-900">Load Song</span>
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-900 text-xl leading-none">✕</button>
         </div>
         <div className="px-4 py-2">
           <input
@@ -48,12 +48,12 @@ export default function SongLibraryModal({ onSelect, onClose }: Props) {
               onClick={() => onSelect(song)}
               className="w-full text-left px-4 py-3 hover:bg-brand-1 transition-colors"
             >
-              <div className="text-sm font-medium text-gray-800">{song.title}</div>
-              {song.artist && <div className="text-xs text-gray-400">{song.artist}</div>}
+              <div className="text-sm font-medium text-gray-900">{song.title}</div>
+              {song.artist && <div className="text-xs text-gray-600">{song.artist}</div>}
             </button>
           ))}
           {filtered.length === 0 && (
-            <div className="px-4 py-6 text-sm text-gray-400 text-center">No songs found</div>
+            <div className="px-4 py-6 text-sm text-gray-600 text-center">No songs found</div>
           )}
         </div>
       </div>

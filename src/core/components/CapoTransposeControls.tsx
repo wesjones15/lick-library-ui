@@ -21,7 +21,7 @@ export default function CapoTransposeControls({
     <div className={`flex items-center gap-4 ${className}`}>
       {/* Capo */}
       <div className="flex flex-col items-center gap-1">
-        <span className="text-xs text-gray-400">Capo</span>
+        <span className="text-xs text-gray-600">Capo</span>
         <div className="flex items-center gap-2">
           <button onClick={() => setCapo(c => Math.max(0, c - 1))} className={BTN_ICON}>−</button>
           <div className="flex items-center justify-center w-8">
@@ -31,7 +31,7 @@ export default function CapoTransposeControls({
         </div>
         <button
           onClick={() => setCapo(originalCapo)}
-          className={`text-xs text-center transition-colors ${capo !== originalCapo ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+          className={`text-xs text-center transition-colors ${capo !== originalCapo ? 'text-gray-600 hover:text-gray-900' : 'invisible'}`}
         >
           reset
         </button>
@@ -41,7 +41,7 @@ export default function CapoTransposeControls({
 
       {/* Transpose */}
       <div className="flex flex-col items-center gap-1">
-        <span className="text-xs text-gray-400">Transpose</span>
+        <span className="text-xs text-gray-600">Transpose</span>
         <div className="flex items-center gap-2">
           <button onClick={() => setSemitones(s => s - 1 <= -12 ? 0 : s - 1)} className={BTN_ICON}>−</button>
           <div className="flex gap-3 items-center">
@@ -49,23 +49,23 @@ export default function CapoTransposeControls({
               <span className="text-base font-semibold text-gray-900">
                 {rootKeyLabel(originalKey, semitones - originalCapo, mode)}
               </span>
-              <span className="text-xs text-gray-400">shape</span>
+              <span className="text-xs text-gray-600">shape</span>
             </div>
-            <span className="text-xs text-gray-300">
+            <span className="text-xs text-gray-600">
               {semitones > 0 ? `+${semitones}` : `${semitones}`}
             </span>
             <div className="flex flex-col items-center w-10">
               <span className="text-base font-semibold text-gray-900">
                 {rootKeyLabel(originalKey, semitones + capo - originalCapo, mode)}
               </span>
-              <span className="text-xs text-gray-400">sound</span>
+              <span className="text-xs text-gray-600">sound</span>
             </div>
           </div>
           <button onClick={() => setSemitones(s => s + 1 >= 12 ? 0 : s + 1)} className={BTN_ICON}>+</button>
         </div>
         <button
           onClick={() => setSemitones(0)}
-          className={`text-xs text-center transition-colors ${semitones !== 0 ? 'text-gray-400 hover:text-gray-600' : 'invisible'}`}
+          className={`text-xs text-center transition-colors ${semitones !== 0 ? 'text-gray-600 hover:text-gray-900' : 'invisible'}`}
         >
           reset
         </button>

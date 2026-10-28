@@ -80,7 +80,7 @@ export default function PlaylistsPage() {
               </button>
               <button
                 onClick={() => setManaging(true)}
-                className="px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
+                className="px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors"
               >
                 Manage
               </button>
@@ -96,7 +96,7 @@ export default function PlaylistsPage() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1 text-xs rounded-lg border transition-colors ${filter === f ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+              className={`px-3 py-1 text-xs rounded-lg border transition-colors ${filter === f ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-600 hover:text-gray-900'}`}
             >
               {f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
@@ -105,7 +105,7 @@ export default function PlaylistsPage() {
       )}
 
       {filtered.length === 0 ? (
-        <p className="text-gray-400 text-sm">No playlists yet. Create one to get started.</p>
+        <p className="text-gray-600 text-sm">No playlists yet. Create one to get started.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {filtered.map(pl => (
@@ -129,12 +129,12 @@ export default function PlaylistsPage() {
                   <div className="font-semibold text-gray-900 group-hover:text-brand-7 transition-colors truncate">{pl.name}</div>
                 )}
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs text-gray-400">{pl.songCount} {pl.songCount === 1 ? 'song' : 'songs'}</span>
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${pl.isPublic ? 'bg-success-1 text-success-6' : 'bg-gray-100 text-gray-400'}`}>
+                  <span className="text-xs text-gray-600">{pl.songCount} {pl.songCount === 1 ? 'song' : 'songs'}</span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${pl.isPublic ? 'bg-success-1 text-success-6' : 'bg-gray-100 text-gray-600'}`}>
                     {pl.isPublic ? 'Public' : 'Private'}
                   </span>
                   {pl.authorName && (
-                    <span className="text-xs text-gray-300">{pl.authorName}</span>
+                    <span className="text-xs text-gray-600">{pl.authorName}</span>
                   )}
                 </div>
               </div>
@@ -149,13 +149,13 @@ export default function PlaylistsPage() {
                 ) : confirmDelete === pl.id ? (
                   <div className="flex gap-2 shrink-0" onClick={e => e.stopPropagation()}>
                     <button onClick={() => handleDelete(pl.id)} className="text-xs px-2 py-1 rounded bg-danger-6 text-white hover:bg-danger-7">Delete</button>
-                    <button onClick={() => setConfirmDelete(null)} className="text-xs px-2 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">Cancel</button>
+                    <button onClick={() => setConfirmDelete(null)} className="text-xs px-2 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-4 shrink-0" onClick={e => e.stopPropagation()}>
                     <button
                       onClick={() => { setEditingCardId(pl.id); setNameInput(pl.name); }}
-                      className="text-gray-400 hover:text-brand-5 transition-colors leading-none"
+                      className="text-gray-600 hover:text-brand-5 transition-colors leading-none"
                       style={{ fontSize: '2.1875rem' }}
                       title="Rename"
                     >✎</button>
@@ -177,7 +177,7 @@ export default function PlaylistsPage() {
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <span className="font-semibold text-gray-900">New Playlist</span>
-              <button onClick={() => setCreateOpen(false)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+              <button onClick={() => setCreateOpen(false)} className="text-gray-600 hover:text-gray-900 text-xl leading-none">×</button>
             </div>
             <form onSubmit={handleCreate} className="flex flex-col gap-3">
               <input

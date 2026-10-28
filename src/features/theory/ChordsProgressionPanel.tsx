@@ -134,11 +134,11 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
                 style={{ width: 10, height: 10, borderRadius: '50%', background: degreeColor, marginBottom: 4 }}
               />
               {/* Roman numeral */}
-              <span className={`text-base font-bold ${isSelected ? 'text-gray-900' : 'text-gray-700'}`}>
+              <span className={`text-base font-bold ${isSelected ? 'text-gray-900' : 'text-gray-900'}`}>
                 {chord.roman}
               </span>
               {/* Chord name */}
-              <span className="text-sm text-gray-500 mt-0.5">
+              <span className="text-sm text-gray-700 mt-0.5">
                 {chord.rootDisplay}{chord.quality !== 'maj' ? chord.apiSuffix || '' : ''}
               </span>
               {/* Quality badge */}
@@ -153,7 +153,7 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
       {/* Voicing display */}
       {selectedDegree !== null && (
         <div>
-          {loadingVoicing && <p className="text-sm text-gray-400 mb-2">Loading voicing…</p>}
+          {loadingVoicing && <p className="text-sm text-gray-600 mb-2">Loading voicing…</p>}
           {!loadingVoicing && voicingDots && (
             <>
               <GuitarNeck dots={voicingDots} fretCount={FRET_COUNT} stringLabels={getStringLabels(instrument)} />
@@ -162,28 +162,28 @@ export default function ChordsProgressionPanel({ initialRoot = 'C', initialMode 
                   <button
                     disabled={voicingIdx === 0}
                     onClick={() => changeVoicing(-1)}
-                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-60"
                   >‹</button>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-700">
                     Voicing {voicingIdx + 1} / {allVoicings.length}
                   </span>
                   <button
                     disabled={voicingIdx === allVoicings.length - 1}
                     onClick={() => changeVoicing(1)}
-                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-60"
                   >›</button>
                 </div>
               )}
             </>
           )}
           {!loadingVoicing && !voicingDots && (
-            <p className="text-sm text-gray-400">No voicing found for this chord.</p>
+            <p className="text-sm text-gray-600">No voicing found for this chord.</p>
           )}
         </div>
       )}
 
       {selectedDegree === null && (
-        <p className="text-sm text-gray-400">Click a chord to see its voicing on the neck.</p>
+        <p className="text-sm text-gray-600">Click a chord to see its voicing on the neck.</p>
       )}
     </div>
   );

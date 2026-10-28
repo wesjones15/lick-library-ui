@@ -88,7 +88,7 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
       >
         <div className="flex items-center justify-between mb-3">
           <span className="font-semibold text-gray-900 text-sm truncate pr-4">Add "{songTitle}" to playlist</span>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none shrink-0">×</button>
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-900 text-xl leading-none shrink-0">×</button>
         </div>
 
         <input
@@ -100,7 +100,7 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
         />
 
         {visible.length === 0 ? (
-          <p className="text-xs text-gray-400 text-center py-4">No playlists found</p>
+          <p className="text-xs text-gray-600 text-center py-4">No playlists found</p>
         ) : (
           <div className="flex flex-col gap-1 max-h-56 overflow-y-auto">
             {visible.map(pl => {
@@ -114,7 +114,7 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
                     onClick={() => { navigate(`/playlist/${pl.id}`); onClose(); }}
                   >
                     {pl.name}
-                    <span className="text-xs text-gray-400 ml-2">{pl.songCount} songs</span>
+                    <span className="text-xs text-gray-600 ml-2">{pl.songCount} songs</span>
                   </button>
                   <button
                     onClick={() => {

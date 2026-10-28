@@ -67,7 +67,7 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
   if (!show) {
     return (
       <div className="mt-4 p-3 inline-block">
-        <button onClick={onToggle} className={`${BTN_SM} border-gray-300 text-gray-600 hover:bg-gray-50`}>
+        <button onClick={onToggle} className={`${BTN_SM} border-gray-300 text-gray-700 hover:bg-gray-50`}>
           Chords
         </button>
       </div>
@@ -88,7 +88,7 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
             {analysis.intervals.map((label, i) => (
               <span
                 key={i}
-                className="px-1.5 py-0.5 text-xs rounded border border-gray-300 bg-white text-gray-700 font-mono"
+                className="px-1.5 py-0.5 text-xs rounded border border-gray-300 bg-white text-gray-900 font-mono"
               >
                 {label}
               </span>
@@ -98,12 +98,12 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
           <div className="mt-2 flex flex-col gap-0.5">
             {analysis.chords.length > 0 ? (
               analysis.chords.map((c, i) => (
-                <span key={i} className="text-xs text-gray-800 font-medium">
+                <span key={i} className="text-xs text-gray-900 font-medium">
                   {c.root} {c.quality}
                 </span>
               ))
             ) : (
-              <span className="text-xs text-gray-400 italic">No matching chord</span>
+              <span className="text-xs text-gray-600 italic">No matching chord</span>
             )}
           </div>
         </>
@@ -113,7 +113,7 @@ export default function ChordsWidget({ show, onToggle, selectedPositions, root, 
         <button
           style={{ visibility: selectedPositions.size > 0 ? 'visible' : 'hidden' }}
           onClick={onClear}
-          className="text-xs text-gray-400 hover:text-gray-600 underline"
+          className="text-xs text-gray-600 hover:text-gray-900 underline"
         >
           Clear
         </button>

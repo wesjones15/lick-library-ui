@@ -18,7 +18,7 @@ function FreeChordsKaraokeSlot({
   if (!line) return <div className="h-8" />;
   const isCurrent = variant === 'current';
   return (
-    <div className={`font-mono transition-opacity ${isCurrent ? 'text-base' : 'text-sm opacity-35'}`}>
+    <div className={`font-mono transition-opacity ${isCurrent ? 'text-base' : 'text-sm opacity-60'}`}>
       <div style={{ color: '#4f46e5', whiteSpace: 'pre' }}>
         {line.map((chord, i) => (
           <span key={i}>
@@ -81,7 +81,7 @@ export default function FreeChordsPanel({ chordIdx, freeHasAdvanced, onApply }: 
     <div className="grid grid-cols-3 gap-4 items-start">
       {/* Left: input + submit */}
       <div className="flex flex-col gap-2">
-        <label className="text-xs text-gray-400">Separate chords with |, lines with ↵</label>
+        <label className="text-xs text-gray-600">Separate chords with |, lines with ↵</label>
         <textarea
           ref={freeInputRef}
           value={freeInput}

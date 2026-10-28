@@ -22,14 +22,14 @@ export default function LickCard({ lick, onDelete, onFork, isManaging }: Props) 
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-xs font-mono text-gray-500 truncate">{lick.intervalDisplayString}</span>
+          <span className="text-xs font-mono text-gray-700 truncate">{lick.intervalDisplayString}</span>
           {lick.authorName && (
-            <span className="text-xs text-gray-300 shrink-0">{lick.authorName}</span>
+            <span className="text-xs text-gray-600 shrink-0">{lick.authorName}</span>
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {lick.instrument && lick.instrument !== 'GUITAR' && (
-            <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full font-medium">
+            <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full font-medium">
               {modeLabel(lick.instrument)}
             </span>
           )}
@@ -59,7 +59,7 @@ export default function LickCard({ lick, onDelete, onFork, isManaging }: Props) 
           )}
         </div>
       </div>
-      <pre className="text-xs font-mono text-gray-700 whitespace-pre overflow-x-auto leading-tight">
+      <pre className="text-xs font-mono text-gray-900 whitespace-pre overflow-x-auto leading-tight">
         {lick.rawTab}
       </pre>
     </div>

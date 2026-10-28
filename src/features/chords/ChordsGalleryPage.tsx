@@ -85,7 +85,7 @@ export default function ChordsGalleryPage() {
           {!manageMode && (
             <button
               onClick={() => navigate('/chords/theory')}
-              className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+              className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               Chord Theory
             </button>
@@ -93,14 +93,14 @@ export default function ChordsGalleryPage() {
           {!manageMode && (
             <button
               onClick={() => navigate('/chords/upload')}
-              className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+              className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               Upload Voicing
             </button>
           )}
           <button
             onClick={() => { setManageMode(m => !m); setReseedConfirm(false); }}
-            className={`px-3 py-2 text-sm border rounded-lg transition-colors ${manageMode ? 'border-brand-4 bg-brand-1 text-brand-7' : 'border-gray-300 text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
+            className={`px-3 py-2 text-sm border rounded-lg transition-colors ${manageMode ? 'border-brand-4 bg-brand-1 text-brand-7' : 'border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50'}`}
           >
             {manageMode ? 'Done' : 'Manage'}
           </button>

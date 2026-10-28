@@ -54,7 +54,7 @@ export default function Layout() {
 
         <div ref={menuRef} className="relative md:hidden">
           <button
-            className="p-2 rounded-md text-gray-500 hover:bg-gray-50 transition-colors"
+            className="p-2 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
             onClick={() => setMenuOpen(m => !m)}
             aria-label="Menu"
           >
@@ -70,7 +70,7 @@ export default function Layout() {
                   className={`px-4 py-2 text-sm font-medium transition-colors ${
                     pathname === to
                       ? 'bg-brand-1 text-brand-6'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   {label}
@@ -90,7 +90,7 @@ export default function Layout() {
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   active
                     ? 'bg-brand-1 text-brand-6'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
                 {label}
@@ -104,20 +104,20 @@ export default function Layout() {
             <>
               <button
                 onClick={() => miniActions?.onPlaylistBack()}
-                className="w-6 h-6 flex items-center justify-center text-base text-gray-400 hover:text-brand-5 transition-colors"
+                className="w-6 h-6 flex items-center justify-center text-base text-gray-600 hover:text-brand-5 transition-colors"
                 aria-label="Back to playlist"
               >↩</button>
               <button
                 onClick={() => miniActions?.onPlaylistPrev()}
-                className="w-6 h-6 flex items-center justify-center text-base text-gray-400 hover:text-brand-5 transition-colors"
+                className="w-6 h-6 flex items-center justify-center text-base text-gray-600 hover:text-brand-5 transition-colors"
                 aria-label="Previous song"
               >←</button>
-              <span className="text-xs text-gray-400 tabular-nums">
+              <span className="text-xs text-gray-600 tabular-nums">
                 {(miniActions?.playlistCurrentIndex ?? 0) + 1}/{miniActions?.playlistTotal ?? 0}
               </span>
               <button
                 onClick={() => miniActions?.onPlaylistNext()}
-                className="w-6 h-6 flex items-center justify-center text-base text-gray-400 hover:text-brand-5 transition-colors"
+                className="w-6 h-6 flex items-center justify-center text-base text-gray-600 hover:text-brand-5 transition-colors"
                 aria-label="Next song"
               >→</button>
             </>
@@ -125,7 +125,7 @@ export default function Layout() {
           {!currentUser && (
             <a
               href={`${BACKEND}/api/oauth2/authorize/google`}
-              className="text-sm text-gray-500 hover:text-brand-6 transition-colors px-2 py-1"
+              className="text-sm text-gray-700 hover:text-brand-6 transition-colors px-2 py-1"
             >
               Sign in
             </a>
@@ -140,7 +140,7 @@ export default function Layout() {
           {info && (
             <button
               onClick={() => setCollapsed(true)}
-              className="text-gray-400 hover:text-brand-5 transition-colors text-2xl leading-none ml-4"
+              className="text-gray-600 hover:text-brand-5 transition-colors text-2xl leading-none ml-4"
               aria-label="Collapse song view"
               title="Collapse navbar"
             >
@@ -158,7 +158,7 @@ export default function Layout() {
         {collapsed && info ? <MiniBar /> : renderNormalNav()}
         <button
           onClick={() => setSoundEnabled(!soundEnabled)}
-          className={`shrink-0 px-2 py-1.5 rounded-md text-sm transition-colors ${soundEnabled ? 'text-brand-5' : 'text-gray-400 hover:text-gray-600'}`}
+          className={`shrink-0 px-2 py-1.5 rounded-md text-sm transition-colors ${soundEnabled ? 'text-brand-5' : 'text-gray-600 hover:text-gray-900'}`}
           aria-label={soundEnabled ? 'Mute sound' : 'Enable sound'}
           title={soundEnabled ? 'Sound on' : 'Sound off'}
         >

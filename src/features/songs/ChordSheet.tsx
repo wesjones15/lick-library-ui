@@ -131,24 +131,24 @@ function ChordToken({ name, instrument }: ChordTokenProps) {
           }
           <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
             <button
-              style={{ background: 'none', border: 'none', cursor: voicings.length > 1 ? 'pointer' : 'default', padding: 0, color: voicings.length > 1 ? '#6b7280' : 'transparent', fontSize: '24px', lineHeight: 1 }}
+              style={{ background: 'none', border: 'none', cursor: voicings.length > 1 ? 'pointer' : 'default', padding: 0, color: voicings.length > 1 ? '#374151' : 'transparent', fontSize: '24px', lineHeight: 1 }}
               onClick={e => { e.stopPropagation(); if (voicings.length > 1) setVoicingIdx(i => (i - 1 + voicings.length) % voicings.length); }}
             >‹</button>
             <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' }}>
               {voicings.length > 1 && (
-                <span style={{ fontSize: '8px', color: '#9ca3af', lineHeight: 1 }}>{voicingIdx + 1}/{voicings.length}</span>
+                <span style={{ fontSize: '8px', color: '#4b5563', lineHeight: 1 }}>{voicingIdx + 1}/{voicings.length}</span>
               )}
-              <span style={{ fontSize: '7px', color: '#9ca3af', lineHeight: 1 }}>{formatInstrumentLabel(instrument)}</span>
+              <span style={{ fontSize: '7px', color: '#4b5563', lineHeight: 1 }}>{formatInstrumentLabel(instrument)}</span>
             </span>
             {voicings.length > 0 && (
               <button
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', color: '#6b7280', fontSize: '14px', lineHeight: 1 }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', color: '#374151', fontSize: '14px', lineHeight: 1 }}
                 onClick={e => { e.stopPropagation(); playMidi(voicingToMidi(voicings[voicingIdx].frets, instrument), 20); }}
                 title="Play chord"
               >▶</button>
             )}
             <button
-              style={{ background: 'none', border: 'none', cursor: voicings.length > 1 ? 'pointer' : 'default', padding: 0, color: voicings.length > 1 ? '#6b7280' : 'transparent', fontSize: '24px', lineHeight: 1 }}
+              style={{ background: 'none', border: 'none', cursor: voicings.length > 1 ? 'pointer' : 'default', padding: 0, color: voicings.length > 1 ? '#374151' : 'transparent', fontSize: '24px', lineHeight: 1 }}
               onClick={e => { e.stopPropagation(); if (voicings.length > 1) setVoicingIdx(i => (i + 1) % voicings.length); }}
             >›</button>
           </span>
@@ -262,7 +262,7 @@ export default function ChordSheet({ chordLines, numColumns, className, fontScal
                       customTuning={customTuning}
                     />
                   ) : (
-                    <div style={{ fontSize: `${line.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#4b5563', fontFamily: 'monospace' }}>
+                    <div style={{ fontSize: `${line.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#1f2937', fontFamily: 'monospace' }}>
                       {line.tabLines.join('\n')}
                     </div>
                   )}

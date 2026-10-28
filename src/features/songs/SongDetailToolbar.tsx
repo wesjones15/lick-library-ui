@@ -23,12 +23,12 @@ interface SongDetailToolbarProps {
   setAddToPlaylistOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const MENU_ITEM = 'px-4 py-2 text-sm text-left text-gray-600 hover:bg-gray-50';
+const MENU_ITEM = 'px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-50';
 
 function stubBtnClass(active: boolean) {
   return `px-2 py-1 text-xs rounded border transition-colors ${active
     ? 'border-brand-3 bg-brand-1 text-brand-6'
-    : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300'}`;
+    : 'border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300'}`;
 }
 
 export default function SongDetailToolbar({
@@ -64,7 +64,7 @@ export default function SongDetailToolbar({
       {viewMode === 'scroll' && (
         <button
           onClick={() => setAutoScrolling(a => !a)}
-          className={`w-8 h-8 rounded-lg border flex items-center justify-center text-xl leading-none transition-colors ${autoScrolling ? 'border-brand-3 bg-brand-1 text-brand-5' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+          className={`w-8 h-8 rounded-lg border flex items-center justify-center text-xl leading-none transition-colors ${autoScrolling ? 'border-brand-3 bg-brand-1 text-brand-5' : 'border-gray-200 text-gray-600 hover:text-gray-900'}`}
           aria-label={autoScrolling ? 'Pause autoscroll' : 'Start autoscroll'}
         >
           {autoScrolling ? '⏸' : '▶'}
@@ -83,7 +83,7 @@ export default function SongDetailToolbar({
         <button
           onClick={handleTabLicksToggle}
           disabled={reparsing}
-          className={`hidden md:flex w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? 'border-danger-4 bg-danger-1 text-danger-6' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+          className={`hidden md:flex w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-60 ${showTabLicks ? 'border-danger-4 bg-danger-1 text-danger-6' : 'border-gray-200 text-gray-600 hover:text-gray-900'}`}
           aria-label="Tab positions (experimental)" title="Tab positions (experimental)"
         >
           {reparsing ? '…' : '≡'}
@@ -112,7 +112,7 @@ export default function SongDetailToolbar({
       {song.ownedByCurrentUser && (
         <button
           onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-          className="hidden md:block text-gray-300 hover:text-brand-5 transition-colors text-4xl leading-none"
+          className="hidden md:block text-gray-600 hover:text-brand-5 transition-colors text-4xl leading-none"
           aria-label="Manage song"
         >
           ✎
@@ -131,7 +131,7 @@ export default function SongDetailToolbar({
         <button
           onClick={handleTabLicksToggle}
           disabled={reparsing}
-          className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-40 ${showTabLicks ? 'border-danger-4 bg-danger-1 text-danger-6' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+          className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs font-mono transition-colors disabled:opacity-60 ${showTabLicks ? 'border-danger-4 bg-danger-1 text-danger-6' : 'border-gray-200 text-gray-600 hover:text-gray-900'}`}
           aria-label="Tab positions (experimental)" title="Tab positions (experimental)"
         >
           {reparsing ? '…' : '≡'}
@@ -139,7 +139,7 @@ export default function SongDetailToolbar({
       )}
       <button
         onClick={() => setViewMode(m => m === 'columns' ? 'scroll' : 'columns')}
-        className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs transition-colors ${viewMode === 'scroll' ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+        className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-xs transition-colors ${viewMode === 'scroll' ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-600 hover:text-gray-900'}`}
         aria-label="Toggle view"
         title={viewMode === 'scroll' ? 'Switch to columns' : 'Switch to scroll'}
       >
@@ -147,7 +147,7 @@ export default function SongDetailToolbar({
       </button>
       <button
         onClick={() => setShowChords(v => !v)}
-        className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${showChords ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-400 hover:text-gray-600'}`}
+        className={`hidden sm:flex md:hidden w-8 h-8 rounded-lg border items-center justify-center text-base transition-colors ${showChords ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-200 text-gray-600 hover:text-gray-900'}`}
         aria-label="Show chords" title="Show chords"
       >
         ♬
@@ -162,7 +162,7 @@ export default function SongDetailToolbar({
       {song.ownedByCurrentUser && (
         <button
           onClick={() => navigate(`/song/${id}/manage?semitones=${semitones}`)}
-          className="hidden sm:block md:hidden text-gray-300 hover:text-brand-5 transition-colors text-3xl leading-none"
+          className="hidden sm:block md:hidden text-gray-600 hover:text-brand-5 transition-colors text-3xl leading-none"
           aria-label="Manage song"
         >
           ✎
@@ -173,7 +173,7 @@ export default function SongDetailToolbar({
       <div ref={overflowRef} className="relative sm:hidden">
         <button
           onClick={() => setOverflowOpen(o => !o)}
-          className="w-8 h-8 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 flex items-center justify-center text-xl leading-none"
+          className="w-8 h-8 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center text-xl leading-none"
           aria-label="More options"
         >
           ⋮
@@ -216,7 +216,7 @@ export default function SongDetailToolbar({
               <button
                 onClick={() => { handleTabLicksToggle(); setOverflowOpen(false); }}
                 disabled={reparsing}
-                className={`px-4 py-2 text-sm text-left transition-colors disabled:opacity-40 ${showTabLicks ? 'text-danger-6' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`px-4 py-2 text-sm text-left transition-colors disabled:opacity-60 ${showTabLicks ? 'text-danger-6' : 'text-gray-700 hover:bg-gray-50'}`}
               >
                 {reparsing ? 'Detecting tabs…' : showTabLicks ? 'Tab positions: on' : 'Tab positions'}
               </button>

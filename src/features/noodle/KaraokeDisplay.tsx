@@ -151,7 +151,7 @@ function KaraokeSlot({
 }) {
   if (!line) return null;
   const isActive = variant === 'active';
-  const opacity = isActive ? 1 : variant === 'secondary' ? 0.6 : 0.25;
+  const opacity = isActive ? 1 : variant === 'secondary' ? 0.8 : 0.5;
   const sizeClass = expanded
     ? (isActive ? 'text-xl' : variant === 'secondary' ? 'text-base' : 'text-sm')
     : (isActive ? 'text-lg' : variant === 'secondary' ? 'text-sm' : 'text-xs');
@@ -206,7 +206,7 @@ function KaraokeSlot({
           line.chords.trimEnd() || ' '
         )}
       </div>
-      <div style={{ color: isLickPlaying ? '#6b7280' : '#111827', whiteSpace: 'pre', fontStyle: isLickPlaying ? 'italic' : undefined }}>
+      <div style={{ color: isLickPlaying ? '#374151' : '#111827', whiteSpace: 'pre', fontStyle: isLickPlaying ? 'italic' : undefined }}>
         {line.lyrics.trimEnd() || ' '}
       </div>
     </div>

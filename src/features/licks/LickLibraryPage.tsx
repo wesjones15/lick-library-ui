@@ -65,7 +65,7 @@ export default function LickLibraryPage() {
       <LickSubNav active="library" />
 
       <div className="mb-4 flex items-start gap-3 flex-wrap">
-        <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest pt-2.5">Instrument</span>
+        <span className="text-xs font-semibold text-gray-600 uppercase tracking-widest pt-2.5">Instrument</span>
         <InstrumentSelector
           instrument={instrument}
           customTuning={customTuning}
@@ -120,7 +120,7 @@ export default function LickLibraryPage() {
         />
       </div>
 
-      {loading && <p className="text-gray-400 text-sm">Loading…</p>}
+      {loading && <p className="text-gray-600 text-sm">Loading…</p>}
       {error && <p className="text-danger-6 text-sm">{error}</p>}
       {!loading && !error && (
         <LickList licks={licks} onDelete={handleDelete} onFork={handleFork} isManaging={isManaging} />

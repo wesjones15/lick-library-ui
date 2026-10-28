@@ -20,7 +20,7 @@ export default function LickSubNav({ active }: { active: ActiveTab }) {
           <Link
             key={tab.key}
             to={tab.to}
-            className={`px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors${i < inactiveTabs.length - 1 ? ' border-r border-gray-300' : ''}`}
+            className={`px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors${i < inactiveTabs.length - 1 ? ' border-r border-gray-300' : ''}`}
           >
             {tab.label}
           </Link>

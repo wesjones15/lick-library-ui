@@ -167,7 +167,7 @@ export default function SongManagePage() {
     }
   };
 
-  if (!song) return <div className="px-6 pt-8 text-sm text-gray-400">Loading…</div>;
+  if (!song) return <div className="px-6 pt-8 text-sm text-gray-600">Loading…</div>;
 
   const isOwner = song.ownedByCurrentUser;
 
@@ -245,7 +245,7 @@ export default function SongManagePage() {
             value={keyMode}
             onChange={e => setKeyMode(e.target.value)}
             disabled={!keyRoot}
-            className={`${SELECT} w-24 disabled:opacity-40`}
+            className={`${SELECT} w-24 disabled:opacity-60`}
           >
             {MODE_DATA.map(m => (
               <option key={m.suffix} value={m.suffix}>{m.label}</option>
@@ -323,7 +323,7 @@ export default function SongManagePage() {
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 px-3 py-1.5 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-3 py-1.5 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
@@ -368,7 +368,7 @@ export default function SongManagePage() {
           ← Back
         </button>
         {extractChordNames(song!).length === 0 ? (
-          <p className="text-sm text-gray-400">No chords detected in this song.</p>
+          <p className="text-sm text-gray-600">No chords detected in this song.</p>
         ) : (
           <div className="grid grid-cols-6 gap-3">
             {extractChordNames(song!).map(name => {
@@ -380,24 +380,24 @@ export default function SongManagePage() {
                   key={name}
                   className="relative flex-shrink-0 flex flex-col items-center border border-gray-200 rounded-lg px-2 pt-2 pb-1 bg-white"
                 >
-                  <span className="text-xs font-semibold text-gray-700 mb-1">{name}</span>
+                  <span className="text-xs font-semibold text-gray-900 mb-1">{name}</span>
                   <button
                     title="Add voicing"
                     onClick={() => setSelectedChord(name)}
-                    className="absolute top-1 right-2 text-gray-300 hover:text-brand-5 text-xl leading-none"
+                    className="absolute top-1 right-2 text-gray-600 hover:text-brand-5 text-xl leading-none"
                   >
                     +
                   </button>
                   <ChordDiagram frets={frets} width={90} />
                   {voicings.length > 1 && (
-                    <div className="flex items-center justify-between w-full text-xs text-gray-400 mt-1">
+                    <div className="flex items-center justify-between w-full text-xs text-gray-600 mt-1">
                       <button
-                        className="hover:text-gray-600 px-1 text-2xl leading-none"
+                        className="hover:text-gray-900 px-1 text-2xl leading-none"
                         onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx - 1 + voicings.length) % voicings.length }))}
                       >‹</button>
                       <span>{idx + 1}/{voicings.length}</span>
                       <button
-                        className="hover:text-gray-600 px-1 text-2xl leading-none"
+                        className="hover:text-gray-900 px-1 text-2xl leading-none"
                         onClick={() => setChordVoicingIdx(s => ({ ...s, [name]: (idx + 1) % voicings.length }))}
                       >›</button>
                     </div>

@@ -16,7 +16,7 @@ export default function AccountDropdown({ currentUser, onNavigateProfile, onLogo
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(o => !o)}
-        className={`text-xl transition-colors px-2 py-1 leading-none ${currentUser.role === 'ADMIN' ? 'text-brand-6 hover:text-brand-8' : 'text-gray-500 hover:text-gray-900'}`}
+        className={`text-xl transition-colors px-2 py-1 leading-none ${currentUser.role === 'ADMIN' ? 'text-brand-6 hover:text-brand-8' : 'text-gray-700 hover:text-gray-900'}`}
         title={`${currentUser.role} · ${currentUser.status}`}
         aria-label="Account menu"
       >
@@ -26,13 +26,13 @@ export default function AccountDropdown({ currentUser, onNavigateProfile, onLogo
         <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-md py-1 z-50 min-w-[120px]">
           <button
             onClick={() => { onNavigateProfile(); setOpen(false); }}
-            className="w-full text-left text-sm px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+            className="w-full text-left text-sm px-4 py-2 text-gray-900 hover:bg-gray-50 transition-colors"
           >
             Profile
           </button>
           <button
             onClick={() => { onLogout(); setOpen(false); }}
-            className="w-full text-left text-sm px-4 py-2 text-gray-500 hover:bg-gray-50 transition-colors"
+            className="w-full text-left text-sm px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
           >
             Sign out
           </button>

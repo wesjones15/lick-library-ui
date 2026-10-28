@@ -28,20 +28,20 @@ export default function LickLibraryModal({ onSelect, onClose }: Props) {
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="text-base font-semibold text-gray-800">Lick Library</h2>
+          <h2 className="text-base font-semibold text-gray-900">Lick Library</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+            className="text-gray-600 hover:text-gray-900 text-xl leading-none"
           >
             ✕
           </button>
         </div>
 
         <div className="overflow-y-auto flex-1 px-4 py-3 space-y-2">
-          {loading && <p className="text-sm text-gray-400 text-center py-6">Loading…</p>}
+          {loading && <p className="text-sm text-gray-600 text-center py-6">Loading…</p>}
           {error && <p className="text-sm text-danger-6 text-center py-6">{error}</p>}
           {!loading && !error && licks.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-6">No licks saved yet.</p>
+            <p className="text-sm text-gray-600 text-center py-6">No licks saved yet.</p>
           )}
           {licks.map(lick => (
             <button
@@ -55,9 +55,9 @@ export default function LickLibraryModal({ onSelect, onClose }: Props) {
                     {lick.mode}
                   </span>
                 )}
-                <span className="text-xs text-gray-400 font-mono">{lick.intervalDisplayString}</span>
+                <span className="text-xs text-gray-600 font-mono">{lick.intervalDisplayString}</span>
               </div>
-              <div className="font-mono text-xs text-gray-600 leading-tight">
+              <div className="font-mono text-xs text-gray-700 leading-tight">
                 {lick.rawTab.split('\n').map((line, i) => (
                   <div key={i} className="truncate">{line}</div>
                 ))}

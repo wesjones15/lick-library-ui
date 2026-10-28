@@ -35,29 +35,29 @@ export default function ChordCard({ rootDisplay, quality, displayQuality, label,
       >
         <div>
           <div className="font-semibold text-gray-900 text-sm">{displayName}</div>
-          <div className="text-xs text-gray-400">{label}</div>
+          <div className="text-xs text-gray-600">{label}</div>
         </div>
         <div className="flex-1 flex items-center justify-center">
           {voicings.length > 0
             ? <ChordDiagram frets={voicings[idx].frets} width={140} stringCount={getStringCount(instrument)} />
-            : <span className="text-gray-300 text-sm">???</span>
+            : <span className="text-gray-600 text-sm">???</span>
           }
         </div>
         {!manageMode && voicings.length > 0 && (
-          <div className="flex items-center justify-between text-xs text-gray-400">
+          <div className="flex items-center justify-between text-xs text-gray-600">
             <button
-              className="hover:text-gray-600 px-1 text-2xl leading-none"
+              className="hover:text-gray-900 px-1 text-2xl leading-none"
               style={{ visibility: voicings.length > 1 ? 'visible' : 'hidden' }}
               onClick={e => { e.stopPropagation(); setIdx(i => (i - 1 + voicings.length) % voicings.length); }}
             >‹</button>
             <button
-              className="hover:text-gray-600 px-1 text-base leading-none"
+              className="hover:text-gray-900 px-1 text-base leading-none"
               onClick={e => { e.stopPropagation(); playMidi(voicingToMidi(voicings[idx].frets, instrument ?? 'GUITAR'), 20); }}
               title="Play chord"
             >▶</button>
             {voicings.length > 1 && <span>{idx + 1}/{voicings.length}</span>}
             <button
-              className="hover:text-gray-600 px-1 text-2xl leading-none"
+              className="hover:text-gray-900 px-1 text-2xl leading-none"
               style={{ visibility: voicings.length > 1 ? 'visible' : 'hidden' }}
               onClick={e => { e.stopPropagation(); setIdx(i => (i + 1) % voicings.length); }}
             >›</button>

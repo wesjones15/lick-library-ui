@@ -96,13 +96,13 @@ export default function ChordUploadForm({
           value={chordName}
           onChange={e => handleChordNameChange(e.target.value)}
           disabled={lockChordName}
-          className={`border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-4 ${lockChordName ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
+          className={`border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-4 ${lockChordName ? 'bg-gray-100 cursor-not-allowed text-gray-700' : ''}`}
         />
         {parseError && <p className="text-danger-6 text-xs">{parseError}</p>}
       </div>
 
       {lockInstrument ? (
-        <div className="text-sm text-gray-500 bg-gray-100 rounded-lg px-3 py-2 border border-gray-200">
+        <div className="text-sm text-gray-700 bg-gray-100 rounded-lg px-3 py-2 border border-gray-200">
           {instrument.charAt(0) + instrument.slice(1).toLowerCase()}
         </div>
       ) : (
@@ -114,12 +114,12 @@ export default function ChordUploadForm({
       )}
 
       <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-        <p className="text-xs text-gray-500 mb-3">Frets — enter a number (0–24) or <code>x</code> for muted</p>
+        <p className="text-xs text-gray-700 mb-3">Frets — enter a number (0–24) or <code>x</code> for muted</p>
         <div className="flex items-start gap-6">
           <div className="flex flex-col gap-2">
             {stringDisplay.map(({ label, fretsIdx }) => (
               <div key={label + fretsIdx} className="flex items-center gap-3">
-                <span className="w-4 text-right text-sm font-mono text-gray-600">{label}</span>
+                <span className="w-4 text-right text-sm font-mono text-gray-700">{label}</span>
                 <NumpadInput
                   value={frets[fretsIdx] ?? ''}
                   onChange={val => setFret(fretsIdx, val)}

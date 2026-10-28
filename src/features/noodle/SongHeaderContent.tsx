@@ -13,7 +13,7 @@ export function SongTitleInfo({ song, activeSongId, showBackLink }: SongTitleInf
   return (
     <div className="flex flex-col min-w-0">
       {song.artist && (
-        <span className="text-xs text-gray-400 leading-tight truncate">{song.artist}</span>
+        <span className="text-xs text-gray-600 leading-tight truncate">{song.artist}</span>
       )}
       {showBackLink ? (
         <Link
@@ -44,7 +44,7 @@ export function SongHeaderActions({
     <>
       <button
         onClick={() => setGuitarKaraokeMode(v => !v)}
-        className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${guitarKaraokeMode ? 'text-brand-5' : 'text-gray-300 hover:text-gray-500'}`}
+        className={`w-8 h-8 flex items-center justify-center text-xl leading-none transition-colors ${guitarKaraokeMode ? 'text-brand-5' : 'text-gray-600 hover:text-gray-900'}`}
         aria-label="Toggle guitar karaoke"
       >
         ◎
@@ -52,7 +52,7 @@ export function SongHeaderActions({
       {song?.chordLines.some(isTabLine) && (
         <button
           onClick={() => setLickModeEnabled(v => !v)}
-          className={`w-8 h-8 flex items-center justify-center text-base font-bold leading-none transition-colors ${lickModeEnabled ? 'text-brand-5' : 'text-gray-300 hover:text-gray-500'}`}
+          className={`w-8 h-8 flex items-center justify-center text-base font-bold leading-none transition-colors ${lickModeEnabled ? 'text-brand-5' : 'text-gray-600 hover:text-gray-900'}`}
           aria-label="Toggle lick mode"
           title="Lick mode"
         >
