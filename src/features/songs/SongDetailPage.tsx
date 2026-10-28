@@ -17,6 +17,7 @@ import { useSongNavContext } from '../../core/context/SongNavContext';
 import { NOTE_KEYS, getStringCount, soundingOffset } from '../../core/music';
 import { keyLabel } from './songKeyUtils';
 import SongDetailToolbar from './SongDetailToolbar';
+import LoadingOverlay from '../../core/components/LoadingOverlay';
 
 function usePortrait() {
   const [p, setP] = useState(() => window.matchMedia('(orientation: portrait)').matches);
@@ -40,6 +41,7 @@ export default function SongDetailPage() {
   const [capo, setCapo] = useState(0);
   const [song, setSong] = useState<SongDetail | null>(null);
   const [loading, setLoading] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'columns' | 'scroll'>('columns');
   const [showTabLicks, setShowTabLicks] = useState(false);
@@ -81,7 +83,7 @@ export default function SongDetailPage() {
       })
       .catch(() => setError('Failed to load song.'))
       .finally(() => setLoading(false));
-  }, [id, semitones]);
+  }, [id, semitones, attempt]);
 
   useEffect(() => {
     if (!song) return;
@@ -452,8 +454,11 @@ export default function SongDetailPage() {
           {renderChordDiagramPanel()}
         </>
       )}
-      {!song && loading && <p className="text-gray-600 text-sm">Loading…</p>}
-      {!song && error && <p className="text-danger-6 text-sm">{error}</p>}
+      {/* Cover the screen while opening a song (including playlist next/prev), not while transposing */}
+      <LoadingOverlay
+        state={song?.id === id ? 'ready' : error ? 'error' : 'loading'}
+        onRetry={() => setAttempt(n => n + 1)}
+      />
       {renderChordUploadModal()}
       {renderAddToPlaylistModal()}
     </div>

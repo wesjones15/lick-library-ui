@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllPlaylists, createPlaylist, deletePlaylist, renamePlaylist } from '../../core/api/client';
 import { BTN_PRIMARY, SELECT } from '../../core/ui';
 import type { PlaylistSummary } from '../../core/api/client';
+import LoadingOverlay from '../../core/components/LoadingOverlay';
+import { useLoader } from '../../core/useLoader';
 
 type PlaylistFilter = 'all' | 'mine' | 'public';
 
@@ -18,8 +20,9 @@ export default function PlaylistsPage() {
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const [nameInput, setNameInput] = useState('');
 
-  useEffect(() => {
-    getAllPlaylists().then(setPlaylists).catch(() => {});
+  const load = useLoader(async isCancelled => {
+    const data = await getAllPlaylists();
+    if (!isCancelled()) setPlaylists(data);
   }, []);
 
   async function handleCreate(e: React.FormEvent) {
@@ -60,6 +63,7 @@ export default function PlaylistsPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
+      <LoadingOverlay state={load.firstLoad} onRetry={load.retry} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Playlists</h1>
         <div className="flex items-center gap-2">

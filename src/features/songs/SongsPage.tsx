@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllSongs } from '../../core/api/client';
+import LoadingOverlay from '../../core/components/LoadingOverlay';
 import { BTN_PRIMARY, BTN_XS } from '../../core/ui';
 import type { SongSummary } from '../../core/api/client';
 import SongList from './SongList';
@@ -119,7 +120,10 @@ export default function SongsPage() {
         />
       </div>
 
-      {loading && <p className="text-gray-600 text-sm">Loading…</p>}
+      <LoadingOverlay
+        state={loading ? 'loading' : error && songs.length === 0 ? 'error' : 'ready'}
+        onRetry={() => { setLoading(true); fetchSongs(); }}
+      />
       {error && <p className="text-danger-6 text-sm">{error}</p>}
       {!loading && !error && (
         <>
