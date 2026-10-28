@@ -59,24 +59,24 @@ export default function SongUploadForm({ onSuccess }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <input
           type="text"
           placeholder="Title *"
           value={title}
           onChange={e => setTitle(e.target.value)}
           required
-          className={`${SELECT} flex-1`}
+          className={`${SELECT} flex-1 min-w-0`}
         />
         <input
           type="text"
           placeholder="Artist"
           value={artist}
           onChange={e => setArtist(e.target.value)}
-          className={`${SELECT} flex-1`}
+          className={`${SELECT} flex-1 min-w-0`}
         />
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <select
           value={keyRoot}
           onChange={e => setKeyRoot(e.target.value)}

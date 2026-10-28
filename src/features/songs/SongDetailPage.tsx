@@ -419,9 +419,9 @@ export default function SongDetailPage() {
         <>
           {!collapsed && (
             <div className={viewMode === 'scroll' ? 'sticky top-14 z-40 bg-white border-b border-gray-300 relative' : ''}>
-              <div className="flex items-start justify-between mb-1">
+              <div className="flex flex-wrap items-start justify-between gap-y-2 mb-1">
                 {renderSongMeta()}
-                <div className="flex items-center gap-2 md:gap-4">
+                <div className="flex flex-wrap items-center justify-end gap-2 md:gap-4">
                   <SongDetailToolbar
                     id={id!}
                     song={song}

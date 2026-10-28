@@ -13,14 +13,14 @@ export default function LickSubNav({ active }: { active: ActiveTab }) {
   const activeTab = TABS.find(t => t.key === active)!;
   const inactiveTabs = TABS.filter(t => t.key !== active);
   return (
-    <div className="flex items-baseline gap-4 mb-6">
-      <h1 className="text-3xl font-bold text-gray-900 shrink-0">{activeTab.label}</h1>
-      <div className="flex rounded-md overflow-hidden border border-gray-400">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 shrink-0">{activeTab.label}</h1>
+      <div className="flex max-w-full overflow-x-auto rounded-md border border-gray-400">
         {inactiveTabs.map((tab, i) => (
           <Link
             key={tab.key}
             to={tab.to}
-            className={`px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors${i < inactiveTabs.length - 1 ? ' border-r border-gray-400' : ''}`}
+            className={`px-3 py-1.5 text-sm font-medium whitespace-nowrap text-gray-700 hover:bg-gray-50 transition-colors${i < inactiveTabs.length - 1 ? ' border-r border-gray-400' : ''}`}
           >
             {tab.label}
           </Link>

@@ -230,7 +230,7 @@ export default function SongManagePage() {
           placeholder="Artist"
           className={`${SELECT} w-full`}
         />
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <select
             value={keyRoot}
             onChange={e => setKeyRoot(e.target.value)}

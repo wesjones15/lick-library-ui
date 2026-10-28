@@ -224,7 +224,10 @@ interface Props {
 const COLUMN_GAP_PX = 24; // gap-6
 const TAB_MARGIN_PX = 8;  // my-1 around tab blocks
 const MAX_FIT_SCALE = 2.5;
-const MIN_READABLE_PX = 12;
+const MIN_READABLE_PX = 14;
+// Single scrolling column (phones): text size range, sized so most lines fit without wrapping
+const PHONE_MIN_PX = 14;
+const PHONE_MAX_PX = 18;
 
 // Height in px at scale 1, as rendered: a pair is two 1.25em rows, a blank spacer one row, a tab one row per string
 function lineHeight(line: ChordSheetLine): number {
@@ -260,9 +263,11 @@ function splitColumns(lines: ChordSheetLine[], numColumns: number): Column[] {
 
 // Column count and scale giving the largest text that fits the box. When nothing fits on one screen at a
 // readable size (phones), use one column as wide as the screen and let the page scroll.
-function fitLayout(lines: ChordSheetLine[], availW: number, availH: number, charRatio: number): { numColumns: number; scale: number } {
+type Fit = { numColumns: number; scale: number; wrapChars?: number };
+
+function fitLayout(lines: ChordSheetLine[], availW: number, availH: number, charRatio: number): Fit {
   const baseFont = Math.max(1, ...lines.filter(l => isTabBlock(l) || (l as ChordLyric).lyrics.trim()).map(l => l.fontSize));
-  let best: { numColumns: number; scale: number } | null = null;
+  let best: Fit | null = null;
   for (let n = 1; n <= 4; n++) {
     const cols = splitColumns(lines, n);
     const width = cols.reduce((w, c) => w + Math.max(0, ...c.lines.map(l => lineWidth(l, charRatio))), 0);
@@ -272,8 +277,45 @@ function fitLayout(lines: ChordSheetLine[], availW: number, availH: number, char
     if (baseFont * scale >= MIN_READABLE_PX && (!best || scale > best.scale + 0.01)) best = { numColumns: n, scale };
   }
   if (best) return best;
-  const width = Math.max(0, ...lines.map(l => lineWidth(l, charRatio)));
-  return { numColumns: 1, scale: width > 0 ? Math.min(MAX_FIT_SCALE, availW / width) : 1 };
+
+  // One scrolling column: size the text so nine lines in ten fit, and wrap the rest
+  const pairChars = lines
+    .filter(l => !isTabBlock(l) && ((l as ChordLyric).chords.trim() || (l as ChordLyric).lyrics.trim()))
+    .map(l => Math.max((l as ChordLyric).chords.trimEnd().length, (l as ChordLyric).lyrics.trimEnd().length))
+    .sort((a, b) => a - b);
+  const typical = pairChars[Math.floor(pairChars.length * 0.9)] ?? 40;
+  const font = Math.min(PHONE_MAX_PX, Math.max(PHONE_MIN_PX, availW / (Math.max(1, typical) * charRatio)));
+  return { numColumns: 1, scale: font / baseFont, wrapChars: Math.max(10, Math.floor(availW / (font * charRatio))) };
+}
+
+function isCleanBreak(s: string, at: number): boolean {
+  return at >= s.length || s[at - 1] === ' ' || s[at] === ' ';
+}
+
+// Same rules as the parser: break where neither a chord nor a word is split, keep chords over their syllables
+function wrapPair(pair: ChordLyric, limit: number): ChordLyric[] {
+  if (Math.max(pair.chords.trimEnd().length, pair.lyrics.trimEnd().length) <= limit) return [pair];
+  const out: ChordLyric[] = [];
+  let chords = pair.chords.trimEnd();
+  let lyrics = pair.lyrics.trimEnd();
+  while (Math.max(chords.length, lyrics.length) > limit) {
+    let at = limit;
+    while (at > 0 && !(isCleanBreak(chords, at) && isCleanBreak(lyrics, at))) at--;
+    if (at === 0) {
+      at = limit;
+      while (at > 0 && !isCleanBreak(chords, at)) at--;
+      if (at === 0) at = limit;
+    }
+    out.push({ ...pair, chords: chords.slice(0, at), lyrics: lyrics.slice(0, at) });
+    chords = chords.slice(at);
+    lyrics = lyrics.slice(at);
+    const lead = (t: string) => (t.trim() ? t.length - t.trimStart().length : Infinity);
+    const indent = Math.min(lead(chords), lead(lyrics));
+    if (Number.isFinite(indent)) { chords = chords.slice(indent); lyrics = lyrics.slice(indent); }
+    else { chords = ''; lyrics = ''; }
+  }
+  if (chords.trim() || lyrics.trim()) out.push({ ...pair, chords, lyrics });
+  return out;
 }
 
 function monospaceCharRatio(el: HTMLElement): number {
@@ -285,10 +327,14 @@ function monospaceCharRatio(el: HTMLElement): number {
 
 export default function ChordSheet({ chordLines, numColumns: parsedColumns, className, fontScale: baseFontScale = 1, showTabLicks = false, songLicks = {}, currentKey, semitones = 0, instrument, customTuning, fitToScreen = false }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const [fit, setFit] = useState<{ numColumns: number; scale: number } | null>(null);
+  const [fit, setFit] = useState<Fit | null>(null);
   const numColumns = fitToScreen && fit ? fit.numColumns : parsedColumns;
   const fontScale = baseFontScale * (fitToScreen && fit ? fit.scale : 1);
-  const columns = useMemo(() => splitColumns(chordLines, numColumns), [chordLines, numColumns]);
+  const wrapChars = fitToScreen ? fit?.wrapChars : undefined;
+  const lines = useMemo(() => (wrapChars
+    ? chordLines.flatMap<ChordSheetLine>(l => (isTabBlock(l) ? [l] : wrapPair(l as ChordLyric, wrapChars)))
+    : chordLines), [chordLines, wrapChars]);
+  const columns = useMemo(() => splitColumns(lines, numColumns), [lines, numColumns]);
 
   // Size the sheet to the space left on screen: below the header, inside the page's width
   useLayoutEffect(() => {
@@ -301,7 +347,8 @@ export default function ChordSheet({ chordLines, numColumns: parsedColumns, clas
       const availH = window.innerHeight - (el!.getBoundingClientRect().top + window.scrollY) - 16;
       if (availW <= 0 || availH <= 0) return;
       const next = fitLayout(chordLines, availW, availH, charRatio);
-      setFit(prev => prev && prev.numColumns === next.numColumns && Math.abs(prev.scale - next.scale) < 0.01 ? prev : next);
+      setFit(prev => prev && prev.numColumns === next.numColumns && prev.wrapChars === next.wrapChars
+        && Math.abs(prev.scale - next.scale) < 0.01 ? prev : next);
     }
     refit();
     const ro = new ResizeObserver(refit);
@@ -314,23 +361,23 @@ export default function ChordSheet({ chordLines, numColumns: parsedColumns, clas
   const tabOrderMap = useMemo(() => {
     const m = new Map<number, number>();
     let order = 0;
-    chordLines.forEach((line, idx) => {
+    lines.forEach((line, idx) => {
       if (isTabBlock(line)) m.set(idx, order++);
     });
     return m;
-  }, [chordLines]);
+  }, [lines]);
 
   return (
     <div ref={rootRef} className={`flex gap-6 font-mono ${fitToScreen ? 'justify-between' : ''} ${className ?? ''}`}>
       {columns.map((col, ci) => (
-        <div key={ci} className={`${numColumns === 1 || fitToScreen ? 'w-max' : 'flex-1'} flex flex-col`}>
+        <div key={ci} className={`${wrapChars ? 'w-full min-w-0' : numColumns === 1 || fitToScreen ? 'w-max' : 'flex-1'} flex flex-col`}>
           {col.lines.map((line, li) => {
             const globalIdx = col.start + li;
             if (isTabBlock(line)) {
               const tabOrder = tabOrderMap.get(globalIdx);
               const lickInfo = tabOrder !== undefined ? songLicks[tabOrder] : undefined;
               return (
-                <div key={li} className="leading-tight my-1">
+                <div key={li} className={`leading-tight my-1 ${wrapChars ? 'overflow-x-auto' : ''}`}>
                   {line.header && (
                     <div style={{ fontSize: `${line.fontSize * fontScale}px`, whiteSpace: 'pre', color: '#111827' }}>
                       {renderChords(line.header, instrument)}

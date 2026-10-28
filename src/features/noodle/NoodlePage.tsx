@@ -195,12 +195,12 @@ export default function NoodlePage() {
   const btnInactive = `${btnBase} border-gray-400 text-gray-700 hover:bg-gray-50`;
 
   return (
-    <div className={`max-w-6xl mx-auto px-6 py-4 flex flex-col gap-2 ${noodleMode === 'song' ? 'min-h-[calc(100vh-3.5rem)]' : ''}`}>
+    <div className={`max-w-6xl mx-auto px-3 sm:px-6 py-4 flex flex-col gap-2 ${noodleMode === 'song' ? 'min-h-[calc(100vh-3.5rem)]' : ''}`}>
 
       {/* Header row */}
-      <div className="flex items-center">
-        <div className="flex items-center gap-2 min-w-0">
-          <h1 className="text-3xl font-bold text-gray-900 shrink-0">
+      <div className="flex flex-wrap items-center gap-y-2">
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 shrink-0">
             {songMode.guitarKaraokeMode && noodleMode === 'song' ? 'Guitar Karaoke' : 'Noodle'}
           </h1>
           <div className="flex gap-2 shrink-0">
