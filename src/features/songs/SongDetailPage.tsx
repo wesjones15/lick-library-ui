@@ -294,6 +294,7 @@ export default function SongDetailPage() {
           chordLines={song.chordLines}
           numColumns={viewMode === 'scroll' ? 1 : song.numColumns}
           fontScale={effectiveFontScale}
+          fitToScreen={viewMode === 'columns'}
           className={loading ? 'opacity-50 transition-opacity duration-150' : 'transition-opacity duration-150'}
           showTabLicks={showTabLicks}
           songLicks={song.songLicks ?? {}}
