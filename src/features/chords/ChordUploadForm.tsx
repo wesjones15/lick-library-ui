@@ -96,13 +96,13 @@ export default function ChordUploadForm({
           value={chordName}
           onChange={e => handleChordNameChange(e.target.value)}
           disabled={lockChordName}
-          className={`border border-gray-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-4 ${lockChordName ? 'bg-gray-100 cursor-not-allowed text-gray-700' : ''}`}
+          className={`border-2 border-gray-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-4 ${lockChordName ? 'bg-gray-100 cursor-not-allowed text-gray-700' : ''}`}
         />
         {parseError && <p className="text-danger-6 text-xs">{parseError}</p>}
       </div>
 
       {lockInstrument ? (
-        <div className="text-sm text-gray-700 bg-gray-100 rounded-lg px-3 py-2 border border-gray-400">
+        <div className="text-sm text-gray-700 bg-gray-100 rounded-lg px-3 py-2 border-2 border-gray-400">
           {instrument.charAt(0) + instrument.slice(1).toLowerCase()}
         </div>
       ) : (
@@ -113,7 +113,7 @@ export default function ChordUploadForm({
         />
       )}
 
-      <div className="border border-gray-400 rounded-lg p-4 bg-gray-50">
+      <div className="border-2 border-gray-400 rounded-lg p-4 bg-gray-50">
         <p className="text-xs text-gray-700 mb-3">Frets — enter a number (0–24) or <code>x</code> for muted</p>
         <div className="flex items-start gap-6">
           <div className="flex flex-col gap-2">
@@ -125,7 +125,7 @@ export default function ChordUploadForm({
                   onChange={val => setFret(fretsIdx, val)}
                   placeholder="—"
                   extraKeys={[{ label: 'x', value: 'x' }]}
-                  className="w-16 border border-gray-400 rounded px-2 py-1 text-sm font-mono text-center focus:outline-none focus:border-brand-4"
+                  className="w-16 border-2 border-gray-400 rounded px-2 py-1 text-sm font-mono text-center focus:outline-none focus:border-brand-4"
                 />
               </div>
             ))}

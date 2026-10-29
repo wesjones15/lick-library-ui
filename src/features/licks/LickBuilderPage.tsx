@@ -218,7 +218,7 @@ export default function LickBuilderPage() {
             <select
               value={buildRoot}
               onChange={e => setBuildRoot(e.target.value)}
-              className="border border-gray-400 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-brand-4"
+              className="border-2 border-gray-400 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-brand-4"
             >
               <option value="">— None —</option>
               {NOTE_KEYS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
@@ -226,7 +226,7 @@ export default function LickBuilderPage() {
             <select
               value={buildMode}
               onChange={e => setBuildMode(e.target.value)}
-              className="border border-gray-400 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-brand-4"
+              className="border-2 border-gray-400 rounded-md px-2 py-1 text-sm bg-white focus:outline-none focus:border-brand-4"
             >
               {MODE_DATA.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
             </select>
@@ -263,7 +263,7 @@ export default function LickBuilderPage() {
             value={builtTabText}
             onChange={e => setBuiltTabText(e.target.value)}
             spellCheck={false}
-            className="font-mono text-xs border border-gray-400 rounded-lg px-3 py-2 focus:outline-none focus:border-brand-4 resize-none w-full max-w-lg"
+            className="font-mono text-xs border-2 border-gray-400 rounded-lg px-3 py-2 focus:outline-none focus:border-brand-4 resize-none w-full max-w-lg"
             rows={6}
           />
           <div className="flex gap-2 mt-2">

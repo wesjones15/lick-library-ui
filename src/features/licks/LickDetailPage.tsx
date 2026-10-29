@@ -81,7 +81,7 @@ export default function LickDetailPage() {
                   onSubmit={applyTuning}
                   error={instrumentError}
                 />
-                <div className="flex rounded-lg overflow-hidden border border-gray-400 text-sm self-start">
+                <div className="flex rounded-lg overflow-hidden border-2 border-gray-400 text-sm self-start">
                   {(['greedy', 'chord', 'dfs'] as const).map(a => (
                     <button key={a} onClick={() => setAlgo(a)}
                       className={`px-3 py-1.5 ${algo === a ? 'bg-brand-6 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
@@ -98,7 +98,7 @@ export default function LickDetailPage() {
               <p className="text-xs font-semibold text-gray-600 uppercase tracking-widest mb-2">
                 Original tab
               </p>
-              <pre className="text-xs font-mono text-gray-700 bg-gray-50 border border-gray-400 rounded-lg p-4 overflow-x-auto whitespace-pre leading-tight">
+              <pre className="text-xs font-mono text-gray-700 bg-gray-50 border-2 border-gray-400 rounded-lg p-4 overflow-x-auto whitespace-pre leading-tight">
                 {lick.rawTab}
               </pre>
             </div>

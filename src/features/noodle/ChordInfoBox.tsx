@@ -134,7 +134,7 @@ export default function ChordInfoBox({ chordName, voicing, instrument, effective
   const hasScale = tones.length > 0;
 
   return (
-    <div className="flex flex-col px-3 py-1 bg-gray-50 rounded-lg border border-gray-300 shrink-0">
+    <div className="flex flex-col px-3 py-1 bg-gray-50 rounded-lg border-2 border-gray-300 shrink-0">
       <div className="flex items-center gap-2">
         <span className="font-bold text-base text-brand-6 leading-tight">
           {chordName}

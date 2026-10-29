@@ -59,7 +59,7 @@ export default function VoicingModal({ entry, onSave, onClose }: VoicingModalPro
                     if (!isNaN(v)) setLocalTempoOverride(Math.min(240, Math.max(40, v)));
                   }}
                   placeholder={entry.tempo != null ? String(entry.tempo) : '—'}
-                  className="w-12 text-center text-base font-semibold text-gray-900 bg-transparent border-b border-gray-400 focus:border-brand-5 focus:outline-none"
+                  className="w-12 text-center text-base font-semibold text-gray-900 bg-transparent border-b-2 border-gray-400 focus:border-brand-5 focus:outline-none"
                 />
               </div>
               <button

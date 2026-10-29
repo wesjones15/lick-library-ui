@@ -79,7 +79,7 @@ export default function SongsPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setManaging(m => !m)}
-            className={`px-3 py-2 text-sm rounded-lg border transition-colors ${managing ? 'border-brand-3 text-brand-6 bg-brand-1' : 'border-gray-400 text-gray-600 hover:text-gray-900'}`}
+            className={`px-3 py-2 text-sm rounded-lg border-2 transition-colors ${managing ? 'border-brand-3 text-brand-6 bg-brand-1' : 'border-gray-400 text-gray-600 hover:text-gray-900'}`}
           >
             Manage
           </button>
@@ -105,7 +105,7 @@ export default function SongsPage() {
           <select
             value={filterArtist}
             onChange={e => setFilterArtist(e.target.value)}
-            className="text-xs border border-gray-400 rounded px-2 py-1 text-gray-700 focus:outline-none focus:border-brand-4 bg-white"
+            className="text-xs border-2 border-gray-400 rounded px-2 py-1 text-gray-700 focus:outline-none focus:border-brand-4 bg-white"
           >
             <option value="">All artists</option>
             {artists.map(a => <option key={a} value={a}>{a}</option>)}
@@ -116,7 +116,7 @@ export default function SongsPage() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search…"
-          className="text-xs border border-gray-400 rounded px-2 py-1 text-gray-700 focus:outline-none focus:border-brand-4 bg-white min-w-[120px]"
+          className="text-xs border-2 border-gray-400 rounded px-2 py-1 text-gray-700 focus:outline-none focus:border-brand-4 bg-white min-w-[120px]"
         />
       </div>
 
@@ -132,26 +132,26 @@ export default function SongsPage() {
               {!showAll && (
                 <>
                   <button onClick={() => setPage(1)} disabled={page === 1}
-                    className="px-3 py-1 border border-gray-400 rounded-lg hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
+                    className="px-3 py-1 border-2 border-gray-400 rounded-lg hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
                     «
                   </button>
                   <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                    className="px-3 py-1 border border-gray-400 rounded-lg hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
+                    className="px-3 py-1 border-2 border-gray-400 rounded-lg hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
                     ←<span className="hidden sm:inline"> Prev</span>
                   </button>
                   <span>{page} / {totalPages}</span>
                   <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                    className="px-3 py-1 border border-gray-400 rounded-lg hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
+                    className="px-3 py-1 border-2 border-gray-400 rounded-lg hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
                     <span className="hidden sm:inline">Next </span>→
                   </button>
                   <button onClick={() => setPage(totalPages)} disabled={page === totalPages}
-                    className="px-3 py-1 border border-gray-400 rounded-lg hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
+                    className="px-3 py-1 border-2 border-gray-400 rounded-lg hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
                     »
                   </button>
                 </>
               )}
               <button onClick={() => setShowAll(v => !v)}
-                className="px-3 py-1 border border-gray-400 rounded-lg text-gray-600 hover:text-brand-5 hover:border-brand-3 transition-colors">
+                className="px-3 py-1 border-2 border-gray-400 rounded-lg text-gray-600 hover:text-brand-5 hover:border-brand-3 transition-colors">
                 {showAll ? 'Show Less' : 'Show All'}
               </button>
             </div>

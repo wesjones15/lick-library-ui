@@ -47,7 +47,7 @@ export default function HomePage() {
         {!currentUser && (
           <a
             href={`${BACKEND}/api/oauth2/authorize/google`}
-            className="text-sm px-4 py-1.5 rounded-lg border border-gray-400 text-gray-700 hover:border-brand-3 hover:text-brand-6 transition-all"
+            className="text-sm px-4 py-1.5 rounded-lg border-2 border-gray-400 text-gray-700 hover:border-brand-3 hover:text-brand-6 transition-all"
           >
             Sign in with Google
           </a>
@@ -68,7 +68,7 @@ export default function HomePage() {
           <button
             key={f.to}
             onClick={() => navigate(f.to)}
-            className="text-left border border-gray-400 rounded-xl p-5 bg-white hover:shadow-sm hover:border-primary-200 transition-all"
+            className="text-left border-2 border-gray-400 rounded-xl p-5 bg-white hover:shadow-sm hover:border-primary-200 transition-all"
           >
             <div className="text-base font-semibold text-gray-900 mb-1">{f.title}</div>
             <div className="text-xs text-gray-600 leading-snug">{f.description}</div>

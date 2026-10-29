@@ -44,7 +44,7 @@ export default function PentatonicWidget({
   }
 
   return (
-    <div className="mt-4 p-3 border border-gray-400 rounded-lg bg-gray-50 inline-block">
+    <div className="mt-4 p-3 border-2 border-gray-400 rounded-lg bg-gray-50 inline-block">
       {/* Row 1: toggle button + mode dropdown */}
       <div className="flex items-center gap-2">
         <button
@@ -91,7 +91,7 @@ export default function PentatonicWidget({
                 <button
                   key={key}
                   onClick={() => onKeyToggle(key)}
-                  className={`w-12 py-1.5 text-xs font-medium rounded border transition-colors ${
+                  className={`w-12 py-1.5 text-xs font-medium rounded border-2 transition-colors ${
                     isActive
                       ? 'bg-gray-800 text-white border-gray-800'
                       : isFull

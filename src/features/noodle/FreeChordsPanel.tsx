@@ -101,7 +101,7 @@ export default function FreeChordsPanel({ chordIdx, freeHasAdvanced, onApply }: 
           }}
           placeholder="G | Am | F | C"
           rows={3}
-          className="w-full border border-gray-400 rounded-lg p-3 font-mono text-sm focus:outline-none focus:border-brand-4 resize-none"
+          className="w-full border-2 border-gray-400 rounded-lg p-3 font-mono text-sm focus:outline-none focus:border-brand-4 resize-none"
         />
         <button
           onClick={handleApply}

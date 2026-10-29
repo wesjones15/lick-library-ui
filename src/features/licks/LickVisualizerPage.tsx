@@ -177,9 +177,9 @@ export default function LickVisualizerPage() {
             )}
 
             <div className="flex gap-4 items-center flex-wrap mb-3 mt-4">
-              <div className="flex rounded-md overflow-hidden border border-gray-400">
+              <div className="flex rounded-md overflow-hidden border-2 border-gray-400">
                 <button
-                  className={`${TOGGLE} rounded-none border-0 border-r border-gray-400 ${displayMode === 'column' ? TOGGLE_ON : TOGGLE_OFF}`}
+                  className={`${TOGGLE} rounded-none border-0 border-r-2 border-gray-400 ${displayMode === 'column' ? TOGGLE_ON : TOGGLE_OFF}`}
                   onClick={() => setDisplayMode('column')}
                 >
                   Column
@@ -194,9 +194,9 @@ export default function LickVisualizerPage() {
 
               {displayMode === 'column' && (
                 <>
-                  <div className="flex rounded-md overflow-hidden border border-gray-400">
+                  <div className="flex rounded-md overflow-hidden border-2 border-gray-400">
                     <button
-                      className={`${TOGGLE} rounded-none border-0 border-r border-gray-400 ${speedMode === 'fixed' ? TOGGLE_ON : TOGGLE_OFF}`}
+                      className={`${TOGGLE} rounded-none border-0 border-r-2 border-gray-400 ${speedMode === 'fixed' ? TOGGLE_ON : TOGGLE_OFF}`}
                       onClick={() => setSpeedMode('fixed')}
                     >
                       1/sec

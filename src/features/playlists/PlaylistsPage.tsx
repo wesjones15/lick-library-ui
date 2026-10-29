@@ -70,7 +70,7 @@ export default function PlaylistsPage() {
           {managing ? (
             <button
               onClick={() => { setManaging(false); setEditingCardId(null); setConfirmDelete(null); }}
-              className="px-4 py-2 text-sm rounded-lg border border-brand-3 text-brand-6 bg-brand-1 hover:bg-brand-2 transition-colors"
+              className="px-4 py-2 text-sm rounded-lg border-2 border-brand-3 text-brand-6 bg-brand-1 hover:bg-brand-2 transition-colors"
             >
               Done
             </button>
@@ -84,7 +84,7 @@ export default function PlaylistsPage() {
               </button>
               <button
                 onClick={() => setManaging(true)}
-                className="px-4 py-2 text-sm rounded-lg border border-gray-400 text-gray-600 hover:text-gray-900 hover:border-gray-500 transition-colors"
+                className="px-4 py-2 text-sm rounded-lg border-2 border-gray-400 text-gray-600 hover:text-gray-900 hover:border-gray-500 transition-colors"
               >
                 Manage
               </button>
@@ -100,7 +100,7 @@ export default function PlaylistsPage() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1 text-xs rounded-lg border transition-colors ${filter === f ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-400 text-gray-600 hover:text-gray-900'}`}
+              className={`px-3 py-1 text-xs rounded-lg border-2 transition-colors ${filter === f ? 'border-brand-3 bg-brand-1 text-brand-6' : 'border-gray-400 text-gray-600 hover:text-gray-900'}`}
             >
               {f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
@@ -115,7 +115,7 @@ export default function PlaylistsPage() {
           {filtered.map(pl => (
             <div
               key={pl.id}
-              className={`border border-gray-400 rounded-xl p-4 flex items-start justify-between transition-colors ${managing ? 'cursor-default' : 'hover:border-brand-3 cursor-pointer group'}`}
+              className={`border-2 border-gray-400 rounded-xl p-4 flex items-start justify-between transition-colors ${managing ? 'cursor-default' : 'hover:border-brand-3 cursor-pointer group'}`}
               onClick={managing ? undefined : () => navigate(`/playlist/${pl.id}`)}
             >
               <div className="flex-1 min-w-0 mr-3">
@@ -127,7 +127,7 @@ export default function PlaylistsPage() {
                     onChange={e => setNameInput(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') handleSaveCardName(pl.id); if (e.key === 'Escape') setEditingCardId(null); }}
                     onClick={e => e.stopPropagation()}
-                    className="w-full text-sm font-semibold text-gray-900 border-b border-brand-4 focus:outline-none bg-transparent pb-0.5"
+                    className="w-full text-sm font-semibold text-gray-900 border-b-2 border-brand-4 focus:outline-none bg-transparent pb-0.5"
                   />
                 ) : (
                   <div className="font-semibold text-gray-900 group-hover:text-brand-7 transition-colors truncate">{pl.name}</div>
@@ -153,7 +153,7 @@ export default function PlaylistsPage() {
                 ) : confirmDelete === pl.id ? (
                   <div className="flex gap-2 shrink-0" onClick={e => e.stopPropagation()}>
                     <button onClick={() => handleDelete(pl.id)} className="text-xs px-2 py-1 rounded bg-danger-6 text-white hover:bg-danger-7">Delete</button>
-                    <button onClick={() => setConfirmDelete(null)} className="text-xs px-2 py-1 rounded border border-gray-400 text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button onClick={() => setConfirmDelete(null)} className="text-xs px-2 py-1 rounded border-2 border-gray-400 text-gray-700 hover:bg-gray-50">Cancel</button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-4 shrink-0" onClick={e => e.stopPropagation()}>

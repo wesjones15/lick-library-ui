@@ -27,7 +27,7 @@ export default function LickLibraryModal({ onSelect, onClose }: Props) {
         className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[80vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-300">
+        <div className="flex items-center justify-between px-5 py-4 border-b-2 border-gray-300">
           <h2 className="text-base font-semibold text-gray-900">Lick Library</h2>
           <button
             onClick={onClose}
@@ -47,7 +47,7 @@ export default function LickLibraryModal({ onSelect, onClose }: Props) {
             <button
               key={lick.id}
               onClick={() => onSelect(lick.rawTab)}
-              className="w-full text-left border border-gray-400 rounded-lg px-4 py-3 hover:border-brand-4 hover:bg-brand-1 transition-colors"
+              className="w-full text-left border-2 border-gray-400 rounded-lg px-4 py-3 hover:border-brand-4 hover:bg-brand-1 transition-colors"
             >
               <div className="flex items-center gap-2 mb-1.5">
                 {lick.mode && (

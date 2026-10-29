@@ -10,7 +10,7 @@ export default function LoadingOverlay({ state, onRetry }: { state: LoadState; o
       {state === 'error' ? (
         <button
           onClick={onRetry}
-          className="relative px-4 py-3 rounded-xl bg-white border border-gray-400 text-sm text-gray-900 shadow"
+          className="relative px-4 py-3 rounded-xl bg-white border-2 border-gray-400 text-sm text-gray-900 shadow"
         >
           Couldn't load — tap to retry
         </button>
