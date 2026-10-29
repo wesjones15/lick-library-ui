@@ -30,6 +30,20 @@ function usePortrait() {
   return p;
 }
 
+// Phone-sized screen: narrow, or short like a phone held sideways (matches the `short` CSS variant)
+const PHONE_QUERY = '(max-width: 639px), (max-height: 540px)';
+
+function usePhoneScreen() {
+  const [p, setP] = useState(() => window.matchMedia(PHONE_QUERY).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(PHONE_QUERY);
+    const h = (e: MediaQueryListEvent) => setP(e.matches);
+    mq.addEventListener('change', h);
+    return () => mq.removeEventListener('change', h);
+  }, []);
+  return p;
+}
+
 export default function SongDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -37,13 +51,16 @@ export default function SongDetailPage() {
   const { setBpm, setIsPlaying, bpm, isPlaying, setBeatsPerBar, setClickKey } = useMetronomeContext();
   const { setInfo, collapsed, showChords, setShowChords, setMiniActions } = useSongNavContext();
   const isPortrait = usePortrait();
+  const isPhone = usePhoneScreen();
   const [semitones, setSemitones] = useState(() => playlistState?.entries[playlistState.currentIndex]?.keyOffset ?? 0);
   const [capo, setCapo] = useState(0);
   const [song, setSong] = useState<SongDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'columns' | 'scroll'>('columns');
+  // Phones held upright open in scroll view; everything else opens in columns
+  const [viewMode, setViewMode] = useState<'columns' | 'scroll'>(() =>
+    window.matchMedia(PHONE_QUERY).matches && window.matchMedia('(orientation: portrait)').matches ? 'scroll' : 'columns');
   const [showTabLicks, setShowTabLicks] = useState(false);
   const [reparsing, setReparsing] = useState(false);
   const [chordVoicings, setChordVoicings] = useState<Record<string, ChordVoicing[]>>({});
@@ -265,7 +282,7 @@ export default function SongDetailPage() {
         {/* Δ — mobile capo/transpose modal trigger (below md) */}
         <button
           onClick={() => setCapTranspOpen(true)}
-          className={`md:hidden w-8 h-8 rounded-lg border flex items-center justify-center text-base transition-colors ${
+          className={`md:hidden short:flex w-8 h-8 rounded-lg border flex items-center justify-center text-base transition-colors ${
             (capo !== (song.capo ?? 0) || semitones !== 0)
               ? 'border-brand-3 bg-brand-1 text-brand-6'
               : 'border-gray-400 text-gray-600 hover:text-gray-900'
@@ -282,7 +299,7 @@ export default function SongDetailPage() {
           originalCapo={song.capo ?? 0}
           mode={song.mode}
           tuningOffset={tuningOffset}
-          className="hidden md:flex"
+          className="hidden md:flex short:hidden"
         />
       </>
     );
@@ -295,8 +312,8 @@ export default function SongDetailPage() {
         <ChordSheet
           chordLines={song.chordLines}
           numColumns={viewMode === 'scroll' ? 1 : song.numColumns}
-          fontScale={effectiveFontScale}
-          fitToScreen={viewMode === 'columns'}
+          fontScale={viewMode === 'scroll' && isPhone ? undefined : effectiveFontScale}
+          fitMode={viewMode === 'columns' ? 'columns' : isPhone ? 'phoneScroll' : undefined}
           className={loading ? 'opacity-50 transition-opacity duration-150' : 'transition-opacity duration-150'}
           showTabLicks={showTabLicks}
           songLicks={song.songLicks ?? {}}
