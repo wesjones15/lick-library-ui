@@ -217,17 +217,19 @@ interface Props {
   semitones?: number;
   instrument?: string;
   customTuning?: string;
-  // Grow the text so the columns fill the space left on screen
-  fitToScreen?: boolean;
+  // 'columns': fit the whole sheet on screen in columns, as large as possible.
+  // 'phoneScroll': one column across a phone screen at a readable size, long lines wrapped.
+  fitMode?: 'columns' | 'phoneScroll';
 }
 
 const COLUMN_GAP_PX = 24; // gap-6
 const TAB_MARGIN_PX = 8;  // my-1 around tab blocks
 const MAX_FIT_SCALE = 2.5;
-const MIN_READABLE_PX = 14;
 // Single scrolling column (phones): text size range, sized so most lines fit without wrapping
 const PHONE_MIN_PX = 14;
 const PHONE_MAX_PX = 18;
+// Below this, fitting the whole sheet on one screen isn't worth it: let full-height columns flow sideways
+const MIN_COLUMN_PX = { phone: 12, other: 8 };
 
 // Height in px at scale 1, as rendered: a pair is two 1.25em rows, a blank spacer one row, a tab one row per string
 function lineHeight(line: ChordSheetLine): number {
@@ -261,11 +263,11 @@ function splitColumns(lines: ChordSheetLine[], numColumns: number): Column[] {
   return columns;
 }
 
-// Column count and scale giving the largest text that fits the box. When nothing fits on one screen at a
-// readable size (phones), use one column as wide as the screen and let the page scroll.
-type Fit = { numColumns: number; scale: number; wrapChars?: number };
+// `flow`: columns are one screen tall and the sheet scrolls sideways to the next one
+type Fit = { numColumns: number; scale: number; wrapChars?: number; flow?: boolean };
 
-function fitLayout(lines: ChordSheetLine[], availW: number, availH: number, charRatio: number): Fit {
+// Column count and scale giving the largest text that keeps the whole sheet on one screen
+function fitColumns(lines: ChordSheetLine[], availW: number, availH: number, charRatio: number, phone: boolean): Fit {
   const baseFont = Math.max(1, ...lines.filter(l => isTabBlock(l) || (l as ChordLyric).lyrics.trim()).map(l => l.fontSize));
   let best: Fit | null = null;
   for (let n = 1; n <= 4; n++) {
@@ -274,11 +276,20 @@ function fitLayout(lines: ChordSheetLine[], availW: number, availH: number, char
     const height = Math.max(0, ...cols.map(c => c.lines.reduce((h, l) => h + lineHeight(l), 0)));
     if (width <= 0 || height <= 0) continue;
     const scale = Math.min(MAX_FIT_SCALE, (availW - COLUMN_GAP_PX * (n - 1)) / width, availH / height);
-    if (baseFont * scale >= MIN_READABLE_PX && (!best || scale > best.scale + 0.01)) best = { numColumns: n, scale };
+    if (!best || scale > best.scale + 0.01) best = { numColumns: n, scale };
   }
-  if (best) return best;
+  const minPx = phone ? MIN_COLUMN_PX.phone : MIN_COLUMN_PX.other;
+  if (best && baseFont * best.scale >= minPx) return best;
 
-  // One scrolling column: size the text so nine lines in ten fit, and wrap the rest
+  // Too small on one screen (a phone held sideways): readable text in screen-tall columns, swipe for more
+  const scale = (phone ? PHONE_MIN_PX : minPx) / baseFont;
+  const total = lines.reduce((h, l) => h + lineHeight(l), 0) * scale;
+  return { numColumns: Math.max(1, Math.ceil(total / (availH * 0.92))), scale, flow: true };
+}
+
+// One scrolling column on a phone: size the text so nine lines in ten fit, and wrap the rest
+function fitPhoneScroll(lines: ChordSheetLine[], availW: number, charRatio: number): Fit {
+  const baseFont = Math.max(1, ...lines.filter(l => isTabBlock(l) || (l as ChordLyric).lyrics.trim()).map(l => l.fontSize));
   const pairChars = lines
     .filter(l => !isTabBlock(l) && ((l as ChordLyric).chords.trim() || (l as ChordLyric).lyrics.trim()))
     .map(l => Math.max((l as ChordLyric).chords.trimEnd().length, (l as ChordLyric).lyrics.trimEnd().length))
@@ -325,12 +336,13 @@ function monospaceCharRatio(el: HTMLElement): number {
   return ctx.measureText('M').width / 100 || 0.6;
 }
 
-export default function ChordSheet({ chordLines, numColumns: parsedColumns, className, fontScale: baseFontScale = 1, showTabLicks = false, songLicks = {}, currentKey, semitones = 0, instrument, customTuning, fitToScreen = false }: Props) {
+export default function ChordSheet({ chordLines, numColumns: parsedColumns, className, fontScale: baseFontScale = 1, showTabLicks = false, songLicks = {}, currentKey, semitones = 0, instrument, customTuning, fitMode }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [fit, setFit] = useState<Fit | null>(null);
-  const numColumns = fitToScreen && fit ? fit.numColumns : parsedColumns;
-  const fontScale = baseFontScale * (fitToScreen && fit ? fit.scale : 1);
-  const wrapChars = fitToScreen ? fit?.wrapChars : undefined;
+  const fitted = fitMode && fit ? fit : null;
+  const numColumns = fitted ? fitted.numColumns : parsedColumns;
+  const fontScale = baseFontScale * (fitted ? fitted.scale : 1);
+  const wrapChars = fitted?.wrapChars;
   const lines = useMemo(() => (wrapChars
     ? chordLines.flatMap<ChordSheetLine>(l => (isTabBlock(l) ? [l] : wrapPair(l as ChordLyric, wrapChars)))
     : chordLines), [chordLines, wrapChars]);
@@ -339,15 +351,17 @@ export default function ChordSheet({ chordLines, numColumns: parsedColumns, clas
   // Size the sheet to the space left on screen: below the header, inside the page's width
   useLayoutEffect(() => {
     const el = rootRef.current;
-    if (!fitToScreen || !el?.parentElement) return;
+    if (!fitMode || !el?.parentElement) return;
     const parent = el.parentElement;
     const charRatio = monospaceCharRatio(el);
     function refit() {
       const availW = parent.clientWidth * 0.98;
       const availH = window.innerHeight - (el!.getBoundingClientRect().top + window.scrollY) - 16;
-      if (availW <= 0 || availH <= 0) return;
-      const next = fitLayout(chordLines, availW, availH, charRatio);
-      setFit(prev => prev && prev.numColumns === next.numColumns && prev.wrapChars === next.wrapChars
+      if (availW <= 0 || (fitMode === 'columns' && availH <= 0)) return;
+      const next = fitMode === 'phoneScroll'
+        ? fitPhoneScroll(chordLines, availW, charRatio)
+        : fitColumns(chordLines, availW, availH, charRatio, window.matchMedia('(max-width: 639px), (max-height: 540px)').matches);
+      setFit(prev => prev && prev.numColumns === next.numColumns && prev.wrapChars === next.wrapChars && prev.flow === next.flow
         && Math.abs(prev.scale - next.scale) < 0.01 ? prev : next);
     }
     refit();
@@ -355,7 +369,7 @@ export default function ChordSheet({ chordLines, numColumns: parsedColumns, clas
     ro.observe(parent);
     window.addEventListener('resize', refit);
     return () => { ro.disconnect(); window.removeEventListener('resize', refit); };
-  }, [fitToScreen, chordLines]);
+  }, [fitMode, chordLines]);
 
   // Precompute global index → tabOrder mapping
   const tabOrderMap = useMemo(() => {
@@ -368,9 +382,9 @@ export default function ChordSheet({ chordLines, numColumns: parsedColumns, clas
   }, [lines]);
 
   return (
-    <div ref={rootRef} className={`flex gap-6 font-mono ${fitToScreen ? 'justify-between' : ''} ${className ?? ''}`}>
+    <div ref={rootRef} className={`flex gap-6 font-mono ${fitted?.flow ? 'overflow-x-auto pb-2' : fitMode === 'columns' ? 'justify-between' : ''} ${className ?? ''}`}>
       {columns.map((col, ci) => (
-        <div key={ci} className={`${wrapChars ? 'w-full min-w-0' : numColumns === 1 || fitToScreen ? 'w-max' : 'flex-1'} flex flex-col`}>
+        <div key={ci} className={`${wrapChars ? 'w-full min-w-0' : numColumns === 1 || fitMode ? 'w-max' : 'flex-1'} flex flex-col`}>
           {col.lines.map((line, li) => {
             const globalIdx = col.start + li;
             if (isTabBlock(line)) {
