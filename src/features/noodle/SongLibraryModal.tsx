@@ -28,7 +28,7 @@ export default function SongLibraryModal({ onSelect, onClose }: Props) {
         className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4 flex flex-col max-h-[70vh]"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300">
+        <div className="flex items-center justify-between px-4 py-3 border-b-2 border-gray-300">
           <span className="font-semibold text-sm text-gray-900">Load Song</span>
           <button onClick={onClose} className="text-gray-600 hover:text-gray-900 text-xl leading-none">✕</button>
         </div>
@@ -38,7 +38,7 @@ export default function SongLibraryModal({ onSelect, onClose }: Props) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search songs…"
-            className="w-full border border-gray-400 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-brand-4"
+            className="w-full border-2 border-gray-400 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-brand-4"
           />
         </div>
         <div className="overflow-y-auto flex-1 divide-y divide-gray-300">

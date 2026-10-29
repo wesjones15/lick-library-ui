@@ -91,7 +91,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
           value={keyMode}
           onChange={e => setKeyMode(e.target.value)}
           disabled={!keyRoot}
-          className="w-24 border border-gray-400 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:border-brand-4 disabled:opacity-60"
+          className="w-24 border-2 border-gray-400 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:border-brand-4 disabled:opacity-60"
         >
           {MODE_DATA.map(m => (
             <option key={m.suffix} value={m.suffix}>{m.label}</option>
@@ -121,7 +121,7 @@ export default function SongUploadForm({ onSuccess }: Props) {
         <select
           value={timeSignature}
           onChange={e => setTimeSignature(Number(e.target.value))}
-          className="w-20 border border-gray-400 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:border-brand-4"
+          className="w-20 border-2 border-gray-400 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:border-brand-4"
         >
           <option value={1}>1/4</option>
           <option value={2}>2/4</option>

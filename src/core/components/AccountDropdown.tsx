@@ -23,7 +23,7 @@ export default function AccountDropdown({ currentUser, onNavigateProfile, onLogo
         {currentUser.role === 'ADMIN' ? '⚙︎' : '👤'}
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 bg-white border border-gray-400 rounded-lg shadow-md py-1 z-50 min-w-[120px]">
+        <div className="absolute right-0 top-full mt-1 bg-white border-2 border-gray-400 rounded-lg shadow-md py-1 z-50 min-w-[120px]">
           <button
             onClick={() => { onNavigateProfile(); setOpen(false); }}
             className="w-full text-left text-sm px-4 py-2 text-gray-900 hover:bg-gray-50 transition-colors"

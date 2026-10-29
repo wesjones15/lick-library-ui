@@ -91,7 +91,7 @@ export default function ChordsGalleryPage() {
           {!manageMode && (
             <button
               onClick={() => navigate('/chords/theory')}
-              className="px-3 py-2 text-sm border border-gray-400 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              className="px-3 py-2 text-sm border-2 border-gray-400 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               Chord Theory
             </button>
@@ -99,14 +99,14 @@ export default function ChordsGalleryPage() {
           {!manageMode && (
             <button
               onClick={() => navigate('/chords/upload')}
-              className="px-3 py-2 text-sm border border-gray-400 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              className="px-3 py-2 text-sm border-2 border-gray-400 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               Upload Voicing
             </button>
           )}
           <button
             onClick={() => { setManageMode(m => !m); setReseedConfirm(false); }}
-            className={`px-3 py-2 text-sm border rounded-lg transition-colors ${manageMode ? 'border-brand-4 bg-brand-1 text-brand-7' : 'border-gray-400 text-gray-700 hover:text-gray-900 hover:bg-gray-50'}`}
+            className={`px-3 py-2 text-sm border-2 rounded-lg transition-colors ${manageMode ? 'border-brand-4 bg-brand-1 text-brand-7' : 'border-gray-400 text-gray-700 hover:text-gray-900 hover:bg-gray-50'}`}
           >
             {manageMode ? 'Done' : 'Manage'}
           </button>
@@ -116,7 +116,7 @@ export default function ChordsGalleryPage() {
       {manageMode && (
         <div className="mb-4 flex items-center gap-3">
           {reseedConfirm ? (
-            <div className="flex items-center gap-3 px-4 py-2 bg-danger-1 border border-danger-3 rounded-lg text-sm text-danger-8">
+            <div className="flex items-center gap-3 px-4 py-2 bg-danger-1 border-2 border-danger-3 rounded-lg text-sm text-danger-8">
               <span>This will restore any deleted system voicings. Continue?</span>
               <button
                 onClick={handleReseed}
@@ -127,7 +127,7 @@ export default function ChordsGalleryPage() {
               </button>
               <button
                 onClick={() => setReseedConfirm(false)}
-                className="px-3 py-1 border border-danger-4 rounded hover:bg-danger-2"
+                className="px-3 py-1 border-2 border-danger-4 rounded hover:bg-danger-2"
               >
                 Cancel
               </button>
@@ -135,7 +135,7 @@ export default function ChordsGalleryPage() {
           ) : (
             <button
               onClick={() => setReseedConfirm(true)}
-              className="px-3 py-2 text-sm border border-danger-4 text-danger-7 rounded-lg hover:bg-danger-1"
+              className="px-3 py-2 text-sm border-2 border-danger-4 text-danger-7 rounded-lg hover:bg-danger-1"
             >
               Reseed Defaults
             </button>

@@ -99,7 +99,7 @@ function ChordToken({ name, instrument }: ChordTokenProps) {
               : `translateX(calc(-50% + ${popoverOffset}px))`,
             zIndex: 1000,
             background: 'white',
-            border: '1px solid #9ca3af',
+            border: '2px solid #9ca3af',
             borderRadius: '8px',
             padding: '6px 8px',
             boxShadow: '0 2px 10px rgba(0,0,0,0.12)',

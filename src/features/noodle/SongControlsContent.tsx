@@ -25,14 +25,14 @@ export default function SongControlsContent({
         <span className="text-xs text-gray-600">Transpose</span>
         <button
           onClick={() => { setLocalSemitones(s => s - 1); setNeckRefresh(n => n + 1); }}
-          className="w-6 h-6 flex items-center justify-center text-sm text-gray-700 hover:text-brand-5 border border-gray-400 rounded"
+          className="w-6 h-6 flex items-center justify-center text-sm text-gray-700 hover:text-brand-5 border-2 border-gray-400 rounded"
         >−</button>
         <span className="text-sm text-gray-900 w-6 text-center tabular-nums">
           {localSemitones > 0 ? `+${localSemitones}` : localSemitones}
         </span>
         <button
           onClick={() => { setLocalSemitones(s => s + 1); setNeckRefresh(n => n + 1); }}
-          className="w-6 h-6 flex items-center justify-center text-sm text-gray-700 hover:text-brand-5 border border-gray-400 rounded"
+          className="w-6 h-6 flex items-center justify-center text-sm text-gray-700 hover:text-brand-5 border-2 border-gray-400 rounded"
         >+</button>
       </div>
 
@@ -40,7 +40,7 @@ export default function SongControlsContent({
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => { setBeatmapDraft([...beatmap]); setShowBeatmapEditor(v => !v); }}
-            className={`px-2 py-0.5 text-xs rounded border transition-colors ${showBeatmapEditor ? 'border-brand-4 text-brand-6 bg-brand-1' : 'border-gray-400 text-gray-700 hover:bg-gray-50'}`}
+            className={`px-2 py-0.5 text-xs rounded border-2 transition-colors ${showBeatmapEditor ? 'border-brand-4 text-brand-6 bg-brand-1' : 'border-gray-400 text-gray-700 hover:bg-gray-50'}`}
           >
             Beat Map
           </button>
@@ -57,7 +57,7 @@ export default function SongControlsContent({
             <button
               key={s}
               onClick={() => setLickSpeed(s)}
-              className={`px-1.5 py-0.5 text-xs rounded border transition-colors ${lickSpeed === s ? 'border-brand-4 text-brand-6 bg-brand-1' : 'border-gray-400 text-gray-700 hover:bg-gray-50'}`}
+              className={`px-1.5 py-0.5 text-xs rounded border-2 transition-colors ${lickSpeed === s ? 'border-brand-4 text-brand-6 bg-brand-1' : 'border-gray-400 text-gray-700 hover:bg-gray-50'}`}
             >
               {s === 1 ? '1×' : s === 2 ? '½×' : '¼×'}
             </button>

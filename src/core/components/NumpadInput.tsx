@@ -141,7 +141,7 @@ export default function NumpadInput({
   if (insertMode) {
     return (
       <div
-        className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-400 z-[200] p-3 pb-6"
+        className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-400 z-[200] p-3 pb-6"
         onPointerDown={e => e.stopPropagation()}
       >
         <Grid />

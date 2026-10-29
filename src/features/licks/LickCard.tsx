@@ -18,7 +18,7 @@ export default function LickCard({ lick, onDelete, onFork, isManaging }: Props) 
   return (
     <div
       onClick={() => navigate(`/lick/${lick.id}`)}
-      className="border border-gray-400 rounded-lg p-4 cursor-pointer hover:border-brand-4 hover:shadow-sm transition-all bg-white"
+      className="border-2 border-gray-400 rounded-lg p-4 cursor-pointer hover:border-brand-4 hover:shadow-sm transition-all bg-white"
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2 min-w-0">
@@ -50,7 +50,7 @@ export default function LickCard({ lick, onDelete, onFork, isManaging }: Props) 
           {!lick.autoImported && isManaging && !lick.ownedByCurrentUser && (
             <button
               onClick={e => { e.stopPropagation(); onFork(); }}
-              className="text-brand-4 hover:text-brand-6 text-xs leading-none transition-colors border border-primary-200 rounded px-1.5 py-0.5"
+              className="text-brand-4 hover:text-brand-6 text-xs leading-none transition-colors border-2 border-primary-200 rounded px-1.5 py-0.5"
               aria-label="Fork lick"
               title="Fork — save a copy to your library"
             >

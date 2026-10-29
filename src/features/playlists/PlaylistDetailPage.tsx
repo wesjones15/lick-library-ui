@@ -160,20 +160,20 @@ export default function PlaylistDetailPage() {
           {managing && playlist.ownedByCurrentUser && confirmDelete && (
             <div className="flex gap-2">
               <button onClick={handleDeletePlaylist} className="text-xs px-3 py-1.5 rounded bg-danger-6 text-white hover:bg-danger-7">Delete playlist</button>
-              <button onClick={() => setConfirmDelete(false)} className="text-xs px-3 py-1.5 rounded border border-gray-400 text-gray-700 hover:bg-gray-50">Cancel</button>
+              <button onClick={() => setConfirmDelete(false)} className="text-xs px-3 py-1.5 rounded border-2 border-gray-400 text-gray-700 hover:bg-gray-50">Cancel</button>
             </div>
           )}
           {managing && playlist.ownedByCurrentUser && !confirmDelete && (
             <>
               <button
                 onClick={handleToggleVisibility}
-                className="px-3 py-2 text-sm rounded-lg border border-gray-400 text-gray-600 hover:text-gray-900 hover:border-gray-500 transition-colors"
+                className="px-3 py-2 text-sm rounded-lg border-2 border-gray-400 text-gray-600 hover:text-gray-900 hover:border-gray-500 transition-colors"
                 title={playlist.isPublic ? 'Make private' : 'Make public'}
               >
                 {playlist.isPublic ? 'Make Private' : 'Make Public'}
               </button>
               <button onClick={() => setConfirmDelete(true)}
-                className="px-3 py-2 text-sm rounded-lg border border-danger-3 text-danger-6 hover:bg-danger-1 transition-colors"
+                className="px-3 py-2 text-sm rounded-lg border-2 border-danger-3 text-danger-6 hover:bg-danger-1 transition-colors"
                 title="Delete playlist">Delete</button>
             </>
           )}
@@ -181,8 +181,8 @@ export default function PlaylistDetailPage() {
             <button
               onClick={toggleManage}
               className={managing
-                ? 'px-4 py-2 text-sm rounded-lg border border-brand-3 text-brand-6 bg-brand-1 hover:bg-brand-2 transition-colors'
-                : 'px-4 py-2 text-sm rounded-lg border border-gray-400 text-gray-600 hover:text-gray-900 hover:border-gray-500 transition-colors'}
+                ? 'px-4 py-2 text-sm rounded-lg border-2 border-brand-3 text-brand-6 bg-brand-1 hover:bg-brand-2 transition-colors'
+                : 'px-4 py-2 text-sm rounded-lg border-2 border-gray-400 text-gray-600 hover:text-gray-900 hover:border-gray-500 transition-colors'}
             >
               {managing ? 'Done' : 'Manage'}
             </button>
@@ -194,7 +194,7 @@ export default function PlaylistDetailPage() {
 
   function renderEntryRow(entry: PlaylistEntry, idx: number) {
     return (
-      <div key={entry.entryId} className="border border-gray-400 rounded-xl p-3">
+      <div key={entry.entryId} className="border-2 border-gray-400 rounded-xl p-3">
         <div className="flex items-center gap-3">
           <span className="text-xs text-gray-600 w-5 text-right shrink-0">{idx + 1}</span>
 
@@ -249,7 +249,7 @@ export default function PlaylistDetailPage() {
               {confirmRemove === entry.entryId ? (
                 <div className="flex gap-1">
                   <button onClick={() => handleRemoveEntry(entry.entryId)} className="text-xs px-2 py-0.5 rounded bg-danger-6 text-white hover:bg-danger-7">Remove</button>
-                  <button onClick={() => setConfirmRemove(null)} className="text-xs px-2 py-0.5 rounded border border-gray-400 text-gray-700">Cancel</button>
+                  <button onClick={() => setConfirmRemove(null)} className="text-xs px-2 py-0.5 rounded border-2 border-gray-400 text-gray-700">Cancel</button>
                 </div>
               ) : (
                 <button onClick={() => setConfirmRemove(entry.entryId)}
@@ -269,7 +269,7 @@ export default function PlaylistDetailPage() {
       {playlist.ownedByCurrentUser && (managing || entries.length === 0) && (
         <button
           onClick={() => setShowAddSongs(true)}
-          className="flex items-center gap-2 text-sm text-brand-6 hover:text-brand-7 border border-dashed border-brand-3 rounded-xl px-4 py-3 w-full hover:bg-brand-1 transition-colors mb-4"
+          className="flex items-center gap-2 text-sm text-brand-6 hover:text-brand-7 border-2 border-dashed border-brand-3 rounded-xl px-4 py-3 w-full hover:bg-brand-1 transition-colors mb-4"
         >
           <span className="text-lg leading-none">+</span> Add Songs
         </button>

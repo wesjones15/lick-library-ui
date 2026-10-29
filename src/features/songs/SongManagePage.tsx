@@ -302,7 +302,7 @@ export default function SongManagePage() {
           {loading ? 'Saving…' : isOwner ? 'Save' : 'Submit for review'}
         </button>
 
-        <div className="flex flex-col gap-2 mt-2 pt-4 border-t border-gray-300">
+        <div className="flex flex-col gap-2 mt-2 pt-4 border-t-2 border-gray-300">
           <button type="button" onClick={() => { setMode('chart'); setSubmitSuccess(false); }} className={BTN_SECONDARY}>
             Update Song Chart
           </button>
@@ -315,12 +315,12 @@ export default function SongManagePage() {
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
-              className="px-4 py-2 text-sm border border-danger-3 rounded-lg text-danger-5 hover:bg-danger-1 transition-colors"
+              className="px-4 py-2 text-sm border-2 border-danger-3 rounded-lg text-danger-5 hover:bg-danger-1 transition-colors"
             >
               Delete Song
             </button>
           ) : (
-            <div className="flex flex-col gap-2 p-3 bg-danger-1 border border-danger-3 rounded-lg">
+            <div className="flex flex-col gap-2 p-3 bg-danger-1 border-2 border-danger-3 rounded-lg">
               <p className="text-sm text-danger-7">Are you sure? This action cannot be undone.</p>
               <div className="flex gap-2">
                 <button
@@ -333,7 +333,7 @@ export default function SongManagePage() {
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 px-3 py-1.5 border border-gray-400 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-3 py-1.5 border-2 border-gray-400 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
@@ -388,7 +388,7 @@ export default function SongManagePage() {
               return (
                 <div
                   key={name}
-                  className="relative flex-shrink-0 flex flex-col items-center border border-gray-400 rounded-lg px-2 pt-2 pb-1 bg-white"
+                  className="relative flex-shrink-0 flex flex-col items-center border-2 border-gray-400 rounded-lg px-2 pt-2 pb-1 bg-white"
                 >
                   <span className="text-xs font-semibold text-gray-900 mb-1">{name}</span>
                   <button

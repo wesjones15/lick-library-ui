@@ -121,15 +121,15 @@ export default function UserPage() {
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-gray-900 mb-3">My Uploads</h2>
         <div className="grid grid-cols-3 gap-4">
-          <div className="border border-gray-400 rounded-xl p-4 text-center">
+          <div className="border-2 border-gray-400 rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-brand-6">{myLicks.length}</div>
             <div className="text-xs text-gray-600 mt-1">Licks</div>
           </div>
-          <div className="border border-gray-400 rounded-xl p-4 text-center">
+          <div className="border-2 border-gray-400 rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-brand-6">{mySongs.length}</div>
             <div className="text-xs text-gray-600 mt-1">Songs</div>
           </div>
-          <div className="border border-gray-400 rounded-xl p-4 text-center">
+          <div className="border-2 border-gray-400 rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-brand-6">{myPlaylists.length}</div>
             <div className="text-xs text-gray-600 mt-1">Playlists</div>
           </div>
@@ -158,7 +158,7 @@ export default function UserPage() {
         ) : (
           <div className="flex flex-col gap-2">
             {queue.map(u => (
-              <div key={u.id} className="flex items-center justify-between border border-gray-400 rounded-lg px-4 py-2.5 bg-white">
+              <div key={u.id} className="flex items-center justify-between border-2 border-gray-400 rounded-lg px-4 py-2.5 bg-white">
                 <div>
                   <div className="flex items-center gap-2">
                     <div className="text-sm font-medium text-gray-900">{u.username}</div>
@@ -181,7 +181,7 @@ export default function UserPage() {
                   </button>
                   <button
                     onClick={() => handleReject(u.id)}
-                    className="text-xs px-3 py-1 rounded-lg border border-danger-4 text-danger-7 hover:bg-danger-1 transition-colors"
+                    className="text-xs px-3 py-1 rounded-lg border-2 border-danger-4 text-danger-7 hover:bg-danger-1 transition-colors"
                   >
                     Reject
                   </button>
@@ -201,7 +201,7 @@ export default function UserPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-xs border-collapse">
             <thead>
-              <tr className="border-b border-gray-400 text-gray-600 text-left">
+              <tr className="border-b-2 border-gray-400 text-gray-600 text-left">
                 <th className="pb-2 pr-4">ID</th>
                 <th className="pb-2 pr-4">Username</th>
                 <th className="pb-2 pr-4">Email</th>
@@ -212,7 +212,7 @@ export default function UserPage() {
             </thead>
             <tbody>
               {allUsers.map(u => (
-                <tr key={u.id} className="border-b border-gray-300">
+                <tr key={u.id} className="border-b-2 border-gray-300">
                   <td className="py-1.5 pr-4 text-gray-600">{u.id}</td>
                   <td className="py-1.5 pr-4 text-gray-900">{u.username}</td>
                   <td className="py-1.5 pr-4 text-gray-700">{u.email}</td>
@@ -243,7 +243,7 @@ export default function UserPage() {
                           </button>
                           <button
                             onClick={() => setConfirmDeleteUserId(null)}
-                            className="text-xs px-2 py-0.5 rounded border border-gray-400 text-gray-700 hover:bg-gray-50 transition-colors"
+                            className="text-xs px-2 py-0.5 rounded border-2 border-gray-400 text-gray-700 hover:bg-gray-50 transition-colors"
                           >
                             Cancel
                           </button>
@@ -276,7 +276,7 @@ export default function UserPage() {
         ) : (
           <div className="flex flex-col gap-2">
             {songUpdateQueue.map(req => (
-              <div key={req.id} className="flex items-center justify-between border border-gray-400 rounded-lg px-4 py-2.5 bg-white">
+              <div key={req.id} className="flex items-center justify-between border-2 border-gray-400 rounded-lg px-4 py-2.5 bg-white">
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <div className="text-sm font-medium text-gray-900">{req.songTitle}{req.songArtist ? ` — ${req.songArtist}` : ''}</div>
@@ -292,7 +292,7 @@ export default function UserPage() {
                 </div>
                 <button
                   onClick={() => setReviewingUpdateId(req.id)}
-                  className="text-xs px-3 py-1 rounded-lg border border-brand-3 text-brand-6 hover:bg-brand-1 transition-colors"
+                  className="text-xs px-3 py-1 rounded-lg border-2 border-brand-3 text-brand-6 hover:bg-brand-1 transition-colors"
                 >
                   Review
                 </button>
@@ -306,7 +306,7 @@ export default function UserPage() {
 
   function renderDeleteAccount() {
     return (
-      <div className="mt-8 pt-6 border-t border-gray-300">
+      <div className="mt-8 pt-6 border-t-2 border-gray-300">
         {confirmDelete ? (
           <div className="flex items-center gap-3">
             <span className="text-sm text-danger-7">Submit a deletion request for admin review?</span>
@@ -319,7 +319,7 @@ export default function UserPage() {
             </button>
             <button
               onClick={() => setConfirmDelete(false)}
-              className="text-xs px-3 py-1.5 rounded-lg border border-gray-400 text-gray-700 hover:bg-gray-50 transition-colors"
+              className="text-xs px-3 py-1.5 rounded-lg border-2 border-gray-400 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
@@ -345,7 +345,7 @@ export default function UserPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-1">Account</h1>
 
         {/* Profile card */}
-        <div className="border border-gray-400 rounded-xl p-5 mb-6 bg-white">
+        <div className="border-2 border-gray-400 rounded-xl p-5 mb-6 bg-white">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               {editingUsername !== null ? (
@@ -355,7 +355,7 @@ export default function UserPage() {
                     value={editingUsername}
                     onChange={e => setEditingUsername(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') handleSaveUsername(); if (e.key === 'Escape') setEditingUsername(null); }}
-                    className="text-sm border border-gray-400 rounded px-2 py-0.5 text-gray-900 focus:outline-none focus:border-brand-4 w-40"
+                    className="text-sm border-2 border-gray-400 rounded px-2 py-0.5 text-gray-900 focus:outline-none focus:border-brand-4 w-40"
                   />
                   <button
                     onClick={handleSaveUsername}

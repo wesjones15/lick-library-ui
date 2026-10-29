@@ -14,7 +14,7 @@ interface Props {
 
 
 const SELECT_CLASS =
-  'border border-gray-400 rounded-lg bg-white focus:outline-none focus:border-brand-4';
+  'border-2 border-gray-400 rounded-lg bg-white focus:outline-none focus:border-brand-4';
 
 export default function InstrumentSelector({
   instrument, customTuning = '', onInstrumentChange, onCustomTuningChange, onSubmit, error, excludeCustom = false, compact = false,

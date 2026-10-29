@@ -281,7 +281,7 @@ export default function TheoryPage() {
         {highlightedDegrees.size > 0 && (
           <button
             onClick={() => setHighlightedDegrees(new Set())}
-            className="px-2 py-1 text-xs rounded border border-gray-400 text-gray-700 hover:bg-gray-50"
+            className="px-2 py-1 text-xs rounded border-2 border-gray-400 text-gray-700 hover:bg-gray-50"
           >
             Clear
           </button>

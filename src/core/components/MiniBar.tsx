@@ -81,7 +81,7 @@ export default function MiniBar() {
                   🎵
                 </button>
                 {playlistPanelOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-400 rounded-lg shadow-lg z-50 p-3 flex flex-col gap-2">
+                  <div className="absolute right-0 top-full mt-1 w-48 bg-white border-2 border-gray-400 rounded-lg shadow-lg z-50 p-3 flex flex-col gap-2">
                     <button
                       onClick={() => { miniActions?.onPlaylistBack(); setPlaylistPanelOpen(false); setIconsOpen(false); }}
                       className="text-xs text-left text-gray-700 hover:text-brand-5 transition-colors"
@@ -91,7 +91,7 @@ export default function MiniBar() {
                     <div className="flex items-center justify-between">
                       <button
                         onClick={() => miniActions?.onPlaylistPrev()}
-                        className="text-xs px-2 py-1 rounded border border-gray-400 text-gray-700 hover:bg-gray-50"
+                        className="text-xs px-2 py-1 rounded border-2 border-gray-400 text-gray-700 hover:bg-gray-50"
                       >
                         Prev
                       </button>
@@ -100,7 +100,7 @@ export default function MiniBar() {
                       </span>
                       <button
                         onClick={() => miniActions?.onPlaylistNext()}
-                        className="text-xs px-2 py-1 rounded border border-gray-400 text-gray-700 hover:bg-gray-50"
+                        className="text-xs px-2 py-1 rounded border-2 border-gray-400 text-gray-700 hover:bg-gray-50"
                       >
                         Next
                       </button>
@@ -157,7 +157,7 @@ export default function MiniBar() {
                   🎸
                 </button>
                 {instrumentPanelOpen && (
-                  <div className="absolute right-0 top-full mt-1 bg-white border border-gray-400 rounded-lg shadow-lg z-50 p-2">
+                  <div className="absolute right-0 top-full mt-1 bg-white border-2 border-gray-400 rounded-lg shadow-lg z-50 p-2">
                     <InstrumentSelector
                       instrument={miniActions.instrument as InstrumentName}
                       onInstrumentChange={v => { miniActions.setInstrument(v); setInstrumentPanelOpen(false); }}

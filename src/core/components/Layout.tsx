@@ -61,7 +61,7 @@ export default function Layout() {
             ☰
           </button>
           {menuOpen && (
-            <div className="absolute top-full left-0 mt-1 w-44 bg-white border border-gray-400 rounded-lg shadow-lg z-50 flex flex-col py-1">
+            <div className="absolute top-full left-0 mt-1 w-44 bg-white border-2 border-gray-400 rounded-lg shadow-lg z-50 flex flex-col py-1">
               {NAV_LINKS.map(({ label, to }) => (
                 <Link
                   key={to}
@@ -154,7 +154,7 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-400 z-50 flex items-center px-4 sm:px-6">
+      <nav className="fixed top-0 left-0 right-0 h-14 bg-white border-b-2 border-gray-400 z-50 flex items-center px-4 sm:px-6">
         {collapsed && info ? <MiniBar /> : renderNormalNav()}
         <button
           onClick={() => setSoundEnabled(!soundEnabled)}
