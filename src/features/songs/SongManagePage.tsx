@@ -8,6 +8,7 @@ import ChordUploadModal from '../chords/ChordUploadModal';
 import { CHROMATIC_NOTES, MODE_DATA, MODE_SUFFIX, SONG_MODE_TO_ENUM } from '../../core/music';
 import { BTN_SECONDARY, SELECT, TEXTAREA_MONO, ALERT_AMBER, ALERT_GREEN } from '../../core/ui';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
+import LoadingOverlay from '../../core/components/LoadingOverlay';
 import NumpadInput from '../../core/components/NumpadInput';
 import type { InstrumentName } from '../../core/useInstrument';
 
@@ -58,6 +59,8 @@ export default function SongManagePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!id) return;
@@ -77,8 +80,8 @@ export default function SongManagePage() {
       setTempo(s.tempo != null ? String(s.tempo) : '');
       setTimeSignature(s.timeSignature ?? 4);
       setRawChordSheet(s.rawChordSheet ?? '');
-    });
-  }, [id]);
+    }).catch(() => setLoadFailed(true));
+  }, [id, attempt]);
 
   useEffect(() => {
     if (mode !== 'chords' || !song) return;
@@ -167,7 +170,14 @@ export default function SongManagePage() {
     }
   };
 
-  if (!song) return <div className="px-6 pt-8 text-sm text-gray-600">Loading…</div>;
+  if (!song) {
+    return (
+      <LoadingOverlay
+        state={loadFailed ? 'error' : 'loading'}
+        onRetry={() => { setLoadFailed(false); setAttempt(n => n + 1); }}
+      />
+    );
+  }
 
   const isOwner = song.ownedByCurrentUser;
 

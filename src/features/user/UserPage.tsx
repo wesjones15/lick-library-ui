@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../core/auth/AuthContext';
 import {
@@ -10,6 +10,8 @@ import {
 import type { UserProfileResponse, AdminUserResponse, LickSummary, SongSummary, PlaylistSummary, SongUpdateRequestSummary } from '../../core/api/client';
 import SongUpdateReviewModal from '../songs/SongUpdateReviewModal';
 import { ALERT_AMBER, ALERT_RED } from '../../core/ui';
+import LoadingOverlay from '../../core/components/LoadingOverlay';
+import { useLoader } from '../../core/useLoader';
 
 export default function UserPage() {
   const { currentUser, logout } = useAuth();
@@ -33,9 +35,10 @@ export default function UserPage() {
   const [songUpdateQueue, setSongUpdateQueue] = useState<SongUpdateRequestSummary[]>([]);
   const [reviewingUpdateId, setReviewingUpdateId] = useState<string | null>(null);
 
+  // The profile gates the page; the upload counts and admin lists fill in when they arrive
   const loadData = useCallback(() => {
-    if (!currentUser) return;
-    getUserProfile().then(setProfile).catch(() => {});
+    if (!currentUser) return Promise.resolve();
+    const profileLoad = getUserProfile().then(setProfile);
     if (currentUser.status === 'APPROVED' || currentUser.role === 'ADMIN') {
       getAllLicks(false, { mine: true }).then(setMyLicks).catch(() => {});
       getAllSongs(true).then(data => setMySongs(data.filter(s => s.ownedByCurrentUser))).catch(() => {});
@@ -46,11 +49,10 @@ export default function UserPage() {
       getAdminUsers().then(setAllUsers).catch(() => {});
       getAdminSongUpdateQueue().then(setSongUpdateQueue).catch(() => {});
     }
+    return profileLoad;
   }, [currentUser]);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const load = useLoader(() => loadData(), [currentUser?.role, currentUser?.status]);
 
   async function handleApprove(userId: number) {
     await approveUser(userId);
@@ -338,6 +340,7 @@ export default function UserPage() {
 
   return (
     <>
+      <LoadingOverlay state={load.firstLoad} onRetry={load.retry} />
       <div className="max-w-3xl mx-auto px-6 py-10">
         <h1 className="text-3xl font-bold text-gray-900 mb-1">Account</h1>
 

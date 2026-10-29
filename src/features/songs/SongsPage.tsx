@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllSongs } from '../../core/api/client';
+import LoadingOverlay from '../../core/components/LoadingOverlay';
 import { BTN_PRIMARY, BTN_XS } from '../../core/ui';
 import type { SongSummary } from '../../core/api/client';
 import SongList from './SongList';
@@ -72,9 +73,9 @@ export default function SongsPage() {
   const paginated = showAll ? filtered : filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Songs</h1>
+    <div className="max-w-4xl mx-auto px-4 pt-4 pb-8 sm:pt-10 short:pt-3">
+      <div className="flex items-center justify-between mb-4 sm:mb-6 short:mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Songs</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setManaging(m => !m)}
@@ -92,7 +93,7 @@ export default function SongsPage() {
       </div>
 
       {/* Sort + filter controls */}
-      <div className="flex items-center gap-3 mb-5 flex-wrap">
+      <div className="flex items-center gap-3 mb-4 short:mb-2 flex-wrap">
         <div className="flex items-center gap-1">
           {(['title', 'artist', 'key', 'tempo'] as SortKey[]).map(k => (
             <button key={k} onClick={() => handleSort(k)} className={sortBtnClass(sortBy === k)}>
@@ -119,12 +120,15 @@ export default function SongsPage() {
         />
       </div>
 
-      {loading && <p className="text-gray-600 text-sm">Loading…</p>}
+      <LoadingOverlay
+        state={loading ? 'loading' : error && songs.length === 0 ? 'error' : 'ready'}
+        onRetry={() => { setLoading(true); fetchSongs(); }}
+      />
       {error && <p className="text-danger-6 text-sm">{error}</p>}
       {!loading && !error && (
         <>
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-4 mb-4 text-sm text-gray-700">
+            <div className="flex items-center justify-center gap-2 sm:gap-4 mb-3 short:mb-2 text-sm text-gray-700 whitespace-nowrap">
               {!showAll && (
                 <>
                   <button onClick={() => setPage(1)} disabled={page === 1}
@@ -133,12 +137,12 @@ export default function SongsPage() {
                   </button>
                   <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
                     className="px-3 py-1 border border-gray-400 rounded-lg hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
-                    ← Prev
+                    ←<span className="hidden sm:inline"> Prev</span>
                   </button>
                   <span>{page} / {totalPages}</span>
                   <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
                     className="px-3 py-1 border border-gray-400 rounded-lg hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
-                    Next →
+                    <span className="hidden sm:inline">Next </span>→
                   </button>
                   <button onClick={() => setPage(totalPages)} disabled={page === totalPages}
                     className="px-3 py-1 border border-gray-400 rounded-lg hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">

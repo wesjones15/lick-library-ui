@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import LickSubNav from './LickSubNav';
 import { getAllLicks, deleteLick, forkLick } from '../../core/api/client';
+import LoadingOverlay from '../../core/components/LoadingOverlay';
 import type { LickSummary } from '../../core/api/client';
 import LickList from './LickList';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
@@ -120,7 +121,10 @@ export default function LickLibraryPage() {
         />
       </div>
 
-      {loading && <p className="text-gray-600 text-sm">Loading…</p>}
+      <LoadingOverlay
+        state={loading ? 'loading' : error && licks.length === 0 ? 'error' : 'ready'}
+        onRetry={() => { setLoading(true); fetchLicks(); }}
+      />
       {error && <p className="text-danger-6 text-sm">{error}</p>}
       {!loading && !error && (
         <LickList licks={licks} onDelete={handleDelete} onFork={handleFork} isManaging={isManaging} />

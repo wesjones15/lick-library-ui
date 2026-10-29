@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getLick } from '../../core/api/client';
+import LoadingOverlay from '../../core/components/LoadingOverlay';
 import type { LickDetail } from '../../core/api/client';
 import KeySelector from '../../core/components/KeySelector';
 import InstrumentSelector from '../../core/components/InstrumentSelector';
@@ -21,6 +22,7 @@ export default function LickDetailPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [instrumentError, setInstrumentError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   const { instrument, customTuning, setInstrument, setCustomTuning } = useInstrument();
 
@@ -41,13 +43,18 @@ export default function LickDetailPage() {
         else setError('Failed to load positions.');
       })
       .finally(() => setLoading(false));
-  }, [id, key, algo, instrument, appliedTuning]);
+  }, [id, key, algo, instrument, appliedTuning, attempt]);
+
+  // Cover the page until the lick first arrives; later key/algo changes show the inline "Loading…"
+  const waitingForTuning = instrument === 'CUSTOM' && !appliedTuning.trim();
+  const overlayState = lick || waitingForTuning || instrumentError ? 'ready' : error ? 'error' : 'loading';
 
   const tabLineLength = lick?.positions?.[0]?.tabString.split('\n')[0]?.length ?? 20;
   const minCellWidth = Math.round(tabLineLength * 8.4 + 32);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
+      <LoadingOverlay state={overlayState} onRetry={() => setAttempt(n => n + 1)} />
       <div className="max-w-2xl">
         {lick && (
           <>

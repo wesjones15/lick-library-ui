@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import KeySelector from '../../core/components/KeySelector';
 import ChordCard from './ChordCard';
@@ -6,6 +6,8 @@ import InstrumentSelector from '../../core/components/InstrumentSelector';
 import { getAllChordVoicings, reseedChordDefaults } from '../../core/api/client';
 import type { ChordVoicing } from '../../core/api/client';
 import type { InstrumentName } from '../../core/useInstrument';
+import LoadingOverlay from '../../core/components/LoadingOverlay';
+import { useLoader } from '../../core/useLoader';
 
 import { formatNoteEnum, NOTE_KEYS, ROOT_CHROMATIC } from '../../core/music';
 
@@ -50,7 +52,10 @@ export default function ChordsGalleryPage() {
 
   const fetchVoicings = () => getAllChordVoicings(root, instrument).then(setAllVoicings);
 
-  useEffect(() => { fetchVoicings(); }, [root, instrument]);
+  const load = useLoader(async isCancelled => {
+    const data = await getAllChordVoicings(root, instrument);
+    if (!isCancelled()) setAllVoicings(data);
+  }, [root, instrument]);
 
   const rootDisplay = formatNoteEnum(root);
 
@@ -73,6 +78,7 @@ export default function ChordsGalleryPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      <LoadingOverlay state={load.firstLoad} onRetry={load.retry} />
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Chord Gallery</h1>
         <div className="flex flex-wrap items-center gap-3">

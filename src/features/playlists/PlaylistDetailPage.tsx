@@ -9,6 +9,8 @@ import type { PlaylistDetail, PlaylistEntry, SongSummary } from '../../core/api/
 import { keyLabel } from '../songs/songKeyUtils';
 import { soundingOffset } from '../../core/music';
 import VoicingModal from './VoicingModal';
+import LoadingOverlay from '../../core/components/LoadingOverlay';
+import { useLoader } from '../../core/useLoader';
 import AddSongsModal from './AddSongsModal';
 
 export default function PlaylistDetailPage() {
@@ -24,13 +26,17 @@ export default function PlaylistDetailPage() {
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   const [editingEntry, setEditingEntry] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = useLoader(async isCancelled => {
     if (!id) return;
-    getPlaylist(id).then(setPlaylist).catch(() => {});
+    const data = await getPlaylist(id);
+    if (!isCancelled()) setPlaylist(data);
+  }, [id]);
+
+  useEffect(() => {
     getAllSongs().then(setAllSongs).catch(() => {});
   }, [id]);
 
-  if (!playlist) return <div className="max-w-3xl mx-auto px-6 py-10 text-gray-600 text-sm">Loading…</div>;
+  if (!playlist) return <LoadingOverlay state={load.state === 'error' ? 'error' : 'loading'} onRetry={load.retry} />;
 
   const entries = playlist.entries;
 

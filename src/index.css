@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Phones held sideways: little height, so trim vertical space */
+@custom-variant short (@media (max-height: 540px));
+/* Portrait screens or short landscape ones: use compact one-row cards */
+@custom-variant compact {
+  @media (orientation: portrait) { @slot; }
+  @media (max-height: 540px) { @slot; }
+}
+
 @theme {
   /* Brand */
   --color-brand-1: var(--color-indigo-50);
@@ -78,4 +86,9 @@
 ::placeholder {
   color: var(--color-gray-600);
   opacity: 1;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

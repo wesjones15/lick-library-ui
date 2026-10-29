@@ -216,9 +216,11 @@ export default function TheoryPage() {
   const intervalLabels = MODE_INTERVALS[mode] ?? [];
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10">
-      <div className="flex items-center gap-4 mb-4 flex-wrap">
-        <h1 className="text-3xl font-bold text-gray-900">Theory</h1>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 short:py-2">
+      {/* On a sideways phone the scale degrees sit beside the controls so the neck fits without scrolling */}
+      <div className="short:flex short:flex-wrap short:items-center short:gap-x-4 short:mb-2">
+      <div className="flex items-center gap-x-4 gap-y-2 mb-4 short:mb-0 flex-wrap">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Theory</h1>
 
         <select className={SELECT} value={root} onChange={e => setRoot(e.target.value)}>
           <option value="">— Key —</option>
@@ -239,7 +241,7 @@ export default function TheoryPage() {
         />
       </div>
 
-      <div className="flex gap-2 items-center flex-wrap mb-6">
+      <div className="flex gap-2 items-center flex-wrap mb-6 short:mb-0">
         {intervalLabels.map((label, idx) => {
           const degree = idx + 1;
           const isNoteActive = currentNote?.degree === degree;
@@ -258,8 +260,9 @@ export default function TheoryPage() {
                   return next;
                 });
               }}
+              className="w-8 h-8 short:w-6 short:h-6"
               style={{
-                width: 32, height: 32, borderRadius: '50%',
+                borderRadius: '50%',
                 background: DEGREE_COLORS[degree],
                 opacity: lit ? 1 : 0.35,
                 border: isDegreeHighlighted ? '2px solid #ffffff' : isNoteActive ? '2px solid #fef08a' : 'none',
@@ -285,12 +288,17 @@ export default function TheoryPage() {
         )}
       </div>
 
-      <GuitarNeck
-        dots={dots}
-        fretCount={FRET_COUNT}
-        stringLabels={getStringLabels(instrument)}
-        onDotClick={handleDotClick}
-      />
+      </div>
+
+      {/* The neck is ~3.1x wider than tall: on short screens, cap its width so its height fits */}
+      <div className="short:mx-auto short:max-w-[calc((100dvh-7.5rem)*3.1)]">
+        <GuitarNeck
+          dots={dots}
+          fretCount={FRET_COUNT}
+          stringLabels={getStringLabels(instrument)}
+          onDotClick={handleDotClick}
+        />
+      </div>
 
       <div className="flex gap-3 flex-wrap items-start">
         <PentatonicWidget
