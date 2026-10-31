@@ -270,6 +270,22 @@ function lineWidth(line: ChordSheetLine, charRatio: number): number {
 
 type Column = { start: number; lines: ChordSheetLine[] };
 
+// Fill each column up to maxHeight before starting the next, so no column runs past the screen
+function splitByHeight(lines: ChordSheetLine[], maxHeight: number): Column[] {
+  const columns: Column[] = [{ start: 0, lines: [] }];
+  let filled = 0;
+  lines.forEach((line, i) => {
+    const h = lineHeight(line);
+    if (columns[columns.length - 1].lines.length > 0 && filled + h > maxHeight) {
+      columns.push({ start: i, lines: [] });
+      filled = 0;
+    }
+    columns[columns.length - 1].lines.push(line);
+    filled += h;
+  });
+  return columns;
+}
+
 // Split by height, not line count, so a column holding tabs isn't twice as tall as the rest
 function splitColumns(lines: ChordSheetLine[], numColumns: number): Column[] {
   const heights = lines.map(lineHeight);
@@ -287,8 +303,8 @@ function splitColumns(lines: ChordSheetLine[], numColumns: number): Column[] {
   return columns;
 }
 
-// `flow`: columns are one screen tall and the sheet scrolls sideways to the next one
-type Fit = { numColumns: number; scale: number; wrapChars?: number; flow?: boolean };
+// `flowHeight`: columns are filled to this height (at scale 1) and the sheet scrolls sideways to the next one
+type Fit = { numColumns: number; scale: number; wrapChars?: number; flowHeight?: number };
 
 // Column count and scale giving the largest text that keeps the whole sheet on one screen
 function fitColumns(lines: ChordSheetLine[], availW: number, availH: number, charRatio: number, phone: boolean): Fit {
@@ -307,8 +323,8 @@ function fitColumns(lines: ChordSheetLine[], availW: number, availH: number, cha
 
   // Too small on one screen (a phone held sideways): readable text in screen-tall columns, swipe for more
   const scale = (phone ? PHONE_MIN_PX : minPx) / baseFont;
-  const total = lines.reduce((h, l) => h + lineHeight(l), 0) * scale;
-  return { numColumns: Math.max(1, Math.ceil(total / (availH * 0.92))), scale, flow: true };
+  const flowHeight = availH / scale;
+  return { numColumns: splitByHeight(lines, flowHeight).length, scale, flowHeight };
 }
 
 // One scrolling column on a phone: size the text so nine lines in ten fit, and wrap the rest
@@ -370,7 +386,9 @@ export default function ChordSheet({ chordLines, numColumns: parsedColumns, clas
   const lines = useMemo(() => (wrapChars
     ? chordLines.flatMap<ChordSheetLine>(l => (isTabBlock(l) ? [l] : wrapPair(l as ChordLyric, wrapChars)))
     : chordLines), [chordLines, wrapChars]);
-  const columns = useMemo(() => splitColumns(lines, numColumns), [lines, numColumns]);
+  const flowHeight = fitted?.flowHeight;
+  const columns = useMemo(() => (flowHeight ? splitByHeight(lines, flowHeight) : splitColumns(lines, numColumns)),
+    [lines, numColumns, flowHeight]);
 
   // Size the sheet to the space left on screen: below the header, inside the page's width
   useLayoutEffect(() => {
@@ -385,7 +403,7 @@ export default function ChordSheet({ chordLines, numColumns: parsedColumns, clas
       const next = fitMode === 'phoneScroll'
         ? fitPhoneScroll(chordLines, availW, charRatio)
         : fitColumns(chordLines, availW, availH, charRatio, window.matchMedia('(max-width: 639px), (max-height: 540px)').matches);
-      setFit(prev => prev && prev.numColumns === next.numColumns && prev.wrapChars === next.wrapChars && prev.flow === next.flow
+      setFit(prev => prev && prev.numColumns === next.numColumns && prev.wrapChars === next.wrapChars && prev.flowHeight === next.flowHeight
         && Math.abs(prev.scale - next.scale) < 0.01 ? prev : next);
     }
     refit();
@@ -406,7 +424,7 @@ export default function ChordSheet({ chordLines, numColumns: parsedColumns, clas
   }, [lines]);
 
   return (
-    <div ref={rootRef} className={`flex gap-6 font-mono ${fitted?.flow ? 'overflow-x-auto pb-2' : fitMode === 'columns' ? 'justify-between' : ''} ${className ?? ''}`}>
+    <div ref={rootRef} className={`flex gap-6 font-mono ${flowHeight ? 'overflow-x-auto' : fitMode === 'columns' ? 'justify-between' : ''} ${className ?? ''}`}>
       {columns.map((col, ci) => (
         <div key={ci} className={`${wrapChars ? 'w-full min-w-0' : numColumns === 1 || fitMode ? 'w-max' : 'flex-1'} flex flex-col`}>
           {col.lines.map((line, li) => {
