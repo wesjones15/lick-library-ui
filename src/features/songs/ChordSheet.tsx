@@ -9,6 +9,7 @@ import ChordDiagram from '../chords/ChordDiagram';
 import SongLickCard from './SongLickCard';
 import { shiftTab } from './tabTranspose';
 import { getStringCount } from '../../core/music';
+import { useClickOutside } from '../../core/useClickOutside';
 
 // Cache fetched voicings so re-hovering the same chord doesn't re-fetch
 const voicingCache = new Map<string, ChordVoicing[]>();
@@ -36,7 +37,14 @@ function ChordToken({ name, instrument }: ChordTokenProps) {
   const [anchorRect, setAnchorRect] = useState<{ top: number; bottom: number; left: number; width: number } | null>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
   const popoverRef = useRef<HTMLSpanElement>(null);
+  // Whether the popover should be showing once voicings arrive; a hover that ends or a second tap
+  // during the fetch cancels it, so a slow load can't pop it open late
+  const wantOpenRef = useRef(false);
+  const pointerTypeRef = useRef('mouse');
   const parsed = parseChordName(name);
+
+  const close = () => { wantOpenRef.current = false; setOpen(false); };
+  useClickOutside(spanRef, open, close);
 
   useLayoutEffect(() => {
     if (!open || !popoverRef.current) {
@@ -51,8 +59,9 @@ function ChordToken({ name, instrument }: ChordTokenProps) {
     setPopoverOffset(offset);
   }, [open]);
 
-  async function handleMouseEnter() {
+  async function openPopover() {
     if (!parsed) return;
+    wantOpenRef.current = true;
     const { root, quality } = parsed;
     const key = `${root}:${quality}:${instrument ?? 'GUITAR'}`;
 
@@ -60,6 +69,7 @@ function ChordToken({ name, instrument }: ChordTokenProps) {
       const result = await getChordVoicings(root, quality, instrument ?? 'GUITAR');
       voicingCache.set(key, result);
     }
+    if (!wantOpenRef.current) return;
     const cached = voicingCache.get(key)!;
     setVoicings(cached);
     setVoicingIdx(0);
@@ -73,8 +83,11 @@ function ChordToken({ name, instrument }: ChordTokenProps) {
     setOpen(true);
   }
 
-  function handleMouseLeave() {
-    setOpen(false);
+  // Pen and finger tap to toggle; a mouse keeps hover
+  function handleTap() {
+    if (pointerTypeRef.current === 'mouse') return;
+    if (open || wantOpenRef.current) close();
+    else openPopover();
   }
 
   const canShowPopover = parsed !== null;
@@ -83,10 +96,21 @@ function ChordToken({ name, instrument }: ChordTokenProps) {
     <span
       ref={spanRef}
       style={{ display: 'inline-block', position: 'relative', fontWeight: 'bold', color: '#4f46e5' }}
-      onMouseEnter={canShowPopover ? handleMouseEnter : undefined}
-      onMouseLeave={canShowPopover ? handleMouseLeave : undefined}
+      onPointerEnter={canShowPopover ? e => { if (e.pointerType === 'mouse') openPopover(); } : undefined}
+      onPointerLeave={canShowPopover ? e => { if (e.pointerType === 'mouse') close(); } : undefined}
     >
-      {name}
+      {/* Invisible padding widens the tap target past the letters without moving any text */}
+      <span
+        style={{
+          display: 'inline-block', position: 'relative',
+          padding: '0.5em 0.25em', margin: '-0.5em -0.25em',
+          cursor: canShowPopover ? 'pointer' : undefined, touchAction: 'manipulation',
+        }}
+        onPointerDown={e => { pointerTypeRef.current = e.pointerType; }}
+        onClick={canShowPopover ? handleTap : undefined}
+      >
+        {name}
+      </span>
       {open && anchorRect && (
         <span
           ref={popoverRef}
