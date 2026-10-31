@@ -424,7 +424,7 @@ export default function ChordSheet({ chordLines, numColumns: parsedColumns, clas
   }, [lines]);
 
   return (
-    <div ref={rootRef} className={`flex gap-6 font-mono ${flowHeight ? 'overflow-x-auto' : fitMode === 'columns' ? 'justify-between' : ''} ${className ?? ''}`}>
+    <div ref={rootRef} className={`flex gap-6 font-mono ${flowHeight ? 'overflow-x-auto' : fitMode === 'columns' ? 'justify-evenly' : ''} ${className ?? ''}`}>
       {columns.map((col, ci) => (
         <div key={ci} className={`${wrapChars ? 'w-full min-w-0' : numColumns === 1 || fitMode ? 'w-max' : 'flex-1'} flex flex-col`}>
           {col.lines.map((line, li) => {
