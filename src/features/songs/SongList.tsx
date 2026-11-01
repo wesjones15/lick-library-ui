@@ -13,7 +13,7 @@ export default function SongList({ songs, managing = false, onReparse, onAddToPl
     return <p className="text-gray-600 text-sm">No songs yet.</p>;
   }
   return (
-    <div className="grid grid-cols-1 portrait:grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-1 portrait:grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 min-[73.75rem]:grid-cols-6 gap-3">
       {songs.map(song => (
         <SongCard key={song.id} song={song} managing={managing} onReparse={onReparse} onAddToPlaylist={onAddToPlaylist ? () => onAddToPlaylist(song) : undefined} />
       ))}
