@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllPlaylists, addPlaylistEntry, removePlaylistEntry, updatePlaylistEntry, getPlaylistsContainingSong } from '../../core/api/client';
+import { getAllPlaylists, addPlaylistEntry, removePlaylistEntry, updatePlaylistEntry, getPlaylistsContainingSong, createPlaylist, setPlaylistVisibility } from '../../core/api/client';
 import type { PlaylistSummary } from '../../core/api/client';
-import { SELECT } from '../../core/ui';
+import { SELECT, BTN_PRIMARY, BTN_SECONDARY } from '../../core/ui';
+import { useVisualViewport } from '../../core/useVisualViewport';
 
 interface Props {
   songId: string;
@@ -22,6 +23,12 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
   const [recentlyAdded, setRecentlyAdded] = useState<Set<string>>(new Set());
   const [updatedPlaylists, setUpdatedPlaylists] = useState<Set<string>>(new Set());
   const [addedEntryIds, setAddedEntryIds] = useState<Map<string, string>>(new Map());
+  const [creatingNew, setCreatingNew] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [justCreated, setJustCreated] = useState<string | null>(null);
+  const viewport = useVisualViewport();
 
   useEffect(() => {
     getAllPlaylists().then(setPlaylists).catch(() => {});
@@ -75,15 +82,45 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
     }
   }
 
+  // New playlists start private; the song is then one tap away on the new row
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    const name = newName.trim();
+    if (!name || saving) return;
+    setSaving(true);
+    setCreateError(null);
+    try {
+      const created = await createPlaylist(name);
+      let isPublic = created.isPublic;
+      try {
+        await setPlaylistVisibility(created.id, false);
+        isPublic = false;
+      } catch {
+        // keep the playlist; it just stays at the server's default visibility
+      }
+      setPlaylists(p => [{ ...created, isPublic }, ...p.filter(pl => pl.id !== created.id)]);
+      setFilter('');
+      setNewName('');
+      setCreatingNew(false);
+      setJustCreated(created.id);
+    } catch {
+      setCreateError("Couldn't create the playlist. Try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   const visible = playlists.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
 
   return (
+    // Sized to the visible area, so the on-screen keyboard never covers the modal or its text fields
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+      className="fixed inset-x-0 z-50 flex items-center justify-center bg-black/30"
+      style={{ top: viewport.top, height: viewport.height }}
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-xl p-5 w-full max-w-sm mx-4"
+        className="bg-white rounded-xl shadow-xl p-5 w-full max-w-sm mx-4 max-h-[calc(100%-1rem)] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-3">
@@ -99,6 +136,38 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
           className={`w-full ${SELECT} mb-3`}
         />
 
+        {creatingNew ? (
+          <form onSubmit={handleCreate} className="flex flex-col gap-2 mb-3 p-3 rounded-lg border-2 border-gray-400">
+            <input
+              type="text"
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              onFocus={e => { const el = e.currentTarget; setTimeout(() => el.scrollIntoView({ block: 'center' }), 300); }}
+              placeholder="New playlist name"
+              autoFocus
+              enterKeyHint="done"
+              className={`w-full ${SELECT}`}
+            />
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-600 flex-1">Private — only you can see it</span>
+              <button type="button" onClick={() => { setCreatingNew(false); setNewName(''); setCreateError(null); }} className={BTN_SECONDARY}>
+                Cancel
+              </button>
+              <button type="submit" disabled={!newName.trim() || saving} className={`${BTN_PRIMARY} disabled:opacity-60`}>
+                {saving ? 'Creating…' : 'Create'}
+              </button>
+            </div>
+            {createError && <p className="text-xs text-danger-6">{createError}</p>}
+          </form>
+        ) : (
+          <button
+            onClick={() => { setCreatingNew(true); setNewName(filter.trim()); }}
+            className="w-full mb-3 px-3 py-2 text-sm text-left rounded-lg border-2 border-dashed border-gray-400 text-gray-700 hover:text-brand-6 hover:border-brand-3"
+          >
+            + New playlist{filter.trim() ? ` "${filter.trim()}"` : ''}
+          </button>
+        )}
+
         {visible.length === 0 ? (
           <p className="text-xs text-gray-600 text-center py-4">No playlists found</p>
         ) : (
@@ -108,13 +177,14 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
               const isAdded = added.has(pl.id);
               const showUpdate = !isRecent && overrideChanged && pl.id === currentPlaylistId && isAdded && !updatedPlaylists.has(pl.id);
               return (
-                <div key={pl.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
+                <div key={pl.id} className={`flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 ${pl.id === justCreated && !isAdded ? 'bg-brand-1' : ''}`}>
                   <button
                     className="text-sm text-gray-900 hover:text-brand-6 flex-1 text-left"
                     onClick={() => { navigate(`/playlist/${pl.id}`); onClose(); }}
                   >
                     {pl.name}
                     <span className="text-xs text-gray-600 ml-2">{pl.songCount} songs</span>
+                    {pl.id === justCreated && !isAdded && <span className="text-xs text-brand-6 ml-2">new — tap + to add</span>}
                   </button>
                   <button
                     onClick={() => {
