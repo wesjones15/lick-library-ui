@@ -26,8 +26,9 @@ export default function SongCard({ song, managing = false, onReparse, onAddToPla
     }
   }
 
-  // Same size for every title; long ones wrap between words onto more lines
-  const titleClass = 'text-sm font-semibold text-gray-900 break-words leading-snug';
+  // Same size for every title; long ones wrap between words onto more lines.
+  // On wide screens title, artist, key and tempo all share one larger size.
+  const titleClass = 'text-sm lg:text-base font-semibold text-gray-900 break-words leading-snug';
 
   return (
     <div
@@ -36,7 +37,7 @@ export default function SongCard({ song, managing = false, onReparse, onAddToPla
     >
       <div className="flex-1">
         <div className={titleClass}>{song.title}</div>
-        {song.artist && <div className="text-xs text-gray-600 mt-0.5">{song.artist}</div>}
+        {song.artist && <div className="text-xs lg:text-base text-gray-600 mt-0.5">{song.artist}</div>}
       </div>
 
       {managing ? (
@@ -76,7 +77,7 @@ export default function SongCard({ song, managing = false, onReparse, onAddToPla
         </div>
       ) : (
         <div className="flex items-center mt-auto pt-1 compact:mt-0 compact:pt-0 compact:flex-col compact:items-end compact:gap-0.5">
-          <div className="flex items-center gap-2 text-xs text-gray-600 font-mono compact:flex-col compact:items-end compact:gap-0">
+          <div className="flex items-center gap-2 text-xs lg:text-base text-gray-600 font-mono compact:flex-col compact:items-end compact:gap-0">
             {song.originalKey && <span>{formatKeyWithMode(formatNoteEnum(song.originalKey), song.mode ?? '')}</span>}
             {song.tempo != null && <span>{song.tempo} BPM</span>}
           </div>

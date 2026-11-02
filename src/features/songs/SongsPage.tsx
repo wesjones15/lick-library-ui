@@ -81,13 +81,15 @@ export default function SongsPage() {
     function measure() {
       if (!window.matchMedia(FILL_SCREEN_QUERY).matches) { setPageSize(DEFAULT_PAGE_SIZE); return; }
       const grid = gridWrapRef.current?.querySelector<HTMLElement>('.grid');
-      const card = grid?.firstElementChild as HTMLElement | null;
-      if (!grid || !card) return;
+      const cards = grid ? [...grid.children] as HTMLElement[] : [];
+      if (!grid || cards.length === 0) return;
+      // Rows grow to their tallest card (long titles wrap), so size rows by the tallest one
+      const cardHeight = Math.max(...cards.map(c => c.offsetHeight));
       const style = getComputedStyle(grid);
       const cols = style.gridTemplateColumns.split(' ').filter(Boolean).length;
       const gap = parseFloat(style.rowGap) || 0;
       const avail = window.innerHeight - (grid.getBoundingClientRect().top + window.scrollY) - PAGER_RESERVE_PX;
-      const rows = Math.max(2, Math.floor((avail + gap) / (card.offsetHeight + gap)));
+      const rows = Math.max(2, Math.floor((avail + gap) / (cardHeight + gap)));
       setPageSize(prev => (prev === cols * rows ? prev : cols * rows));
     }
     measure();
