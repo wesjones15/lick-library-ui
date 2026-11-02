@@ -26,12 +26,8 @@ export default function SongCard({ song, managing = false, onReparse, onAddToPla
     }
   }
 
-  const titleClass =
-    song.title.length > 40
-      ? 'text-[10px] font-semibold text-gray-900 break-words leading-snug line-clamp-2'
-      : song.title.length > 22
-      ? 'text-xs font-semibold text-gray-900 break-words leading-snug line-clamp-2'
-      : 'text-sm font-semibold text-gray-900 break-words leading-snug line-clamp-2';
+  // Same size for every title; long ones wrap between words onto more lines
+  const titleClass = 'text-sm font-semibold text-gray-900 break-words leading-snug';
 
   return (
     <div
