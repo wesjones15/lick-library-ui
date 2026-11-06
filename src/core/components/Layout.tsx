@@ -7,6 +7,7 @@ import { useSoundContext } from '../sound/SoundContext';
 import { useAuth } from '../auth/AuthContext';
 import AccountDropdown from './AccountDropdown';
 import MiniBar from './MiniBar';
+import { useSongsListContext } from '../context/SongsListContext';
 import { useClickOutside } from '../useClickOutside';
 
 const NAV_LINKS: { label: ReactNode; to: string }[] = [
@@ -34,6 +35,9 @@ export default function Layout() {
   const { info, collapsed, setCollapsed, miniActions } = useSongNavContext();
   const { soundEnabled, setSoundEnabled } = useSoundContext();
   const { currentUser, logout } = useAuth();
+  const { resetList } = useSongsListContext();
+  // Clicking Songs while already on the list clears its sort/filter/search/page
+  const onNavClick = (to: string) => { if (to === '/songs' && pathname === '/songs') resetList(); };
   const navLinks = currentUser?.role === 'ADMIN' ? [...NAV_LINKS, DEBUG_LINK] : NAV_LINKS;
   const BACKEND = (import.meta.env.VITE_API_URL ?? `http://${window.location.hostname}:8080/api`).replace(/\/api$/, '');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -69,7 +73,7 @@ export default function Layout() {
                 <Link
                   key={to}
                   to={to}
-                  onClick={() => setMenuOpen(false)}
+                  onClick={() => { onNavClick(to); setMenuOpen(false); }}
                   className={`px-4 py-2 text-sm font-medium transition-colors ${
                     pathname === to
                       ? 'bg-brand-1 text-brand-6'
@@ -90,6 +94,7 @@ export default function Layout() {
               <Link
                 key={to}
                 to={to}
+                onClick={() => onNavClick(to)}
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   active
                     ? 'bg-brand-1 text-brand-6'

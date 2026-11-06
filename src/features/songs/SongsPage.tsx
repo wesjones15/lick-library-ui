@@ -98,7 +98,8 @@ export default function SongsPage() {
   }, [loading, songs.length]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages, setPage]);
+  // Wait for songs before clamping: with none loaded yet totalPages is 1, which wiped the remembered page
+  useEffect(() => { if (!loading && page > totalPages) setPage(totalPages); }, [loading, page, totalPages, setPage]);
   const paginated = showAll ? filtered : filtered.slice((page - 1) * pageSize, page * pageSize);
 
   return (

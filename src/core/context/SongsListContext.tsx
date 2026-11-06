@@ -16,6 +16,7 @@ interface SongsListContextValue {
   setPage: (v: number) => void;
   showAll: boolean;
   setShowAll: (v: boolean) => void;
+  resetList: () => void;
 }
 
 const SongsListContext = createContext<SongsListContextValue | null>(null);
@@ -28,8 +29,12 @@ export function SongsListProvider({ children }: { children: ReactNode }) {
   const [page, setPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
 
+  const resetList = () => {
+    setSortBy('title'); setSortDir('asc'); setFilterArtist(''); setSearch(''); setPage(1); setShowAll(false);
+  };
+
   return (
-    <SongsListContext.Provider value={{ sortBy, setSortBy, sortDir, setSortDir, filterArtist, setFilterArtist, search, setSearch, page, setPage, showAll, setShowAll }}>
+    <SongsListContext.Provider value={{ sortBy, setSortBy, sortDir, setSortDir, filterArtist, setFilterArtist, search, setSearch, page, setPage, showAll, setShowAll, resetList }}>
       {children}
     </SongsListContext.Provider>
   );
