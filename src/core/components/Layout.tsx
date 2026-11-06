@@ -26,12 +26,15 @@ const NAV_LINKS: { label: ReactNode; to: string }[] = [
   { label: 'Noodle', to: '/noodle' },
 ];
 
+const DEBUG_LINK = { label: 'Debug', to: '/debug' };
+
 export default function Layout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { info, collapsed, setCollapsed, miniActions } = useSongNavContext();
   const { soundEnabled, setSoundEnabled } = useSoundContext();
   const { currentUser, logout } = useAuth();
+  const navLinks = currentUser?.role === 'ADMIN' ? [...NAV_LINKS, DEBUG_LINK] : NAV_LINKS;
   const BACKEND = (import.meta.env.VITE_API_URL ?? `http://${window.location.hostname}:8080/api`).replace(/\/api$/, '');
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -62,7 +65,7 @@ export default function Layout() {
           </button>
           {menuOpen && (
             <div className="absolute top-full left-0 mt-1 w-44 bg-white border-2 border-gray-400 rounded-lg shadow-lg z-50 flex flex-col py-1">
-              {NAV_LINKS.map(({ label, to }) => (
+              {navLinks.map(({ label, to }) => (
                 <Link
                   key={to}
                   to={to}
@@ -81,7 +84,7 @@ export default function Layout() {
         </div>
 
         <div className="hidden md:flex items-center gap-1">
-          {NAV_LINKS.map(({ label, to }) => {
+          {navLinks.map(({ label, to }) => {
             const active = pathname === to;
             return (
               <Link

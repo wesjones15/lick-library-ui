@@ -29,6 +29,7 @@ import LickLibraryPage from './features/licks/LickLibraryPage'
 import ChordsTheoryPage from './features/chords/ChordsTheoryPage'
 import NoodlePage from './features/noodle/NoodlePage'
 import UserPage from './features/user/UserPage'
+import DebugPage from './features/debug/DebugPage'
 
 function ProtectedRoute({ children, adminOnly = false, allowPending = false }: { children: ReactNode; adminOnly?: boolean; allowPending?: boolean }) {
   const { currentUser, statusResolved } = useAuth();
@@ -69,6 +70,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/licks/library" element={<ProtectedRoute><LickLibraryPage /></ProtectedRoute>} />
                 <Route path="/chords/theory" element={<ProtectedRoute><ChordsTheoryPage /></ProtectedRoute>} />
                 <Route path="/noodle" element={<ProtectedRoute><NoodlePage /></ProtectedRoute>} />
+                <Route path="/debug" element={<ProtectedRoute adminOnly><DebugPage /></ProtectedRoute>} />
                 <Route path="/user" element={<ProtectedRoute allowPending><UserPage /></ProtectedRoute>} />
               </Route>
             </Routes>
