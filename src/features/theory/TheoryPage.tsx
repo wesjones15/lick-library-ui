@@ -3,6 +3,10 @@ import GuitarNeck, { type NeckDot, DEGREE_COLORS } from '../../core/components/G
 import { getPentatonicDegree, getPentatonicNoteSet } from './cagedUtils';
 import PentatonicWidget from './PentatonicWidget';
 import ChordsWidget from './ChordsWidget';
+import ScalesWidget from './ScalesWidget';
+import { CAGED_COLORS } from './cagedUtils';
+import { placeShape, shapesUpTheNeck, upAndDown, SCALES_FRET_COUNT, type ShapeName } from './scaleShapes';
+import { usePitchTracker, type MatchMode } from '../../core/sound/usePitchTracker';
 import { getScalePositions } from '../../core/api/client';
 import { NOTE_KEYS, CHROMATIC_NOTES, formatNoteEnum, getStringCount, getStringLabels, GUITAR_OPEN_MIDI, MODE_SEMITONES, ROOT_CHROMATIC, MODE_DATA, MODE_INTERVALS } from '../../core/music';
 import { useSoundContext } from '../../core/sound/SoundContext';
@@ -37,7 +41,98 @@ export default function TheoryPage() {
   const [pentWidgetMode, setPentWidgetMode] = useState(mode);
   const [pentModeSynced, setPentModeSynced] = useState(true);
   const noteHoldTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { playMidi } = useSoundContext();
+  const { playMidi, setSoundEnabled, preload } = useSoundContext();
+
+  // ── Scales (CAGED shapes + drill) ──────────────────────────────────────────
+  const [showScales, setShowScales] = useState(false);
+  const [scaleShape, setScaleShape] = useState<ShapeName>('C');
+  const [scalePent, setScalePent] = useState(false);
+  const [drill, setDrill] = useState(false);
+  const [matchMode, setMatchMode] = useState<MatchMode>('pitch');
+  const [refNote, setRefNote] = useState(false);
+  // Drill position, tied to what it was counted against so a key/mode/shape change restarts it
+  const [drillPos, setDrillPos] = useState({ sig: '', idx: 0 });
+
+  const scalesActive = showScales && !!root && instrument === 'GUITAR';
+  const fretCount = showScales ? SCALES_FRET_COUNT : FRET_COUNT;
+
+  // The scale API stops at fret 12; frets 13–15 repeat 1–3 an octave up
+  const neckScaleDots = useMemo(() => showScales
+    ? scaleDots.map(row => [...row, ...row.slice(1, 4).map(d => ({ ...d, active: false }))])
+    : scaleDots,
+  [showScales, scaleDots]);
+
+  const placed = useMemo(() => scalesActive ? placeShape(scaleShape, root, mode) : null, [scalesActive, scaleShape, root, mode]);
+
+  // Pentatonic = the Theory page's degrees 1 2 3 5 6 of the selected mode
+  const shapeNotes = useMemo(() => (placed?.notes ?? []).filter(n =>
+    !scalePent || [1, 2, 3, 5, 6].includes(neckScaleDots[n.string]?.[n.fret]?.degree ?? 0)
+  ), [placed, scalePent, neckScaleDots]);
+  const shapeKeys = useMemo(() => new Set(shapeNotes.map(n => `${n.string},${n.fret}`)), [shapeNotes]);
+
+  const sequence = useMemo(() => drill ? upAndDown(shapeNotes) : [], [drill, shapeNotes]);
+  const drillSig = `${root}|${mode}|${scaleShape}|${scalePent}|${drill}`;
+  const drillIdx = drillPos.sig === drillSig ? drillPos.idx : 0;
+  const target = scalesActive && drill ? sequence[drillIdx] ?? null : null;
+  const targetMidi = target?.midi ?? null;
+
+  const rootMidi = useMemo(() => {
+    const roots = shapeNotes.filter(n => neckScaleDots[n.string]?.[n.fret]?.degree === 1);
+    return roots[0]?.midi ?? null;
+  }, [shapeNotes, neckScaleDots]);
+
+  function selectShape(s: ShapeName) {
+    setScaleShape(s);
+    setDrillPos({ sig: '', idx: 0 });
+  }
+
+  function stepShape(dir: 1 | -1) {
+    if (!root) return;
+    const order = shapesUpTheNeck(root, mode);
+    const i = order.indexOf(scaleShape);
+    selectShape(order[(i + dir + order.length) % order.length]);
+  }
+
+  // Up and down the shape, then on to the next shape
+  function advanceNote() {
+    if (drillIdx + 1 >= sequence.length) stepShape(1);
+    else setDrillPos({ sig: drillSig, idx: drillIdx + 1 });
+  }
+
+  const { heard, error: micError, suspended: micSuspended, suppress, resume: resumeMic } =
+    usePitchTracker(scalesActive && drill, { target: targetMidi, mode: matchMode, onHit: advanceNote });
+
+  // Reference note: each drill target, or the shape's root when stepping through shapes.
+  // The mic ignores input while it sounds so the drill can't hear itself.
+  useEffect(() => {
+    if (!scalesActive || !drill || !refNote || targetMidi === null) return;
+    suppress(800);
+    playMidi([targetMidi]);
+  }, [scalesActive, drill, refNote, targetMidi, drillIdx, playMidi, suppress]);
+
+  useEffect(() => {
+    if (!scalesActive || drill || !refNote || rootMidi === null) return;
+    playMidi([rootMidi]);
+  }, [scalesActive, drill, refNote, rootMidi, scaleShape, playMidi]);
+
+  function closeScales() {
+    setShowScales(false);
+    setDrill(false);
+  }
+
+  function toggleScales() {
+    if (showScales) { closeScales(); return; }
+    // Scales, Chords and Pentatonic each repaint the neck, so only one runs at a time
+    setShowScales(true);
+    setShowChordsWidget(false);
+    setChordSelectedPositions(new Set());
+    setShowPentatonicWidget(false);
+    setActivePentKeys([]);
+    setHighlightedDegrees(new Set());
+    if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
+    setCurrentNote(null);
+    if (root) selectShape(shapesUpTheNeck(root, mode)[0]);
+  }
 
   useEffect(() => {
     const sc = getStringCount(instrument);
@@ -122,6 +217,13 @@ export default function TheoryPage() {
   }, [highlightedDegrees, root, mode, pentWidgetMode]);
 
   const dots = useMemo<NeckDot[][]>(() => {
+    if (showScales) {
+      return neckScaleDots.map((row, s) => row.map((dot, f) => {
+        if (dot.degree === null) return dot;
+        const isTarget = target?.string === s && target?.fret === f;
+        return { ...dot, active: isTarget, shapeMember: shapeKeys.has(`${s},${f}`) };
+      }));
+    }
     return scaleDots.map((row, s) =>
       row.map((dot, f) => {
         let pentatonicRings: string[] | undefined;
@@ -176,7 +278,7 @@ export default function TheoryPage() {
         };
       })
     );
-  }, [scaleDots, currentNote, allCandidates, highlightedDegrees, activePentKeys, pentWidgetMode, showChordsWidget, chordSelectedPositions]);
+  }, [scaleDots, currentNote, allCandidates, highlightedDegrees, activePentKeys, pentWidgetMode, showChordsWidget, chordSelectedPositions, showScales, neckScaleDots, target, shapeKeys]);
 
   function selectNote(s: number, f: number, degree: number) {
     if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
@@ -185,6 +287,13 @@ export default function TheoryPage() {
   }
 
   function handleDotClick(stringIndex: number, fret: number) {
+    if (showScales) {
+      // Tap anywhere on the neck: next shape, or (drilling) skip the current note
+      if (!scalesActive) return;
+      if (drill) advanceNote();
+      else stepShape(1);
+      return;
+    }
     if (showChordsWidget) {
       const key = `${stringIndex},${fret}`;
       setChordSelectedPositions(prev => {
@@ -235,7 +344,7 @@ export default function TheoryPage() {
         </select>
         <InstrumentSelector
           instrument={instrument as InstrumentName}
-          onInstrumentChange={name => { setInstrument(name); setCurrentNote(null); setHighlightedDegrees(new Set()); }}
+          onInstrumentChange={name => { setInstrument(name); setCurrentNote(null); setHighlightedDegrees(new Set()); if (name !== 'GUITAR') closeScales(); }}
           excludeCustom
           compact
         />
@@ -251,6 +360,7 @@ export default function TheoryPage() {
             <div
               key={degree}
               onClick={() => {
+                if (showScales) return;
                 setCurrentNote(null);
                 if (noteHoldTimer.current) clearTimeout(noteHoldTimer.current);
                 setHighlightedDegrees(prev => {
@@ -291,10 +401,11 @@ export default function TheoryPage() {
       </div>
 
       {/* The neck is ~3.1x wider than tall: on short screens, cap its width so its height fits */}
-      <div className="short:mx-auto short:max-w-[calc((100dvh-7.5rem)*3.1)]">
+      <div className={`short:mx-auto ${showScales ? 'short:max-w-[calc((100dvh-7.5rem)*3.8)]' : 'short:max-w-[calc((100dvh-7.5rem)*3.1)]'}`}>
         <GuitarNeck
           dots={dots}
-          fretCount={FRET_COUNT}
+          fretCount={fretCount}
+          cagedZones={placed ? [{ shape: placed.shape, fretStart: placed.lo, fretEnd: placed.hi, color: CAGED_COLORS[placed.shape] }] : undefined}
           stringLabels={getStringLabels(instrument)}
           onDotClick={handleDotClick}
         />
@@ -311,17 +422,40 @@ export default function TheoryPage() {
           )}
           onModeChange={m => { setPentWidgetMode(m); setPentModeSynced(false); }}
           show={showPentatonicWidget}
-          onToggle={() => setShowPentatonicWidget(v => !v)}
+          onToggle={() => { if (!showPentatonicWidget) closeScales(); setShowPentatonicWidget(v => !v); }}
         />
         <ChordsWidget
           show={showChordsWidget}
           onToggle={() => {
+            if (!showChordsWidget) closeScales();
             setShowChordsWidget(v => !v);
             setChordSelectedPositions(new Set());
           }}
           selectedPositions={chordSelectedPositions}
           root={root}
           onClear={() => setChordSelectedPositions(new Set())}
+        />
+        <ScalesWidget
+          show={showScales}
+          onToggle={toggleScales}
+          disabled={instrument !== 'GUITAR'}
+          shape={scaleShape}
+          onShape={selectShape}
+          onPrev={() => stepShape(-1)}
+          onNext={() => stepShape(1)}
+          pentatonic={scalePent}
+          onPentatonic={setScalePent}
+          drill={drill}
+          onDrill={v => { setDrill(v); setDrillPos({ sig: '', idx: 0 }); if (v && refNote) preload(); }}
+          matchMode={matchMode}
+          onMatchMode={setMatchMode}
+          refNote={refNote}
+          onRefNote={v => { setRefNote(v); if (v) { setSoundEnabled(true); preload(); } }}
+          progress={target ? { idx: drillIdx, total: sequence.length } : null}
+          heard={heard}
+          micError={micError}
+          micSuspended={micSuspended}
+          onResumeMic={resumeMic}
         />
       </div>
     </div>

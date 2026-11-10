@@ -1,4 +1,4 @@
-import type { CagedZone } from './cagedUtils';
+import type { CagedZone } from '../../features/theory/cagedUtils';
 import NeckNoteDot from './NeckNoteDot';
 
 export interface NeckDot {
@@ -11,6 +11,7 @@ export interface NeckDot {
   thirdCandidate?: boolean;      // 3rd closest candidate from currentNote; renders at 1/3 brightness
   nextChord?: boolean;           // note is in the upcoming chord; subtle static hint, no animation
   highlighted?: boolean;         // toolbar-selected or pentatonic-active; degree pulse, no pale yellow ring
+  shapeMember?: boolean;         // in the selected scale shape; bright and still (no pulse)
   note?: string;                 // display label, e.g. "C#", "Bb"
   pentatonicRings?: string[];    // ordered ring colors; index 0 = r=11.5, 1 = r=14.5, 2 = r=17.5
   pentatonicOutOfScale?: boolean; // in active pentatonic but not in diatonic scale → grey pulsing circle
@@ -40,7 +41,7 @@ export const DEGREE_COLORS: Record<number, string> = {
 };
 
 const STRING_LABELS_DEFAULT = ['e', 'B', 'G', 'D', 'A', 'E']; // display top → bottom (guitar)
-const INLAY_SINGLE = [3, 5, 7, 9];
+const INLAY_SINGLE = [3, 5, 7, 9, 15];
 const INLAY_DOUBLE = 12;
 
 const LABEL_W = 22;
@@ -142,8 +143,9 @@ export default function GuitarNeck({ dots, fretCount = 12, width = '100%', onDot
 
   function renderCagedZones() {
     return cagedZones?.map(zone => {
-      const x = fretLineStart + (zone.fretStart - 1) * FRET_W;
-      const w = (zone.fretEnd - zone.fretStart + 1) * FRET_W;
+      // A zone that includes open strings starts at the open-string column
+      const x = zone.fretStart <= 0 ? LABEL_W + 2 : fretLineStart + (zone.fretStart - 1) * FRET_W;
+      const w = fretLineStart + zone.fretEnd * FRET_W - x;
       const y = strLineY0 - 6;
       const h = TOTAL_STR_H + 12;
       return (

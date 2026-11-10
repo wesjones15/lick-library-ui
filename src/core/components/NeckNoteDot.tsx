@@ -84,8 +84,9 @@ export default function NeckNoteDot({ dot, cx, cy }: NeckNoteDotProps) {
   const isSecondCandidate = !!dot.secondCandidate && !dot.active && !isCandidate;
   const isThirdCandidate = !!dot.thirdCandidate && !dot.active && !isCandidate && !isSecondCandidate;
   const isHighlighted = !!dot.highlighted && !dot.active;
+  const isShape = !!dot.shapeMember && !dot.active && !isHighlighted;
   const isNextChord = !!dot.nextChord && !dot.active && !isCandidate && !isHighlighted;
-  const bright = dot.active || isCandidate || isHighlighted;
+  const bright = dot.active || isCandidate || isHighlighted || isShape;
   const textFill = (bright || isSecondCandidate || isThirdCandidate) ? '#111827' : '#9ca3af';
   const fontSize = dot.active
     ? (label.length > 1 ? 9 : 11)
@@ -107,8 +108,8 @@ export default function NeckNoteDot({ dot, cx, cy }: NeckNoteDotProps) {
       <circle
         cx={cx} cy={cy} r={R_NORMAL}
         fill={color} opacity={bright || isSecondCandidate || isThirdCandidate ? 1 : 0.4}
-        stroke={dot.active ? color : candidateStroke}
-        strokeWidth={dot.active || isCandidate || isSecondCandidate || isThirdCandidate || isHighlighted ? 1 : 0}
+        stroke={dot.active ? color : isShape ? '#111827' : candidateStroke}
+        strokeWidth={isShape ? 1.5 : dot.active || isCandidate || isSecondCandidate || isThirdCandidate || isHighlighted ? 1 : 0}
         style={dot.active ? { stroke: color } : ((isCandidate || isSecondCandidate || isThirdCandidate) ? { stroke: candidateStroke } : (isHighlighted ? { stroke: color } : undefined))}
         className={dot.active || isHighlighted ? 'active-dot' : (isCandidate || isSecondCandidate || isThirdCandidate) ? 'candidate-dot' : undefined}
       />

@@ -5,7 +5,7 @@ export interface CagedZone {
   color: string;
 }
 
-const CAGED_COLORS: Record<string, string> = {
+export const CAGED_COLORS: Record<string, string> = {
   E: 'rgba(34,197,94,0.18)',
   D: 'rgba(59,130,246,0.18)',
   C: 'rgba(239,68,68,0.18)',
