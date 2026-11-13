@@ -13,8 +13,11 @@ import { PitchDetector } from 'pitchy';
 //   errors are the classic failure, and within a scale shape each pitch appears once and
 //   the next target is a step away, so the allowance can't be mistaken for a neighbour.
 // - A hit needs the pitch held for HOLD_FRAMES frames in a row.
-// - After a hit, the next one needs a new pluck (a volume jump), a pitch change, or a
-//   moment of silence first, so one ringing note never counts twice.
+// - Notes are tracked by volume with hysteresis: a note starts when the sound rises well
+//   above the room's noise floor, or, while one is ringing, when it has decayed and then
+//   jumps again (a re-pluck). A held sound, however it wobbles, is one note.
+// - After a hit, the next one needs a new note, a settled pitch change, or a moment of
+//   silence first, so one ringing note never counts twice.
 
 export type MatchMode = 'pitch' | 'any';
 
@@ -33,8 +36,12 @@ const MIN_HZ = 75;
 const MAX_HZ = 1400;
 const CENTS_TOLERANCE = 40;
 const HOLD_FRAMES = 3;
-const ONSET_RATIO = 2;      // RMS this many times what it was ONSET_LOOKBACK frames ago
-const ONSET_LOOKBACK = 6;   // ~100 ms at 60 fps
+const NOTE_ON_FLOOR_RATIO = 3;   // a note starts this far above the noise floor…
+const NOTE_OFF_FLOOR_RATIO = 1.8; // …and ends when it falls back under this
+const OFF_FRAMES = 4;             // frames under the off level before a note ends
+const REPLUCK_DECAY = 0.7;        // while ringing, the sound must fall to this share of its peak…
+const REPLUCK_RISE = 1.8;         // …then rise this much from its low point to count as a re-pluck
+const MIN_NOTE_GAP_MS = 150;      // shortest time between two note starts
 const SILENCE_FRAMES = 4;
 const MIN_HIT_GAP_MS = 120;
 const READOUT_MS = 100;
@@ -96,7 +103,14 @@ export function usePitchTracker(enabled: boolean, { target, mode, onHit }: Optio
       const detector = PitchDetector.forFloat32Array(FFT_SIZE);
       detector.minVolumeAbsolute = MIN_RMS;
       const buf = new Float32Array(FFT_SIZE);
-      const rmsHistory: number[] = [];
+
+      // Note tracking by volume
+      let floor = MIN_RMS / 3;   // room noise level: follows quiet quickly, loud slowly
+      let noteOn = false;
+      let offFrames = 0;
+      let peak = 0;              // loudest since the note started
+      let valley = 0;            // quietest since that peak
+      let noteStartAt = -Infinity;
 
       let matchFrames = 0;      // consecutive frames on the target (pitch mode)
       let candMidi = -1;        // consecutive frames on the same semitone
@@ -130,10 +144,26 @@ export function usePitchTracker(enabled: boolean, { target, mode, onHit }: Optio
         for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
         const rms = Math.sqrt(sum / buf.length);
 
-        rmsHistory.push(rms);
-        if (rmsHistory.length > ONSET_LOOKBACK + 1) rmsHistory.shift();
-        const past = rmsHistory.length > ONSET_LOOKBACK ? rmsHistory[0] : Infinity;
-        const onset = rms > MIN_RMS && rms > past * ONSET_RATIO;
+        // New note? `onset` is true on exactly one frame per note.
+        let onset = false;
+        const onLevel = Math.max(MIN_RMS, floor * NOTE_ON_FLOOR_RATIO);
+        const offLevel = Math.max(MIN_RMS * 0.6, floor * NOTE_OFF_FLOOR_RATIO);
+        if (!noteOn) {
+          if (rms > onLevel && now - noteStartAt >= MIN_NOTE_GAP_MS) {
+            noteOn = true; onset = true; noteStartAt = now; peak = valley = rms; offFrames = 0;
+          } else {
+            // Only learn the noise floor between notes
+            floor = rms < floor ? floor + (rms - floor) * 0.3 : floor + (rms - floor) * 0.01;
+          }
+        } else {
+          if (rms > peak) { peak = valley = rms; }
+          else if (rms < valley) valley = rms;
+          if (valley < peak * REPLUCK_DECAY && rms > valley * REPLUCK_RISE && now - noteStartAt >= MIN_NOTE_GAP_MS) {
+            onset = true; noteStartAt = now; peak = valley = rms;
+          }
+          offFrames = rms < offLevel ? offFrames + 1 : 0;
+          if (offFrames >= OFF_FRAMES) noteOn = false;
+        }
 
         const [freq, clarity] = detector.findPitch(buf, ctx.sampleRate);
         const voiced = clarity >= MIN_CLARITY && freq >= MIN_HZ && freq <= MAX_HZ && rms >= MIN_RMS;
@@ -165,7 +195,7 @@ export function usePitchTracker(enabled: boolean, { target, mode, onHit }: Optio
         }
 
         if (m === 'any') {
-          if (armed && (onset || newStablePitch)) hit(midi ?? -1, now);
+          if (onset) hit(midi ?? -1, now);
           return;
         }
 
