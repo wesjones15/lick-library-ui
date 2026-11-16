@@ -21,6 +21,7 @@ interface ScalesWidgetProps {
   onRefNote: (v: boolean) => void;
   progress: { idx: number; total: number } | null;
   heard: Heard | null;
+  micLevel: number;
   micError: string | null;
   micSuspended: boolean;
   onResumeMic: () => void;
@@ -124,7 +125,12 @@ export default function ScalesWidget(p: ScalesWidgetProps) {
             ) : p.micSuspended ? (
               <button onClick={p.onResumeMic} className={`${BTN_XS} border-gray-400 bg-white text-gray-800`}>Tap to start mic</button>
             ) : (
-              <span className="font-mono">Hearing: {p.heard ? formatHeard(p.heard) : '—'}</span>
+              <span className="flex items-center gap-2">
+                <span className="w-16 h-2.5 rounded-sm border border-gray-500 bg-white overflow-hidden" title="Mic level">
+                  <span className="block h-full bg-gray-700" style={{ width: `${Math.round(p.micLevel * 100)}%` }} />
+                </span>
+                <span className="font-mono">Hearing: {p.heard ? formatHeard(p.heard) : '—'}</span>
+              </span>
             )}
           </div>
         ) : (
