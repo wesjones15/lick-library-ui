@@ -99,7 +99,7 @@ export default function TheoryPage() {
     else setDrillPos({ sig: drillSig, idx: drillIdx + 1 });
   }
 
-  const { heard, error: micError, suspended: micSuspended, suppress, resume: resumeMic } =
+  const { heard, level: micLevel, error: micError, suspended: micSuspended, suppress, resume: resumeMic } =
     usePitchTracker(scalesActive && drill, { target: targetMidi, mode: matchMode, onHit: advanceNote });
 
   // Reference note: each drill target, or the shape's root when stepping through shapes.
@@ -453,6 +453,7 @@ export default function TheoryPage() {
           onRefNote={v => { setRefNote(v); if (v) { setSoundEnabled(true); preload(); } }}
           progress={target ? { idx: drillIdx, total: sequence.length } : null}
           heard={heard}
+          micLevel={micLevel}
           micError={micError}
           micSuspended={micSuspended}
           onResumeMic={resumeMic}
