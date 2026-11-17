@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { getAllPlaylists, addPlaylistEntry, removePlaylistEntry, updatePlaylistEntry, getPlaylistsContainingSong, createPlaylist, setPlaylistVisibility } from '../../core/api/client';
 import type { PlaylistSummary } from '../../core/api/client';
 import { SELECT, BTN_PRIMARY, BTN_SECONDARY } from '../../core/ui';
@@ -16,7 +15,6 @@ interface Props {
 }
 
 export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffset, capoOffset, overrideChanged, currentPlaylistId }: Props) {
-  const navigate = useNavigate();
   const [playlists, setPlaylists] = useState<PlaylistSummary[]>([]);
   const [filter, setFilter] = useState('');
   const [added, setAdded] = useState<Set<string>>(new Set());
@@ -171,38 +169,45 @@ export default function AddToPlaylistModal({ songId, songTitle, onClose, keyOffs
         {visible.length === 0 ? (
           <p className="text-xs text-gray-600 text-center py-4">No playlists found</p>
         ) : (
-          <div className="flex flex-col gap-1 max-h-56 overflow-y-auto">
+          <div className="flex flex-col gap-1 max-h-72 overflow-y-auto">
             {visible.map(pl => {
               const isRecent = recentlyAdded.has(pl.id);
               const isAdded = added.has(pl.id);
               const showUpdate = !isRecent && overrideChanged && pl.id === currentPlaylistId && isAdded && !updatedPlaylists.has(pl.id);
+              // The whole row adds/removes the song: a big target, and no surprise navigation
+              const toggle = () => {
+                if (isRecent) return;
+                if (showUpdate) { handleUpdate(pl.id); return; }
+                if (isAdded) handleRemove(pl.id); else handleAdd(pl.id);
+              };
+              const action = isRecent ? 'Done' : showUpdate ? 'Update key/capo in' : isAdded ? 'Remove from' : 'Add to';
               return (
-                <div key={pl.id} className={`flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 ${pl.id === justCreated && !isAdded ? 'bg-brand-1' : ''}`}>
-                  <button
-                    className="text-sm text-gray-900 hover:text-brand-6 flex-1 text-left"
-                    onClick={() => { navigate(`/playlist/${pl.id}`); onClose(); }}
-                  >
+                <button
+                  key={pl.id}
+                  onClick={toggle}
+                  disabled={isRecent}
+                  aria-label={`${action} ${pl.name}`}
+                  className={`w-full min-h-14 flex items-center gap-2 pl-3 pr-1 rounded-lg text-left border-2 border-transparent hover:bg-gray-50 active:bg-gray-100 disabled:cursor-default ${
+                    pl.id === justCreated && !isAdded ? 'bg-brand-1' : ''
+                  }`}
+                >
+                  <span className="flex-1 min-w-0 py-2 text-sm text-gray-900">
                     {pl.name}
                     <span className="text-xs text-gray-600 ml-2">{pl.songCount} songs</span>
-                    {pl.id === justCreated && !isAdded && <span className="text-xs text-brand-6 ml-2">new — tap + to add</span>}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (isRecent) return;
-                      if (showUpdate) { handleUpdate(pl.id); return; }
-                      isAdded ? handleRemove(pl.id) : handleAdd(pl.id);
-                    }}
-                    className={`text-lg leading-none transition-colors ${
-                      isRecent ? 'text-success-5 cursor-default'
-                      : showUpdate ? 'text-brand-5 hover:text-brand-7'
-                      : isAdded ? 'text-danger-5 hover:text-danger-7'
-                      : 'text-info-4 hover:text-info-6'
+                    {pl.id === justCreated && !isAdded && <span className="text-xs text-brand-6 ml-2">new — tap to add</span>}
+                  </span>
+                  <span
+                    aria-hidden
+                    className={`w-14 h-12 shrink-0 flex items-center justify-center text-3xl leading-none transition-colors ${
+                      isRecent ? 'text-success-5'
+                      : showUpdate ? 'text-brand-5'
+                      : isAdded ? 'text-danger-5'
+                      : 'text-info-4'
                     }`}
-                    disabled={isRecent}
                   >
                     {isRecent ? '✓' : showUpdate ? '↑' : isAdded ? '×' : '+'}
-                  </button>
-                </div>
+                  </span>
+                </button>
               );
             })}
           </div>
