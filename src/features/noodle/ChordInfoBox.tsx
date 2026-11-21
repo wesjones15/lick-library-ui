@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import type { ChordVoicing } from '../../core/api/client';
 import { parseChordName } from '../songs/parseChordName';
-import { INSTRUMENT_OPEN_SEMITONES, CHROMATIC_NOTES, MODE_SEMITONES, ROOT_CHROMATIC, INTERVAL_NAMES } from '../../core/music';
+import { INSTRUMENT_OPEN_SEMITONES, CHROMATIC_NOTES, MODE_SEMITONES, ROOT_CHROMATIC, INTERVAL_NAMES, soundingOffset } from '../../core/music';
 import { DEGREE_COLORS } from '../../core/components/GuitarNeck';
 
 
@@ -92,13 +92,15 @@ function computePlainIntervals(
   return (QUALITY_INTERVALS[quality] ?? QUALITY_INTERVALS['']).map(i => INTERVAL_NAMES[i] ?? String(i));
 }
 
-function getSoundChordName(chordName: string, effectiveCapo: number): string | null {
-  if (effectiveCapo === 0) return null;
+// What the chart shape actually sounds: moved up by the capo, and down on a guitar tuned
+// below standard (an E shape with capo 2 on Eb tuning sounds F)
+function getSoundChordName(chordName: string, shift: number): string | null {
+  if (shift % 12 === 0) return null;
   const parsed = parseChordName(chordName);
   if (!parsed) return null;
   const rootIdx = ROOT_CHROMATIC[parsed.root];
   if (rootIdx === undefined) return null;
-  const soundRoot = CHROMATIC_NOTES[(rootIdx + effectiveCapo) % 12];
+  const soundRoot = CHROMATIC_NOTES[(((rootIdx + shift) % 12) + 12) % 12];
   return soundRoot + parsed.quality;
 }
 
@@ -127,8 +129,8 @@ export default function ChordInfoBox({ chordName, voicing, instrument, effective
   );
 
   const soundName = useMemo(
-    () => getSoundChordName(chordName, effectiveCapo),
-    [chordName, effectiveCapo],
+    () => getSoundChordName(chordName, effectiveCapo + soundingOffset(instrument)),
+    [chordName, effectiveCapo, instrument],
   );
 
   const hasScale = tones.length > 0;

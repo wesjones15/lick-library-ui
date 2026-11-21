@@ -3,7 +3,7 @@ import { getScalePositions } from '../../core/api/client';
 import type { ChordVoicing } from '../../core/api/client';
 import type { NeckDot } from '../../core/components/GuitarNeck';
 import { parseChordName } from '../songs/parseChordName';
-import { CHROMATIC_NOTES, ROOT_CHROMATIC, formatNoteEnum, getStringCount, INSTRUMENT_OPEN_SEMITONES } from '../../core/music';
+import { CHROMATIC_NOTES, ROOT_CHROMATIC, formatNoteEnum, getStringCount, INSTRUMENT_OPEN_SEMITONES, soundingOffset } from '../../core/music';
 
 const FRET_COUNT = 12;
 
@@ -55,9 +55,14 @@ function chordToneSemitones(chordName: string, capoOffset: number): Set<number> 
   const rootSemitone = ROOT_CHROMATIC[parsed.root];
   if (rootSemitone === undefined) return null;
   const intervals = QUALITY_INTERVALS[baseQuality] ?? QUALITY_INTERVALS[''];
-  return new Set(intervals.map(i => (rootSemitone + i + capoOffset) % 12));
+  return new Set(intervals.map(i => (((rootSemitone + i + capoOffset) % 12) + 12) % 12));
 }
 
+// `root` and the chord names come in chart terms: the key and chords as written, played with
+// standard-guitar shapes (plus the capo). The neck shows the instrument's real strings, so on
+// a guitar tuned down from standard (Eb tuning) they are moved to the pitch those shapes
+// actually sound: chart E with capo 2 on Eb tuning is F, not F#. Chord shapes need no move:
+// their notes are read off the real strings.
 export function useChordHighlight(
   chordName: string | null,
   root: string,
@@ -69,16 +74,19 @@ export function useChordHighlight(
   nextChordName?: string | null,
 ): NeckDot[][] {
   const stringCount = getStringCount(instrument);
+  const tuningShift = soundingOffset(instrument);
+  const rootIdx = CHROMATIC_NOTES.indexOf(root);
+  const neckRoot = rootIdx === -1 ? root : CHROMATIC_NOTES[(rootIdx + tuningShift + 12) % 12];
   const [scaleDots, setScaleDots] = useState<NeckDot[][]>(() => blankDots(stringCount));
 
   useEffect(() => {
-    console.log('[useChordHighlight] effect fired', { root, mode, instrument, refreshToken });
-    if (!root || !mode) {
+    console.log('[useChordHighlight] effect fired', { root: neckRoot, mode, instrument, refreshToken });
+    if (!neckRoot || !mode) {
       console.log('[useChordHighlight] early return — root or mode empty');
       return;
     }
     let cancelled = false;
-    const enumRoot = root === 'Bb' ? 'B_FLAT' : root.replace('#', '_SHARP').toUpperCase();
+    const enumRoot = neckRoot === 'Bb' ? 'B_FLAT' : neckRoot.replace('#', '_SHARP').toUpperCase();
     console.log('[useChordHighlight] fetching scale', { enumRoot, mode, instrument });
     getScalePositions(enumRoot, mode, instrument).then(res => {
       if (cancelled) {
@@ -113,16 +121,16 @@ export function useChordHighlight(
       setScaleDots(dots);
     }).catch(err => { console.error('[useChordHighlight] fetch FAILED', err); });
     return () => { cancelled = true; };
-  }, [root, mode, instrument, refreshToken]);
+  }, [neckRoot, mode, instrument, refreshToken]);
 
   return useMemo(() => {
     const tones: Set<number> | null = chordName
       ? (voicing
           ? semitonesFromVoicing(voicing, instrument, capoOffset)
-          : chordToneSemitones(chordName, capoOffset))
+          : chordToneSemitones(chordName, capoOffset + tuningShift))
       : null;
     const nextTones: Set<number> | null = nextChordName
-      ? chordToneSemitones(nextChordName, capoOffset)
+      ? chordToneSemitones(nextChordName, capoOffset + tuningShift)
       : null;
 
     if (!tones && !nextTones) return scaleDots;
@@ -141,5 +149,5 @@ export function useChordHighlight(
         };
       })
     );
-  }, [scaleDots, chordName, capoOffset, voicing, instrument, nextChordName]);
+  }, [scaleDots, chordName, capoOffset, tuningShift, voicing, instrument, nextChordName]);
 }
